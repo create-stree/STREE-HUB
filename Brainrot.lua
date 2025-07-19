@@ -62,7 +62,7 @@ UniversalTab:AddToggle({
     Name = "Noclip",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Noclip.lua"))()(Value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Noclip.lua"))()
     end
 })
 
@@ -77,7 +77,7 @@ VisualTab:AddToggle({
     Name = "ESP Highlight",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))()(Value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))()
     end
 })
 
@@ -85,7 +85,7 @@ VisualTab:AddToggle({
     Name = "ESP NameTag",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPnametag.lua"))()(Value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPnametag.lua"))()
     end
 })
 
