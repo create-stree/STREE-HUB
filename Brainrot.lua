@@ -111,11 +111,29 @@ VisualTab:AddToggle({
     end
 })
 
+VisualTab:AddToggle({
+    Name = "ESP Line Tracer",
+    Default = false,
+    Callback = function(Value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPlinetracer.lua"))()
+    end
+})
+
+VisualTab:AddToggle({
+    Name = "ESP Box",
+    Default = false,
+    Callback = function(Value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
+    end
+})
+
 local SettingsTab = Window:MakeTab({
     Name = "Settings",
     Icon = "rbxassetid://139410041229101",
     PremiumOnly = false
 })
+
+
 
 -- JANGAN HAPUS INIT
 OrionLib:Init()
