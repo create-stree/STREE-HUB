@@ -59,11 +59,33 @@ local UniversalTab = Window:MakeTab({
 })
 
 UniversalTab:AddToggle({
-    Name = "Noclip",
-    Default = false,
-    Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Noclip.lua"))()
-    end
+	Name = "Noclip",
+	Default = false,
+	Callback = function(Value)
+		print("Toggle value:", Value)
+		if Value then
+			-- Aktifkan Infinite Jump saat toggle ON
+		    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/InfiniteJump.lua"))()
+		else
+			-- NONAKTIFKAN Infinite Jump (gunakan _G flag)
+			_G.STREE_INFINITEJUMP = false
+		end
+	end    
+})
+
+UniversalTab:AddToggle({
+	Name = "Infinite Jump",
+	Default = false,
+	Callback = function(Value)
+		print("Toggle value:", Value)
+		if Value then
+			-- Aktifkan Infinite Jump saat toggle ON
+		    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/InfiniteJump.lua"))()
+		else
+			-- NONAKTIFKAN Infinite Jump (gunakan _G flag)
+			_G.STREE_INFINITEJUMP = false
+		end
+	end    
 })
 
 -- VISUAL TAB
