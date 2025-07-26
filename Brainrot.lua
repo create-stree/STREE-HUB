@@ -195,5 +195,33 @@ SettingsTab:AddToggle({
     end
 })
 
--- INIT WAJIB
+SettingsTab:AddButton({
+    Name = "Destroy GUI",
+    Callback = function()
+        OrionLib:Destroy()
+        OrionLib:MakeNotification({
+            Name = "STREE HUB",
+            Content = "GUI berhasil dihancurkan!",
+            Image = "rbxassetid://123032091977400",
+            Time = 3
+        })
+    end
+})
+
+-- Toggle GUI ON/OFF dengan RightShift
+local UIS = game:GetService("UserInputService")
+local guiVisible = true
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
+        guiVisible = not guiVisible
+        for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+            if v.Name:find("Orion") then
+                v.Enabled = guiVisible
+            end
+        end
+    end
+end)
+
+-- WAJIB
 OrionLib:Init()
