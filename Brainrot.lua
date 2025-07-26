@@ -1,7 +1,7 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 local Window = OrionLib:MakeWindow({
-    Name = "STREE HUB | Steal A Brainrot | v0.15.25",
+    Name = "STREE HUB | Steal A Brainrot | v0.00.01",
     HidePremium = true,
     SaveConfig = true,
     ConfigFolder = "STREE HUB",
