@@ -2,7 +2,12 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jen
 
 local Window = OrionLib:MakeWindow({ Name = "STREE HUB | Steal A Brainrot | v0.15.25", HidePremium = true, SaveConfig = true, ConfigFolder = "STREE HUB", Icon = "123032091977400", IntroEnabled = true, IntroText = "Welcome To Script STREE HUB", Theme = "Dark", CloseCallback = function() print("UI Closed!") end })
 
--- HOME TAB local HomeTab = Window:MakeTab({ Name = "Home", Icon = "rbxassetid://124242667284964", PremiumOnly = false })
+-- HOME TAB 
+local HomeTab = Window:MakeTab({ 
+                Name = "Home", 
+                Icon = "rbxassetid://124242667284964", 
+                PremiumOnly = false 
+})
 
 local Section = HomeTab:AddSection({ Name = "LINK STREE HUB" })
 
@@ -10,7 +15,12 @@ HomeTab:AddButton({ Name = "Discord", Callback = function() setclipboard("https:
 
 HomeTab:AddButton({ Name = "WhatsApp", Callback = function() setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N") OrionLib:MakeNotification({ Name = "WhatsApp", Content = "Link WhatsApp berhasil disalin!", Image = "rbxassetid://123032091977400", Time = 4 }) end })
 
--- GAME TAB local UniversalTab = Window:MakeTab({ Name = "Game", Icon = "rbxassetid://453473360", PremiumOnly = false })
+-- GAME TAB 
+local UniversalTab = Window:MakeTab({ 
+                Name = "Game", 
+                Icon = "rbxassetid://453473360", 
+                PremiumOnly = false 
+})
 
 local toggles = { Noclip = false, InfiniteJump = false, ESPHighlight = false, ESPNameTag = false, ESPLineTracer = false, ESPBox = false, AntiAFK = false }
 
@@ -26,7 +36,12 @@ UniversalTab:AddButton({ Name = "Aktifkan Infinite Jump", Callback = function() 
 
 UniversalTab:AddButton({ Name = "Nonaktifkan Infinite Jump", Callback = function() toggles.InfiniteJump = false _G.STREE_INFINITEJUMP = false end })
 
--- VISUAL TAB local VisualTab = Window:MakeTab({ Name = "Visual", Icon = "rbxassetid://139410041229101", PremiumOnly = false })
+-- VISUAL TAB 
+local VisualTab = Window:MakeTab({ 
+                Name = "Visual", 
+                Icon = "rbxassetid://139410041229101", 
+                PremiumOnly = false 
+})
 
 VisualTab:AddToggle({ Name = "ESP Highlight", Default = false, Callback = function(Value) toggles.ESPHighlight = Value loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))() end })
 
