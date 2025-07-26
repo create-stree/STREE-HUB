@@ -58,28 +58,42 @@ local UniversalTab = Window:MakeTab({
 
 UniversalTab:AddSection({ Name = "Gameplay" })
 
-UniversalTab:AddToggle({
-    Name = "Noclip",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_NOCLIP = Value
-        if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua"))()
-        else
-            _G.STREE_NOCLIP = false
-        end
-    end
-})
-
+-- Infinite Jump
+local InfiniteJumpConn
 UniversalTab:AddToggle({
     Name = "Infinite Jump",
     Default = false,
     Callback = function(Value)
-        _G.STREE_INFINITEJUMP = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/InfiniteJump.lua"))()
+            InfiniteJumpConn = game:GetService("UserInputService").JumpRequest:Connect(function()
+                local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+                if humanoid then humanoid:ChangeState("Jumping") end
+            end)
         else
-            _G.STREE_INFINITEJUMP = false
+            if InfiniteJumpConn then InfiniteJumpConn:Disconnect() InfiniteJumpConn = nil end
+        end
+    end
+})
+
+-- Noclip
+local NoclipConn
+UniversalTab:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            NoclipConn = game:GetService("RunService").Stepped:Connect(function()
+                local char = game.Players.LocalPlayer.Character
+                if char then
+                    for _, part in pairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            if NoclipConn then NoclipConn:Disconnect() NoclipConn = nil end
         end
     end
 })
@@ -93,6 +107,7 @@ local VisualTab = Window:MakeTab({
 
 VisualTab:AddSection({ Name = "ESP" })
 
+-- ESP Highlight
 VisualTab:AddToggle({
     Name = "ESP Highlight",
     Default = false,
@@ -106,6 +121,7 @@ VisualTab:AddToggle({
     end
 })
 
+-- ESP NameTag
 VisualTab:AddToggle({
     Name = "ESP NameTag",
     Default = false,
@@ -119,6 +135,7 @@ VisualTab:AddToggle({
     end
 })
 
+-- ESP Line Tracer
 VisualTab:AddToggle({
     Name = "ESP Line Tracer",
     Default = false,
@@ -132,6 +149,7 @@ VisualTab:AddToggle({
     end
 })
 
+-- ESP Box
 VisualTab:AddToggle({
     Name = "ESP Box",
     Default = false,
@@ -147,6 +165,7 @@ VisualTab:AddToggle({
 
 VisualTab:AddSection({ Name = "Others" })
 
+-- Cooldown Base
 VisualTab:AddToggle({
     Name = "Cooldown Base",
     Default = false,
@@ -169,28 +188,37 @@ local SettingsTab = Window:MakeTab({
 
 SettingsTab:AddSection({ Name = "Others" })
 
+-- Anti AFK
+local AntiAFKConn
 SettingsTab:AddToggle({
     Name = "Anti AFK",
     Default = false,
     Callback = function(Value)
-        _G.STREE_ANTI_AFK = Value
         if Value then
-            loadstring(game:HttpGet("https://obj.wearedevs.net/175531/scripts/Anti%20Afk%20Kick%20Script.lua"))()
+            AntiAFKConn = game:GetService("Players").LocalPlayer.Idled:Connect(function()
+                local VirtualUser = game:GetService("VirtualUser")
+                VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+            end)
         else
-            _G.STREE_ANTI_AFK = false
+            if AntiAFKConn then AntiAFKConn:Disconnect() AntiAFKConn = nil end
         end
     end
 })
 
+-- Explorer (Dex)
 SettingsTab:AddToggle({
-    Name = "Explorer",
+    Name = "Explorer (Dex)",
     Default = false,
     Callback = function(Value)
-        _G.STREE_EXPLORER = Value
         if Value then
             loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
         else
-            _G.STREE_EXPLORER = false
+            local dex = game.CoreGui:FindFirstChild("Dex")
+            if dex then
+                dex.Enabled = false
+            end
         end
     end
 })
@@ -216,7 +244,7 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
         guiVisible = not guiVisible
         for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-            if v.Name:find("Orion") then
+            if v:IsA("ScreenGui") and v.Name:find("Orion") then
                 v.Enabled = guiVisible
             end
         end
