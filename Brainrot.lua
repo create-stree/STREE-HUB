@@ -14,6 +14,27 @@ local Window = OrionLib:MakeWindow({
     end
 })
 
+-- Fungsi reusable toggle
+local function createToggle(tab, name, flag, url)
+    tab:AddToggle({
+        Name = name,
+        Default = false,
+        Callback = function(Value)
+            _G[flag] = Value
+            if Value then
+                loadstring(game:HttpGet(url))()
+            else
+                OrionLib:MakeNotification({
+                    Name = "STREE HUB",
+                    Content = name .. " dimatikan.",
+                    Image = "rbxassetid://123032091977400",
+                    Time = 3
+                })
+            end
+        end
+    })
+end
+
 -- HOME TAB
 local HomeTab = Window:MakeTab({
     Name = "Home",
@@ -57,46 +78,8 @@ local UniversalTab = Window:MakeTab({
 })
 
 UniversalTab:AddSection({ Name = "Gameplay" })
-
--- Infinite Jump
-local InfiniteJumpConn
-UniversalTab:AddToggle({
-    Name = "Infinite Jump",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            InfiniteJumpConn = game:GetService("UserInputService").JumpRequest:Connect(function()
-                local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
-                if humanoid then humanoid:ChangeState("Jumping") end
-            end)
-        else
-            if InfiniteJumpConn then InfiniteJumpConn:Disconnect() InfiniteJumpConn = nil end
-        end
-    end
-})
-
--- Noclip
-local NoclipConn
-UniversalTab:AddToggle({
-    Name = "Noclip",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            NoclipConn = game:GetService("RunService").Stepped:Connect(function()
-                local char = game.Players.LocalPlayer.Character
-                if char then
-                    for _, part in pairs(char:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
-                    end
-                end
-            end)
-        else
-            if NoclipConn then NoclipConn:Disconnect() NoclipConn = nil end
-        end
-    end
-})
+createToggle(UniversalTab, "Noclip", "STREE_NOCLIP", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua")
+createToggle(UniversalTab, "Infinite Jump", "STREE_INFINITEJUMP", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/InfiniteJump.lua")
 
 -- VISUAL TAB
 local VisualTab = Window:MakeTab({
@@ -106,78 +89,13 @@ local VisualTab = Window:MakeTab({
 })
 
 VisualTab:AddSection({ Name = "ESP" })
-
--- ESP Highlight
-VisualTab:AddToggle({
-    Name = "ESP Highlight",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_ESP_HIGHLIGHT = Value
-        if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPhighlight.lua"))()
-        else
-            _G.STREE_ESP_HIGHLIGHT = false
-        end
-    end
-})
-
--- ESP NameTag
-VisualTab:AddToggle({
-    Name = "ESP NameTag",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_ESP_NAMETAG = Value
-        if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPnametag.lua"))()
-        else
-            _G.STREE_ESP_NAMETAG = false
-        end
-    end
-})
-
--- ESP Line Tracer
-VisualTab:AddToggle({
-    Name = "ESP Line Tracer",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_ESP_LINETRACER = Value
-        if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPlinetracer.lua"))()
-        else
-            _G.STREE_ESP_LINETRACER = false
-        end
-    end
-})
-
--- ESP Box
-VisualTab:AddToggle({
-    Name = "ESP Box",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_ESP_BOX = Value
-        if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPbox.lua"))()
-        else
-            _G.STREE_ESP_BOX = false
-        end
-    end
-})
+createToggle(VisualTab, "ESP Highlight", "STREE_ESP_HIGHLIGHT", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPhighlight.lua")
+createToggle(VisualTab, "ESP NameTag", "STREE_ESP_NAMETAG", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPnametag.lua")
+createToggle(VisualTab, "ESP Line Tracer", "STREE_ESP_LINETRACER", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPlinetracer.lua")
+createToggle(VisualTab, "ESP Box", "STREE_ESP_BOX", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPbox.lua")
 
 VisualTab:AddSection({ Name = "Others" })
-
--- Cooldown Base
-VisualTab:AddToggle({
-    Name = "Cooldown Base",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_COOLDOWN_BASE = Value
-        if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Cooldown%20base.lua"))()
-        else
-            _G.STREE_COOLDOWN_BASE = false
-        end
-    end
-})
+createToggle(VisualTab, "Cooldown Base", "STREE_COOLDOWN_BASE", "https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Cooldown%20base.lua")
 
 -- SETTINGS TAB
 local SettingsTab = Window:MakeTab({
@@ -186,70 +104,51 @@ local SettingsTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-SettingsTab:AddSection({ Name = "Others" })
+SettingsTab:AddSection({ Name = "System Settings" })
 
--- Anti AFK
-local AntiAFKConn
+createToggle(SettingsTab, "Anti AFK", "STREE_ANTI_AFK", "https://obj.wearedevs.net/175531/scripts/Anti%20Afk%20Kick%20Script.lua")
+createToggle(SettingsTab, "Explorer", "STREE_EXPLORER", "https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua")
+
+-- ANTI LAG
 SettingsTab:AddToggle({
-    Name = "Anti AFK",
+    Name = "Anti-Lag (FPS Boost)",
     Default = false,
     Callback = function(Value)
+        _G.STREE_ANTILAG = Value
         if Value then
-            AntiAFKConn = game:GetService("Players").LocalPlayer.Idled:Connect(function()
-                local VirtualUser = game:GetService("VirtualUser")
-                VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-                task.wait(1)
-                VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-            end)
-        else
-            if AntiAFKConn then AntiAFKConn:Disconnect() AntiAFKConn = nil end
-        end
-    end
-})
-
--- Explorer (Dex)
-SettingsTab:AddToggle({
-    Name = "Explorer (Dex)",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
-        else
-            local dex = game.CoreGui:FindFirstChild("Dex")
-            if dex then
-                dex.Enabled = false
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    v:Destroy()
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Enabled = false
+                elseif v:IsA("Explosion") then
+                    v:Destroy()
+                end
             end
+
+            local Lighting = game:GetService("Lighting")
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 1e10
+            Lighting.Brightness = 0
+
+            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+
+            OrionLib:MakeNotification({
+                Name = "Anti-Lag Aktif",
+                Content = "Semua efek visual berat dimatikan.",
+                Image = "rbxassetid://123032091977400",
+                Time = 5
+            })
+        else
+            OrionLib:MakeNotification({
+                Name = "Anti-Lag Dimatikan",
+                Content = "Efek visual tidak dikembalikan otomatis.",
+                Image = "rbxassetid://123032091977400",
+                Time = 4
+            })
         end
     end
 })
-
-SettingsTab:AddButton({
-    Name = "Destroy GUI",
-    Callback = function()
-        OrionLib:Destroy()
-        OrionLib:MakeNotification({
-            Name = "STREE HUB",
-            Content = "GUI berhasil dihancurkan!",
-            Image = "rbxassetid://123032091977400",
-            Time = 3
-        })
-    end
-})
-
--- Toggle GUI ON/OFF dengan RightShift
-local UIS = game:GetService("UserInputService")
-local guiVisible = true
-
-UIS.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
-        guiVisible = not guiVisible
-        for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-            if v:IsA("ScreenGui") and v.Name:find("Orion") then
-                v.Enabled = guiVisible
-            end
-        end
-    end
-end)
 
 -- WAJIB
 OrionLib:Init()
