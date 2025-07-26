@@ -79,15 +79,21 @@ local UniversalTab = Window:MakeTab({
 
 UniversalTab:AddSection({ Name = "Gameplay" })
 
+local NoclipConn
 UniversalTab:AddToggle({
     Name = "Noclip",
     Default = false,
     Callback = function(Value)
-        _G.STREE_NOCLIP = Value
         if Value then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua"))()
         else
-            _G.STREE_NOCLIP = false
+            if NoclipConn then NoclipConn:Disconnect() end
+            OrionLib:MakeNotification({
+                Name = "Noclip",
+                Content = "Noclip dimatikan!",
+                Image = "rbxassetid://123032091977400",
+                Time = 4
+            })
         end
     end
 })
@@ -184,24 +190,9 @@ VisualTab:AddToggle({
 -- SETTINGS TAB
 local SettingsTab = Window:MakeTab({
     Name = "Settings",
-    Icon = "rbxassetid://139410041229101",
-    PremiumOnly = false
-})
+    Icon = "rbxassetid://139410041229101})
 
-SettingsTab:AddSection({ Name = "Others" })
-
-SettingsTab:AddToggle({
-    Name = "Explorer",
-    Default = false,
-    Callback = function(Value)
-        _G.STREE_EXPLORER = Value
-        if Value then
-            loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
-        else
-            _G.STREE_EXPLORER = false
-        end
-    end
-})
+SettingsTab:AddSection({ Name = "PlayerStats" })
 
 SettingsTab:AddToggle({
     Name = "Anti Lag",
@@ -233,6 +224,15 @@ SettingsTab:AddToggle({
             Image = "rbxassetid://123032091977400",
             Time = 4
         })
+    end
+})
+
+SettingsTab:AddSection({ Name = "Other Script" })
+
+SettingsTab:AddButton({
+    Name = "Infiel yiel",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end
 })
 
