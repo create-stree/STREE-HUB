@@ -89,6 +89,8 @@ local VisualTab = Window:MakeTab({
     PremiumOnly = false
 })
 
+local Section = HomeTab:AddSection({ Name = "ESP" })
+
 VisualTab:AddToggle({
     Name = "ESP Highlight",
     Default = false,
@@ -137,6 +139,21 @@ VisualTab:AddToggle({
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
         else
             _G.STREE_ESP_BOX = false
+        end
+    end
+})
+
+local Section = HomeTab:AddSection({ Name = "Know" })
+
+VisualTab:AddToggle({
+    Name = "Cooldown Base",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_COOLDOWN_BASE = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Cooldown%20base.lua"))()
+        else
+            _G.STREE_COOLDOWN_BASE = false
         end
     end
 })
