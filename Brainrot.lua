@@ -5,7 +5,7 @@ local Window = OrionLib:MakeWindow({
     HidePremium = true,
     SaveConfig = true,
     ConfigFolder = "STREE HUB",
-    Icon = "123032091977400",
+    Icon = "rbxassetid://123032091977400",
     IntroEnabled = true,
     IntroText = "Welcome To Script STREE HUB",
     Theme = "Dark",
@@ -21,7 +21,7 @@ local HomeTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-local Section = HomeTab:AddSection({ Name = "LINK STREE HUB" })
+HomeTab:AddSection({ Name = "LINK STREE HUB" })
 
 HomeTab:AddButton({
     Name = "Discord",
@@ -56,13 +56,15 @@ local UniversalTab = Window:MakeTab({
     PremiumOnly = false
 })
 
+UniversalTab:AddSection({ Name = "Gameplay" })
+
 UniversalTab:AddToggle({
     Name = "Noclip",
     Default = false,
     Callback = function(Value)
         _G.STREE_NOCLIP = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Noclip.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua"))()
         else
             _G.STREE_NOCLIP = false
         end
@@ -75,7 +77,7 @@ UniversalTab:AddToggle({
     Callback = function(Value)
         _G.STREE_INFINITEJUMP = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/InfiniteJump.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/InfiniteJump.lua"))()
         else
             _G.STREE_INFINITEJUMP = false
         end
@@ -89,7 +91,7 @@ local VisualTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-local Section = HomeTab:AddSection({ Name = "ESP" })
+VisualTab:AddSection({ Name = "ESP" })
 
 VisualTab:AddToggle({
     Name = "ESP Highlight",
@@ -97,7 +99,7 @@ VisualTab:AddToggle({
     Callback = function(Value)
         _G.STREE_ESP_HIGHLIGHT = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPhighlight.lua"))()
         else
             _G.STREE_ESP_HIGHLIGHT = false
         end
@@ -110,7 +112,7 @@ VisualTab:AddToggle({
     Callback = function(Value)
         _G.STREE_ESP_NAMETAG = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPnametag.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPnametag.lua"))()
         else
             _G.STREE_ESP_NAMETAG = false
         end
@@ -123,7 +125,7 @@ VisualTab:AddToggle({
     Callback = function(Value)
         _G.STREE_ESP_LINETRACER = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPlinetracer.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPlinetracer.lua"))()
         else
             _G.STREE_ESP_LINETRACER = false
         end
@@ -136,14 +138,14 @@ VisualTab:AddToggle({
     Callback = function(Value)
         _G.STREE_ESP_BOX = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPbox.lua"))()
         else
             _G.STREE_ESP_BOX = false
         end
     end
 })
 
-local Section = HomeTab:AddSection({ Name = "Know" })
+VisualTab:AddSection({ Name = "Others" })
 
 VisualTab:AddToggle({
     Name = "Cooldown Base",
@@ -151,7 +153,7 @@ VisualTab:AddToggle({
     Callback = function(Value)
         _G.STREE_COOLDOWN_BASE = Value
         if Value then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Cooldown%20base.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Cooldown%20base.lua"))()
         else
             _G.STREE_COOLDOWN_BASE = false
         end
@@ -163,6 +165,34 @@ local SettingsTab = Window:MakeTab({
     Name = "Settings",
     Icon = "rbxassetid://139410041229101",
     PremiumOnly = false
+})
+
+SettingsTab:AddSection({ Name = "Others" })
+
+SettingsTab:AddToggle({
+    Name = "Anti AFK",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_ANTI_AFK = Value
+        if Value then
+            loadstring(game:HttpGet("https://obj.wearedevs.net/175531/scripts/Anti%20Afk%20Kick%20Script.lua"))()
+        else
+            _G.STREE_ANTI_AFK = false
+        end
+    end
+})
+
+SettingsTab:AddToggle({
+    Name = "Explorer",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_EXPLORER = Value
+        if Value then
+            loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
+        else
+            _G.STREE_EXPLORER = false
+        end
+    end
 })
 
 -- INIT WAJIB
