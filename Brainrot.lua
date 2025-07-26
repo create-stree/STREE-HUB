@@ -21,9 +21,7 @@ local HomeTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-local Section = HomeTab:AddSection({
-    Name = "LINK STREE HUB"
-})
+local Section = HomeTab:AddSection({ Name = "LINK STREE HUB" })
 
 HomeTab:AddButton({
     Name = "Discord",
@@ -59,33 +57,29 @@ local UniversalTab = Window:MakeTab({
 })
 
 UniversalTab:AddToggle({
-	Name = "Noclip",
-	Default = false,
-	Callback = function(Value)
-		print("Toggle value:", Value)
-		if Value then
-			-- Aktifkan Infinite Jump saat toggle ON
-		    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/InfiniteJump.lua"))()
-		else
-			-- NONAKTIFKAN Infinite Jump (gunakan _G flag)
-			_G.STREE_INFINITEJUMP = false
-		end
-	end    
+    Name = "Noclip",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_NOCLIP = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Noclip.lua"))()
+        else
+            _G.STREE_NOCLIP = false
+        end
+    end
 })
 
 UniversalTab:AddToggle({
-	Name = "Infinite Jump",
-	Default = false,
-	Callback = function(Value)
-		print("Toggle value:", Value)
-		if Value then
-			-- Aktifkan Infinite Jump saat toggle ON
-		    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/InfiniteJump.lua"))()
-		else
-			-- NONAKTIFKAN Infinite Jump (gunakan _G flag)
-			_G.STREE_INFINITEJUMP = false
-		end
-	end    
+    Name = "Infinite Jump",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_INFINITEJUMP = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/InfiniteJump.lua"))()
+        else
+            _G.STREE_INFINITEJUMP = false
+        end
+    end
 })
 
 -- VISUAL TAB
@@ -99,7 +93,12 @@ VisualTab:AddToggle({
     Name = "ESP Highlight",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))()
+        _G.STREE_ESP_HIGHLIGHT = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))()
+        else
+            _G.STREE_ESP_HIGHLIGHT = false
+        end
     end
 })
 
@@ -107,7 +106,12 @@ VisualTab:AddToggle({
     Name = "ESP NameTag",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPnametag.lua"))()
+        _G.STREE_ESP_NAMETAG = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPnametag.lua"))()
+        else
+            _G.STREE_ESP_NAMETAG = false
+        end
     end
 })
 
@@ -115,7 +119,12 @@ VisualTab:AddToggle({
     Name = "ESP Line Tracer",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPlinetracer.lua"))()
+        _G.STREE_ESP_LINETRACER = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPlinetracer.lua"))()
+        else
+            _G.STREE_ESP_LINETRACER = false
+        end
     end
 })
 
@@ -123,17 +132,21 @@ VisualTab:AddToggle({
     Name = "ESP Box",
     Default = false,
     Callback = function(Value)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
+        _G.STREE_ESP_BOX = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
+        else
+            _G.STREE_ESP_BOX = false
+        end
     end
 })
 
+-- SETTINGS TAB
 local SettingsTab = Window:MakeTab({
     Name = "Settings",
     Icon = "rbxassetid://139410041229101",
     PremiumOnly = false
 })
 
-
-
--- JANGAN HAPUS INIT
+-- INIT WAJIB
 OrionLib:Init()
