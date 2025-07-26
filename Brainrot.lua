@@ -190,7 +190,9 @@ VisualTab:AddToggle({
 -- SETTINGS TAB
 local SettingsTab = Window:MakeTab({
     Name = "Settings",
-    Icon = "rbxassetid://139410041229101})
+    Icon = "rbxassetid://139410041229101",
+    PremiumOnly = false
+})
 
 SettingsTab:AddSection({ Name = "PlayerStats" })
 
@@ -230,7 +232,7 @@ SettingsTab:AddToggle({
 SettingsTab:AddSection({ Name = "Other Script" })
 
 SettingsTab:AddButton({
-    Name = "Infiel yiel",
+    Name = "Inf yield",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end
