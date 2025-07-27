@@ -1,4 +1,4 @@
-local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 local Window = OrionLib:MakeWindow({
     Name = "STREE HUB | Steal A Brainrot | v0.00.01",
@@ -14,7 +14,7 @@ local Window = OrionLib:MakeWindow({
     end
 })
 
--- HOME TAB
+-- Home Tab
 local HomeTab = Window:MakeTab({
     Name = "Home",
     Icon = "rbxassetid://124242667284964",
@@ -30,7 +30,7 @@ HomeTab:AddButton({
         OrionLib:MakeNotification({
             Name = "Copied!",
             Content = "Link Discord disalin ke clipboard.",
-            Time = 5
+            Time = 4
         })
     end
 })
@@ -42,12 +42,12 @@ HomeTab:AddButton({
         OrionLib:MakeNotification({
             Name = "Copied!",
             Content = "Link WhatsApp disalin ke clipboard.",
-            Time = 5
+            Time = 4
         })
     end
 })
 
--- GAME TAB
+-- Game Tab
 local GameTab = Window:MakeTab({
     Name = "Game",
     Icon = "rbxassetid://453473360",
@@ -89,7 +89,7 @@ GameTab:AddToggle({
     end
 })
 
--- VISUAL TAB
+-- Visual Tab
 local VisualTab = Window:MakeTab({
     Name = "Visual",
     Icon = "rbxassetid://1137375831",
@@ -121,6 +121,28 @@ VisualTab:AddToggle({
 })
 
 VisualTab:AddToggle({
+    Name = "ESP Name",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_ESP_NAME = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPnametag.lua"))()
+        end
+    end
+})
+
+VisualTab:AddToggle({
+    Name = "ESP Box",
+    Default = false,
+    Callback = function(Value)
+        _G.STREE_ESP_BOX = Value
+        if Value then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/ESPbox.lua"))()
+        end
+    end
+})
+
+VisualTab:AddToggle({
     Name = "Cooldown Base ESP [Putih Neon]",
     Default = false,
     Callback = function(Value)
@@ -131,16 +153,16 @@ VisualTab:AddToggle({
     end
 })
 
--- SETTINGS TAB
-local SettingsTab = Window:MakeTab({
+-- Settings Tab
+local SettingTab = Window:MakeTab({
     Name = "Settings",
     Icon = "rbxassetid://113924094978555",
     PremiumOnly = false
 })
 
-SettingsTab:AddSection({ Name = "Players" })
+SettingTab:AddSection({ Name = "Players" })
 
-SettingsTab:AddToggle({
+SettingTab:AddToggle({
     Name = "Anti lag",
     Default = false,
     Callback = function(Value)
@@ -151,7 +173,7 @@ SettingsTab:AddToggle({
     end
 })
 
-SettingsTab:AddToggle({
+SettingTab:AddToggle({
     Name = "Anti AFK",
     Default = false,
     Callback = function(Value)
@@ -162,9 +184,9 @@ SettingsTab:AddToggle({
     end
 })
 
-SettingsTab:AddSection({ Name = "Other Script" })
+SettingTab:AddSection({ Name = "Other Script" })
 
-SettingsTab:AddButton({
+SettingTab:AddButton({
     Name = "Inf Yield",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
