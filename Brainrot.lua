@@ -1,7 +1,7 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 local Window = OrionLib:MakeWindow({
-    Name = "STREE HUB | Steal A Brainrot | v0.00.03",
+    Name = "STREE HUB | Steal A Brainrot | v0.00.04",
     HidePremium = true,
     SaveConfig = true,
     ConfigFolder = "STREE HUB",
@@ -46,6 +46,21 @@ HomeTab:AddButton({
         })
     end
 })
+
+HomeTab:AddSection({ Name = "Website" })
+
+HomeTab:AddButton({
+    Name = "Website",
+    Callback = function()
+        setclipboard("https://streehub.netlify.app")
+        OrionLib:MakeNotification({
+            Name = "Copied!",
+            Content = "Link Website disalin ke clipboard.",
+            Time = 4
+        })
+    end
+})
+
 
 -- Game Tab
 local GameTab = Window:MakeTab({
