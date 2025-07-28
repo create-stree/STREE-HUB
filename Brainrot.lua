@@ -8,7 +8,7 @@ local Window = OrionLib:MakeWindow({
     Icon = "rbxassetid://123032091977400",
     IntroEnabled = true,
     IntroText = "Welcome To Script STREE HUB",
-    Theme = "Green",
+    Theme = "Dark",
     CloseCallback = function()
         print("UI Closed!")
     end
