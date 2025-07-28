@@ -142,8 +142,10 @@ VisualTab:AddToggle({
     end
 })
 
+VisualTab:AddSection({ Name = "Base" })
+
 VisualTab:AddToggle({
-    Name = "Cooldown Base ESP [Putih Neon]",
+    Name = "Cooldown Base",
     Default = false,
     Callback = function(Value)
         _G.STREE_COOLDOWN_BASE = Value
