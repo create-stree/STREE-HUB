@@ -1,0 +1,139 @@
+-- Libry Menu STREE HUB Lengkap 100% by Kirsiasc
+-- Fitur: Button, Toggle, Slider, Logo, Close UI, Section, Save, dan Akses Premium/VIP/VVIP
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local userId = player.UserId
+
+-- Daftar User ID untuk akses level
+local PremiumIDs = {12345678}
+local VIPIDs = {23456789}
+local VVIPIDs = {34567890}
+
+local isPremium = table.find(PremiumIDs, userId)
+local isVIP = table.find(VIPIDs, userId)
+local isVVIP = table.find(VVIPIDs, userId)
+
+local HttpService = game:GetService("HttpService")
+local function SaveData(name, data)
+    if writefile then
+        writefile("STREEHUB_"..name..".json", HttpService:JSONEncode(data))
+    end
+end
+
+local function LoadData(name)
+    if isfile("STREEHUB_"..name..".json") then
+        return HttpService:JSONDecode(readfile("STREEHUB_"..name..".json"))
+    end
+    return {}
+end
+
+-- GUI Main Frame
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundTransparency = 0.2
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- Logo
+local logo = Instance.new("ImageLabel", MainFrame)
+logo.Size = UDim2.new(0, 40, 0, 40)
+logo.Position = UDim2.new(0, 10, 0, -45)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://15084508812"
+
+-- Close Button
+local closeBtn = Instance.new("TextButton", MainFrame)
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -30, 0, 5)
+closeBtn.Text = "❌"
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Section Label
+local function createSection(title, position)
+    local section = Instance.new("TextLabel", MainFrame)
+    section.Size = UDim2.new(1, -20, 0, 25)
+    section.Position = position
+    section.Text = "[ "..title.." ]"
+    section.TextColor3 = Color3.fromRGB(0, 255, 0)
+    section.BackgroundTransparency = 1
+    section.TextXAlignment = Enum.TextXAlignment.Left
+    return section
+end
+
+-- Toggle with Save
+local saved = LoadData("Settings")
+local function createToggle(name, default, position, callback)
+    local toggle = Instance.new("TextButton", MainFrame)
+    toggle.Size = UDim2.new(0, 180, 0, 30)
+    toggle.Position = position
+    toggle.Text = name..": "..(saved[name] and "ON" or "OFF")
+    toggle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    toggle.TextColor3 = Color3.fromRGB(0, 255, 0)
+
+    toggle.MouseButton1Click:Connect(function()
+        saved[name] = not saved[name]
+        toggle.Text = name..": "..(saved[name] and "ON" or "OFF")
+        SaveData("Settings", saved)
+        callback(saved[name])
+    end)
+
+    callback(saved[name] or default)
+end
+
+-- Button
+local function createButton(name, position, callback)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0, 180, 0, 30)
+    btn.Position = position
+    btn.Text = name
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.fromRGB(0, 255, 0)
+    btn.MouseButton1Click:Connect(callback)
+end
+
+-- Slider (Silinder) Simpel
+local function createSlider(name, position, min, max, callback)
+    local slider = Instance.new("TextButton", MainFrame)
+    slider.Size = UDim2.new(0, 180, 0, 30)
+    slider.Position = position
+    slider.Text = name..": "..tostring(saved[name] or min)
+    slider.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    slider.TextColor3 = Color3.fromRGB(0, 255, 0)
+
+    slider.MouseButton1Click:Connect(function()
+        local val = tonumber(string.match(slider.Text, '%d+')) or min
+        val = val + 1
+        if val > max then val = min end
+        slider.Text = name..": "..val
+        saved[name] = val
+        SaveData("Settings", saved)
+        callback(val)
+    end)
+end
+
+-- UI Components
+createSection("Main", UDim2.new(0, 10, 0, 40))
+createToggle("Anti-AFK", false, UDim2.new(0, 10, 0, 70), function(v) print("AntiAFK:", v) end)
+createButton("💨 Speed Boost", UDim2.new(0, 10, 0, 110), function() print("Boost!") end)
+createSlider("WalkSpeed", UDim2.new(0, 10, 0, 150), 16, 100, function(v) player.Character.Humanoid.WalkSpeed = v end)
+
+-- VIP SECTION
+if isPremium or isVIP or isVVIP then
+    createSection("[VIP PANEL]", UDim2.new(0, 10, 0, 200))
+    createToggle("ESP", false, UDim2.new(0, 10, 0, 230), function(v) print("ESP:", v) end)
+    if isVVIP then
+        createButton("💎 VVIP Only: Fling", UDim2.new(0, 10, 0, 270), function() print("FLINGED!") end)
+    end
+else
+    createSection("[VIP PANEL]", UDim2.new(0, 10, 0, 200))
+    createButton("🚫 Kamu bukan VIP", UDim2.new(0, 10, 0, 230), function() print("Akses ditolak.") end)
+end
