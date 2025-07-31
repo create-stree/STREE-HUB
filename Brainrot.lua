@@ -1,7 +1,7 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 local Window = OrionLib:MakeWindow({
-    Name = "STREE HUB | Steal A Brainrot | v0.00.04",
+    Name = "STREE HUB | Steal A Brainrot | v0.00.05",
     HidePremium = true,
     SaveConfig = true,
     ConfigFolder = "STREE HUB",
@@ -21,7 +21,7 @@ local HomeTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-HomeTab:AddSection({ Name = "LINK STREE HUB" })
+HomeTab:AddSection({ Name = "LINK CHANNEL STREE HUB" })
 
 HomeTab:AddButton({
     Name = "Discord",
@@ -42,6 +42,18 @@ HomeTab:AddButton({
         OrionLib:MakeNotification({
             Name = "Copied!",
             Content = "Link WhatsApp disalin ke clipboard.",
+            Time = 4
+        })
+    end
+})
+
+HomeTab:AddButton({
+    Name = "Telegram",
+    Callback = function()
+        setclipboard("https://t.me/StreeCoumminty")
+        OrionLib:MakeNotification({
+            Name = "Copied!",
+            Content = "Link Telegram disalin ke clipboard.",
             Time = 4
         })
     end
