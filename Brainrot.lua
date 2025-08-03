@@ -19,14 +19,12 @@ local HomeTab = Window:MakeTab({
 	PremiumOnly = false
 })
 
-local Section = HomeTab:AddSection({
-	Name = "Information"
-  })
+HomeTab:AddSection({Name = "Information"})
 
 HomeTab:AddButton({
 	Name = "Discord",
 	Callback = function()
-		setclipboard("https://discord.gg/jdmX43t5mY") -- Salin link ke clipboard
+		setclipboard("https://discord.gg/jdmX43t5mY")
 		OrionLib:MakeNotification({
 			Name = "STREE HUB",
 			Content = "Link Discord sudah disalin ke clipboard!",
@@ -39,7 +37,7 @@ HomeTab:AddButton({
 HomeTab:AddButton({
 	Name = "WhatsApp",
 	Callback = function()
-		setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N") -- Salin link ke clipboard
+		setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
 		OrionLib:MakeNotification({
 			Name = "STREE HUB",
 			Content = "Link WhatsApp sudah disalin ke clipboard!",
@@ -52,7 +50,7 @@ HomeTab:AddButton({
 HomeTab:AddButton({
 	Name = "Telegram",
 	Callback = function()
-		setclipboard("https://t.me/StreeCoumminty") -- Salin link ke clipboard
+		setclipboard("https://t.me/StreeCoumminty")
 		OrionLib:MakeNotification({
 			Name = "STREE HUB",
 			Content = "Link Telegram sudah disalin ke clipboard!",
@@ -62,14 +60,12 @@ HomeTab:AddButton({
 	end    
 })
 
-local Section = HomeTab:AddSection({
-	Name = "Website STREE Community"
-  })
+HomeTab:AddSection({Name = "Website STREE Community"})
 
 HomeTab:AddButton({
-	Name = "Telegram",
+	Name = "Website",
 	Callback = function()
-		setclipboard("https://STREEHUB.NETLIFY.APP") -- Salin link ke clipboard
+		setclipboard("https://STREEHUB.NETLIFY.APP")
 		OrionLib:MakeNotification({
 			Name = "STREE HUB",
 			Content = "Link Website sudah disalin ke clipboard!",
@@ -85,9 +81,7 @@ local MainTab = Window:MakeTab({
 	PremiumOnly = false
 })
 
-local Section = MainTab:AddSection({
-	Name = "Players"
-  })
+MainTab:AddSection({Name = "Players"})
 
 local GameTab = Window:MakeTab({
 	Name = "Game",
@@ -95,22 +89,28 @@ local GameTab = Window:MakeTab({
 	PremiumOnly = false
 })
 
-local Section = GameTab:AddSection({
-	Name = "Game Features"
-  })
+GameTab:AddSection({Name = "Game Features"})
 
+-- Noclip Toggle
 GameTab:AddToggle({
 	Name = "Noclip",
 	Default = false,
 	Callback = function(Value)
-		print(Value)
-	end    
+		_G.NoclipON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua"))()
+		end
+	end
 })
 
+-- Inf Jump Toggle
 GameTab:AddToggle({
 	Name = "InfJump",
 	Default = false,
 	Callback = function(Value)
-		print(Value)
-	end    
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/InfiniteJump.lua"))()
+		end
+	end
 })
