@@ -83,6 +83,17 @@ local MainTab = Window:MakeTab({
 
 MainTab:AddSection({Name = "Players"})
 
+MainTab:AddToggle({
+	Name = "Anti Stun",
+	Default = false,
+	Callback = function(Value)
+		_G.NoclipON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/AntiStun.lua"))()
+		end
+	end
+})
+
 local GameTab = Window:MakeTab({
 	Name = "Game",
 	Icon = "rbxassetid://96170009430978",
@@ -91,7 +102,6 @@ local GameTab = Window:MakeTab({
 
 GameTab:AddSection({Name = "Game Features"})
 
--- Noclip Toggle
 GameTab:AddToggle({
 	Name = "Noclip",
 	Default = false,
@@ -103,7 +113,6 @@ GameTab:AddToggle({
 	end
 })
 
--- Infinite Jump Toggle
 GameTab:AddToggle({
 	Name = "InfiniteJump",
 	Default = false,
@@ -175,7 +184,35 @@ VisualTab:AddToggle({
 	Callback = function(Value)
 		_G.InfJumpON = Value
 		if Value then
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Cooldown_Base.lua"))()
+		end
+	end
+})
+
+local SettingsTab = Window:MakeTab({
+	Name = "Settings",
+	Icon = "rbxassetid://96170009430978",
+	PremiumOnly = false
+})
+
+SettingsTab:AddToggle({
+	Name = "Anti AFK",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/AntiAFK.lua"))()
+		end
+	end
+})
+
+SettingsTab:AddToggle({
+	Name = "Anti Lag",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Antilag.lua"))()
 		end
 	end
 })
