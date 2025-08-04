@@ -103,14 +103,79 @@ GameTab:AddToggle({
 	end
 })
 
--- Inf Jump Toggle
+-- Infinite Jump Toggle
 GameTab:AddToggle({
-	Name = "InfJump",
+	Name = "InfiniteJump",
 	Default = false,
 	Callback = function(Value)
 		_G.InfJumpON = Value
 		if Value then
 			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/InfiniteJump.lua"))()
+		end
+	end
+})
+
+local VisualTab = Window:MakeTab({
+	Name = "Visual",
+	Icon = "rbxassetid://96170009430978",
+	PremiumOnly = false
+})
+
+VisualTab:AddSection({Name = "ESP Players"})
+
+VisualTab:AddToggle({
+	Name = "ESP highlight",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPhighlight.lua"))()
+		end
+	end
+})
+
+VisualTab:AddToggle({
+	Name = "ESP Nametag",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPnametag.lua"))()
+		end
+	end
+})
+
+VisualTab:AddToggle({
+	Name = "ESP Linetracer",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPlinetracer.lua"))()
+		end
+	end
+})
+
+VisualTab:AddToggle({
+	Name = "ESP Box",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
+		end
+	end
+})
+
+VisualTab:AddSection({Name = "ESP Base"})
+
+VisualTab:AddToggle({
+	Name = "Cooldown Base",
+	Default = false,
+	Callback = function(Value)
+		_G.InfJumpON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/ESPbox.lua"))()
 		end
 	end
 })
