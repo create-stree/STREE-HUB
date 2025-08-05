@@ -1,7 +1,7 @@
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
 
 local Window = OrionLib:MakeWindow({
-    Name = "STREE HUB | Steal A Brainrot | v0.00.06", 
+    Name = "STREE HUB | Steal A Brainrot | v0.00.07", 
     HidePremium = false, 
     SaveConfig = true, 
     ConfigFolder = "STREE HUB",
@@ -84,6 +84,17 @@ local MainTab = Window:MakeTab({
 MainTab:AddSection({Name = "Players"})
 
 MainTab:AddToggle({
+	Name = "Noclip",
+	Default = false,
+	Callback = function(Value)
+		_G.NoclipON = Value
+		if Value then
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua"))()
+		end
+	end
+})
+
+MainTab:AddToggle({
 	Name = "Anti Stun",
 	Default = false,
 	Callback = function(Value)
@@ -101,17 +112,6 @@ local GameTab = Window:MakeTab({
 })
 
 GameTab:AddSection({Name = "Game Features"})
-
-GameTab:AddToggle({
-	Name = "Noclip",
-	Default = false,
-	Callback = function(Value)
-		_G.NoclipON = Value
-		if Value then
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/main/Noclip.lua"))()
-		end
-	end
-})
 
 GameTab:AddToggle({
 	Name = "InfiniteJump",
