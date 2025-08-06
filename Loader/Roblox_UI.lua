@@ -12,6 +12,14 @@ local ui = Instance.new("ScreenGui", parentGui)
 ui.Name = "STREE_HUB_UI"
 ui.ResetOnSpawn = false
 
+-- Tombol Icon STREE HUB (untuk buka/tutup window)
+local logoButton = Instance.new("ImageButton", ui)
+logoButton.Name = "HubIcon"
+logoButton.Size = UDim2.new(0, 40, 0, 40)
+logoButton.Position = UDim2.new(0, 20, 1, -60)
+logoButton.Image = "rbxassetid://123032091977400" -- Ganti dengan asset logo kamu
+logoButton.BackgroundTransparency = 1
+
 -- Frame Utama (Window)
 local window = Instance.new("Frame", ui)
 window.Name = "MainWindow"
@@ -26,14 +34,49 @@ window.Draggable = true
 local corner = Instance.new("UICorner", window)
 corner.CornerRadius = UDim.new(0, 12)
 
--- Judul
-local title = Instance.new("TextLabel", window)
+-- Judul dan tombol X / -
+local titleBar = Instance.new("Frame", window)
+titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.BackgroundTransparency = 1
+
+local title = Instance.new("TextLabel", titleBar)
 title.Text = "STREE HUB"
-title.Size = UDim2.new(1, 0, 0, 40)
+title.Size = UDim2.new(1, -80, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
 title.TextSize = 22
 title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(0, 255, 100)
 title.BackgroundTransparency = 1
+
+do
+    local closeBtn = Instance.new("TextButton", titleBar)
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -35, 0, 5)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 16
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.MouseButton1Click:Connect(function()
+        window.Visible = false
+    end)
+
+    local minimizeBtn = Instance.new("TextButton", titleBar)
+    minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+    minimizeBtn.Position = UDim2.new(1, -70, 0, 5)
+    minimizeBtn.Text = "-"
+    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 80)
+    minimizeBtn.Font = Enum.Font.GothamBold
+    minimizeBtn.TextSize = 16
+    minimizeBtn.BackgroundTransparency = 1
+    minimizeBtn.MouseButton1Click:Connect(function()
+        window.Visible = false
+    end)
+
+    logoButton.MouseButton1Click:Connect(function()
+        window.Visible = not window.Visible
+    end)
+end
 
 -- Panel kanan (Tab menu)
 local tabMenu = Instance.new("Frame", window)
@@ -134,14 +177,11 @@ local function createTab(name, callback)
 	end)
 end
 
--- Tab: HOME
+-- Tab: Home
 createTab("Home", function()
 	createLabel("Welcome to STREE HUB!")
 	createButton("Load Script", function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/Roblox_UI.lua"))()
-	end)
-	createToggle("Auto Execute", function(state)
-		print("Auto Execute:", state)
 	end)
 end)
 
@@ -150,3 +190,5 @@ createTab("Credits", function()
 	createLabel("Create : STREE Community")
 	createLabel("STREE HUB | create-stree")
 end)
+
+-- TODO: Tambahkan Key System di bagian awal script sesuai permintaan user
