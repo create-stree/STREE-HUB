@@ -46,7 +46,7 @@ Logo.Name = "Logo"
 Logo.Size = UDim2.new(0, 40, 0, 40)
 Logo.Position = UDim2.new(0, 0, 0, 0)
 Logo.BackgroundTransparency = 1
-Logo.Image = "rbxassetid://YOUR_LOGO_ASSET_ID" -- Ganti dengan ID logomu
+Logo.Image = "rbxassetid://123032091977400" -- Ganti dengan ID logomu
 Logo.ScaleType = Enum.ScaleType.Fit
 
 -- Drag function
