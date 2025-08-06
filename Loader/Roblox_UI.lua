@@ -1,8 +1,3 @@
-# STREE HUB LOADER dengan Logo
-
-Berikut versi terbaru dari script STREE HUB LOADER yang sudah saya tambahkan fitur logo:
-
-```lua
 -- STREE HUB LOADER - UI Custom with Logo
 repeat wait() until game:IsLoaded()
 
