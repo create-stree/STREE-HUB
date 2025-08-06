@@ -138,7 +138,7 @@ end
 createTab("Home", function()
 	createLabel("Welcome to STREE HUB!")
 	createButton("Load Script", function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/loader/main/Main.lua"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/Roblox_UI.lua"))()
 	end)
 	createToggle("Auto Execute", function(state)
 		print("Auto Execute:", state)
