@@ -170,7 +170,7 @@ local function createHomeTab()
     createLabel("Premium scripting hub for Roblox")
     createButton("Load Script", function()
         local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua", true))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/Roblox_UI.lua", true))()
         end)
         if not success then
             warn("Failed to load script: "..err)
