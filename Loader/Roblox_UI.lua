@@ -1,14 +1,3 @@
--- STREE HUB UI Final by kirsiasc
-
--- Services
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
-
 -- Fungsi drag
 local function MakeDraggable(frame)
 	local dragging, dragInput, mousePos, framePos
@@ -54,7 +43,7 @@ local LogoButton = Instance.new("ImageButton", ScreenGui)
 LogoButton.Name = "Logo"
 LogoButton.Size = UDim2.new(0, 60, 0, 60)
 LogoButton.Position = UDim2.new(0, 10, 0, 200)
-LogoButton.Image = "rbxassetid://YOUR_LOGO_IMAGEID"
+LogoButton.Image = "rbxassetid://123032091977400"
 LogoButton.BackgroundTransparency = 1
 LogoButton.Visible = true
 
@@ -73,6 +62,10 @@ local stroke = Instance.new("UIStroke", MainFrame)
 stroke.Color = Color3.fromRGB(0, 255, 0)
 stroke.Thickness = 1
 
+-- Blur Layar (jika ingin blur background, bukan bagian UI)
+local blurEffect = Instance.new("BlurEffect", Lighting)
+blurEffect.Size = 12
+
 -- Header
 local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 30)
@@ -82,7 +75,6 @@ Header.TextColor3 = Color3.new(1, 1, 1)
 Header.Font = Enum.Font.GothamSemibold
 Header.TextSize = 16
 Header.TextXAlignment = Enum.TextXAlignment.Center
-Header.ZIndex = 1
 
 -- Tombol Minimize
 local Minimize = Instance.new("TextButton", MainFrame)
@@ -91,7 +83,6 @@ Minimize.Size = UDim2.new(0, 30, 0, 30)
 Minimize.Position = UDim2.new(1, -60, 0, 0)
 Minimize.TextColor3 = Color3.new(1, 1, 1)
 Minimize.BackgroundTransparency = 1
-Minimize.ZIndex = 1
 
 -- Tombol Close
 local Close = Instance.new("TextButton", MainFrame)
@@ -100,7 +91,6 @@ Close.Size = UDim2.new(0, 30, 0, 30)
 Close.Position = UDim2.new(1, -30, 0, 0)
 Close.TextColor3 = Color3.new(1, 0, 0)
 Close.BackgroundTransparency = 1
-Close.ZIndex = 1
 
 -- Aksi Tombol
 Minimize.MouseButton1Click:Connect(function()
@@ -121,17 +111,6 @@ Sidebar.Size = UDim2.new(0, 100, 1, -30)
 Sidebar.Position = UDim2.new(0, 0, 0, 30)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 
--- Efek blur pada Sidebar
-local SidebarBlur = Instance.new("ImageLabel", Sidebar)
-SidebarBlur.Name = "SidebarBlur"
-SidebarBlur.Size = UDim2.new(1, 0, 1, 0)
-SidebarBlur.Position = UDim2.new(0, 0, 0, 0)
-SidebarBlur.BackgroundTransparency = 1
-SidebarBlur.Image = "rbxassetid://5553946656"
-SidebarBlur.ImageTransparency = 0.3
-SidebarBlur.ScaleType = Enum.ScaleType.Stretch
-SidebarBlur.ZIndex = 0
-
 -- Container untuk Tab
 local TabContainer = Instance.new("Frame", MainFrame)
 TabContainer.Size = UDim2.new(1, -100, 1, -30)
@@ -142,8 +121,6 @@ TabContainer.BackgroundTransparency = 1
 local TabSections = {
 	["Home"] = Instance.new("Frame", TabContainer),
 	["Settings"] = Instance.new("Frame", TabContainer),
-	["Macro"] = Instance.new("Frame", TabContainer),
-	["Webhook"] = Instance.new("Frame", TabContainer)
 }
 
 -- Inisialisasi tab
@@ -163,7 +140,6 @@ local function CreateTabButton(name)
 	btn.TextColor3 = Color3.new(1, 1, 1)
 	btn.Font = Enum.Font.Gotham
 	btn.TextSize = 14
-	btn.ZIndex = 1
 
 	btn.MouseButton1Click:Connect(function()
 		for _, f in pairs(TabSections) do
@@ -176,10 +152,8 @@ end
 -- Buat tombol tab
 CreateTabButton("Home")
 CreateTabButton("Settings")
-CreateTabButton("Macro")
-CreateTabButton("Webhook")
 
--- Contoh Section di Tab Home
+-- Section di Tab Home
 local HomeSection = Instance.new("Frame", TabSections["Home"])
 HomeSection.Size = UDim2.new(1, -20, 0, 200)
 HomeSection.Position = UDim2.new(0, 10, 0, 10)
