@@ -1,194 +1,182 @@
--- STREE HUB LOADER - UI Custom (Mirip Alchemy Hub, kanan)
-repeat wait() until game:IsLoaded()
+-- STREE HUB Custom UI by kirsiasc
 
--- Konfigurasi GUI
-local success, result = pcall(function()
-    return game:GetService("CoreGui")
-end)
+-- Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
 
-local parentGui = success and result or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Create UI
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "STREE_HUB_UI"
+ScreenGui.ResetOnSpawn = false
 
-local ui = Instance.new("ScreenGui", parentGui)
-ui.Name = "STREE_HUB_UI"
-ui.ResetOnSpawn = false
+-- Function: Create glow border
+local function createGlow(parent)
+	local glow = Instance.new("UIStroke", parent)
+	glow.Color = Color3.fromRGB(0, 255, 0)
+	glow.Thickness = 2
+	glow.Transparency = 0
+	glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	glow.LineJoinMode = Enum.LineJoinMode.Round
 
--- Tombol Icon STREE HUB (untuk buka/tutup window)
-local logoButton = Instance.new("ImageButton", ui)
-logoButton.Name = "HubIcon"
-logoButton.Size = UDim2.new(0, 40, 0, 40)
-logoButton.Position = UDim2.new(0, 20, 1, -60)
-logoButton.Image = "rbxassetid://123032091977400" -- Ganti dengan asset logo kamu
-logoButton.BackgroundTransparency = 1
-
--- Frame Utama (Window)
-local window = Instance.new("Frame", ui)
-window.Name = "MainWindow"
-window.Size = UDim2.new(0, 500, 0, 320)
-window.Position = UDim2.new(0.5, -250, 0.5, -160)
-window.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-window.BackgroundTransparency = 0.1
-window.BorderSizePixel = 0
-window.Active = true
-window.Draggable = true
-
-local corner = Instance.new("UICorner", window)
-corner.CornerRadius = UDim.new(0, 12)
-
--- Judul dan tombol X / -
-local titleBar = Instance.new("Frame", window)
-titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.BackgroundTransparency = 1
-
-local title = Instance.new("TextLabel", titleBar)
-title.Text = "STREE HUB"
-title.Size = UDim2.new(1, -80, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
-title.TextSize = 22
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(0, 255, 100)
-title.BackgroundTransparency = 1
-
-do
-    local closeBtn = Instance.new("TextButton", titleBar)
-    closeBtn.Size = UDim2.new(0, 30, 0, 30)
-    closeBtn.Position = UDim2.new(1, -35, 0, 5)
-    closeBtn.Text = "X"
-    closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 16
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.MouseButton1Click:Connect(function()
-        window.Visible = false
-    end)
-
-    local minimizeBtn = Instance.new("TextButton", titleBar)
-    minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-    minimizeBtn.Position = UDim2.new(1, -70, 0, 5)
-    minimizeBtn.Text = "-"
-    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 80)
-    minimizeBtn.Font = Enum.Font.GothamBold
-    minimizeBtn.TextSize = 16
-    minimizeBtn.BackgroundTransparency = 1
-    minimizeBtn.MouseButton1Click:Connect(function()
-        window.Visible = false
-    end)
-
-    logoButton.MouseButton1Click:Connect(function()
-        window.Visible = not window.Visible
-    end)
+	local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+	TweenService:Create(glow, tweenInfo, {Transparency = 0.2}):Play()
 end
 
--- Panel kanan (Tab menu)
-local tabMenu = Instance.new("Frame", window)
-tabMenu.Name = "TabMenu"
-tabMenu.Size = UDim2.new(0, 120, 1, -40)
-tabMenu.Position = UDim2.new(1, -120, 0, 40)
-tabMenu.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabMenu.BackgroundTransparency = 0.1
-Instance.new("UICorner", tabMenu).CornerRadius = UDim.new(0, 6)
+-- Main Window
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Name = "MainFrame"
+MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 480, 0, 320)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
 
--- Konten Area
-local contentFrame = Instance.new("Frame", window)
-contentFrame.Name = "ContentFrame"
-contentFrame.Size = UDim2.new(1, -140, 1, -50)
-contentFrame.Position = UDim2.new(0, 10, 0, 45)
-contentFrame.BackgroundTransparency = 1
+-- Glow border
+createGlow(MainFrame)
 
--- Fungsi Bersih Konten
-local function clearContent()
-	for _,v in pairs(contentFrame:GetChildren()) do
-		if v:IsA("GuiObject") then
-			v:Destroy()
-		end
+-- Header
+local Header = Instance.new("Frame", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+-- Draggable logo
+local Logo = Instance.new("ImageLabel", Header)
+Logo.Name = "Logo"
+Logo.Size = UDim2.new(0, 40, 0, 40)
+Logo.Position = UDim2.new(0, 0, 0, 0)
+Logo.BackgroundTransparency = 1
+Logo.Image = "rbxassetid://YOUR_LOGO_ASSET_ID" -- Ganti dengan ID logomu
+Logo.ScaleType = Enum.ScaleType.Fit
+
+-- Drag function
+local dragging, dragInput, dragStart, startPos
+Logo.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = ScreenGui.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
 	end
-end
-
--- Perhitungan Dinamis Posisi Komponen
-local yOffset = 0
-local function resetYOffset()
-	yOffset = 0
-end
-local function nextY(height)
-	local y = yOffset
-	yOffset += height + 5
-	return y
-end
-
--- Fungsi Tambah Komponen
-local function createLabel(text)
-	local lbl = Instance.new("TextLabel", contentFrame)
-	lbl.Size = UDim2.new(1, -20, 0, 25)
-	lbl.Position = UDim2.new(0, 10, 0, nextY(25))
-	lbl.Text = text
-	lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
-	lbl.Font = Enum.Font.Gotham
-	lbl.TextSize = 14
-	lbl.BackgroundTransparency = 1
-end
-
-local function createButton(text, callback)
-	local btn = Instance.new("TextButton", contentFrame)
-	btn.Size = UDim2.new(1, -20, 0, 30)
-	btn.Position = UDim2.new(0, 10, 0, nextY(30))
-	btn.Text = text
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	btn.TextColor3 = Color3.fromRGB(0, 255, 0)
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-	btn.MouseButton1Click:Connect(callback)
-end
-
-local function createToggle(text, callback)
-	local btn = Instance.new("TextButton", contentFrame)
-	btn.Size = UDim2.new(1, -20, 0, 30)
-	btn.Position = UDim2.new(0, 10, 0, nextY(30))
-	btn.Text = text.." [OFF]"
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 14
-	btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-	local state = false
-	btn.MouseButton1Click:Connect(function()
-		state = not state
-		btn.Text = text.." ["..(state and "ON" or "OFF").."]"
-		callback(state)
-	end)
-end
-
--- Fungsi Tambah Tab
-local lastTabY = 0
-local function createTab(name, callback)
-	local btn = Instance.new("TextButton", tabMenu)
-	btn.Size = UDim2.new(1, -10, 0, 30)
-	btn.Position = UDim2.new(0, 5, 0, lastTabY + 5)
-	lastTabY = lastTabY + 35
-	btn.Text = name
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 15
-	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	btn.TextColor3 = Color3.fromRGB(0, 255, 100)
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-	btn.MouseButton1Click:Connect(function()
-		clearContent()
-		resetYOffset()
-		callback()
-	end)
-end
-
--- Tab: Home
-createTab("Home", function()
-	createLabel("Welcome to STREE HUB!")
-	createButton("Load Script", function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/Roblox_UI.lua"))()
-	end)
 end)
 
--- Tab: Credits
-createTab("Credits", function()
-	createLabel("Create : STREE Community")
-	createLabel("STREE HUB | create-stree")
+Logo.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
 end)
 
--- TODO: Tambahkan Key System di bagian awal script sesuai permintaan user
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- Button: Close (X)
+local CloseBtn = Instance.new("TextButton", Header)
+CloseBtn.Text = "X"
+CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseBtn.Position = UDim2.new(1, -40, 0, 0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.Font = Enum.Font.Gotham
+CloseBtn.TextSize = 20
+CloseBtn.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
+-- Button: Minimize (-)
+local MinimizeBtn = Instance.new("TextButton", Header)
+MinimizeBtn.Text = "-"
+MinimizeBtn.Size = UDim2.new(0, 40, 0, 40)
+MinimizeBtn.Position = UDim2.new(1, -80, 0, 0)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(0, 60, 0)
+MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+MinimizeBtn.Font = Enum.Font.Gotham
+MinimizeBtn.TextSize = 20
+
+local ContentFrame = Instance.new("Frame", MainFrame)
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+ContentFrame.Size = UDim2.new(1, 0, 1, -40)
+ContentFrame.BackgroundTransparency = 1
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+	ContentFrame.Visible = not ContentFrame.Visible
+end)
+
+-- Right Side Tab Menu
+local Sidebar = Instance.new("Frame", ContentFrame)
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 100, 1, 0)
+Sidebar.Position = UDim2.new(1, -100, 0, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local Tabs = {
+	"Home",
+	"Game",
+	"Macro",
+	"Webhook",
+	"Settings"
+}
+
+local SelectedTab = nil
+local TabFrames = {}
+
+for i, name in ipairs(Tabs) do
+	local Button = Instance.new("TextButton", Sidebar)
+	Button.Size = UDim2.new(1, 0, 0, 30)
+	Button.Position = UDim2.new(0, 0, 0, (i - 1) * 35)
+	Button.Text = name
+	Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	Button.TextColor3 = Color3.new(1, 1, 1)
+	Button.Font = Enum.Font.Gotham
+	Button.TextSize = 14
+
+	local TabFrame = Instance.new("Frame", ContentFrame)
+	TabFrame.Name = name .. "Tab"
+	TabFrame.Size = UDim2.new(1, -100, 1, 0)
+	TabFrame.Position = UDim2.new(0, 0, 0, 0)
+	TabFrame.Visible = false
+	TabFrame.BackgroundTransparency = 1
+
+	TabFrames[name] = TabFrame
+
+	Button.MouseButton1Click:Connect(function()
+		if SelectedTab then TabFrames[SelectedTab].Visible = false end
+		TabFrame.Visible = true
+		SelectedTab = name
+	end)
+end
+
+-- Show default tab
+TabFrames["Home"].Visible = true
+SelectedTab = "Home"
+
+-- Example Components in Home tab
+local Label = Instance.new("TextLabel", TabFrames["Home"])
+Label.Text = "Welcome to STREE HUB!"
+Label.Size = UDim2.new(1, 0, 0, 50)
+Label.Position = UDim2.new(0, 0, 0, 0)
+Label.BackgroundTransparency = 1
+Label.TextColor3 = Color3.fromRGB(0, 255, 0)
+Label.Font = Enum.Font.GothamBold
+Label.TextSize = 24
+
+local Toggle = Instance.new("TextButton", TabFrames["Home"])
+Toggle.Size = UDim2.new(0, 200, 0, 40)
+Toggle.Position = UDim2.new(0, 0, 0, 60)
+Toggle.Text = "Toggle Option: OFF"
+Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Toggle.TextColor3 = Color3.new(1, 1, 1)
+Toggle.Font = Enum.Font.Gotham
+Toggle.TextSize = 16
+
+local state = false
+Toggle.MouseButton1Click:Connect(function()
+	state = not state
+	Toggle.Text = "Toggle Option: " .. (state and "ON" or "OFF")
+end)
