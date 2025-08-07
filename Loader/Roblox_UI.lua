@@ -52,16 +52,16 @@ title.BackgroundTransparency = 1
 
 do
 	local closeBtn = Instance.new("TextButton", titleBar)
-	closeBtn.Size = UDim2.new(0, 30, 0, 30)
-	closeBtn.Position = UDim2.new(1, -35, 0, 5)
-	closeBtn.Text = "X"
-	closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-	closeBtn.Font = Enum.Font.GothamBold
-	closeBtn.TextSize = 16
-	closeBtn.BackgroundTransparency = 1
-	closeBtn.MouseButton1Click:Connect(function()
-		window.Visible = false
-	end)
+        closeBtn.Size = UDim2.new(0, 30, 0, 30)
+        closeBtn.Position = UDim2.new(1, -35, 0, 5)
+        closeBtn.Text = "X"
+        closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+        closeBtn.Font = Enum.Font.GothamBold
+        closeBtn.TextSize = 16
+        closeBtn.BackgroundTransparency = 1
+        closeBtn.MouseButton1Click:Connect(function()
+                ui:Destroy()
+        end)
 
 	local minimizeBtn = Instance.new("TextButton", titleBar)
 	minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
