@@ -12,6 +12,13 @@ local ui = Instance.new("ScreenGui", parentGui)
 ui.Name = "STREE_HUB_UI"
 ui.ResetOnSpawn = false
 
+game.StarterGui:SetCore("SendNotification", {
+	Title = "STREE HUB",
+	Text = "UI berhasil dimuat!",
+	Icon = "rbxassetid://123032091977400", -- Ubah jika ada ikon baru
+	Duration = 3
+})
+
 -- Tombol Icon STREE HUB (untuk buka/tutup window)
 local logoButton = Instance.new("ImageButton", ui)
 logoButton.Name = "HubIcon"
