@@ -24,7 +24,7 @@ local logoButton = Instance.new("ImageButton", ui)
 logoButton.Name = "HubIcon"
 logoButton.Size = UDim2.new(0, 40, 0, 40)
 logoButton.Position = UDim2.new(0, 120, 0.8, 0)
-logoButton.Image = "rbxassetid://123032091977400" -- Ganti dengan asset logo kamu
+logoButton.Image = "rbxassetid://123032091977400"
 logoButton.BackgroundTransparency = 1
 logoButton.Draggable = true
 logoButton.Active = true
@@ -47,45 +47,67 @@ corner.CornerRadius = UDim.new(0, 12)
 local titleBar = Instance.new("Frame", window)
 titleBar.Size = UDim2.new(1, 0, 0, 40)
 titleBar.BackgroundTransparency = 1
+titleBar.Name = "TitleBar"
 
-local title = Instance.new("TextLabel", titleBar)
+-- Frame Container untuk logo + teks
+local titleContainer = Instance.new("Frame", titleBar)
+titleContainer.Size = UDim2.new(1, -80, 1, 0)
+titleContainer.Position = UDim2.new(0, 10, 0, 0)
+titleContainer.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", titleContainer)
+layout.FillDirection = Enum.FillDirection.Horizontal
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+layout.VerticalAlignment = Enum.VerticalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 5)
+
+-- Logo kecil kiri atas titleBar
+local headerLogo = Instance.new("ImageLabel", titleContainer)
+headerLogo.Size = UDim2.new(0, 28, 0, 28)
+headerLogo.Image = "rbxassetid://123032091977400"
+headerLogo.BackgroundTransparency = 1
+headerLogo.LayoutOrder = 1
+
+-- Judul STREE HUB
+local title = Instance.new("TextLabel", titleContainer)
 title.Text = "STREE HUB"
-title.Size = UDim2.new(1, -80, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
+title.Size = UDim2.new(1, 0, 1, 0)
 title.TextSize = 22
 title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(0, 255, 100)
 title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.LayoutOrder = 2
 
-do
-	local closeBtn = Instance.new("TextButton", titleBar)
-        closeBtn.Size = UDim2.new(0, 30, 0, 30)
-        closeBtn.Position = UDim2.new(1, -35, 0, 5)
-        closeBtn.Text = "X"
-        closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-        closeBtn.Font = Enum.Font.GothamBold
-        closeBtn.TextSize = 16
-        closeBtn.BackgroundTransparency = 1
-        closeBtn.MouseButton1Click:Connect(function()
-                ui:Destroy()
-        end)
+-- Tombol X dan -
+local closeBtn = Instance.new("TextButton", titleBar)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.BackgroundTransparency = 1
+closeBtn.MouseButton1Click:Connect(function()
+	ui:Destroy()
+end)
 
-	local minimizeBtn = Instance.new("TextButton", titleBar)
-	minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-	minimizeBtn.Position = UDim2.new(1, -70, 0, 5)
-	minimizeBtn.Text = "-"
-	minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 80)
-	minimizeBtn.Font = Enum.Font.GothamBold
-	minimizeBtn.TextSize = 16
-	minimizeBtn.BackgroundTransparency = 1
-	minimizeBtn.MouseButton1Click:Connect(function()
-		window.Visible = false
-	end)
+local minimizeBtn = Instance.new("TextButton", titleBar)
+minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+minimizeBtn.Position = UDim2.new(1, -70, 0, 5)
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 80)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 16
+minimizeBtn.BackgroundTransparency = 1
+minimizeBtn.MouseButton1Click:Connect(function()
+	window.Visible = false
+end)
 
-	logoButton.MouseButton1Click:Connect(function()
-		window.Visible = not window.Visible
-	end)
-end
+logoButton.MouseButton1Click:Connect(function()
+	window.Visible = not window.Visible
+end)
 
 -- Panel kanan (Tab menu)
 local tabMenu = Instance.new("Frame", window)
@@ -103,7 +125,7 @@ SidebarBlur.Parent = tabMenu
 SidebarBlur.Size = UDim2.new(1, 0, 1, 0)
 SidebarBlur.Position = UDim2.new(0, 0, 0, 0)
 SidebarBlur.BackgroundTransparency = 1
-SidebarBlur.Image = "rbxassetid://5553946656" -- Blur asset ID
+SidebarBlur.Image = "rbxassetid://5553946656"
 SidebarBlur.ImageTransparency = 0.4
 SidebarBlur.ScaleType = Enum.ScaleType.Stretch
 SidebarBlur.ZIndex = 0
