@@ -15,7 +15,7 @@ ui.ResetOnSpawn = false
 game.StarterGui:SetCore("SendNotification", {
 	Title = "STREE HUB",
 	Text = "UI berhasil dimuat!",
-	Icon = "rbxassetid://136107251712298", -- Ubah jika ada ikon baru
+	Icon = "rbxassetid://116481690703030", -- Ubah jika ada ikon baru
 	Duration = 3
 })
 
@@ -65,7 +65,7 @@ layout.Padding = UDim.new(0, 5)
 -- Logo kecil kiri atas titleBar
 local headerLogo = Instance.new("ImageLabel", titleContainer)
 headerLogo.Size = UDim2.new(0, 28, 0, 28)
-headerLogo.Image = "rbxassetid://136107251712298"
+headerLogo.Image = "rbxassetid://116481690703030"
 headerLogo.BackgroundTransparency = 1
 headerLogo.LayoutOrder = 1
 
