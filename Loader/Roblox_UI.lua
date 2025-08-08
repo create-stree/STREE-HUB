@@ -1,4 +1,6 @@
 -- STREE HUB with Key System
+-- STREE HUB LOADER 
+-- UI Custom (Mirip Alchemy Hub, kanan)
 local HttpService = game:GetService("HttpService")
 local url = "https://rkns.link/qss3x" -- URL verifikasi key
 
@@ -179,7 +181,6 @@ end
 
 ShowKeyUI()
 
--- STREE HUB LOADER - UI Custom (Mirip Alchemy Hub, kanan)
 repeat wait() until game:IsLoaded()
 
 -- Konfigurasi GUI
