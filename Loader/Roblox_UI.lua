@@ -1,186 +1,116 @@
--- STREE HUB with Key System
--- STREE HUB LOADER 
--- UI Custom (Mirip Alchemy Hub, kanan)
+-- Layanan Roblox
+local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
-local url = "https://rkns.link/qss3x" -- URL verifikasi key
+local LocalPlayer = Players.LocalPlayer
 
--- ======== CONFIG UI ========
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.CoreGui
-screenGui.ResetOnSpawn = false
+-- URL untuk verifikasi key
+local verifyURL = "https://rkns.link/qss3x" -- Ganti dengan link server verifikasi
 
--- ==== KEY SYSTEM UI ====
-local keyFrame = Instance.new("Frame")
-keyFrame.Size = UDim2.new(0, 300, 0, 150)
-keyFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
-keyFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-keyFrame.BorderSizePixel = 0
-keyFrame.Parent = screenGui
+-- Simpan UI utama di sini (di-hide dulu)
+local mainWindow -- nanti diisi
 
-local uICorner = Instance.new("UICorner", keyFrame)
-uICorner.CornerRadius = UDim.new(0, 10)
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
-title.BackgroundTransparency = 1
-title.Text = "🔑 Enter Your Key"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(0, 255, 0)
-title.Parent = keyFrame
-
-local keyBox = Instance.new("TextBox")
-keyBox.Size = UDim2.new(0.9, 0, 0, 35)
-keyBox.Position = UDim2.new(0.05, 0, 0.4, 0)
-keyBox.PlaceholderText = "Enter key..."
-keyBox.Font = Enum.Font.Gotham
-keyBox.TextSize = 14
-keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-keyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-keyBox.ClearTextOnFocus = false
-keyBox.Parent = keyFrame
-Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 6)
-
-local verifyBtn = Instance.new("TextButton")
-verifyBtn.Size = UDim2.new(0.9, 0, 0, 35)
-verifyBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
-verifyBtn.Text = "Verify Key"
-verifyBtn.Font = Enum.Font.GothamBold
-verifyBtn.TextSize = 14
-verifyBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-verifyBtn.Parent = keyFrame
-Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 6)
-
--- Fungsi verifikasi
+-- Fungsi verifikasi key
 local function verifyKey(keyInput)
     local success, response = pcall(function()
-        return HttpService:PostAsync(url, HttpService:JSONEncode({key = keyInput}), Enum.HttpContentType.ApplicationJson)
+        return HttpService:PostAsync(
+            verifyURL,
+            HttpService:JSONEncode({key = keyInput}),
+            Enum.HttpContentType.ApplicationJson
+        )
     end)
+
     if success then
         local data = HttpService:JSONDecode(response)
         if data.status == "valid" then
-            return true, data.script
+            return true
         end
     end
-    return false, nil
+    return false
 end
 
--- Klik Verify
-verifyBtn.MouseButton1Click:Connect(function()
-    local key = keyBox.Text
-    verifyBtn.Text = "Verifying..."
-    local ok, scriptData = verifyKey(key)
-    if ok then
-        verifyBtn.Text = "✅ Verified!"
+-- Buat UI Key System
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 8)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundTransparency = 1
+Title.Text = "STREE HUB - Key System"
+Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.Parent = Frame
+
+local KeyBox = Instance.new("TextBox")
+KeyBox.Size = UDim2.new(1, -20, 0, 30)
+KeyBox.Position = UDim2.new(0, 10, 0, 50)
+KeyBox.PlaceholderText = "Masukkan Key..."
+KeyBox.Text = ""
+KeyBox.TextColor3 = Color3.new(1, 1, 1)
+KeyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+KeyBox.ClearTextOnFocus = false
+KeyBox.Parent = Frame
+Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 5)
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+StatusLabel.Position = UDim2.new(0, 0, 0, 85)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 14
+StatusLabel.Text = ""
+StatusLabel.Parent = Frame
+
+local RekoniseButton = Instance.new("TextButton")
+RekoniseButton.Size = UDim2.new(1, -20, 0, 30)
+RekoniseButton.Position = UDim2.new(0, 10, 0, 110)
+RekoniseButton.Text = "Rekonise"
+RekoniseButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+RekoniseButton.TextColor3 = Color3.new(1, 1, 1)
+RekoniseButton.Font = Enum.Font.GothamBold
+RekoniseButton.TextSize = 16
+RekoniseButton.Parent = Frame
+Instance.new("UICorner", RekoniseButton).CornerRadius = UDim.new(0, 5)
+
+-- Event klik tombol
+RekoniseButton.MouseButton1Click:Connect(function()
+    local key = KeyBox.Text
+    if key == "" then
+        StatusLabel.Text = "❌ Key tidak boleh kosong!"
+        return
+    end
+    
+    StatusLabel.Text = "🔄 Memverifikasi..."
+    
+    if verifyKey(key) then
+        StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        StatusLabel.Text = "✅ Key valid!"
+        
         wait(1)
-        keyFrame.Visible = false
-        -- Load script utama dari server
-        loadstring(scriptData)()
-        -- Munculkan UI STREE HUB utama
-        -- =============================
-        local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(0, 500, 0, 300)
-        mainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
-        mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        mainFrame.BackgroundTransparency = 0.2
-        mainFrame.BorderSizePixel = 0
-        mainFrame.Parent = screenGui
-        Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
-
-        -- Border hijau neon
-        local uiStroke = Instance.new("UIStroke", mainFrame)
-        uiStroke.Thickness = 2
-        uiStroke.Color = Color3.fromRGB(0, 255, 0)
-        uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-        -- Title
-        local titleMain = Instance.new("TextLabel")
-        titleMain.Size = UDim2.new(1, 0, 0, 40)
-        titleMain.BackgroundTransparency = 1
-        titleMain.Text = "STREE | Grow A Garden | v0.00.01"
-        titleMain.Font = Enum.Font.GothamBold
-        titleMain.TextSize = 16
-        titleMain.TextColor3 = Color3.fromRGB(0, 255, 0)
-        titleMain.Parent = mainFrame
-
-        -- Minimize button
-        local minBtn = Instance.new("TextButton")
-        minBtn.Size = UDim2.new(0, 40, 0, 40)
-        minBtn.Position = UDim2.new(1, -45, 0, 0)
-        minBtn.Text = "-"
-        minBtn.Font = Enum.Font.GothamBold
-        minBtn.TextSize = 20
-        minBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        minBtn.Parent = mainFrame
-        Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 5)
-
-        -- Logo toggle (pojok kiri atas)
-        local logoBtn = Instance.new("TextButton")
-        logoBtn.Size = UDim2.new(0, 50, 0, 50)
-        logoBtn.Position = UDim2.new(0, 10, 0, 10)
-        logoBtn.Text = "🌿"
-        logoBtn.Font = Enum.Font.GothamBold
-        logoBtn.TextSize = 30
-        logoBtn.BackgroundTransparency = 1
-        logoBtn.Parent = screenGui
-
-        minBtn.MouseButton1Click:Connect(function()
-            mainFrame.Visible = false
-        end)
-
-        logoBtn.MouseButton1Click:Connect(function()
-            mainFrame.Visible = not mainFrame.Visible
-        end)
+        ScreenGui:Destroy() -- Tutup UI key system
+        if mainWindow then
+            mainWindow.Enabled = true -- Tampilkan UI utama
+        end
     else
-        verifyBtn.Text = "❌ Invalid Key!"
-        wait(1.5)
-        verifyBtn.Text = "Verify Key"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        StatusLabel.Text = "❌ Key salah!"
     end
 end)
 
-end)
-
--- // KEY SYSTEM
-local function ShowKeyUI()
-    local KeyFrame = Instance.new("Frame", ScreenGui)
-    KeyFrame.Size = UDim2.new(0, 300, 0, 150)
-    KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
-    KeyFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    KeyFrame.BackgroundTransparency = 0.3
-    KeyFrame.BorderSizePixel = 0
-
-    local Box = Instance.new("TextBox", KeyFrame)
-    Box.Size = UDim2.new(1, -20, 0, 30)
-    Box.Position = UDim2.new(0, 10, 0, 20)
-    Box.PlaceholderText = "Enter your key..."
-    Box.Text = ""
-    Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-
-    local Btn = Instance.new("TextButton", KeyFrame)
-    Btn.Size = UDim2.new(1, -20, 0, 30)
-    Btn.Position = UDim2.new(0, 10, 0, 70)
-    Btn.Text = "Verify"
-    Btn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-
-    Btn.MouseButton1Click:Connect(function()
-        if table.find(ValidKeys, Box.Text) then
-            KeyFrame:Destroy()
-            MainFrame.Visible = true
-        else
-            Btn.Text = "Invalid Key!"
-            Btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            wait(1)
-            Btn.Text = "Verify"
-            Btn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        end
-    end)
-end
-
-ShowKeyUI()
-
+-- Contoh pembuatan UI utama (kamu bisa ganti dengan UI kamu)
+-- STREE HUB LOADER - UI Custom (Mirip Alchemy Hub, kanan)
 repeat wait() until game:IsLoaded()
 
 -- Konfigurasi GUI
