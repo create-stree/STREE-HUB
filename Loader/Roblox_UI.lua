@@ -66,6 +66,7 @@ local function buildMainUI(parent)
     logoButton.Image = "rbxassetid://123032091977400"
     logoButton.BackgroundTransparency = 1
     logoButton.ZIndex = 2
+    logoButton.Visible = false -- sembunyi saat window muncul
 
     -- Main window
     local window = Instance.new("Frame", ui)
@@ -75,9 +76,7 @@ local function buildMainUI(parent)
     window.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     window.BackgroundTransparency = 0.25
     window.BorderSizePixel = 0
-    window.Active = true
-    window.Draggable = true
-    window.Visible = true -- shown immediately after creation
+    window.Visible = true -- muncul saat UI dibuat
 
     local border = Instance.new("UIStroke", window)
     border.Thickness = 3
@@ -246,45 +245,58 @@ local function buildMainUI(parent)
         createLabel(c, "STREE HUB | create-stree", 36)
     end
 
-    closeBtn.MouseButton1Click:Connect(function() ui:Destroy() end)
+    closeBtn.MouseButton1Click:Connect(function()
+        ui:Destroy()
+    end)
+
     minBtn.MouseButton1Click:Connect(function()
         window.Visible = false
         logoButton.Visible = true
     end)
+
     logoButton.MouseButton1Click:Connect(function()
-        window.Visible = not window.Visible
-        if window.Visible then logoButton.Visible = false end
+        window.Visible = true
+        logoButton.Visible = false
     end)
 
-    do
-        local dragging, dragInput, dragStart, startPos
-        local function update(input)
-            local delta = input.Position - dragStart
-            window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-        logoButton.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                dragStart = input.Position
-                startPos = window.Position
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
-                end)
-            end
-        end)
-        logoButton.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                dragInput = input
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(input)
-            if input == dragInput and dragging then
-                update(input)
-            end
-        end)
+    -- Dragging window
+    local dragging, dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        window.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
     end
+
+    window.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = window.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    window.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
 
     return {
         ScreenGui = ui;
@@ -366,12 +378,14 @@ local function buildKeyUI(parent, onSuccess)
     end)
 
     verifyBtn.MouseButton1Click:Connect(function()
-        local key = tostring(input.Text or "Cari")
-        if key == "STREEHUB-2025-9GHTQ7ZP4M","STREE-KeySystem-82ghtQRSM","StreeCommunity-7g81ht7NO22" then
+        local key = tostring(input.Text or "")
+
+        if key == "" then
             status.TextColor3 = Color3.fromRGB(255,100,100)
             status.Text = "Key tidak boleh kosong!"
             return
         end
+
         status.TextColor3 = Color3.fromRGB(200,200,200)
         status.Text = "Memverifikasi..."
         local ok, err = verifyKey(key)
@@ -383,23 +397,6 @@ local function buildKeyUI(parent, onSuccess)
             if onSuccess then pcall(onSuccess) end
         else
             status.TextColor3 = Color3.fromRGB(255,100,100)
-            if err == "request_error" then
-                status.Text = "Error koneksi. Cek https & endpoint."
-            elseif err == "invalid_response" then
-                status.Text = "Silahkan ambil key yang benar"
-            else
-                status.Text = "Key salah!"
-            end
-        end
-    end)
-end
+            if err == "request
 
--- ======= Main flow: show key UI first =======
-buildKeyUI(PlayerGui, function()
-    -- Build and show main UI only after valid key
-    local builtMain = buildMainUI(PlayerGui)
-    builtMain.Window.Visible = true
-    builtMain.Logo.Visible = true
-end)
-
--- End of script
+-- End Of Script
