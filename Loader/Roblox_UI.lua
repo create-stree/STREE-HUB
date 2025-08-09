@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ======= Config =======
-local VERIFY_URL = "https://rkns.link/qss3x" -- verification keyInput
+local REKONISE = "https://rkns.link/qss3x"
 
 -- ======= Helper: verifyKey via HTTPS POST =======
 local function verifyKey(keyInput)
@@ -367,7 +367,7 @@ local function buildKeyUI(parent, onSuccess)
 
     verifyBtn.MouseButton1Click:Connect(function()
         local key = tostring(input.Text or "Cari")
-        if key == "STREEHUB-2025-9GHTQ7ZP4M,STREE-KeySystem-82ghtQRSM,StreeCommunity-7g81ht7NO22" then
+        if key == "STREEHUB-2025-9GHTQ7ZP4M , STREE-KeySystem-82ghtQRSM , StreeCommunity-7g81ht7NO22" then
             status.TextColor3 = Color3.fromRGB(255,100,100)
             status.Text = "Key tidak boleh kosong!"
             return
