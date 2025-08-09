@@ -377,14 +377,18 @@ local function buildKeyUI(parent, onSuccess)
         status.Text = "Link copied! Paste in browser."
     end)
 
-    verifyBtn.MouseButton1Click:Connect(function()
-        local key = tostring(input.Text or "")
-
-        if key == "" then
-            status.TextColor3 = Color3.fromRGB(255,100,100)
-            status.Text = "Key tidak boleh kosong!"
-            return
-        end
+    local function verifyKey(keyInput)
+    local validKeys = {
+        ["STREEHUB-2025-9GHTQ7ZP4M"] = true,
+        ["STREE-KeySystem-82ghtQRSM"] = true,
+        ["StreeCommunity-7g81ht7NO22"] = true,
+    }
+    if validKeys[keyInput] then
+        return true
+    else
+        return false, "invalid_key"
+    end
+    end
 
         status.TextColor3 = Color3.fromRGB(200,200,200)
         status.Text = "Memverifikasi..."
