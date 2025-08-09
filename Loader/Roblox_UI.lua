@@ -1,56 +1,56 @@
--- STREE HUB (Key system + Main UI) - All in one
--- Key verification via HTTP, no loadstring, UI main included
--- Main UI is NOT created until the key is verified.
+-- STREE HUB (Key system + Main UI)
+-- Key verification via HTTP POST (no loadstring). Main UI is created only after key is valid.
 
 -- ======= Services =======
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ======= Config =======
-local REKONISE = "https://rkns.link/qss3x"
+local VERIFY_URL = "https://rkns.link/qss3x" -- endpoint verifikasi (ubah jika perlu)
+local REKONISE_URL = VERIFY_URL -- link yang akan dibuka / disalin oleh tombol Rekonise
 
 -- ======= Helper: verifyKey via HTTPS POST =======
 local function verifyKey(keyInput)
-    if not keyInput or keyInput == "" then
+    if not keyInput or tostring(keyInput):match("^%s*$") then
         return false, "empty"
     end
 
     local ok, resp = pcall(function()
-        return HttpService:PostAsync(
-            VERIFY_URL,
-            HttpService:JSONEncode({ key = keyInput }),
-            Enum.HttpContentType.ApplicationJson
-        )
+        return HttpService:PostAsync(VERIFY_URL, HttpService:JSONEncode({ key = keyInput }), Enum.HttpContentType.ApplicationJson)
     end)
-
     if not ok then
         return false, "request_error"
     end
 
     local suc, decoded = pcall(function() return HttpService:JSONDecode(resp) end)
-    if not suc or type(decoded) ~= "table" then
+    if not suc then
         return false, "invalid_response"
     end
 
-    if decoded.status == "valid" then
+    -- Accept both { status = "valid" } or plain "valid" string
+    if type(decoded) == "table" and decoded.status and tostring(decoded.status):lower() == "valid" then
+        return true
+    elseif type(decoded) == "string" and tostring(decoded):lower():find("valid") then
         return true
     end
 
     return false, "invalid_key"
 end
 
--- ======= Build Main UI (only called after key is valid) =======
+-- ======= Build Main UI (created only after key valid) =======
 local function buildMainUI(parent)
     local ui = Instance.new("ScreenGui")
     ui.Name = "STREE_HUB_UI"
     ui.ResetOnSpawn = false
     ui.Parent = parent
 
+    -- notif
     pcall(function()
-        game.StarterGui:SetCore("SendNotification", {
+        StarterGui:SetCore("SendNotification", {
             Title = "STREE HUB",
             Text = "UI berhasil dimuat!",
             Icon = "rbxassetid://123032091977400",
@@ -58,14 +58,15 @@ local function buildMainUI(parent)
         })
     end)
 
-    -- Logo button (restore/minimize)
+    -- Logo button (restore)
     local logoButton = Instance.new("ImageButton", ui)
     logoButton.Name = "HubIcon"
     logoButton.Size = UDim2.new(0, 48, 0, 48)
-    logoButton.Position = UDim2.new(0, 12, 0, 12)
+    logoButton.Position = UDim2.new(0, 12, 0, 12) -- sesuai permintaan: dekat chat kiri atas
     logoButton.Image = "rbxassetid://123032091977400"
     logoButton.BackgroundTransparency = 1
     logoButton.ZIndex = 2
+    logoButton.Visible = false -- akan disembunyikan ketika window muncul
 
     -- Main window
     local window = Instance.new("Frame", ui)
@@ -77,23 +78,22 @@ local function buildMainUI(parent)
     window.BorderSizePixel = 0
     window.Active = true
     window.Draggable = true
-    window.Visible = true -- shown immediately after creation
+    window.Visible = true
 
+    -- neon border
     local border = Instance.new("UIStroke", window)
     border.Thickness = 3
     border.Color = Color3.fromRGB(0, 255, 0)
     border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     border.LineJoinMode = Enum.LineJoinMode.Round
 
-    local windowCorner = Instance.new("UICorner", window)
-    windowCorner.CornerRadius = UDim.new(0, 12)
+    Instance.new("UICorner", window).CornerRadius = UDim.new(0, 12)
 
+    -- Title bar
     local titleBar = Instance.new("Frame", window)
-    titleBar.Name = "TitleBar"
     titleBar.Size = UDim2.new(1, 0, 0, 40)
     titleBar.Position = UDim2.new(0, 0, 0, 0)
     titleBar.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    titleBar.BorderSizePixel = 0
 
     local titleLabel = Instance.new("TextLabel", titleBar)
     titleLabel.Size = UDim2.new(1, -120, 1, 0)
@@ -129,25 +129,21 @@ local function buildMainUI(parent)
     minBtn.BackgroundTransparency = 0.8
     minBtn.TextColor3 = Color3.fromRGB(255, 255, 140)
 
+    -- Content + Sidebar
     local contentFrame = Instance.new("Frame", window)
     contentFrame.Name = "Content"
     contentFrame.Size = UDim2.new(1, -160, 1, -60)
     contentFrame.Position = UDim2.new(0, 10, 0, 50)
     contentFrame.BackgroundTransparency = 1
-    contentFrame.BorderSizePixel = 0
 
     local sidebar = Instance.new("Frame", window)
     sidebar.Name = "Sidebar"
     sidebar.Size = UDim2.new(0, 140, 1, -60)
     sidebar.Position = UDim2.new(1, -150, 0, 50)
     sidebar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    sidebar.BorderSizePixel = 0
-
-    local sidebarCorner = Instance.new("UICorner", sidebar)
-    sidebarCorner.CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 8)
 
     local sideBlur = Instance.new("ImageLabel", sidebar)
-    sideBlur.Name = "SidebarBlur"
     sideBlur.Size = UDim2.new(1, 0, 1, 0)
     sideBlur.Position = UDim2.new(0, 0, 0, 0)
     sideBlur.BackgroundTransparency = 1
@@ -156,14 +152,13 @@ local function buildMainUI(parent)
     sideBlur.ScaleType = Enum.ScaleType.Stretch
     sideBlur.ZIndex = 0
 
+    -- Tabs
     local tabs = { "Home", "Game", "Macro", "Webhook", "Settings", "Credits" }
-    local tabButtons = {}
     local tabFrames = {}
-    local startY = 6
     for i, tabName in ipairs(tabs) do
         local btn = Instance.new("TextButton", sidebar)
         btn.Size = UDim2.new(1, -12, 0, 34)
-        btn.Position = UDim2.new(0, 6, 0, startY + (i-1) * 40)
+        btn.Position = UDim2.new(0, 6, 0, 6 + (i-1)*40)
         btn.Text = tabName
         btn.Font = Enum.Font.Gotham
         btn.TextSize = 14
@@ -174,20 +169,19 @@ local function buildMainUI(parent)
         local f = Instance.new("Frame", contentFrame)
         f.Name = tabName .. "Frame"
         f.Size = UDim2.new(1, 0, 1, 0)
-        f.Position = UDim2.new(0,0,0,0)
+        f.Position = UDim2.new(0, 0, 0, 0)
         f.BackgroundTransparency = 1
         f.Visible = false
-
-        tabButtons[tabName] = btn
         tabFrames[tabName] = f
 
         btn.MouseButton1Click:Connect(function()
-            for _, tf in pairs(tabFrames) do tf.Visible = false end
+            for _, v in pairs(tabFrames) do v.Visible = false end
             f.Visible = true
         end)
     end
     tabFrames["Home"].Visible = true
 
+    -- Small helpers to add controls to tabs
     local function createLabel(parent, text, y)
         local lbl = Instance.new("TextLabel", parent)
         lbl.Size = UDim2.new(1, -20, 0, 22)
@@ -208,7 +202,7 @@ local function buildMainUI(parent)
         b.Font = Enum.Font.GothamBold
         b.Text = text
         Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
-        b.MouseButton1Click:Connect(function() if cb then cb() end end)
+        b.MouseButton1Click:Connect(function() if cb then pcall(cb) end end)
         return b
     end
     local function createToggle(parent, text, y, cb)
@@ -229,15 +223,14 @@ local function buildMainUI(parent)
         return t
     end
 
+    -- Populate Home
     do
         local home = tabFrames["Home"]
         local y = 8
         createLabel(home, "Welcome to STREE HUB!", y); y = y + 28
         createButton(home, "Load Script (example)", y, function() warn("Load Script clicked") end); y = y + 36
         createToggle(home, "Auto Execute", y, function(state) warn("Auto execute:", state) end); y = y + 36
-        createButton(home, "Enable Shiftlock", y, function()
-            pcall(function() Players.LocalPlayer.DevEnableMouseLock = true end)
-        end); y = y + 36
+        createButton(home, "Enable Shiftlock", y, function() pcall(function() Players.LocalPlayer.DevEnableMouseLock = true end) end); y = y + 36
     end
 
     do
@@ -246,6 +239,7 @@ local function buildMainUI(parent)
         createLabel(c, "STREE HUB | create-stree", 36)
     end
 
+    -- Minimize / Close / Logo behavior
     closeBtn.MouseButton1Click:Connect(function() ui:Destroy() end)
     minBtn.MouseButton1Click:Connect(function()
         window.Visible = false
@@ -256,6 +250,7 @@ local function buildMainUI(parent)
         if window.Visible then logoButton.Visible = false end
     end)
 
+    -- allow dragging the logo to reposition the whole window
     do
         local dragging, dragInput, dragStart, startPos
         local function update(input)
@@ -268,21 +263,15 @@ local function buildMainUI(parent)
                 dragStart = input.Position
                 startPos = window.Position
                 input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                    end
+                    if input.UserInputState == Enum.UserInputState.End then dragging = false end
                 end)
             end
         end)
         logoButton.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                dragInput = input
-            end
+            if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
         end)
         UserInputService.InputChanged:Connect(function(input)
-            if input == dragInput and dragging then
-                update(input)
-            end
+            if input == dragInput and dragging then update(input) end
         end)
     end
 
@@ -293,7 +282,7 @@ local function buildMainUI(parent)
     }
 end
 
--- ======= Build Key UI (only shown first) =======
+-- ======= Build Key UI (shown first) =======
 local function buildKeyUI(parent, onSuccess)
     local keyGui = Instance.new("ScreenGui")
     keyGui.Name = "STREE_KeyUI"
@@ -306,9 +295,7 @@ local function buildKeyUI(parent, onSuccess)
     frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
     frame.BorderSizePixel = 0
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0,8)
-    local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(0,255,0)
-    stroke.Thickness = 3
+    local stroke = Instance.new("UIStroke", frame); stroke.Color = Color3.fromRGB(0,255,0); stroke.Thickness = 3
 
     local title = Instance.new("TextLabel", frame)
     title.Size = UDim2.new(1, -20, 0, 36)
@@ -340,9 +327,9 @@ local function buildKeyUI(parent, onSuccess)
     status.Text = ""
 
     local getBtn = Instance.new("TextButton", frame)
-    getBtn.Size = UDim2.new(0.47, -6, 0, 30)
+    getBtn.Size = UDim2.new(0, 160, 0, 30)
     getBtn.Position = UDim2.new(0, 10, 0, 126)
-    getBtn.Text = "Get Key"
+    getBtn.Text = "Rekonise"
     getBtn.Font = Enum.Font.GothamBold
     getBtn.TextSize = 16
     getBtn.BackgroundColor3 = Color3.fromRGB(60,120,255)
@@ -350,8 +337,8 @@ local function buildKeyUI(parent, onSuccess)
     Instance.new("UICorner", getBtn).CornerRadius = UDim.new(0,6)
 
     local verifyBtn = Instance.new("TextButton", frame)
-    verifyBtn.Size = UDim2.new(0.47, -6, 0, 30)
-    verifyBtn.Position = UDim2.new(0, 10 + (0.47 * 340) + 12, 0, 126)
+    verifyBtn.Size = UDim2.new(0, 160, 0, 30)
+    verifyBtn.Position = UDim2.new(0, 170, 0, 126)
     verifyBtn.Text = "Verify"
     verifyBtn.Font = Enum.Font.GothamBold
     verifyBtn.TextSize = 16
@@ -359,21 +346,37 @@ local function buildKeyUI(parent, onSuccess)
     verifyBtn.TextColor3 = Color3.fromRGB(0,0,0)
     Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0,6)
 
+    -- Rekonise: try to open browser, else copy link to clipboard
     getBtn.MouseButton1Click:Connect(function()
-        pcall(function() setclipboard(VERIFY_URL) end)
-        status.TextColor3 = Color3.fromRGB(0,255,0)
-        status.Text = "Link copied! Paste in browser."
+        local okOpen = pcall(function()
+            StarterGui:SetCore("OpenBrowserWindow", REKONISE_URL)
+        end)
+        if okOpen then
+            status.TextColor3 = Color3.fromRGB(0,255,0)
+            status.Text = "Membuka link Rekonise..."
+            return
+        end
+        -- fallback: copy to clipboard (may not work in all executors)
+        local okCopy = pcall(function() setclipboard(REKONISE_URL) end)
+        if okCopy then
+            status.TextColor3 = Color3.fromRGB(0,255,0)
+            status.Text = "Link disalin ke clipboard."
+        else
+            status.TextColor3 = Color3.fromRGB(255,100,100)
+            status.Text = "Gagal membuka/copy link."
+        end
     end)
 
     verifyBtn.MouseButton1Click:Connect(function()
-        local key = tostring(input.Text or "Cari")
-        if key == "STREEHUB-2025-9GHTQ7ZP4M , STREE-KeySystem-82ghtQRSM , StreeCommunity-7g81ht7NO22" then
+        local key = tostring(input.Text or "")
+        if key:match("^%s*$") then
             status.TextColor3 = Color3.fromRGB(255,100,100)
             status.Text = "Key tidak boleh kosong!"
             return
         end
         status.TextColor3 = Color3.fromRGB(200,200,200)
         status.Text = "Memverifikasi..."
+        -- verify
         local ok, err = verifyKey(key)
         if ok then
             status.TextColor3 = Color3.fromRGB(0,255,0)
@@ -384,9 +387,11 @@ local function buildKeyUI(parent, onSuccess)
         else
             status.TextColor3 = Color3.fromRGB(255,100,100)
             if err == "request_error" then
-                status.Text = "Error koneksi. Cek https & endpoint."
+                status.Text = "Error koneksi. Cek HTTP & endpoint."
             elseif err == "invalid_response" then
-                status.Text = "Silahkan ambil key yang benar"
+                status.Text = "Response server tidak valid."
+            elseif err == "empty" then
+                status.Text = "Key kosong."
             else
                 status.Text = "Key salah!"
             end
@@ -394,12 +399,11 @@ local function buildKeyUI(parent, onSuccess)
     end)
 end
 
--- ======= Main flow: show key UI first =======
+-- ======= Start: show key UI first, then create main UI on success =======
 buildKeyUI(PlayerGui, function()
-    -- Build and show main UI only after valid key
     local builtMain = buildMainUI(PlayerGui)
-    builtMain.Window.Visible = true
-    builtMain.Logo.Visible = true
-end)
-
--- End of script
+    -- main UI already visible by buildMainUI
+    -- ensure logo is hidden
+    pcall(function() builtMain.Logo.Visible = false end)
+    print("Main UI dimuat setelah verifikasi key.")
+end)p
