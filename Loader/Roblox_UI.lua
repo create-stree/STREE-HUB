@@ -10,9 +10,9 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ======= Config =======
-local VERIFY_URL = "https://rkns.link/qss3x" -- verification endpoint
+local VERIFY_URL = "https://rkns.link/qss3x" -- verification keyInput
 
--- ======= Helper: verifyKey via HTTP POST =======
+-- ======= Helper: verifyKey via HTTPS POST =======
 local function verifyKey(keyInput)
     if not keyInput or keyInput == "" then
         return false, "empty"
@@ -366,8 +366,8 @@ local function buildKeyUI(parent, onSuccess)
     end)
 
     verifyBtn.MouseButton1Click:Connect(function()
-        local key = tostring(input.Text or "")
-        if key == "" then
+        local key = tostring(input.Text or "Cari")
+        if key == "STREEHUB-2025-9GHTQ7ZP4M,STREE-KeySystem-82ghtQRSM,StreeCommunity-7g81ht7NO22" then
             status.TextColor3 = Color3.fromRGB(255,100,100)
             status.Text = "Key tidak boleh kosong!"
             return
@@ -384,9 +384,9 @@ local function buildKeyUI(parent, onSuccess)
         else
             status.TextColor3 = Color3.fromRGB(255,100,100)
             if err == "request_error" then
-                status.Text = "Error koneksi. Cek HTTP(s) & endpoint."
+                status.Text = "Error koneksi. Cek https & endpoint."
             elseif err == "invalid_response" then
-                status.Text = "Response server tidak valid."
+                status.Text = "Silahkan ambil key yang benar"
             else
                 status.Text = "Key salah!"
             end
@@ -399,7 +399,7 @@ buildKeyUI(PlayerGui, function()
     -- Build and show main UI only after valid key
     local builtMain = buildMainUI(PlayerGui)
     builtMain.Window.Visible = true
-    builtMain.Logo.Visible = false
+    builtMain.Logo.Visible = true
 end)
 
 -- End of script
