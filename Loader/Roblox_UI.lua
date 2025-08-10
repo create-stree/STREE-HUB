@@ -12,8 +12,8 @@ end)
 local parentGui = success and result or LocalPlayer:WaitForChild("PlayerGui")
 
 -- Daftar key valid (hardcoded)
-local validKeys = {
-	"STREEHUB-2025-9GHTQ7ZP4M",
+local validKeys = {local function isKeyValid(keyInput)
+	"STREEHUB-SCRIPT-91htgJkHd",
 	"STREE-KeySystem-82ghtQRSM",
 	"StreeCommunity-7g81ht7NO22"
 }
