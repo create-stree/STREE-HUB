@@ -7,3 +7,4 @@
 **•Steal A Brainrot**
 **•Grow A Garden**
 **•99 Night In The Forest**
+**•Blox Fruits**
