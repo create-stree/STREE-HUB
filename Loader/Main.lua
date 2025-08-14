@@ -1,10 +1,10 @@
 -- Multi-game loader
 local placeId = game.PlaceId
 
-if placeId == 1234567890 then
+if placeId == 79546208627805 then
     -- Game A
     loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-a-script/main.lua"))()
-elseif placeId == 9876543210 then
+elseif placeId == 126884695634066 then
     -- Game B
     loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-b-script/main.lua"))()
 elseif placeId == 2753915549 then
