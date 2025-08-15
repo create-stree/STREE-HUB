@@ -1,4 +1,4 @@
--- STREE HUB LOADER - UI Custom (Mirip Alchemy Hub, kanan)
+-- STREE HUB - Loader & UI Final
 repeat wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
@@ -18,7 +18,7 @@ local validKeys = {
 	"StreeCommunity-7g81ht7NO22"
 }
 
--- Fungsi cek key di daftar validKeys
+-- Fungsi cek key
 local function isKeyValid(keyInput)
 	for _, key in ipairs(validKeys) do
 		if keyInput == key then
@@ -28,30 +28,23 @@ local function isKeyValid(keyInput)
 	return false
 end
 
--- UI utama STREE HUB, dibuat setelah key valid
+-- ==== Build Window Utama ====
 local function buildMainUI()
-	game.StarterGui:SetCore("SendNotification", {
-		Title = "STREE HUB",
-		Text = "UI berhasil dimuat!",
-		Icon = "rbxassetid://123032091977400",
-		Duration = 3
-	})
-
 	local ui = Instance.new("ScreenGui", parentGui)
 	ui.Name = "STREE_HUB_UI"
 	ui.ResetOnSpawn = false
 
-	-- Tombol Icon STREE HUB (untuk buka/tutup window)
+	-- Tombol Logo STREE HUB (buka/tutup)
 	local logoButton = Instance.new("ImageButton", ui)
 	logoButton.Name = "HubIcon"
 	logoButton.Size = UDim2.new(0, 40, 0, 40)
 	logoButton.Position = UDim2.new(0, 120, 0.8, 0)
-	logoButton.Image = "rbxassetid://123032091977400"
+	logoButton.Image = "rbxassetid://123032091977400" -- Ganti dengan logo kamu
 	logoButton.BackgroundTransparency = 1
-	logoButton.Draggable = true
 	logoButton.Active = true
+	logoButton.Draggable = true
 
-	-- Frame Utama (Window)
+	-- Window Utama
 	local window = Instance.new("Frame", ui)
 	window.Name = "MainWindow"
 	window.Size = UDim2.new(0, 500, 0, 320)
@@ -65,19 +58,19 @@ local function buildMainUI()
 	local corner = Instance.new("UICorner", window)
 	corner.CornerRadius = UDim.new(0, 12)
 
-	-- Judul dan tombol X / -
+	-- TitleBar
 	local titleBar = Instance.new("Frame", window)
 	titleBar.Size = UDim2.new(1, 0, 0, 40)
 	titleBar.BackgroundTransparency = 1
 
-	-- Logo kecil kiri atas titleBar
+	-- Logo kecil di judul
 	local headerLogo = Instance.new("ImageLabel", titleBar)
 	headerLogo.Size = UDim2.new(0, 30, 0, 30)
 	headerLogo.Position = UDim2.new(0, 5, 0, 5)
 	headerLogo.Image = "rbxassetid://123032091977400"
 	headerLogo.BackgroundTransparency = 1
 
-	-- Judul STREE HUB
+	-- Judul
 	local title = Instance.new("TextLabel", titleBar)
 	title.Text = "STREE HUB"
 	title.Size = UDim2.new(1, -80, 1, 0)
@@ -87,6 +80,7 @@ local function buildMainUI()
 	title.TextColor3 = Color3.fromRGB(0, 255, 100)
 	title.BackgroundTransparency = 1
 
+	-- Tombol Close
 	local closeBtn = Instance.new("TextButton", titleBar)
 	closeBtn.Size = UDim2.new(0, 30, 0, 30)
 	closeBtn.Position = UDim2.new(1, -35, 0, 5)
@@ -99,6 +93,7 @@ local function buildMainUI()
 		ui:Destroy()
 	end)
 
+	-- Tombol Minimize
 	local minimizeBtn = Instance.new("TextButton", titleBar)
 	minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
 	minimizeBtn.Position = UDim2.new(1, -70, 0, 5)
@@ -115,9 +110,7 @@ local function buildMainUI()
 		window.Visible = not window.Visible
 	end)
 
-	titleBar.Parent = window
-
-	-- Panel kanan (Tab menu)
+	-- Tab kanan
 	local tabMenu = Instance.new("Frame", window)
 	tabMenu.Name = "TabMenu"
 	tabMenu.Size = UDim2.new(0, 120, 1, -40)
@@ -126,26 +119,14 @@ local function buildMainUI()
 	tabMenu.BackgroundTransparency = 0.1
 	Instance.new("UICorner", tabMenu).CornerRadius = UDim.new(0, 6)
 
-	-- Blur pada sidebar
-	local SidebarBlur = Instance.new("ImageLabel")
-	SidebarBlur.Name = "SidebarBlur"
-	SidebarBlur.Parent = tabMenu
-	SidebarBlur.Size = UDim2.new(1, 0, 1, 0)
-	SidebarBlur.Position = UDim2.new(0, 0, 0, 0)
-	SidebarBlur.BackgroundTransparency = 1
-	SidebarBlur.Image = "rbxassetid://5553946656"
-	SidebarBlur.ImageTransparency = 0.4
-	SidebarBlur.ScaleType = Enum.ScaleType.Stretch
-	SidebarBlur.ZIndex = 0
-
-	-- Konten Area
+	-- Konten
 	local contentFrame = Instance.new("Frame", window)
 	contentFrame.Name = "ContentFrame"
 	contentFrame.Size = UDim2.new(1, -140, 1, -50)
 	contentFrame.Position = UDim2.new(0, 10, 0, 45)
 	contentFrame.BackgroundTransparency = 1
 
-	-- Fungsi Bersih Konten
+	-- Fungsi clear konten
 	local function clearContent()
 		for _,v in pairs(contentFrame:GetChildren()) do
 			if v:IsA("GuiObject") then
@@ -154,18 +135,17 @@ local function buildMainUI()
 		end
 	end
 
-	-- Perhitungan Dinamis Posisi Komponen
 	local yOffset = 0
-	local function resetYOffset()
-		yOffset = 0
-	end
 	local function nextY(height)
 		local y = yOffset
 		yOffset += height + 5
 		return y
 	end
+	local function resetYOffset()
+		yOffset = 0
+	end
 
-	-- Fungsi Tambah Komponen
+	-- Helper UI
 	local function createLabel(text)
 		local lbl = Instance.new("TextLabel", contentFrame)
 		lbl.Size = UDim2.new(1, -20, 0, 25)
@@ -199,7 +179,7 @@ local function buildMainUI()
 		btn.TextSize = 14
 		btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
 		local state = false
 		btn.MouseButton1Click:Connect(function()
 			state = not state
@@ -208,25 +188,6 @@ local function buildMainUI()
 		end)
 	end
 
-	local function createSectionTitle(text)
-		local title = Instance.new("TextLabel", contentFrame)
-		title.Size = UDim2.new(1, -20, 0, 25)
-		title.Position = UDim2.new(0, 10, 0, nextY(25))
-		title.Text = text
-		title.Font = Enum.Font.GothamBold
-		title.TextSize = 16
-		title.TextColor3 = Color3.fromRGB(0, 255, 150)
-		title.BackgroundTransparency = 1
-	end
-
-	local function createSection(titleText, elements)
-		createSectionTitle(titleText)
-		for _, element in ipairs(elements) do
-			element()
-		end
-	end
-
-	-- Fungsi Tambah Tab
 	local lastTabY = 0
 	local function createTab(name, callback)
 		local btn = Instance.new("TextButton", tabMenu)
@@ -238,8 +199,7 @@ local function buildMainUI()
 		btn.TextSize = 15
 		btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 		btn.TextColor3 = Color3.fromRGB(0, 255, 100)
-		btn.ZIndex = 1
-		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
 		btn.MouseButton1Click:Connect(function()
 			clearContent()
 			resetYOffset()
@@ -249,32 +209,46 @@ local function buildMainUI()
 
 	-- Tab: Home
 	createTab("Home", function()
-		createSection("⚙️ Utilities", {
-			function() createLabel("Welcome to STREE HUB!") end,
-			function() createButton("Enable Shiftlock", function()
-				local plr = game.Players.LocalPlayer
-				pcall(function()
-					plr.DevEnableMouseLock = true
-				end)
-			end) end,
-			function() createToggle("Night Mode", function(state)
-				if state then
-					game.Lighting.TimeOfDay = "00:00:00"
-				else
-					game.Lighting.TimeOfDay = "14:00:00"
-				end
-			end) end
-		})
+		-- Search bar
+		local searchBox = Instance.new("TextBox", contentFrame)
+		searchBox.Size = UDim2.new(1, -20, 0, 30)
+		searchBox.Position = UDim2.new(0, 10, 0, nextY(30))
+		searchBox.PlaceholderText = "Search features..."
+		searchBox.BackgroundColor3 = Color3.fromRGB(36,36,36)
+		searchBox.TextColor3 = Color3.fromRGB(255,255,255)
+		searchBox.Font = Enum.Font.Gotham
+		searchBox.TextSize = 14
+		Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0,6)
 
-		createSection("📌 Info", {
-			function() createLabel("Version: 1.0.0") end,
-			function() createLabel("Creator: STREE") end
-		})
+		-- Dummy features
+		createSectionTitle = function(text)
+			local lbl = Instance.new("TextLabel", contentFrame)
+			lbl.Size = UDim2.new(1, -20, 0, 25)
+			lbl.Position = UDim2.new(0, 10, 0, nextY(25))
+			lbl.Text = text
+			lbl.Font = Enum.Font.GothamBold
+			lbl.TextSize = 16
+			lbl.TextColor3 = Color3.fromRGB(0,255,150)
+			lbl.BackgroundTransparency = 1
+		end
+
+		createSectionTitle("⚙️ Utilities")
+		createToggle("Night Mode", function(state)
+			if state then
+				game.Lighting.TimeOfDay = "00:00:00"
+			else
+				game.Lighting.TimeOfDay = "14:00:00"
+			end
+		end)
+		createButton("Enable Shiftlock", function()
+			local plr = game.Players.LocalPlayer
+			pcall(function() plr.DevEnableMouseLock = true end)
+		end)
 	end)
 
 	-- Tab: Credits
 	createTab("Credits", function()
-		createLabel("Create : STREE Community")
+		createLabel("Created by: STREE Community")
 		createLabel("STREE HUB | create-stree")
 	end)
 
@@ -285,15 +259,15 @@ local function buildMainUI()
 	}
 end
 
--- ==== Build Key UI, sebelum main UI muncul ====
+-- ==== Build Key UI ====
 local function buildKeyUI()
 	local keyGui = Instance.new("ScreenGui", parentGui)
 	keyGui.Name = "STREE_KeyUI"
 	keyGui.ResetOnSpawn = false
 
 	local frame = Instance.new("Frame", keyGui)
-	frame.Size = UDim2.new(0, 340, 0, 170)
-	frame.Position = UDim2.new(0.5, -170, 0.5, -85)
+	frame.Size = UDim2.new(0, 340, 0, 220)
+	frame.Position = UDim2.new(0.5, -170, 0.5, -110)
 	frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
 	frame.BorderSizePixel = 0
 	Instance.new("UICorner", frame).CornerRadius = UDim.new(0,8)
@@ -330,55 +304,32 @@ local function buildKeyUI()
 	status.TextColor3 = Color3.fromRGB(200,200,200)
 	status.Text = ""
 
+	local enterBtn = Instance.new("TextButton", frame)
+	enterBtn.Size = UDim2.new(0.47, -6, 0, 30)
+	enterBtn.Position = UDim2.new(0, 10, 0, 130)
+	enterBtn.Text = "Enter"
+	enterBtn.Font = Enum.Font.GothamBold
+	enterBtn.TextSize = 16
+	enterBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+	enterBtn.TextColor3 = Color3.fromRGB(0,0,0)
+	Instance.new("UICorner", enterBtn).CornerRadius = UDim.new(0,6)
+
+	local discordBtn = Instance.new("TextButton", frame)
+	discordBtn.Size = UDim2.new(0.47, -6, 0, 30)
+	discordBtn.Position = UDim2.new(0, 180, 0, 130)
+	discordBtn.Text = "Join Discord"
+	discordBtn.Font = Enum.Font.GothamBold
+	discordBtn.TextSize = 16
+	discordBtn.BackgroundColor3 = Color3.fromRGB(60,60,255)
+	discordBtn.TextColor3 = Color3.fromRGB(255,255,255)
+	Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,6)
+
 	local getBtn = Instance.new("TextButton", frame)
-	getBtn.Size = UDim2.new(0.47, -6, 0, 30)
-	getBtn.Position = UDim2.new(0, 10, 0, 126)
-	getBtn.Text = "Get Key"
+	getBtn.Size = UDim2.new(1, -20, 0, 30)
+	getBtn.Position = UDim2.new(0, 10, 0, 170)
+	getBtn.Text = "Get Key Links"
 	getBtn.Font = Enum.Font.GothamBold
 	getBtn.TextSize = 16
 	getBtn.BackgroundColor3 = Color3.fromRGB(60,120,255)
 	getBtn.TextColor3 = Color3.fromRGB(255,255,255)
-	Instance.new("UICorner", getBtn).CornerRadius = UDim.new(0,6)
-
-	local verifyBtn = Instance.new("TextButton", frame)
-	verifyBtn.Size = UDim2.new(0.47, -6, 0, 30)
-	verifyBtn.Position = UDim2.new(0, 10 + (0.47 * 340) + 12, 0, 126)
-	verifyBtn.Text = "Verify"
-	verifyBtn.Font = Enum.Font.GothamBold
-	verifyBtn.TextSize = 16
-	verifyBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-	verifyBtn.TextColor3 = Color3.fromRGB(0,0,0)
-	Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0,6)
-
-	getBtn.MouseButton1Click:Connect(function()
-		pcall(function() setclipboard("https://rkns.link/qss3x") end)
-		status.TextColor3 = Color3.fromRGB(0,255,0)
-		status.Text = "Link copied! Paste di browser untuk dapatkan key."
-	end)
-
-	verifyBtn.MouseButton1Click:Connect(function()
-		local key = tostring(input.Text or "")
-		if key == "" then
-			status.TextColor3 = Color3.fromRGB(255,100,100)
-			status.Text = "Key tidak boleh kosong!"
-			return
-		end
-
-		status.TextColor3 = Color3.fromRGB(200,200,200)
-		status.Text = "Memverifikasi..."
-
-		if isKeyValid(key) then
-			status.TextColor3 = Color3.fromRGB(0,255,0)
-			status.Text = "Key valid! Memuat UI..."
-			wait(0.6)
-			keyGui:Destroy()
-			buildMainUI()
-		else
-			status.TextColor3 = Color3.fromRGB(255,100,100)
-			status.Text = "Key salah!"
-		end
-	end)
-end
-
--- Main flow: tampilkan key UI dulu
-buildKeyUI()
+	Instance
