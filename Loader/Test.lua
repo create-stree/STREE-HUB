@@ -1,5 +1,4 @@
--- STREE HUB 
--- Loader & UI Final
+-- STREE HUB - Loader & UI Final
 repeat wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
