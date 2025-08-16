@@ -50,7 +50,7 @@ local function buildKeyLinksUI()
     title.Font = Enum.Font.GothamBold
     title.TextSize = 18
     title.TextColor3 = Color3.fromRGB(0,255,0)
-    title.Text = "STREE HUB - Key Links"
+    title.Text = "Key Links"
 
     -- Close button
     local closeBtn = Instance.new("TextButton", frame)
@@ -331,7 +331,7 @@ local function buildKeyUI()
     title.Font=Enum.Font.GothamBold
     title.TextSize=18
     title.TextColor3=Color3.fromRGB(0,255,0)
-    title.Text="STREE HUB - Key System"
+    title.Text="🔑Key System"
 
     local input=Instance.new("TextBox", frame)
     input.Size=UDim2.new(1,-20,0,40)
