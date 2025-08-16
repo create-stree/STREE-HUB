@@ -1,243 +1,221 @@
--- STREE HUB - Loader & UI Full Final
-repeat wait() until game:IsLoaded()
+--// STREE HUB - Loader UI (Final Version)
+repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- Parent GUI
-local success, result = pcall(function() return game:GetService("CoreGui") end)
+-- GUI Parent
+local success, result = pcall(function()
+	return game:GetService("CoreGui")
+end)
 local parentGui = success and result or LocalPlayer:WaitForChild("PlayerGui")
 
--- Daftar key valid
+-- Buat ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "STREE_HUB"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = parentGui
+
+-- Variabel Windows
+local KeyWindow = Instance.new("Frame")
+local MainWindow = Instance.new("Frame")
+
+-- CONFIG KEY
 local validKeys = {
-    "STREEHUB-2025-9GHTQ7ZP4M",
-    "STREE-KeySystem-82ghtQRSM",
-    "StreeCommunity-7g81ht7NO22"
+	"STREE-12345",
+	"FREE-ACCESS"
 }
 
--- Fungsi cek key
-local function isKeyValid(keyInput)
-    for _, key in ipairs(validKeys) do
-        if keyInput == key then return true end
-    end
-    return false
+-- Fungsi drag
+local function makeDraggable(gui)
+	local dragging, dragInput, dragStart, startPos
+	gui.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = gui.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	gui.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			local delta = input.Position - dragStart
+			gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
 end
 
--- ==== Build Key Links UI ====
-local function buildKeyLinksUI()
-    if parentGui:FindFirstChild("STREE_KeyLinksUI") then
-        parentGui.STREE_KeyLinksUI:Destroy()
-    end
+--// ========== KEY WINDOW ==========
+KeyWindow.Name = "KeyWindow"
+KeyWindow.Size = UDim2.new(0, 350, 0, 200)
+KeyWindow.Position = UDim2.new(0.5, -175, 0.5, -100)
+KeyWindow.BackgroundColor3 = Color3.fromRGB(25,25,25)
+KeyWindow.Visible = true
+KeyWindow.Parent = ScreenGui
+makeDraggable(KeyWindow)
 
-    local gui = Instance.new("ScreenGui", parentGui)
-    gui.Name = "STREE_KeyLinksUI"
-    gui.ResetOnSpawn = false
+local KeyTitle = Instance.new("TextLabel", KeyWindow)
+KeyTitle.Size = UDim2.new(1,0,0,30)
+KeyTitle.BackgroundColor3 = Color3.fromRGB(0,200,0)
+KeyTitle.Text = "🔑 STREE HUB - Key System"
+KeyTitle.TextColor3 = Color3.new(1,1,1)
+KeyTitle.Font = Enum.Font.SourceSansBold
+KeyTitle.TextSize = 18
 
-    local frame = Instance.new("Frame", gui)
-    frame.Size = UDim2.new(0, 360, 0, 240)
-    frame.Position = UDim2.new(0.5, -180, 0.5, -120)
-    frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
-    frame.BorderSizePixel = 0
-    frame.Active = true
-    frame.Draggable = true
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0,8)
-    local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(0,255,0)
-    stroke.Thickness = 3
+local KeyBox = Instance.new("TextBox", KeyWindow)
+KeyBox.PlaceholderText = "Enter your key here"
+KeyBox.Size = UDim2.new(0.9,0,0,30)
+KeyBox.Position = UDim2.new(0.05,0,0,50)
+KeyBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
+KeyBox.TextColor3 = Color3.new(1,1,1)
+KeyBox.ClearTextOnFocus = false
 
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, -50, 0, 36)
-    title.Position = UDim2.new(0, 10, 0, 8)
-    title.BackgroundTransparency = 1
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 18
-    title.TextColor3 = Color3.fromRGB(0,255,0)
-    title.Text = "STREE HUB - Key Links"
+local EnterButton = Instance.new("TextButton", KeyWindow)
+EnterButton.Size = UDim2.new(0.4,0,0,30)
+EnterButton.Position = UDim2.new(0.05,0,0,100)
+EnterButton.BackgroundColor3 = Color3.fromRGB(0,150,0)
+EnterButton.Text = "Enter"
+EnterButton.TextColor3 = Color3.new(1,1,1)
 
-    -- Tombol X (close -> balik ke Key System)
-    local closeBtn = Instance.new("TextButton", frame)
-    closeBtn.Size = UDim2.new(0,30,0,30)
-    closeBtn.Position = UDim2.new(1,-35,0,5)
-    closeBtn.Text = "X"
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 18
-    closeBtn.TextColor3 = Color3.fromRGB(255,80,80)
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.MouseButton1Click:Connect(function()
-        gui:Destroy()
-    end)
+local DiscordButton = Instance.new("TextButton", KeyWindow)
+DiscordButton.Size = UDim2.new(0.4,0,0,30)
+DiscordButton.Position = UDim2.new(0.55,0,0,100)
+DiscordButton.BackgroundColor3 = Color3.fromRGB(60,60,150)
+DiscordButton.Text = "Join Discord"
+DiscordButton.TextColor3 = Color3.new(1,1,1)
 
-    local yOffset = 50
-    local function createLinkButton(name, link, imageId)
-        local btn = Instance.new("TextButton", frame)
-        btn.Size = UDim2.new(0, 320, 0, 40)
-        btn.Position = UDim2.new(0, 20, 0, yOffset)
-        btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-        btn.Text = name
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 16
-        btn.TextColor3 = Color3.fromRGB(255,255,255)
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+local GetKeyButton = Instance.new("TextButton", KeyWindow)
+GetKeyButton.Size = UDim2.new(0.9,0,0,30)
+GetKeyButton.Position = UDim2.new(0.05,0,0,140)
+GetKeyButton.BackgroundColor3 = Color3.fromRGB(150,150,0)
+GetKeyButton.Text = "🌐 Get Key (LootLabs / Linkvertise / Rekonise)"
+GetKeyButton.TextColor3 = Color3.new(1,1,1)
 
-        btn.MouseButton1Click:Connect(function()
-            if setclipboard then
-                setclipboard(link)
-            end
-        end)
+--// ========== MAIN WINDOW ==========
+MainWindow.Name = "MainWindow"
+MainWindow.Size = UDim2.new(0,500,0,300)
+MainWindow.Position = UDim2.new(0.5,-250,0.5,-150)
+MainWindow.BackgroundColor3 = Color3.fromRGB(20,20,20)
+MainWindow.Visible = false
+MainWindow.Parent = ScreenGui
+makeDraggable(MainWindow)
 
-        yOffset = yOffset + 50
-    end
+local Header = Instance.new("Frame", MainWindow)
+Header.Size = UDim2.new(1,0,0,30)
+Header.BackgroundColor3 = Color3.fromRGB(0,200,0)
 
-    createLinkButton("Rekonise", "https://rkns.link/2vbo0")
-    createLinkButton("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi")
-    createLinkButton("Lootlabs", "https://lootdest.org/s?VooVvLbJ")
-end
+local Title = Instance.new("TextLabel", Header)
+Title.Size = UDim2.new(1,0,1,0)
+Title.BackgroundTransparency = 1
+Title.Text = "🌟 STREE HUB Main UI"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 18
 
--- ==== Build Main UI ====
-local function buildMainUI()
-    local ui = Instance.new("ScreenGui", parentGui)
-    ui.Name = "STREE_HUB_UI"
-    ui.ResetOnSpawn = false
+-- Tombol Header
+local CloseBtn = Instance.new("TextButton", Header)
+CloseBtn.Size = UDim2.new(0,30,0,30)
+CloseBtn.Position = UDim2.new(1,-30,0,0)
+CloseBtn.Text = "X"
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
+CloseBtn.TextColor3 = Color3.new(1,1,1)
 
-    -- Window Utama
-    local window = Instance.new("Frame", ui)
-    window.Name = "MainWindow"
-    window.Size = UDim2.new(0, 500, 0, 320)
-    window.Position = UDim2.new(0.5, -250, 0.5, -160)
-    window.BackgroundColor3 = Color3.fromRGB(20,20,20)
-    window.Active = true
-    window.Draggable = true
-    Instance.new("UICorner", window).CornerRadius = UDim.new(0,12)
+local MinBtn = Instance.new("TextButton", Header)
+MinBtn.Size = UDim2.new(0,30,0,30)
+MinBtn.Position = UDim2.new(1,-60,0,0)
+MinBtn.Text = "-"
+MinBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+MinBtn.TextColor3 = Color3.new(1,1,1)
 
-    -- TitleBar
-    local titleBar = Instance.new("Frame", window)
-    titleBar.Size = UDim2.new(1,0,0,40)
-    titleBar.BackgroundTransparency = 1
+local XKeyBtn = Instance.new("TextButton", Header)
+XKeyBtn.Size = UDim2.new(0,50,0,30)
+XKeyBtn.Position = UDim2.new(1,-110,0,0)
+XKeyBtn.Text = "X KEY"
+XKeyBtn.BackgroundColor3 = Color3.fromRGB(0,100,200)
+XKeyBtn.TextColor3 = Color3.new(1,1,1)
 
-    local title = Instance.new("TextLabel", titleBar)
-    title.Text = "STREE HUB"
-    title.Size = UDim2.new(1,-40,1,0)
-    title.Position = UDim2.new(0,10,0,0)
-    title.TextSize = 22
-    title.Font = Enum.Font.GothamBold
-    title.TextColor3 = Color3.fromRGB(0,255,100)
-    title.BackgroundTransparency = 1
+-- Search Bar
+local SearchBox = Instance.new("TextBox", MainWindow)
+SearchBox.PlaceholderText = "🔍 Search feature..."
+SearchBox.Size = UDim2.new(0.9,0,0,30)
+SearchBox.Position = UDim2.new(0.05,0,0,50)
+SearchBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
+SearchBox.TextColor3 = Color3.new(1,1,1)
 
-    -- Tambahan Persegi Panjang (Search Box)
-    local searchBox = Instance.new("TextBox", window)
-    searchBox.Size = UDim2.new(0, 200, 0, 30)
-    searchBox.Position = UDim2.new(0, 20, 0, 60)
-    searchBox.PlaceholderText = "Search..."
-    searchBox.BackgroundColor3 = Color3.fromRGB(35,35,35)
-    searchBox.TextColor3 = Color3.fromRGB(255,255,255)
-    searchBox.Font = Enum.Font.Gotham
-    searchBox.TextSize = 14
-    Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0,6)
+-- Section Dummy
+local HomeLabel = Instance.new("TextLabel", MainWindow)
+HomeLabel.Text = "🏠 Home Tab (isi toggle & fitur disini)"
+HomeLabel.Size = UDim2.new(1,0,0,30)
+HomeLabel.Position = UDim2.new(0,0,0,100)
+HomeLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+HomeLabel.TextColor3 = Color3.new(1,1,1)
 
-    -- Tambahan Silinder (hiasan)
-    local cylinder = Instance.new("Frame", window)
-    cylinder.Size = UDim2.new(0,40,0,120)
-    cylinder.Position = UDim2.new(1,-60,0,60)
-    cylinder.BackgroundColor3 = Color3.fromRGB(0,255,100)
-    Instance.new("UICorner", cylinder).CornerRadius = UDim.new(1,0) -- jadi bentuk silinder oval
-end
+local CreditsLabel = Instance.new("TextLabel", MainWindow)
+CreditsLabel.Text = "💡 Credits Tab"
+CreditsLabel.Size = UDim2.new(1,0,0,30)
+CreditsLabel.Position = UDim2.new(0,0,0,140)
+CreditsLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+CreditsLabel.TextColor3 = Color3.new(1,1,1)
 
--- ==== Build Key UI utama ====
-local function buildKeyUI()
-    local keyGui = Instance.new("ScreenGui", parentGui)
-    keyGui.Name = "STREE_KeyUI"
-    keyGui.ResetOnSpawn=false
+-- Logo (buat restore kalau minimize)
+local LogoBtn = Instance.new("TextButton", ScreenGui)
+LogoBtn.Size = UDim2.new(0,80,0,30)
+LogoBtn.Position = UDim2.new(0,10,0,200)
+LogoBtn.Text = "STREE HUB"
+LogoBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+LogoBtn.TextColor3 = Color3.new(1,1,1)
+LogoBtn.Visible = false
 
-    local frame = Instance.new("Frame", keyGui)
-    frame.Size = UDim2.new(0,340,0,220)
-    frame.Position = UDim2.new(0.5,-170,0.5,-110)
-    frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
-    frame.Active = true
-    frame.Draggable = true
-    Instance.new("UICorner", frame).CornerRadius=UDim.new(0,8)
-    local stroke=Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(0,255,0)
-    stroke.Thickness=3
+--// ========== FUNCTIONS ==========
+EnterButton.MouseButton1Click:Connect(function()
+	local key = KeyBox.Text
+	for _,v in pairs(validKeys) do
+		if key == v then
+			KeyWindow.Visible = false
+			MainWindow.Visible = true
+			return
+		end
+	end
+	KeyBox.Text = "❌ Invalid Key!"
+end)
 
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1,-50,0,36)
-    title.Position = UDim2.new(0,10,0,8)
-    title.BackgroundTransparency=1
-    title.Font=Enum.Font.GothamBold
-    title.TextSize=18
-    title.TextColor3=Color3.fromRGB(0,255,0)
-    title.Text="STREE HUB - Key System"
+DiscordButton.MouseButton1Click:Connect(function()
+	setclipboard("https://discord.gg/your-server")
+end)
 
-    -- Tombol X (close)
-    local closeBtn = Instance.new("TextButton", frame)
-    closeBtn.Size = UDim2.new(0,30,0,30)
-    closeBtn.Position = UDim2.new(1,-35,0,5)
-    closeBtn.Text = "X"
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 18
-    closeBtn.TextColor3 = Color3.fromRGB(255,80,80)
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.MouseButton1Click:Connect(function()
-        keyGui:Destroy()
-    end)
+GetKeyButton.MouseButton1Click:Connect(function()
+	setclipboard("https://lootlabs.gg/getkey")
+end)
 
-    local input=Instance.new("TextBox", frame)
-    input.Size=UDim2.new(1,-20,0,40)
-    input.Position=UDim2.new(0,10,0,56)
-    input.PlaceholderText="Masukkan key..."
-    input.BackgroundColor3=Color3.fromRGB(36,36,36)
-    input.TextColor3=Color3.fromRGB(255,255,255)
-    input.ClearTextOnFocus=false
-    input.Font=Enum.Font.Gotham
-    input.TextSize=16
-    Instance.new("UICorner", input).CornerRadius=UDim.new(0,6)
+GetKeyButton.MouseButton1Click:Connect(function()
+	setclipboard("https://lootlabs.gg/getkey")
+end)
 
-    local status=Instance.new("TextLabel", frame)
-    status.Size=UDim2.new(1,-20,0,18)
-    status.Position=UDim2.new(0,10,0,104)
-    status.BackgroundTransparency=1
-    status.Font=Enum.Font.Gotham
-    status.TextSize=14
-    status.TextColor3=Color3.fromRGB(200,200,200)
-    status.Text=""
+CloseBtn.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
 
-    local enterBtn=Instance.new("TextButton", frame)
-    enterBtn.Size=UDim2.new(0.47,-6,0,30)
-    enterBtn.Position=UDim2.new(0,10,0,130)
-    enterBtn.Text="Enter"
-    enterBtn.Font=Enum.Font.GothamBold
-    enterBtn.TextSize=16
-    enterBtn.BackgroundColor3=Color3.fromRGB(0,200,0)
-    enterBtn.TextColor3=Color3.fromRGB(0,0,0)
-    Instance.new("UICorner", enterBtn).CornerRadius=UDim.new(0,6)
+MinBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = false
+	LogoBtn.Visible = true
+end)
 
-    local linkBtn=Instance.new("TextButton", frame)
-    linkBtn.Size=UDim2.new(0.47,-6,0,30)
-    linkBtn.Position=UDim2.new(0,180,0,130)
-    linkBtn.Text="Get Key"
-    linkBtn.Font=Enum.Font.GothamBold
-    linkBtn.TextSize=16
-    linkBtn.BackgroundColor3=Color3.fromRGB(80,80,80)
-    linkBtn.TextColor3=Color3.fromRGB(255,255,255)
-    Instance.new("UICorner", linkBtn).CornerRadius=UDim.new(0,6)
-    linkBtn.MouseButton1Click:Connect(function()
-        buildKeyLinksUI()
-    end)
+LogoBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = true
+	LogoBtn.Visible = false
+end)
 
-    enterBtn.MouseButton1Click:Connect(function()
-        local key=input.Text
-        if isKeyValid(key) then
-            status.TextColor3=Color3.fromRGB(0,255,0)
-            status.Text="Key Valid!"
-            wait(0.5)
-            keyGui:Destroy()
-            buildMainUI()
-        else
-            status.TextColor3=Color3.fromRGB(255,0,0)
-            status.Text="Key Invalid!"
-        end
-    end)
-end
-
--- START
-buildKeyUI()
+XKeyBtn.MouseButton1Click:Connect(function()
+	MainWindow.Visible = false
+	KeyWindow.Visible = true
+end)
