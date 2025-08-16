@@ -98,7 +98,7 @@ local function buildKeyLinksUI()
 
     createLinkButton("Rekonise", "https://rkns.link/2vbo0", "rbxassetid://140280617864380")
     createLinkButton("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://113798183844310")
-    createLinkButton("Lootlabs", "https://lootdest.org/s?VooVvLbJ", "rbxassetid://112846309972303")
+    createLinkButton("Lootlabs", "https://lootdest.org/s?FDE9Puik", "rbxassetid://112846309972303")
 end
 
 -- ==== Build Main UI ====
