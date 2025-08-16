@@ -96,9 +96,9 @@ local function buildKeyLinksUI()
         yOffset = yOffset + 60
     end
 
-    createLinkButton("Rekonise", "https://rkns.link/2vbo0", "rbxassetid://INSERT_IMAGE1")
-    createLinkButton("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://INSERT_IMAGE2")
-    createLinkButton("Lootlabs", "https://lootdest.org/s?VooVvLbJ", "rbxassetid://INSERT_IMAGE3")
+    createLinkButton("Rekonise", "https://rkns.link/2vbo0", "rbxassetid://140280617864380")
+    createLinkButton("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://113798183844310")
+    createLinkButton("Lootlabs", "https://lootdest.org/s?VooVvLbJ", "rbxassetid://112846309972303")
 end
 
 -- ==== Build Main UI ====
