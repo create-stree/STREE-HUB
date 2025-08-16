@@ -1,0 +1,127 @@
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.ResetOnSpawn = false
+
+local function makeButton(name, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 200, 0, 45)
+    btn.Position = UDim2.new(0, 30, 0, posY)
+    btn.Text = "[ " .. name .. " ] : OFF"
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BackgroundTransparency = 0.3
+    btn.TextColor3 = Color3.fromRGB(0, 255, 0)
+    btn.Font = Enum.Font.Code
+    btn.TextSize = 20
+    btn.Parent = ScreenGui
+    return btn
+end
+
+local ESPButton = makeButton("ESP", 100)
+local AimButton = makeButton("AutoAim", 160)
+local WallButton = makeButton("WallDetect", 220)
+
+_G.ESP_ACTIVE = false
+_G.AIM_ACTIVE = false
+_G.WALLDETECT_ACTIVE = false
+
+-- Log Console
+local console = Instance.new("TextLabel", ScreenGui)
+console.Size = UDim2.new(0, 400, 0, 200)
+console.Position = UDim2.new(1, -420, 1, -220)
+console.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+console.BackgroundTransparency = 0.4
+console.TextColor3 = Color3.fromRGB(0, 255, 0)
+console.TextXAlignment = Enum.TextXAlignment.Left
+console.TextYAlignment = Enum.TextYAlignment.Top
+console.Font = Enum.Font.Code
+console.TextSize = 18
+console.Text = ">> H4CK3R T3RM1N4L <<\n"
+
+local function log(msg)
+    console.Text = console.Text .. "\n" .. msg
+end
+
+local function toggle(btn, var, label)
+    _G[var] = not _G[var]
+    local active = _G[var]
+    btn.Text = "[ " .. label .. " ] : " .. (active and "ON" or "OFF")
+    btn.TextColor3 = active and Color3.fromRGB(255,0,0) or Color3.fromRGB(0,255,0)
+    log(label .. " => " .. (active and "ON" or "OFF"))
+end
+
+ESPButton.MouseButton1Click:Connect(function() toggle(ESPButton, "ESP_ACTIVE", "ESP") end)
+AimButton.MouseButton1Click:Connect(function() toggle(AimButton, "AIM_ACTIVE", "AutoAim") end)
+WallButton.MouseButton1Click:Connect(function() toggle(WallButton, "WALLDETECT_ACTIVE", "WallDetect") end)
+
+-- ESP System
+local function createESP(player)
+    if player == LocalPlayer then return end
+    if player.Character and player.Character:FindFirstChild("Head") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESP"
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.AlwaysOnTop = true
+        billboard.Adornee = player.Character.Head
+
+        local text = Instance.new("TextLabel", billboard)
+        text.Size = UDim2.new(1,0,1,0)
+        text.BackgroundTransparency = 1
+        text.TextColor3 = Color3.fromRGB(255,0,0)
+        text.Font = Enum.Font.Code
+        text.TextSize = 16
+
+        billboard.Parent = player.Character.Head
+
+        RunService.RenderStepped:Connect(function()
+            if _G.ESP_ACTIVE and player.Character and player.Character:FindFirstChild("Head") then
+                local dist = (LocalPlayer.Character.Head.Position - player.Character.Head.Position).Magnitude
+                text.Text = player.Name .. " [".. math.floor(dist) .."m]"
+                billboard.Enabled = true
+            else
+                billboard.Enabled = false
+            end
+        end)
+    end
+end
+
+for _,plr in pairs(Players:GetPlayers()) do
+    createESP(plr)
+end
+Players.PlayerAdded:Connect(createESP)
+
+-- AutoAim + WallDetect
+RunService.RenderStepped:Connect(function()
+    if _G.AIM_ACTIVE and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
+        local nearest, dist = nil, math.huge
+        for _,plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                local headPos = plr.Character.Head.Position
+                local mag = (LocalPlayer.Character.Head.Position - headPos).Magnitude
+
+                if mag < dist then
+                    -- Raycast untuk WallDetect
+                    if _G.WALLDETECT_ACTIVE then
+                        local ray = workspace:Raycast(LocalPlayer.Character.Head.Position, (headPos - LocalPlayer.Character.Head.Position).Unit * mag)
+                        if ray and ray.Instance and not ray.Instance:IsDescendantOf(plr.Character) then
+                            -- Ada tembok -> skip
+                        else
+                            nearest, dist = plr, mag
+                        end
+                    else
+                        nearest, dist = plr, mag
+                    end
+                end
+            end
+        end
+
+        if nearest then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearest.Character.Head.Position)
+        end
+    end
+end)
