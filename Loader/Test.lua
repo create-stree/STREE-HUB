@@ -101,6 +101,15 @@ local function buildKeyLinksUI()
     createLinkButton("Lootlabs", "https://lootdest.org/s?FDE9Puik", "rbxassetid://112846309972303")
 end
 
+-- UI utama STREE HUB, dibuat setelah key valid
+local function buildMainUI()
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "STREE HUB",
+		Text = "UI berhasil dimuat!",
+		Icon = "rbxassetid://123032091977400",
+		Duration = 3
+	})
+
 -- ==== Build Main UI ====
 local function buildMainUI()
     local ui = Instance.new("ScreenGui", parentGui)
