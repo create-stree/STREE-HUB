@@ -141,7 +141,7 @@ local function buildMainUI()
     headerLogo.BackgroundTransparency = 1
 
     local title = Instance.new("TextLabel", titleBar)
-    title.Text = "STREE HUB"
+    title.Text = "STREE HUB v2.0 FINAL"
     title.Size = UDim2.new(1, -80, 1, 0)
     title.Position = UDim2.new(0,40,0,0)
     title.TextSize = 22
@@ -243,6 +243,23 @@ local function buildMainUI()
         end)
     end
 
+    local function createDecalButton(text, decalId)
+        local btn = Instance.new("TextButton", contentFrame)
+        btn.Size = UDim2.new(1,-20,0,30)
+        btn.Position = UDim2.new(0,10,0,nextY(30))
+        btn.Text = text
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 14
+        btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        btn.TextColor3 = Color3.fromRGB(200,200,255)
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+        btn.MouseButton1Click:Connect(function()
+            if setclipboard then
+                setclipboard("rbxassetid://"..tostring(decalId))
+            end
+        end)
+    end
+
     local lastTabY=0
     local function createTab(name, callback)
         local btn = Instance.new("TextButton", tabMenu)
@@ -273,10 +290,21 @@ local function buildMainUI()
         end)
     end)
 
+    -- Tab Decals
+    createTab("Decals", function()
+        createLabel("🎨 Popular Decals (Copies ID)")
+        createDecalButton("Adidas Logo", 123456789)
+        createDecalButton("Nike Logo", 987654321)
+        createDecalButton("Supreme Logo", 555555555)
+        createDecalButton("Robux Icon", 111222333)
+        createDecalButton("STREE Logo", 123032091977400)
+    end)
+
     -- Tab Credits
     createTab("Credits", function()
         createLabel("Created by: STREE Community")
-        createLabel("STREE HUB | create-stree")
+        createLabel("STREE HUB v2.0 FINAL")
+        createLabel("© 2025 All Rights Reserved")
     end)
 end
 
