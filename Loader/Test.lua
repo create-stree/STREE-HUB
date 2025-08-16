@@ -346,7 +346,7 @@ local function buildKeyUI()
     Instance.new("UICorner", discordBtn).CornerRadius=UDim.new(0,6)
     discordBtn.MouseButton1Click:Connect(function()
         if setclipboard then
-            setclipboard("https://discord.gg/yourdiscord")
+            setclipboard("https://discord.gg/jdmX43t5mY")
         end
     end)
 
