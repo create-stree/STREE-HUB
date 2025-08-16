@@ -2,7 +2,6 @@
 repeat wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Parent GUI
@@ -26,7 +25,6 @@ end
 
 -- ==== Build Key Links UI ====
 local function buildKeyLinksUI()
-    -- Hapus jika window sebelumnya masih ada
     if parentGui:FindFirstChild("STREE_KeyLinksUI") then
         parentGui.STREE_KeyLinksUI:Destroy()
     end
@@ -76,7 +74,9 @@ local function buildKeyLinksUI()
         label.BackgroundTransparency = 1
 
         btn.MouseButton1Click:Connect(function()
-            setclipboard(link)
+            if setclipboard then
+                setclipboard(link)
+            end
         end)
 
         yOffset = yOffset + 60
@@ -328,4 +328,41 @@ local function buildKeyUI()
     discordBtn.Font=Enum.Font.GothamBold
     discordBtn.TextSize=16
     discordBtn.BackgroundColor3=Color3.fromRGB(60,60,255)
-    discordBtn.TextColor3=Color3.from
+    discordBtn.TextColor3=Color3.fromRGB(255,255,255)
+    Instance.new("UICorner", discordBtn).CornerRadius=UDim.new(0,6)
+    discordBtn.MouseButton1Click:Connect(function()
+        if setclipboard then
+            setclipboard("https://discord.gg/yourdiscord")
+        end
+    end)
+
+    local linkBtn=Instance.new("TextButton", frame)
+    linkBtn.Size=UDim2.new(1,-20,0,30)
+    linkBtn.Position=UDim2.new(0,10,0,170)
+    linkBtn.Text="Get Key"
+    linkBtn.Font=Enum.Font.GothamBold
+    linkBtn.TextSize=16
+    linkBtn.BackgroundColor3=Color3.fromRGB(80,80,80)
+    linkBtn.TextColor3=Color3.fromRGB(255,255,255)
+    Instance.new("UICorner", linkBtn).CornerRadius=UDim.new(0,6)
+    linkBtn.MouseButton1Click:Connect(function()
+        buildKeyLinksUI()
+    end)
+
+    enterBtn.MouseButton1Click:Connect(function()
+        local key=input.Text
+        if isKeyValid(key) then
+            status.TextColor3=Color3.fromRGB(0,255,0)
+            status.Text="Key Valid!"
+            wait(0.5)
+            keyGui:Destroy()
+            buildMainUI()
+        else
+            status.TextColor3=Color3.fromRGB(255,0,0)
+            status.Text="Key Invalid!"
+        end
+    end)
+end
+
+-- ==== START ====
+buildKeyUI()
