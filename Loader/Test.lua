@@ -303,7 +303,7 @@ local function buildKeyUI()
     title.Font=Enum.Font.GothamBold
     title.TextSize=18
     title.TextColor3=Color3.fromRGB(0,255,0)
-    title.Text="🔑Key System"
+    title.Text="🔑 | Key System"
 
     local input=Instance.new("TextBox", frame)
     input.Size=UDim2.new(1,-20,0,40)
@@ -346,7 +346,7 @@ local function buildKeyUI()
     Instance.new("UICorner", discordBtn).CornerRadius=UDim.new(0,6)
     discordBtn.MouseButton1Click:Connect(function()
         if setclipboard then
-            setclipboard("https://discord.gg/yourdiscord")
+            setclipboard("https://discord.gg/jdmX43t5mY")
         end
     end)
 
