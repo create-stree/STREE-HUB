@@ -23,6 +23,16 @@ local function isKeyValid(keyInput)
     return false
 end
 
+-- Fungsi notifikasi
+local function sendNotification(title, text, duration)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Icon = "rbxassetid://123032091977400",
+        Duration = duration or 3
+    })
+end
+
 -- ==== Build Key Links UI ====
 local function buildKeyLinksUI()
     if parentGui:FindFirstChild("STREE_KeyLinksUI") then
@@ -90,6 +100,7 @@ local function buildKeyLinksUI()
         btn.MouseButton1Click:Connect(function()
             if setclipboard then
                 setclipboard(link)
+                sendNotification("STREE HUB", "Link "..name.." copied to clipboard!", 2)
             end
         end)
 
@@ -98,20 +109,14 @@ local function buildKeyLinksUI()
 
     createLinkButton("Rekonise", "https://rkns.link/2vbo0", "rbxassetid://140280617864380")
     createLinkButton("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://113798183844310")
-    createLinkButton("Lootlabs", "https://lootdest.org/s?FDE9Puik", "rbxassetid://112846309972303")
+    createLinkButton("Lootlabs", "https://lootdest.org/s?VooVvLbJ", "rbxassetid://112846309972303")
 end
-
--- UI utama STREE HUB, dibuat setelah key valid
-local function buildMainUI()
-	game.StarterGui:SetCore("SendNotification", {
-		Title = "STREE HUB",
-		Text = "UI berhasil dimuat!",
-		Icon = "rbxassetid://123032091977400",
-		Duration = 3
-	})
 
 -- ==== Build Main UI ====
 local function buildMainUI()
+    sendNotification("STREE HUB", "UI successfully loaded!", 3)
+    sendNotification("STREE HUB", "Loaded Script Game: "..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, 3)
+
     local ui = Instance.new("ScreenGui", parentGui)
     ui.Name = "STREE_HUB_UI"
     ui.ResetOnSpawn = false
@@ -150,7 +155,7 @@ local function buildMainUI()
     headerLogo.BackgroundTransparency = 1
 
     local title = Instance.new("TextLabel", titleBar)
-    title.Text = "STREE HUB"
+    title.Text = "STREE HUB Test"
     title.Size = UDim2.new(1, -80, 1, 0)
     title.Position = UDim2.new(0,40,0,0)
     title.TextSize = 22
@@ -168,6 +173,7 @@ local function buildMainUI()
     closeBtn.BackgroundTransparency = 1
     closeBtn.MouseButton1Click:Connect(function()
         ui:Destroy()
+        sendNotification("STREE HUB", "UI closed", 2)
     end)
 
     local minimizeBtn = Instance.new("TextButton", titleBar)
@@ -180,10 +186,12 @@ local function buildMainUI()
     minimizeBtn.BackgroundTransparency = 1
     minimizeBtn.MouseButton1Click:Connect(function()
         window.Visible = false
+        sendNotification("STREE HUB", "UI minimized", 1)
     end)
 
     logoButton.MouseButton1Click:Connect(function()
         window.Visible = not window.Visible
+        sendNotification("STREE HUB", window.Visible and "UI shown" or "UI hidden", 1)
     end)
 
     -- Tab kanan
@@ -248,6 +256,7 @@ local function buildMainUI()
         btn.MouseButton1Click:Connect(function()
             state = not state
             btn.Text = text.." ["..(state and "ON" or "OFF").."]"
+            sendNotification("STREE HUB", text.." "..(state and "enabled" or "disabled"), 2)
             callback(state)
         end)
     end
@@ -268,6 +277,7 @@ local function buildMainUI()
             clearContent()
             resetYOffset()
             callback()
+            sendNotification("STREE HUB", "Switched to "..name.." tab", 1)
         end)
     end
 
@@ -278,7 +288,10 @@ local function buildMainUI()
             game.Lighting.TimeOfDay = state and "00:00:00" or "14:00:00"
         end)
         createButton("Enable Shiftlock", function()
-            pcall(function() LocalPlayer.DevEnableMouseLock=true end)
+            pcall(function() 
+                LocalPlayer.DevEnableMouseLock=true 
+                sendNotification("STREE HUB", "Shiftlock enabled", 2)
+            end)
         end)
     end)
 
@@ -286,6 +299,13 @@ local function buildMainUI()
     createTab("Credits", function()
         createLabel("Created by: STREE Community")
         createLabel("STREE HUB | create-stree")
+        createLabel("Version: 1.0.0")
+        createButton("Copy Discord", function()
+            if setclipboard then
+                setclipboard("https://discord.gg/jdmX43t5mY")
+                sendNotification("STREE HUB", "Discord link copied!", 2)
+            end
+        end)
     end)
 end
 
@@ -312,7 +332,7 @@ local function buildKeyUI()
     title.Font=Enum.Font.GothamBold
     title.TextSize=18
     title.TextColor3=Color3.fromRGB(0,255,0)
-    title.Text="STREE HUB - Key System"
+    title.Text="STREE HUB - 🔑Key System"
 
     local input=Instance.new("TextBox", frame)
     input.Size=UDim2.new(1,-20,0,40)
@@ -356,6 +376,7 @@ local function buildKeyUI()
     discordBtn.MouseButton1Click:Connect(function()
         if setclipboard then
             setclipboard("https://discord.gg/jdmX43t5mY")
+            sendNotification("STREE HUB", "Discord link copied!", 2)
         end
     end)
 
@@ -377,15 +398,18 @@ local function buildKeyUI()
         if isKeyValid(key) then
             status.TextColor3=Color3.fromRGB(0,255,0)
             status.Text="Key Valid!"
+            sendNotification("STREE HUB", "Key accepted! Loading UI...", 2)
             wait(0.5)
             keyGui:Destroy()
             buildMainUI()
         else
             status.TextColor3=Color3.fromRGB(255,0,0)
             status.Text="Key Invalid!"
+            sendNotification("STREE HUB", "Invalid key! Please try again", 2)
         end
     end)
 end
 
 -- ==== START ====
+sendNotification("STREE HUB", "Loading STREE HUB...", 2)
 buildKeyUI()
