@@ -277,13 +277,13 @@ local function buildMainUI()
    createTab("Main", function()
         createLabel("⚙️ Utility")
         createToggle("auto plant & auto harvest", function()
-            load
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()
          end)
         createToggle("Auto Sell", function()
-            load
+            https://github.com/create-stree/STREE-HUB/blob/main/Grow/Auto%20sell.lua
          end)
          createLabel("Predik", function()
-            load
+            loadstring(game:HttpGet(""))()
          end)
      end)
         
