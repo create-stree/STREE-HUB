@@ -295,10 +295,10 @@ local function buildMainUI()
    createTab("Settings", function()
         createLabel("Other")
         createButton("Anti Lag", function()
-             loadstring
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Antilag.lua"))()
         end)
         createButton("Anti AFK", function()
-             loadstring
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/AntiAFK.lua"))()
         end)
     end)
 
