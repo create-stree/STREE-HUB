@@ -8,6 +8,8 @@ local LocalPlayer = Players.LocalPlayer
 local success, result = pcall(function() return game:GetService("CoreGui") end)
 local parentGui = success and result or LocalPlayer:WaitForChild("PlayerGui")
 
+local buildKeyUI
+
 -- Daftar key valid
 local validKeys = {
     "STREEHUB-2025-9GHTQ7ZP4M",
@@ -52,7 +54,7 @@ local function buildKeyLinksUI()
     title.TextColor3 = Color3.fromRGB(0,255,0)
     title.Text = "Key Links"
 
-    -- Close button
+    -- Close button (kembali ke Key UI)
     local closeBtn = Instance.new("TextButton", frame)
     closeBtn.Size = UDim2.new(0, 30, 0, 30)
     closeBtn.Position = UDim2.new(1, -40, 0, 8)
@@ -63,7 +65,9 @@ local function buildKeyLinksUI()
     closeBtn.BackgroundTransparency = 1
     closeBtn.MouseButton1Click:Connect(function()
         gui:Destroy()
-        buildKeyUI() -- Return to key system UI
+        if buildKeyUI then
+            buildKeyUI()
+        end
     end)
 
     local yOffset = 50
@@ -96,9 +100,9 @@ local function buildKeyLinksUI()
         yOffset = yOffset + 60
     end
 
-    createLinkButton("Rekonise", "https://rkns.link/2vbo0", "rbxassetid://140280617864380")
-    createLinkButton("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://113798183844310")
-    createLinkButton("Lootlabs", "https://lootdest.org/s?VooVvLbJ", "rbxassetid://112846309972303")
+    createLinkButton("Rekonise",   "https://rkns.link/2vbo0",                      "rbxassetid://140280617864380")
+    createLinkButton("Linkvertise","https://link-hub.net/1365203/NqhrZrvoQhoi",    "rbxassetid://113798183844310")
+    createLinkButton("Lootlabs",   "https://lootdest.org/s?VooVvLbJ",              "rbxassetid://112846309972303")
 end
 
 -- Build Main UI
@@ -273,32 +277,42 @@ local function buildMainUI()
         end)
     end)
 
-   -- Tab Main
-   createTab("Main", function()
+    -- Tab Main
+    createTab("Main", function()
         createLabel("⚙️ Utility")
-        createToggle("auto plant & auto harvest", function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()
-         end)
-        createToggle("Auto Sell", function()
-            loadstring(game:Http("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
-         end)
-         createToggle("Auto Watering", function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua")
-         end)
-         createLabel("Predik", function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Predik.lua"))()
-         end)
-     end)
-        
 
-   -- Tab Settings
-   createTab("Settings", function()
+        createToggle("Auto Plant & Auto Harvest", function(state)
+            if state then
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()
+            else
+            end
+        end)
+
+        createToggle("Auto Sell", function(state)
+            if state then
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
+            end
+        end)
+
+        createToggle("Auto Watering", function(state)
+            if state then
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()
+            end
+        end)
+
+        createButton("Predik", function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Predik.lua"))()
+        end)
+    end)
+
+    -- Tab Settings
+    createTab("Settings", function()
         createLabel("Other")
         createButton("Anti Lag", function()
-             loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Antilag.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/Antilag.lua"))()
         end)
         createButton("Anti AFK", function()
-             loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/AntiAFK.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kirsiasc/STREE-HUB/refs/heads/main/AntiAFK.lua"))()
         end)
     end)
 
@@ -310,7 +324,7 @@ local function buildMainUI()
 end
 
 -- Build Key UI utama
-local function buildKeyUI()
+buildKeyUI = function()
     local keyGui = Instance.new("ScreenGui", parentGui)
     keyGui.Name = "STREE_KeyUI"
     keyGui.ResetOnSpawn=false
