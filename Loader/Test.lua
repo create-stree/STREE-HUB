@@ -188,9 +188,9 @@ local function buildKeyLinksUI()
     end
 
     -- Ganti IMAGE_ID_... dengan id asset logo kamu agar tampil
-    createLinkCard("Rekonise",   "https://rkns.link/2vbo0",                         "rbxassetid://140280617864380")
+    createLinkCard("Rekonise",   "https://rkns.link/2vbo0",                         "rbxassetid://14028061786438")
     createLinkCard("Linkvertise","https://link-hub.net/1365203/NqhrZrvoQhoi",       "rbxassetid://113798183844310")
-    createLinkCard("Lootlabs",   "https://lootdest.org/s?VooVvLbJ",                 "rbxassetid://112846309972303")
+    createLinkCard("Lootlabs",   "https://lootdest.org/s?VooVvLbJ",                 "rbxassetid://11284630997230")
 
     MakeDraggable(frame, titleBar)
 end
