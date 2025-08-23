@@ -6,13 +6,14 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
--- PARENT GUI
-local success, result = pcall(function() return game:GetService("CoreGui") end)
-local parentGui = success and result or LocalPlayer:WaitForChild("PlayerGui")
+-- PARENT GUI (CoreGui fallback aman)
+local okCG, coreGui = pcall(function() return game:GetService("CoreGui") end)
+local parentGui = okCG and coreGui or LocalPlayer:WaitForChild("PlayerGui")
 
---  HELPERS (UI STYLE)
+-- STYLE HELPERS
 local function corner(parent, r)
     local c = Instance.new("UICorner")
     c.CornerRadius = UDim.new(0, r or 10)
@@ -30,7 +31,6 @@ local function stroke(parent, color, th, tr)
     return s
 end
 
--- Neon border anim sederhana (opsional)
 local function animateBorderGlow(uiStroke)
     if not uiStroke then return end
     task.spawn(function()
@@ -43,11 +43,10 @@ local function animateBorderGlow(uiStroke)
     end)
 end
 
--- DRAGGABLE (semua window)
+-- DRAG UTILS
 local function MakeDraggable(frame: Frame, dragHandle: GuiObject?)
     dragHandle = dragHandle or frame
-    local dragging = false
-    local dragStart, startPos
+    local dragging, dragStart, startPos = false
 
     local function update(input)
         local delta = input.Position - dragStart
@@ -79,31 +78,28 @@ local function MakeDraggable(frame: Frame, dragHandle: GuiObject?)
     end)
 end
 
--- IMAGE HELPER
--- Pakai ID "rbxassetid://<angka>" untuk Asset/Texture ID.
--- Kalau sebelumnya pakai ID halaman (Decal page), gambar bisa tidak muncul.
-local function setImageSmart(imageObj: ImageLabel | ImageButton, idStr: string)
-    if not imageObj then return end
+-- IMAGE HELPER (Asset/Texture ID friendly)
+local function setImageSmart(img: ImageLabel | ImageButton, idStr: string)
+    if not img then return end
     if typeof(idStr) == "string" then
         if idStr:match("^rbxassetid://%d+$") or idStr:match("^rbxthumb://") then
-            imageObj.Image = idStr
+            img.Image = idStr
         elseif idStr:match("^%d+$") then
-            imageObj.Image = "rbxassetid://"..idStr
+            img.Image = "rbxassetid://"..idStr
         else
-            -- fallback kosong
-            imageObj.Image = "rbxassetid://0"
+            img.Image = "rbxassetid://0"
         end
     elseif typeof(idStr) == "number" then
-        imageObj.Image = "rbxassetid://"..tostring(idStr)
+        img.Image = "rbxassetid://"..tostring(idStr)
     else
-        imageObj.Image = "rbxassetid://0"
+        img.Image = "rbxassetid://0"
     end
 end
 
--- GLOBAL FLAGS & CONFIG
+-- GLOBAL FLAGS + CONFIG
 _G.STREE_FLAGS = _G.STREE_FLAGS or {}
 local function setFlag(name, val) _G.STREE_FLAGS[name] = val end
-local function getFlag(name, def) local v = _G.STREE_FLAGS[name]; if v == nil then return def end; return v end
+local function getFlag(name, def) local v=_G.STREE_FLAGS[name]; if v==nil then return def end; return v end
 
 local CONFIG_NAME = "streehub_config.json"
 
@@ -118,18 +114,10 @@ local function saveConfig()
 
     if writefile then
         local ok2, err = pcall(writefile, CONFIG_NAME, encoded)
-        if ok2 then
-            return true
-        else
-            return false, tostring(err)
-        end
+        return ok2, ok2 and nil or tostring(err)
     else
-        -- environment tanpa writefile, fallback: copy ke clipboard
-        if setclipboard then
-            setclipboard(encoded)
-            return true, "clipboard"
-        end
-        return false, "no_write_permission"
+        if setclipboard then setclipboard(encoded) end
+        return true, "clipboard"
     end
 end
 
@@ -138,7 +126,7 @@ local function loadConfig()
         local ok, data = pcall(readfile, CONFIG_NAME)
         if ok and data then
             local ok2, parsed = pcall(HttpService.JSONDecode, HttpService, data)
-            if ok2 and typeof(parsed) == "table" and parsed.flags then
+            if ok2 and typeof(parsed)=="table" and parsed.flags then
                 _G.STREE_FLAGS = parsed.flags
                 return true
             end
@@ -146,6 +134,43 @@ local function loadConfig()
         return false, "read_fail"
     end
     return false, "no_config"
+end
+
+-- SAFE CLIPBOARD
+local function copySafe(text)
+    if typeof(text) ~= "string" then return false, "not_string" end
+    if setclipboard then
+        local ok,err = pcall(setclipboard, text)
+        return ok, err
+    end
+    warn("Clipboard tidak didukung executor ini.")
+    return false, "not_supported"
+end
+
+-- LOADSTRING EXAMPLES
+-- Ganti URL di bawah ini dengan link kamu (Pastebin raw / GitHub raw).
+local ESP_URL    = "https://pastebin.com/raw/8qQn0ESP"   -- <== ganti
+local NOCLIP_URL = "https://pastebin.com/raw/2wXNoClip"  -- <== ganti
+
+local function safeLoadstringFrom(url)
+    local src
+    local ok, result = pcall(function() return game:HttpGet(url) end)
+    if ok then src = result end
+    if not src or #src == 0 then
+        warn("Gagal HttpGet: "..tostring(url))
+        return false, "httpget_fail"
+    end
+    local fn, err = loadstring(src)
+    if not fn then
+        warn("Loadstring error: "..tostring(err))
+        return false, err
+    end
+    local ok2, err2 = pcall(fn)
+    if not ok2 then
+        warn("Runtime error: "..tostring(err2))
+        return false, err2
+    end
+    return true
 end
 
 -- KEY SYSTEM
@@ -161,21 +186,17 @@ local function isKeyValid(keyInput)
     return false
 end
 
--- ICONS (GANTI JIKA PERLU)
--- Kalau gambar belum muncul, kemungkinan besar ID yang kamu punya adalah ID halaman (Decal Page).
--- Ganti menjadi TEXTURE ID dan tetap format "rbxassetid://<angka>".
+-- ICONS (GANTI JIKA PERLU; pakai Texture ID biar aman)
 local LINK_ICONS = {
-    Rekonise   = "rbxassetid://140280617864380", -- ganti ke TextureID jika belum tampil
-    Linkvertise= "rbxassetid://113798183844310",
-    Lootlabs   = "rbxassetid://112846309972303",
+    Rekonise    = "rbxassetid://140280617864380",
+    Linkvertise = "rbxassetid://113798183844310",
+    Lootlabs    = "rbxassetid://112846309972303",
 }
-local HUB_LOGO_ID = "rbxassetid://123032091977400" -- logo utama (pojok kiri atas & header)
+local HUB_LOGO_ID = "rbxassetid://123032091977400"
 
--- UI BUILDERS
+--  KEY LINKS UI
 local function buildKeyLinksUI()
-    if parentGui:FindFirstChild("STREE_KeyLinksUI") then
-        parentGui.STREE_KeyLinksUI:Destroy()
-    end
+    if parentGui:FindFirstChild("STREE_KeyLinksUI") then parentGui.STREE_KeyLinksUI:Destroy() end
 
     local gui = Instance.new("ScreenGui")
     gui.Name = "STREE_KeyLinksUI"
@@ -224,9 +245,7 @@ local function buildKeyLinksUI()
     corner(backBtn, 8)
     backBtn.MouseButton1Click:Connect(function()
         gui:Destroy()
-        if not parentGui:FindFirstChild("STREE_KeyUI") then
-            buildKeyUI()
-        end
+        if not parentGui:FindFirstChild("STREE_KeyUI") then buildKeyUI() end
     end)
 
     local closeBtn = Instance.new("TextButton", titleBar)
@@ -239,9 +258,7 @@ local function buildKeyLinksUI()
     closeBtn.BackgroundTransparency = 1
     closeBtn.MouseButton1Click:Connect(function()
         gui:Destroy()
-        if not parentGui:FindFirstChild("STREE_KeyUI") then
-            buildKeyUI()
-        end
+        if not parentGui:FindFirstChild("STREE_KeyUI") then buildKeyUI() end
     end)
 
     local list = Instance.new("Frame", frame)
@@ -297,7 +314,7 @@ local function buildKeyLinksUI()
             TweenService:Create(card, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()
         end)
         card.MouseButton1Click:Connect(function()
-            if setclipboard then setclipboard(link) end
+            copySafe(link)
             note.Text = "Copied!"
             TweenService:Create(note, TweenInfo.new(0.25), {TextColor3 = Color3.fromRGB(0,255,120)}):Play()
             task.delay(1.2, function()
@@ -307,13 +324,14 @@ local function buildKeyLinksUI()
         end)
     end
 
-    makeCard("Rekonise",    "https://rkns.link/2vbo0",                         LINK_ICONS.Rekonise)
-    makeCard("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi",       LINK_ICONS.Linkvertise)
-    makeCard("Lootlabs",    "https://lootdest.org/s?VooVvLbJ",                 LINK_ICONS.Lootlabs)
+    makeCard("Rekonise",    "https://rkns.link/2vbo0",                   LINK_ICONS.Rekonise)
+    makeCard("Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", LINK_ICONS.Linkvertise)
+    makeCard("Lootlabs",    "https://lootdest.org/s?VooVvLbJ",           LINK_ICONS.Lootlabs)
 
     MakeDraggable(frame, titleBar)
 end
 
+-- MAIN UI
 local function buildMainUI()
     if parentGui:FindFirstChild("STREE_HUB_UI") then parentGui.STREE_HUB_UI:Destroy() end
 
@@ -322,11 +340,11 @@ local function buildMainUI()
     ui.IgnoreGuiInset = true
     ui.ResetOnSpawn = false
 
-    -- Logo Toggle (pojok kiri atas, bisa drag)
+    -- Logo Toggle (pojok kiri atas)
     local logoButton = Instance.new("ImageButton", ui)
     logoButton.Name = "HubIcon"
     logoButton.Size = UDim2.new(0, 44, 0, 44)
-    logoButton.Position = UDim2.new(0, 12, 0, 90) -- dekat kiri atas chat
+    logoButton.Position = UDim2.new(0, 12, 0, 90)
     logoButton.BackgroundTransparency = 1
     setImageSmart(logoButton, HUB_LOGO_ID)
     MakeDraggable(logoButton, logoButton)
@@ -342,7 +360,6 @@ local function buildMainUI()
     local gl = stroke(window, Color3.fromRGB(0,255,120), 2, 0.1)
     animateBorderGlow(gl)
 
-    -- Header (judul + tombol)
     local titleBar = Instance.new("Frame", window)
     titleBar.Size = UDim2.new(1, -20, 0, 50)
     titleBar.Position = UDim2.new(0, 10, 0, 8)
@@ -372,9 +389,7 @@ local function buildMainUI()
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.TextSize = 16
     closeBtn.BackgroundTransparency = 1
-    closeBtn.MouseButton1Click:Connect(function()
-        ui:Destroy()
-    end)
+    closeBtn.MouseButton1Click:Connect(function() ui:Destroy() end)
 
     local minimizeBtn = Instance.new("TextButton", titleBar)
     minimizeBtn.Size = UDim2.new(0, 34, 0, 30)
@@ -384,15 +399,13 @@ local function buildMainUI()
     minimizeBtn.Font = Enum.Font.GothamBold
     minimizeBtn.TextSize = 16
     minimizeBtn.BackgroundTransparency = 1
-    minimizeBtn.MouseButton1Click:Connect(function()
-        window.Visible = false
-    end)
+    minimizeBtn.MouseButton1Click:Connect(function() window.Visible = false end)
 
     logoButton.MouseButton1Click:Connect(function()
         window.Visible = not window.Visible
     end)
 
-    -- Search Bar (kanan atas konten)
+    -- Search bar
     local searchBox = Instance.new("TextBox", window)
     searchBox.PlaceholderText = "Search..."
     searchBox.Size = UDim2.new(0, 220, 0, 32)
@@ -405,7 +418,7 @@ local function buildMainUI()
     corner(searchBox, 8)
     stroke(searchBox, Color3.fromRGB(0,255,120), 1, 0.5)
 
-    -- Sidebar Tab (kanan)
+    -- Sidebar tabs
     local tabMenu = Instance.new("Frame", window)
     tabMenu.Size = UDim2.new(0, 160, 1, -90)
     tabMenu.Position = UDim2.new(1, -170, 0, 96)
@@ -413,7 +426,7 @@ local function buildMainUI()
     corner(tabMenu, 12)
     stroke(tabMenu, Color3.fromRGB(0,255,120), 1, 0.4)
 
-    -- Content
+    -- Content area
     local contentFrame = Instance.new("Frame", window)
     contentFrame.Size = UDim2.new(1, -200, 1, -110)
     contentFrame.Position = UDim2.new(0, 16, 0, 96)
@@ -423,68 +436,55 @@ local function buildMainUI()
 
     -- Layout helpers
     local yOffset = 0
-    local function nextY(height) local y=yOffset; yOffset=yOffset+height+8; return y end
-    local function resetYOffset() yOffset = 0 end
-
+    local function nextY(h) local y=yOffset; yOffset=yOffset+h+8; return y end
+    local function resetY() yOffset = 0 end
     local function clearContent()
-        for _,v in ipairs(contentFrame:GetChildren()) do
-            if v:IsA("GuiObject") then v:Destroy() end
-        end
-        resetYOffset()
+        for _,v in ipairs(contentFrame:GetChildren()) do if v:IsA("GuiObject") then v:Destroy() end end
+        resetY()
     end
 
-    local function section(titleText)
-        local lbl = Instance.new("TextLabel", contentFrame)
-        lbl.Size = UDim2.new(1, -20, 0, 24)
-        lbl.Position = UDim2.new(0, 10, 0, nextY(24))
-        lbl.Text = titleText
-        lbl.Font = Enum.Font.GothamBold
-        lbl.TextSize = 16
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.TextColor3 = Color3.fromRGB(0,255,140)
-        lbl.BackgroundTransparency = 1
+    local function section(txt)
+        local l = Instance.new("TextLabel", contentFrame)
+        l.Size = UDim2.new(1, -20, 0, 24)
+        l.Position = UDim2.new(0, 10, 0, nextY(24))
+        l.Text = txt
+        l.Font = Enum.Font.GothamBold
+        l.TextSize = 16
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.TextColor3 = Color3.fromRGB(0,255,140)
+        l.BackgroundTransparency = 1
     end
-
-    local function label(text)
-        local lbl = Instance.new("TextLabel", contentFrame)
-        lbl.Size = UDim2.new(1, -20, 0, 20)
-        lbl.Position = UDim2.new(0, 10, 0, nextY(20))
-        lbl.Text = text
-        lbl.Font = Enum.Font.Gotham
-        lbl.TextSize = 14
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.TextColor3 = Color3.fromRGB(210,210,210)
-        lbl.BackgroundTransparency = 1
+    local function label(txt)
+        local l = Instance.new("TextLabel", contentFrame)
+        l.Size = UDim2.new(1, -20, 0, 20)
+        l.Position = UDim2.new(0, 10, 0, nextY(20))
+        l.Text = txt
+        l.Font = Enum.Font.Gotham
+        l.TextSize = 14
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.TextColor3 = Color3.fromRGB(210,210,210)
+        l.BackgroundTransparency = 1
     end
-
-    local function button(text, callback)
-        local btn = Instance.new("TextButton", contentFrame)
-        btn.Size = UDim2.new(1, -20, 0, 36)
-        btn.Position = UDim2.new(0, 10, 0, nextY(36))
-        btn.Text = text
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 14
-        btn.BackgroundColor3 = Color3.fromRGB(32,32,32)
-        btn.TextColor3 = Color3.fromRGB(0,255,120)
-        corner(btn, 10)
-        stroke(btn, Color3.fromRGB(0,255,120), 1, 0.6)
-        btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
-        end)
-        btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = Color3.fromRGB(32,32,32)}):Play()
-        end)
-        btn.MouseButton1Click:Connect(function()
-            if callback then pcall(callback) end
-        end)
+    local function button(txt, cb)
+        local b = Instance.new("TextButton", contentFrame)
+        b.Size = UDim2.new(1, -20, 0, 36)
+        b.Position = UDim2.new(0, 10, 0, nextY(36))
+        b.Text = txt
+        b.Font = Enum.Font.GothamBold
+        b.TextSize = 14
+        b.BackgroundColor3 = Color3.fromRGB(32,32,32)
+        b.TextColor3 = Color3.fromRGB(0,255,120)
+        corner(b, 10)
+        stroke(b, Color3.fromRGB(0,255,120), 1, 0.6)
+        b.MouseEnter:Connect(function() TweenService:Create(b, TweenInfo.new(0.08), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play() end)
+        b.MouseLeave:Connect(function() TweenService:Create(b, TweenInfo.new(0.08), {BackgroundColor3 = Color3.fromRGB(32,32,32)}):Play() end)
+        b.MouseButton1Click:Connect(function() if cb then pcall(cb) end end)
     end
-
-    local function slider(text, min, max, default, callback)
+    local function slider(text, min, max, default, cb)
         local row = Instance.new("Frame", contentFrame)
         row.Size = UDim2.new(1, -20, 0, 44)
         row.Position = UDim2.new(0, 10, 0, nextY(44))
-        row.BackgroundColor3 = Color3.fromRGB(30,30,30)
-        corner(row, 10)
+        row.BackgroundColor3 = Color3.fromRGB(30,30,30); corner(row, 10)
 
         local lbl = Instance.new("TextLabel", row)
         lbl.Size = UDim2.new(1, -160, 1, 0)
@@ -499,50 +499,37 @@ local function buildMainUI()
         local bar = Instance.new("Frame", row)
         bar.Size = UDim2.new(0, 140, 0, 6)
         bar.Position = UDim2.new(1, -150, 0.5, -3)
-        bar.BackgroundColor3 = Color3.fromRGB(55,55,55)
-        corner(bar, 3)
+        bar.BackgroundColor3 = Color3.fromRGB(55,55,55); corner(bar,3)
 
         local fill = Instance.new("Frame", bar)
-        fill.Size = UDim2.new(0, 0, 1, 0)
-        fill.BackgroundColor3 = Color3.fromRGB(0,200,100)
-        corner(fill, 3)
+        fill.Size = UDim2.new(0,0,1,0)
+        fill.BackgroundColor3 = Color3.fromRGB(0,200,100); corner(fill,3)
 
         local val = default or min
         local function apply()
-            local alpha = (val - min) / (max - min)
-            fill.Size = UDim2.new(alpha, 0, 1, 0)
+            local a = (val - min) / (max - min)
+            fill.Size = UDim2.new(a, 0, 1, 0)
             lbl.Text = ("%s: %d"):format(text, math.floor(val))
         end
         apply()
 
-        local dragging = false
-        bar.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-            end
-        end)
-        bar.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = false
-            end
-        end)
-        bar.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                local rel = (input.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
-                rel = math.clamp(rel, 0, 1)
-                val = min + rel * (max - min)
-                apply()
-                if callback then pcall(callback, math.floor(val)) end
+        local dragging=false
+        bar.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=true end end)
+        bar.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=false end end)
+        bar.InputChanged:Connect(function(i)
+            if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+                local rel = (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
+                rel = math.clamp(rel,0,1)
+                val = min + rel*(max-min)
+                apply(); if cb then pcall(cb, math.floor(val)) end
             end
         end)
     end
-
-    local function toggleModern(text, flagName, default, callback)
+    local function toggleModern(text, flag, default, cb)
         local row = Instance.new("Frame", contentFrame)
         row.Size = UDim2.new(1, -20, 0, 40)
         row.Position = UDim2.new(0, 10, 0, nextY(40))
-        row.BackgroundColor3 = Color3.fromRGB(28,28,28)
-        corner(row, 10)
+        row.BackgroundColor3 = Color3.fromRGB(28,28,28); corner(row,10)
 
         local lbl = Instance.new("TextLabel", row)
         lbl.Size = UDim2.new(1, -90, 1, 0)
@@ -559,27 +546,24 @@ local function buildMainUI()
         switch.Text = ""
         switch.Size = UDim2.new(0, 56, 0, 24)
         switch.Position = UDim2.new(1, -66, 0.5, -12)
-        switch.BackgroundColor3 = Color3.fromRGB(60,60,60)
-        corner(switch, 12)
+        switch.BackgroundColor3 = Color3.fromRGB(60,60,60); corner(switch,12)
 
         local knob = Instance.new("Frame", switch)
         knob.Size = UDim2.new(0, 20, 0, 20)
         knob.Position = UDim2.new(0, 2, 0.5, -10)
         knob.BackgroundColor3 = Color3.fromRGB(245,245,245)
-        corner(knob, 10)
-        stroke(knob, Color3.fromRGB(0,0,0), 1, 0.6)
+        corner(knob, 10); stroke(knob, Color3.fromRGB(0,0,0), 1, 0.6)
 
-        local state = getFlag(flagName, default and true or false)
+        local state = getFlag(flag, default and true or false)
         local function apply(animated)
-            setFlag(flagName, state)
+            setFlag(flag, state)
             local bg = state and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(60,60,60)
             local x = state and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
             if animated then
                 TweenService:Create(switch, TweenInfo.new(0.15), {BackgroundColor3 = bg}):Play()
                 TweenService:Create(knob, TweenInfo.new(0.15), {Position = x}):Play()
             else
-                switch.BackgroundColor3 = bg
-                knob.Position = x
+                switch.BackgroundColor3 = bg; knob.Position = x
             end
         end
         apply(false)
@@ -587,96 +571,89 @@ local function buildMainUI()
         local function toggle()
             state = not state
             apply(true)
-            if callback then task.spawn(function() pcall(callback, state) end) end
+            if cb then task.spawn(function() pcall(cb, state) end) end
         end
-
         switch.MouseButton1Click:Connect(toggle)
-        row.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                toggle()
-            end
-        end)
+        row.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then toggle() end end)
     end
 
-    -- ====== TAB BUILDER ======
+    -- TABS
+    local lastTabY = 0
+    local function addTab(name, builder)
+        local b = Instance.new("TextButton", tabMenu)
+        b.Size = UDim2.new(1, -12, 0, 34)
+        b.Position = UDim2.new(0, 6, 0, lastTabY + 8)
+        lastTabY += 42
+        b.Text = name
+        b.Font = Enum.Font.Gotham
+        b.TextSize = 15
+        b.BackgroundColor3 = Color3.fromRGB(56,56,56)
+        b.TextColor3 = Color3.fromRGB(0,255,120)
+        corner(b, 10)
+        b.MouseEnter:Connect(function() TweenService:Create(b, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(66,66,66)}):Play() end)
+        b.MouseLeave:Connect(function() TweenService:Create(b, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(56,56,56)}):Play() end)
+        b.MouseButton1Click:Connect(function() clearContent(); builder() end)
+    end
+
+    -- Home
     addTab("Home", function()
         section("⚙️ Utilities")
         toggleModern("Night Mode", "NightMode", false, function(on)
-            pcall(function()
-                Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
-                Lighting.Brightness = on and 1 or 2
-            end)
+            pcall(function() Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"; Lighting.Brightness = on and 1 or 2 end)
         end)
         toggleModern("Shift Lock", "ShiftLock", false, function(on)
             pcall(function() LocalPlayer.DevEnableMouseLock = on end)
         end)
         slider("WalkSpeed", 16, 150, 16, function(v)
-            pcall(function()
-                local c = LocalPlayer.Character
-                if c and c:FindFirstChildOfClass("Humanoid") then
-                    c:FindFirstChildOfClass("Humanoid").WalkSpeed = v
-                end
-            end)
+            pcall(function() local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid"); if h then h.WalkSpeed = v end end)
         end)
         slider("JumpPower", 50, 200, 50, function(v)
-            pcall(function()
-                local c = LocalPlayer.Character
-                if c and c:FindFirstChildOfClass("Humanoid") then
-                    c:FindFirstChildOfClass("Humanoid").JumpPower = v
-                end
-            end)
+            pcall(function() local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid"); if h then h.JumpPower = v end end)
         end)
 
         section("💾 Config")
         button("Save Config", function()
             local ok, why = saveConfig()
-            if ok then
-                title.Text = "STREE | Grow A Garden | v0.00.01  (Config Saved)"
-                task.delay(1.2, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
-            else
-                title.Text = "Save Failed: "..tostring(why or "")
-                task.delay(1.6, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
-            end
+            title.Text = ok and "Config Saved" or ("Save Failed: "..tostring(why or ""))
+            task.delay(1.2, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
         end)
         button("Load Config", function()
             local ok, why = loadConfig()
-            if ok then
-                -- apply flags ke UI: buka ulang tab utk render ulang status toggle
-                title.Text = "Config Loaded"
-                task.delay(1.2, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
-            else
-                title.Text = "Load Failed: "..tostring(why or "")
-                task.delay(1.6, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
-            end
+            title.Text = ok and "Config Loaded" or ("Load Failed: "..tostring(why or ""))
+            task.delay(1.2, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
         end)
     end)
 
-    -- ====== TAB: Game ======
+    -- Scripts (contoh loadstring)
+    addTab("Scripts", function()
+        section("🧩 Example Loadstrings")
+        label("Klik untuk menjalankan script dari URL (ganti URL di kode).")
+        button("Run ESP (loadstring)", function() safeLoadstringFrom(ESP_URL) end)
+        button("Run NoClip (loadstring)", function() safeLoadstringFrom(NOCLIP_URL) end)
+    end)
+
+    -- Game
     addTab("Game", function()
         section("🎮 Gameplay")
         toggleModern("Infinite Jump", "InfiniteJump", false, function(on)
             if on then
                 if _G.__STREE_IJ_CONN then _G.__STREE_IJ_CONN:Disconnect() end
                 _G.__STREE_IJ_CONN = UserInputService.JumpRequest:Connect(function()
-                    local c = LocalPlayer.Character
-                    if c and c:FindFirstChildOfClass("Humanoid") then
-                        c:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-                    end
+                    local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
                 end)
             else
                 if _G.__STREE_IJ_CONN then _G.__STREE_IJ_CONN:Disconnect(); _G.__STREE_IJ_CONN = nil end
             end
         end)
-        toggleModern("NoClip", "NoClip", false, function(on)
+        toggleModern("NoClip (local)", "NoClipLocal", false, function(on)
             if on then
                 if _G.__STREE_NC_CONN then _G.__STREE_NC_CONN:Disconnect() end
-                _G.__STREE_NC_CONN = game:GetService("RunService").Stepped:Connect(function()
+                _G.__STREE_NC_CONN = RunService.Stepped:Connect(function()
                     local c = LocalPlayer.Character
                     if c then
                         for _,v in ipairs(c:GetDescendants()) do
-                            if v:IsA("BasePart") and v.CanCollide then
-                                v.CanCollide = false
-                            end
+                            if v:IsA("BasePart") and v.CanCollide then v.CanCollide = false end
                         end
                     end
                 end)
@@ -695,10 +672,7 @@ local function buildMainUI()
                 if _G.__STREE_AAFK then _G.__STREE_AAFK:Disconnect() end
                 local vu = game:GetService("VirtualUser")
                 _G.__STREE_AAFK = LocalPlayer.Idled:Connect(function()
-                    pcall(function()
-                        vu:CaptureController()
-                        vu:ClickButton2(Vector2.new())
-                    end)
+                    pcall(function() vu:CaptureController(); vu:ClickButton2(Vector2.new()) end)
                 end)
             else
                 if _G.__STREE_AAFK then _G.__STREE_AAFK:Disconnect(); _G.__STREE_AAFK = nil end
@@ -706,105 +680,39 @@ local function buildMainUI()
         end)
     end)
 
-    -- ====== TAB: Macro ======
-    addTab("Macro", function()
-        section("🌀 Simple Macro")
-        label("Auto Jump (tiap 1.5s) & Auto Move (W)")
-        toggleModern("Auto Jump", "AutoJump", false, function(on)
-            if on then
-                if _G.__STREE_AJ_LOOP then _G.__STREE_AJ_LOOP:Disconnect() end
-                _G.__STREE_AJ_LOOP = game:GetService("RunService").Heartbeat:Connect(function(step)
-                    if tick() % 1.5 < step then
-                        pcall(function()
-                            local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                            if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
-                        end)
-                    end
-                end)
-            else
-                if _G.__STREE_AJ_LOOP then _G.__STREE_AJ_LOOP:Disconnect(); _G.__STREE_AJ_LOOP=nil end
-            end
-        end)
-        toggleModern("Auto Move Forward", "AutoMoveW", false, function(on)
-            if on then
-                if _G.__STREE_AM_LOOP then _G.__STREE_AM_LOOP:Disconnect() end
-                _G.__STREE_AM_LOOP = game:GetService("RunService").RenderStepped:Connect(function()
-                    pcall(function()
-                        LocalPlayer.Character:TranslateBy(Vector3.new(0,0,-0.1))
-                    end)
-                end)
-            else
-                if _G.__STREE_AM_LOOP then _G.__STREE_AM_LOOP:Disconnect(); _G.__STREE_AM_LOOP=nil end
-            end
-        end)
-    end)
-
-    -- ====== TAB: Webhook ======
-    addTab("Webhook", function()
-        section("🔗 Discord Webhook")
-        label("Masukkan URL webhook (belum mengirim data beneran, hanya mock).")
-
-        local box = Instance.new("TextBox", contentFrame)
-        box.Size = UDim2.new(1, -20, 0, 36)
-        box.Position = UDim2.new(0, 10, 0, nextY(36))
-        box.PlaceholderText = "https://discord.com/api/webhooks/...."
-        box.BackgroundColor3 = Color3.fromRGB(32,32,32)
-        box.TextColor3 = Color3.fromRGB(255,255,255)
-        box.ClearTextOnFocus = false
-        box.Font = Enum.Font.Gotham
-        box.TextSize = 14
-        corner(box, 8)
-        stroke(box, Color3.fromRGB(0,255,120), 1, 0.6)
-
-        button("Test Send (Mock)", function()
-            if setclipboard then setclipboard("MOCK_SEND::"..box.Text) end
-            title.Text = "Webhook mocked to clipboard"
-            task.delay(1.2, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
-        end)
-    end)
-
-    -- ====== TAB: Settings ======
+    -- Settings
     addTab("Settings", function()
         section("🎨 UI")
         toggleModern("Compact Mode", "CompactMode", false, function(on)
-            local scale = window:FindFirstChild("UIScale") or Instance.new("UIScale", window)
-            scale.Scale = on and 0.9 or 1
+            local sc = window:FindFirstChild("UIScale") or Instance.new("UIScale", window)
+            sc.Scale = on and 0.9 or 1
         end)
-        toggleModern("Glow Border", "Glow", true, function(on)
-            if gl then gl.Enabled = on end
-        end)
+        toggleModern("Glow Border", "Glow", true, function(on) if gl then gl.Enabled = on end end)
 
-        section("🧰 System")
-        button("Rebuild UI", function()
-            buildMainUI()
-        end)
-        button("Open Key Links", function()
-            buildKeyLinksUI()
-        end)
-    end)
-
-    -- ====== TAB: Credits ======
-    addTab("Credits", function()
-        section("👑 Credits")
-        label("Created by: STREE Community")
-        label("STREE HUB | create-stree")
-        label("Thanks for using STREE HUB!")
-        button("Join Discord (Copy)", function()
-            if setclipboard then setclipboard("https://discord.gg/jdmX43t5mY") end
+        section("🔗 Links")
+        button("Open Key Links", function() buildKeyLinksUI() end)
+        button("Copy Discord", function()
+            copySafe("https://discord.gg/jdmX43t5mY")
             title.Text = "Discord link copied!"
             task.delay(1.2, function() title.Text = "STREE | Grow A Garden | v0.00.01" end)
         end)
     end)
 
-    -- Default buka Home
-    for _,b in ipairs(tabMenu:GetChildren()) do
-        if b:IsA("TextButton") then b:Activate(); break end
-    end
+    -- Credits
+    addTab("Credits", function()
+        section("👑 Credits")
+        label("Created by: STREE Community")
+        label("STREE HUB | create-stree")
+        label("Thanks for using STREE HUB!")
+    end)
 
-    -- Draggable
+    -- default open first tab
+    for _,b in ipairs(tabMenu:GetChildren()) do if b:IsA("TextButton") then b:Activate(); break end end
+
     MakeDraggable(window, titleBar)
 end
 
+-- KEY UI
 function buildKeyUI()
     if parentGui:FindFirstChild("STREE_KeyUI") then parentGui.STREE_KeyUI:Destroy() end
 
@@ -882,7 +790,7 @@ function buildKeyUI()
     discordBtn.TextColor3 = Color3.fromRGB(255,255,255)
     corner(discordBtn, 10)
     discordBtn.MouseButton1Click:Connect(function()
-        if setclipboard then setclipboard("https://discord.gg/jdmX43t5mY") end
+        copySafe("https://discord.gg/jdmX43t5mY")
         status.TextColor3 = Color3.fromRGB(0,255,120)
         status.Text = "Discord link copied!"
     end)
@@ -908,7 +816,7 @@ function buildKeyUI()
     tip.Font = Enum.Font.Gotham
     tip.TextSize = 12
     tip.TextColor3 = Color3.fromRGB(160,160,160)
-    tip.Text = "Note: Pastikan pakai Texture ID untuk logo link."
+    tip.Text = "Note: Gunakan Texture ID untuk logo link."
 
     enterBtn.MouseButton1Click:Connect(function()
         local key = input.Text
@@ -924,5 +832,10 @@ function buildKeyUI()
             local orig = input.Position
             TweenService:Create(input, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 3, true), {Position = orig + UDim2.new(0, 3, 0, 0)}):Play()
         end
+    end)
+
+    MakeDraggable(frame, titleBar)
+end
+
 -- START
 buildKeyUI()
