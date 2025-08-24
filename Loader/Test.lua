@@ -489,20 +489,20 @@ local function createSlider(text, min, max, default, callback)
     createTab("Home", function()
         createLabel("⚙️ Utilities")
         createToggleModern("Night Mode", false, function(on)
-            pcall(function()
-                game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
-                game.Lighting.Brightness = on and 1 or 2
-            end)
-        end)
-        createToggleModern("Shiftlock", false, function(on)
-            pcall(function() LocalPlayer.DevEnableMouseLock = on end)
+        pcall(function()
+            game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
+            game.Lighting.Brightness = on and 1 or 2
         end)
     end)
+        createToggleModern("Shiftlock", false, function(on)
+        pcall(function() LocalPlayer.DevEnableMouseLock = on end)
+    end)
         createSlider("WalkSpeed", 16, 250, LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed or 16, function(value)
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChildOfClass("Humanoid") then
-        char:FindFirstChildOfClass("Humanoid").WalkSpeed = value
-    end
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        end
+    end)
 end)
 
     -- Tab Credits
