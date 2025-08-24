@@ -538,43 +538,6 @@ createTab("Home", function()
         end
     end)
 
-    createLabel("🦘 JumpPower")
-    local jumpSlider = Instance.new("Frame", contentFrame)
-    jumpSlider.Size = UDim2.new(1,-20,0,40)
-    jumpSlider.Position = UDim2.new(0,10,0,nextY(40))
-    jumpSlider.BackgroundTransparency = 1
-
-    local jumpLabel = Instance.new("TextLabel", jumpSlider)
-    jumpLabel.Size = UDim2.new(0.5,0,1,0)
-    jumpLabel.Position = UDim2.new(0,0,0,0)
-    jumpLabel.BackgroundTransparency = 1
-    jumpLabel.TextColor3 = Color3.fromRGB(200,200,200)
-    jumpLabel.Text = "JumpPower: 50"
-    jumpLabel.Font = Enum.Font.Gotham
-    jumpLabel.TextSize = 14
-    jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    local jumpBox = Instance.new("TextBox", jumpSlider)
-    jumpBox.Size = UDim2.new(0.3,0,0.7,0)
-    jumpBox.Position = UDim2.new(0.65,0,0.15,0)
-    jumpBox.PlaceholderText = "50"
-    jumpBox.BackgroundColor3 = Color3.fromRGB(36,36,36)
-    jumpBox.TextColor3 = Color3.fromRGB(255,255,255)
-    jumpBox.Font = Enum.Font.Gotham
-    jumpBox.TextSize = 14
-    corner(jumpBox, 6)
-
-    jumpBox.FocusLost:Connect(function(enterPressed)
-        local val = tonumber(jumpBox.Text)
-        if val then
-            LocalPlayer.Character.Humanoid.JumpPower = val
-            jumpLabel.Text = "JumpPower: "..val
-        end
-    end)
-
-    contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
-end)
-
     -- Tab Credits
     createTab("Credits", function()
         createLabel("Created by: STREE Community")
