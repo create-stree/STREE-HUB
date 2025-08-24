@@ -338,7 +338,7 @@ function buildKeyUI()
     status.TextColor3 = Color3.fromRGB(200,200,200)
     status.Text = ""
 
-    local enterBtn = Instance.new("TextButton", frame)
+    local enterBtn = Instance.new("", frame)
     enterBtn.Size = UDim2.new(0.47,-6,0,32)
     enterBtn.Position = UDim2.new(0,10,0,130)
     enterBtn.Text = "Enter"
