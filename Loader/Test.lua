@@ -56,7 +56,7 @@ end
 
 -- Valid Keys
 local validKeys = {
-    "STREEHUB-2025-9GHTQ7ZP4M",
+    "STREEHUB-INDONESIA-9GHTQ7ZP4M",
     "STREE-KeySystem-82ghtQRSM",
     "StreeCommunity-7g81ht7NO22"
 }
