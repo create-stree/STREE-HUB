@@ -326,7 +326,6 @@ local function buildMainUI()
         end)
     end
 
-    -- ===== Modern Toggle (Switch) =====
     local function createToggleModern(text, default, callback)
         local row = Instance.new("Frame", contentFrame)
         row.Size = UDim2.new(1,-20,0,38)
@@ -390,6 +389,75 @@ local function buildMainUI()
                 toggle()
             end
         end)
+    end
+
+local function createSlider(text, min, max, default, callback)
+    local row = Instance.new("Frame", contentFrame)
+    row.Size = UDim2.new(1,-20,0,50)
+    row.Position = UDim2.new(0,10,0,nextY(50))
+    row.BackgroundColor3 = Color3.fromRGB(28,28,28)
+    corner(row, 8)
+
+    local lbl = Instance.new("TextLabel", row)
+    lbl.Size = UDim2.new(0.5, -10, 0, 20)
+    lbl.Position = UDim2.new(0,10,0,5)
+    lbl.BackgroundTransparency = 1
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 14
+    lbl.TextColor3 = Color3.fromRGB(220,220,220)
+    lbl.Text = text
+
+    local valueLbl = Instance.new("TextLabel", row)
+    valueLbl.Size = UDim2.new(0.3, -10, 0, 20)
+    valueLbl.Position = UDim2.new(1, -110, 0, 5)
+    valueLbl.BackgroundTransparency = 1
+    valueLbl.TextXAlignment = Enum.TextXAlignment.Right
+    valueLbl.Font = Enum.Font.Gotham
+    valueLbl.TextSize = 14
+    valueLbl.TextColor3 = Color3.fromRGB(0,255,120)
+    valueLbl.Text = tostring(default)
+
+    local sliderBG = Instance.new("Frame", row)
+    sliderBG.Size = UDim2.new(1,-20,0,8)
+    sliderBG.Position = UDim2.new(0,10,1,-18)
+    sliderBG.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    corner(sliderBG, 4)
+
+    local sliderFill = Instance.new("Frame", sliderBG)
+    sliderFill.Size = UDim2.new((default-min)/(max-min),0,1,0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(0,200,0)
+    corner(sliderFill, 4)
+
+    local dragging = false
+
+    local function update(inputPos)
+        local relative = math.clamp((inputPos.X - sliderBG.AbsolutePosition.X) / sliderBG.AbsoluteSize.X, 0, 1)
+        local value = math.floor((min + (max-min) * relative) * 10)/10
+        sliderFill.Size = UDim2.new(relative,0,1,0)
+        valueLbl.Text = tostring(value)
+        if callback then
+            pcall(callback, value)
+        end
+    end
+
+    sliderBG.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            update(input.Position)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    sliderBG.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            if dragging then update(input.Position) end
+        end
+    end)
     end
 
     local lastTabY = 0
