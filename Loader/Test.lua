@@ -570,13 +570,6 @@ createTab("Home", function()
             LocalPlayer.Character.Humanoid.JumpPower = val
             jumpLabel.Text = "JumpPower: "..val
         end
-                    
-    createLabel("Players")
-    createLabel("Players")
-    createLabel("Players")
-
-
-    createLabel("Players")
     end)
 
     contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
