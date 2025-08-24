@@ -589,7 +589,7 @@ function buildKeyUI()
     title.TextColor3 = Color3.fromRGB(0,255,0)
     title.Text = "🔑 | Key System"
 
-    local input = Instance.new("TextBox", frame)
+    local input = Instance.new("", frame)
     input.Size = UDim2.new(1,-20,0,40)
     input.Position = UDim2.new(0,10,0,56)
     input.PlaceholderText = "Enter key..."
