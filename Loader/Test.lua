@@ -447,7 +447,7 @@ local function buildMainUI()
 end
 
 -- ====== Build Key UI utama ======
-local textBox = Instance.new("")
+function buildKeyUI()
     if parentGui:FindFirstChild("STREE_KeyUI") then parentGui.STREE_KeyUI:Destroy() end
 
     local keyGui = Instance.new("ScreenGui", parentGui)
