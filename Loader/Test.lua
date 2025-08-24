@@ -1,6 +1,5 @@
 -- MAIN UI
 local function buildMainUI()
-    if parentGui:FindFirstChild("STREE_HUB_UI") then parentGui.STREE_HUB_UI:Destroy() end
 
     local ui = Instance.new("ScreenGui", parentGui)
     ui.Name = "STREE_HUB_UI"
