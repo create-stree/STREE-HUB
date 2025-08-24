@@ -486,65 +486,66 @@ local function createSlider(text, min, max, default, callback)
     end
 
     -- Tab Home
-createTab("Home", function()
-    resetYOffset()
+    createTab("Home", function()
+        resetYOffset()
+        createLabel("⚙️ Utilities")
 
-    createLabel("⚙️ Utilities")
-
-    createToggleModern("Night Mode", false, function(on)
-        pcall(function()
-            game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
-            game.Lighting.Brightness = on and 1 or 2
+        createToggleModern("Night Mode", false, function(on)
+            pcall(function()
+                game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
+                game.Lighting.Brightness = on and 1 or 2
+            end)
         end)
-    end)
 
-    createToggleModern("Shiftlock", false, function(on)
-        pcall(function() LocalPlayer.DevEnableMouseLock = on end)
-    end)
+        createToggleModern("Shiftlock", false, function(on)
+            pcall(function() LocalPlayer.DevEnableMouseLock = on end)
+        end)
             
-    createLabel("Players")
+        createLabel("Players")
     
-    createLabel("🏃 WalkSpeed")
-    local walkSlider = Instance.new("Frame", contentFrame)
-    walkSlider.Size = UDim2.new(1,-20,0,40)
-    walkSlider.Position = UDim2.new(0,10,0,nextY(40))
-    walkSlider.BackgroundTransparency = 1
+        createLabel("🏃 WalkSpeed")
+        local walkSlider = Instance.new("Frame", contentFrame)
+        walkSlider.Size = UDim2.new(1,-20,0,40)
+        walkSlider.Position = UDim2.new(0,10,0,nextY(40))
+        walkSlider.BackgroundTransparency = 1
 
-    local walkLabel = Instance.new("TextLabel", walkSlider)
-    walkLabel.Size = UDim2.new(0.5,0,1,0)
-    walkLabel.Position = UDim2.new(0,0,0,0)
-    walkLabel.BackgroundTransparency = 1
-    walkLabel.TextColor3 = Color3.fromRGB(200,200,200)
-    walkLabel.Text = "WalkSpeed: 16"
-    walkLabel.Font = Enum.Font.Gotham
-    walkLabel.TextSize = 14
-    walkLabel.TextXAlignment = Enum.TextXAlignment.Left
+        local walkLabel = Instance.new("TextLabel", walkSlider)
+        walkLabel.Size = UDim2.new(0.5,0,1,0)
+        walkLabel.Position = UDim2.new(0,0,0,0)
+        walkLabel.BackgroundTransparency = 1
+        walkLabel.TextColor3 = Color3.fromRGB(200,200,200)
+        walkLabel.Text = "WalkSpeed: 16"
+        walkLabel.Font = Enum.Font.Gotham
+        walkLabel.TextSize = 14
+        walkLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    local walkBox = Instance.new("TextBox", walkSlider)
-    walkBox.Size = UDim2.new(0.3,0,0.7,0)
-    walkBox.Position = UDim2.new(0.65,0,0.15,0)
-    walkBox.PlaceholderText = "16"
-    walkBox.BackgroundColor3 = Color3.fromRGB(36,36,36)
-    walkBox.TextColor3 = Color3.fromRGB(255,255,255)
-    walkBox.Font = Enum.Font.Gotham
-    walkBox.TextSize = 14
-    corner(walkBox, 6)
+        local walkBox = Instance.new("TextBox", walkSlider)
+        walkBox.Size = UDim2.new(0.3,0,0.7,0)
+        walkBox.Position = UDim2.new(0.65,0,0.15,0)
+        walkBox.PlaceholderText = "16"
+        walkBox.BackgroundColor3 = Color3.fromRGB(36,36,36)
+        walkBox.TextColor3 = Color3.fromRGB(255,255,255)
+        walkBox.Font = Enum.Font.Gotham
+        walkBox.TextSize = 14
+        corner(walkBox, 6)
 
-    walkBox.FocusLost:Connect(function(enterPressed)
-        local val = tonumber(walkBox.Text)
-        if val then
-            LocalPlayer.Character.Humanoid.WalkSpeed = val
-            walkLabel.Text = "WalkSpeed: "..val
-        end
-    end)
+        walkBox.FocusLost:Connect(function(enterPressed)
+            local val = tonumber(walkBox.Text)
+            if val then
+                LocalPlayer.Character.Humanoid.WalkSpeed = val
+                walkLabel.Text = "WalkSpeed: "..val
+            end
+        end)
 
-    -- Tab Credits
-    createTab("Credits", function()
-        createLabel("Created by: STREE Community")
-        createLabel("STREE HUB | create-stree")
-        createLabel("Thank you for using our script😄")
-    end)
+    contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
+end)
 
+-- Tab Credits
+createTab("Credits", function()
+    resetYOffset()
+    createLabel("Created by: STREE Community")
+    createLabel("STREE HUB | create-stree")
+    createLabel("Thank you for using our script😄")
     contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
 end)
 
