@@ -535,12 +535,7 @@ local function createSlider(text, min, max, default, callback)
                 walkLabel.Text = "WalkSpeed: "..val
             end
         end)
-   contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
-end)
 
- -- Tab Auto
- createTab("Auto"), function()
-     resetYOffset()
      createToggleModern("Auto Sell", false, function(on)
            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
        end)
