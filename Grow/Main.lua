@@ -503,6 +503,7 @@ local function createSlider(text, min, max, default, callback)
             
         createLabel("Players")
     
+        createLabel("🏃 WalkSpeed")
         local walkSlider = Instance.new("Frame", contentFrame)
         walkSlider.Size = UDim2.new(1,-20,0,40)
         walkSlider.Position = UDim2.new(0,10,0,nextY(40))
@@ -518,7 +519,7 @@ local function createSlider(text, min, max, default, callback)
         walkLabel.TextSize = 14
         walkLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-        local walkBox = Instance.new("TextBox", walkSlider)
+        local walkBox = Instance.new("16", walkSlider)
         walkBox.Size = UDim2.new(0.3,0,0.7,0)
         walkBox.Position = UDim2.new(0.65,0,0.15,0)
         walkBox.PlaceholderText = "16"
@@ -535,14 +536,6 @@ local function createSlider(text, min, max, default, callback)
                 walkLabel.Text = "WalkSpeed: "..val
             end
         end)
-
-     createToggleModern("Auto Sell", false, function(on)
-           loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
-       end)
-
-      createToggleModern("Auto Sell", false, function(on)
-           loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
-       end)
 
     contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
 end)
