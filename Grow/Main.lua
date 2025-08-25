@@ -519,7 +519,7 @@ local function createSlider(text, min, max, default, callback)
         walkLabel.TextSize = 14
         walkLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-        local walkBox = Instance.new("16", walkSlider)
+        local walkBox = Instance.new("TextBox", walkSlider)
         walkBox.Size = UDim2.new(0.3,0,0.7,0)
         walkBox.Position = UDim2.new(0.65,0,0.15,0)
         walkBox.PlaceholderText = "16"
@@ -554,7 +554,8 @@ end)
         if b:IsA("TextButton") then b:Activate(); break end
     end
 
-    MakeDraggable(windows, titleBar)
+    -- draggable semua window utama via titleBar
+    MakeDraggable(window, titleBar)
 end
 
 -- ====== Build Key UI utama ======
@@ -615,7 +616,7 @@ function buildKeyUI()
     enterBtn.Font = Enum.Font.GothamBold
     enterBtn.TextSize = 16
     enterBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-    enterBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    enterBtn.TextColor3 = Color3.fromRGB(0,0,0)
     corner(enterBtn, 8)
 
     local discordBtn = Instance.new("TextButton", frame)
