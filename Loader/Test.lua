@@ -295,6 +295,55 @@ local function buildMainUI()
     local function nextY(height) local y = yOffset; yOffset=yOffset+height+8; return y end
     local function resetYOffset() yOffset=0 end
 
+    -- CATEGORY SYSTEM
+function createCategory(title)
+    local catFrame = Instance.new("Frame", contentFrame)
+    catFrame.Size = UDim2.new(1,-20,0,30)
+    catFrame.Position = UDim2.new(0,10,0,nextY(30))
+    catFrame.BackgroundTransparency = 1
+
+    local catButton = Instance.new("TextButton", catFrame)
+    catButton.Size = UDim2.new(1,0,1,0)
+    catButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    catButton.TextColor3 = Color3.fromRGB(200,200,200)
+    catButton.Font = Enum.Font.GothamBold
+    catButton.TextSize = 14
+    catButton.Text = "▼ "..title
+    corner(catButton, 8)
+
+    local container = Instance.new("Frame", contentFrame)
+    container.Size = UDim2.new(1,-20,0,0)
+    container.Position = UDim2.new(0,10,0,nextY(0))
+    container.BackgroundTransparency = 1
+    container.ClipsDescendants = true
+
+    local opened = false
+    local innerYOffset = 0
+
+    local function addItem(itemHeight, element)
+        element.Parent = container
+        element.Position = UDim2.new(0,0,0,innerYOffset)
+        innerYOffset = innerYOffset + itemHeight
+        container.Size = UDim2.new(1,-20,0,innerYOffset)
+    end
+
+    catButton.MouseButton1Click:Connect(function()
+        opened = not opened
+        if opened then
+            catButton.Text = "▲ "..title
+            container.Visible = true
+        else
+            catButton.Text = "▼ "..title
+            container.Visible = false
+        end
+    end)
+
+    return {
+        Frame = container,
+        Add = addItem
+    }
+    end
+    
     local function createLabel(text)
         local lbl = Instance.new("TextLabel", contentFrame)
         lbl.Size = UDim2.new(1,-20,0,24)
@@ -488,22 +537,23 @@ local function createSlider(text, min, max, default, callback)
     -- Tab Home
     createTab("Home", function()
         resetYOffset()
+
+        local mainCat = createCategory("🎮 Game")
         createLabel("⚙️ Utilities")
 
-        createToggleModern("Night Mode", false, function(on)
+        local createToggleModern("Night Mode", false, function(on)
             pcall(function()
                 game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
                 game.Lighting.Brightness = on and 1 or 2
             end)
         end)
 
-        createToggleModern("Shiftlock", false, function(on)
+        local createToggleModern("Shiftlock", false, function(on)
             pcall(function() LocalPlayer.DevEnableMouseLock = on end)
         end)
             
-        createLabel("Players")
+        local createLabel("Players")
     
-        createLabel("🏃 WalkSpeed")
         local walkSlider = Instance.new("Frame", contentFrame)
         walkSlider.Size = UDim2.new(1,-20,0,40)
         walkSlider.Position = UDim2.new(0,10,0,nextY(40))
