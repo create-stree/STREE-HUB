@@ -488,22 +488,22 @@ local function createSlider(text, min, max, default, callback)
     -- Tab Home
     createTab("Home", function()
         resetYOffset()
-
         createLabel("⚙️ Utilities")
 
         createToggleModern("Night Mode", false, function(on)
-    pcall(function()
-        game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
-        game.Lighting.Brightness = on and 1 or 2
-    end)
-end)
+            pcall(function()
+                game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
+                game.Lighting.Brightness = on and 1 or 2
+            end)
+        end)
 
-        local createToggleModern("Shiftlock", false, function(on)
+        createToggleModern("Shiftlock", false, function(on)
             pcall(function() LocalPlayer.DevEnableMouseLock = on end)
         end)
             
         createLabel("Players")
     
+        createLabel("🏃 WalkSpeed")
         local walkSlider = Instance.new("Frame", contentFrame)
         walkSlider.Size = UDim2.new(1,-20,0,40)
         walkSlider.Position = UDim2.new(0,10,0,nextY(40))
