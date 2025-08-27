@@ -538,7 +538,7 @@ local function createSlider(text, min, max, default, callback)
     createTab("Home", function()
         resetYOffset()
 
-        local mainCat = createCategory("🎮 Game")
+        local cat = createCategory("🎮 Game")
         createLabel("⚙️ Utilities")
 
         local createToggleModern("Night Mode", false, function(on)
