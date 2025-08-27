@@ -542,11 +542,11 @@ local function createSlider(text, min, max, default, callback)
         createLabel("⚙️ Utilities")
 
         local createToggleModern("Night Mode", false, function(on)
-            pcall(function()
-                game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
-                game.Lighting.Brightness = on and 1 or 2
-            end)
-        end)
+    pcall(function()
+        game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
+        game.Lighting.Brightness = on and 1 or 2
+    end)
+end)
 
         local createToggleModern("Shiftlock", false, function(on)
             pcall(function() LocalPlayer.DevEnableMouseLock = on end)
