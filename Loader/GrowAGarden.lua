@@ -491,7 +491,7 @@ local function createSlider(text, min, max, default, callback)
         createLabel("Infomation")
 
         createButton("Discord", function()
-            print("https://discord.gg/jdmX43t5mY")
+            setclipboard("https://discord.gg/jdmX43t5mY")
         end)
 
         createToggleModern("Night Mode", false, function(on)
