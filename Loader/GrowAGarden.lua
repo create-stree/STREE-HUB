@@ -488,7 +488,11 @@ local function createSlider(text, min, max, default, callback)
     -- Tab Home
     createTab("Home", function()
         resetYOffset()
-        createLabel("⚙️ Utilities")
+        createLabel("Infomation")
+
+        createButton("Discord", function()
+            print("https://discord.gg/jdmX43t5mY")
+        end)
 
         createToggleModern("Night Mode", false, function(on)
             pcall(function()
@@ -502,8 +506,7 @@ local function createSlider(text, min, max, default, callback)
         end)
             
         createLabel("Players")
-    
-        createLabel("🏃 WalkSpeed")
+
         local walkSlider = Instance.new("Frame", contentFrame)
         walkSlider.Size = UDim2.new(1,-20,0,40)
         walkSlider.Position = UDim2.new(0,10,0,nextY(40))
@@ -544,4 +547,128 @@ end)
 createTab("Credits", function()
     resetYOffset()
     createLabel("Created by: STREE Community")
-    crea
+    createLabel("STREE HUB | create-stree")
+    createLabel("Thank you for using our script😄")
+    createLabel("This Windows script still has something missing so wait for the Windows update")
+    contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
+end)
+
+    -- Default buka Home
+    for _,b in ipairs(tabMenu:GetChildren()) do
+        if b:IsA("TextButton") then b:Activate(); break end
+    end
+
+    -- draggable semua window utama via titleBar
+    MakeDraggable(window, titleBar)
+end
+
+-- ====== Build Key UI utama ======
+function buildKeyUI()
+    if parentGui:FindFirstChild("STREE_KeyUI") then parentGui.STREE_KeyUI:Destroy() end
+
+    local keyGui = Instance.new("ScreenGui", parentGui)
+    keyGui.Name = "STREE_KeyUI"
+    keyGui.IgnoreGuiInset = true
+    keyGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame", keyGui)
+    frame.Size = UDim2.new(0,340,0,230)
+    frame.Position = UDim2.new(0.5,-170,0.5,-115)
+    frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
+    frame.BorderSizePixel = 0
+    corner(frame, 12)
+    stroke(frame, Color3.fromRGB(0,255,0), 3)
+
+    local titleBar = Instance.new("Frame", frame)
+    titleBar.Size = UDim2.new(1,-20,0,36)
+    titleBar.Position = UDim2.new(0,10,0,8)
+    titleBar.BackgroundTransparency = 1
+
+    local title = Instance.new("TextLabel", titleBar)
+    title.Size = UDim2.new(1, -40, 1, 0)
+    title.Position = UDim2.new(0,0,0,0)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.TextColor3 = Color3.fromRGB(0,255,0)
+    title.Text = "🔑 | Key System"
+
+    local input = Instance.new("TextBox", frame)
+    input.Size = UDim2.new(1,-20,0,40)
+    input.Position = UDim2.new(0,10,0,56)
+    input.PlaceholderText = "Enter key..."
+    input.BackgroundColor3 = Color3.fromRGB(36,36,36)
+    input.TextColor3 = Color3.fromRGB(255,255,255)
+    input.ClearTextOnFocus = false
+    input.Font = Enum.Font.Gotham
+    input.TextSize = 16
+    corner(input, 8)
+
+    local status = Instance.new("TextLabel", frame)
+    status.Size = UDim2.new(1,-20,0,18)
+    status.Position = UDim2.new(0,10,0,104)
+    status.BackgroundTransparency = 1
+    status.Font = Enum.Font.Gotham
+    status.TextSize = 14
+    status.TextColor3 = Color3.fromRGB(200,200,200)
+    status.Text = ""
+
+    local enterBtn = Instance.new("TextButton", frame)
+    enterBtn.Size = UDim2.new(0.47,-6,0,32)
+    enterBtn.Position = UDim2.new(0,10,0,130)
+    enterBtn.Text = "Enter"
+    enterBtn.Font = Enum.Font.GothamBold
+    enterBtn.TextSize = 16
+    enterBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+    enterBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    corner(enterBtn, 8)
+
+    local discordBtn = Instance.new("TextButton", frame)
+    discordBtn.Size = UDim2.new(0.47,-6,0,32)
+    discordBtn.Position = UDim2.new(0,180,0,130)
+    discordBtn.Text = "Join Discord"
+    discordBtn.Font = Enum.Font.GothamBold
+    discordBtn.TextSize = 16
+    discordBtn.BackgroundColor3 = Color3.fromRGB(60,60,255)
+    discordBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    corner(discordBtn, 8)
+    discordBtn.MouseButton1Click:Connect(function()
+        if setclipboard then setclipboard("https://discord.gg/jdmX43t5mY") end
+        status.TextColor3 = Color3.fromRGB(0,255,120)
+        status.Text = "Discord link copied!"
+    end)
+
+    local linkBtn = Instance.new("TextButton", frame)
+    linkBtn.Size = UDim2.new(1,-20,0,32)
+    linkBtn.Position = UDim2.new(0,10,0,170)
+    linkBtn.Text = "Get Key"
+    linkBtn.Font = Enum.Font.GothamBold
+    linkBtn.TextSize = 16
+    linkBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+    linkBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    corner(linkBtn, 8)
+    linkBtn.MouseButton1Click:Connect(function()
+        keyGui:Destroy()
+        buildKeyLinksUI()
+    end)
+
+    enterBtn.MouseButton1Click:Connect(function()
+        local key = input.Text
+        if isKeyValid(key) then
+            status.TextColor3 = Color3.fromRGB(0,255,0)
+            status.Text = "Key Valid!"
+            task.wait(0.45)
+            keyGui:Destroy()
+            buildMainUI()
+        else
+            status.TextColor3 = Color3.fromRGB(255,0,0)
+            status.Text = "Key Invalid!"
+            TweenService:Create(input, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 3, true), {Position = input.Position + UDim2.new(0,3,0,0)}):Play()
+        end
+    end)
+
+    MakeDraggable(frame, titleBar)
+end
+
+-- START
+buildKeyUI()
