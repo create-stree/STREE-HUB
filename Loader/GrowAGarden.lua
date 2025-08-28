@@ -541,7 +541,7 @@ local function createSlider(text, min, max, default, callback)
         end)
 
     contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
-end)
+
 
 -- Tab Credits
 createTab("Credits", function()
