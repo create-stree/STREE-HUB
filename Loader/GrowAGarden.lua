@@ -494,6 +494,20 @@ local function createSlider(text, min, max, default, callback)
             setclipboard("https://discord.gg/jdmX43t5mY")
         end)
 
+        createButton("WhatsApp", function()
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+        end)
+
+        createButton("Telegram", function()
+            setclipboard("https://t.me/StreeCoumminty")
+        end)
+
+        createButton("Website", function()
+            setclipboard("https://streehub.netlify.app")
+        end)
+
+        createLabel("Test")
+
         createToggleModern("Night Mode", false, function(on)
             pcall(function()
                 game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
@@ -541,7 +555,11 @@ local function createSlider(text, min, max, default, callback)
         end)
 
     contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
+end)
 
+-- Tab Visual
+createTab("Visual"), function()
+    resetYOffset()
 
 -- Tab Credits
 createTab("Credits", function()
@@ -549,7 +567,7 @@ createTab("Credits", function()
     createLabel("Created by: STREE Community")
     createLabel("STREE HUB | create-stree")
     createLabel("Thank you for using our script😄")
-    createLabel("This UI still has shortcomings [Alpha]")
+    createLabel("This UI still has shortcomings [Beta]")
     contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
 end)
 
