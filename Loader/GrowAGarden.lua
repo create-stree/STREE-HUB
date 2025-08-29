@@ -616,13 +616,13 @@ local function buildMainUI()
 
         createLabel("⚙️ Utility")    
     
-        createToggleModern("Auto sell", false, function(on)    
-            if on then    
-                pcall(function()    
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()    
-                end)    
-            end    
-        end)    
+        createToggleModern("Auto sell", false, 
+        function(on)
+            _G.AutoSell = on
+            if on then
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
+            end
+        end)
     
         createToggleModern("Auto Plant & Harvest", false, function(on)    
             if on then    
