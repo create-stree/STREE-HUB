@@ -459,7 +459,7 @@ local function buildMainUI()
             if setclipboard then setclipboard("https://t.me/StreeCoumminty") end
         end)
         createButton("Website", function()
-            if setclipboard then setclipboard("https://streehub.netlify.app") end
+            if setclipboard then setclipboard("https://streecommunity.netlify.app") end
         end)
 
         createLabel("⚙️ Utility")    
