@@ -1,4 +1,4 @@
--- STREE HUB - Loader & UI Final
+-- STREE HUB - Loader & UI Final (Fixed)
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
@@ -10,12 +10,11 @@ local LocalPlayer = Players.LocalPlayer
 local success, result = pcall(function() return game:GetService("CoreGui") end)
 local parentGui = success and result or LocalPlayer:WaitForChild("PlayerGui")
 
--- ====== UTIL: DRAGGABLE (untuk semua window) ======
+-- ====== UTIL: DRAGGABLE ======
 local function MakeDraggable(frame: Frame, dragHandle: GuiObject?)
     dragHandle = dragHandle or frame
     local dragging = false
     local dragStart, startPos
-
     local function update(input)
         local delta = input.Position - dragStart
         frame.Position = UDim2.new(
@@ -23,7 +22,6 @@ local function MakeDraggable(frame: Frame, dragHandle: GuiObject?)
             startPos.Y.Scale, startPos.Y.Offset + delta.Y
         )
     end
-
     dragHandle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
@@ -36,7 +34,6 @@ local function MakeDraggable(frame: Frame, dragHandle: GuiObject?)
             end)
         end
     end)
-
     dragHandle.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             if dragging then update(input) end
@@ -54,14 +51,12 @@ local function stroke(parent, color, th)
     return s
 end
 
--- Daftar key valid
+-- ====== KEY LIST ======
 local validKeys = {
     "STREEHUB-INDONESIA-9GHTQ7ZP4M",
     "STREE-KeySystem-82ghtQRSM",
     "StreeCommunity-7g81ht7NO22"
 }
-
--- Fungsi cek key
 local function isKeyValid(keyInput)
     for _, key in ipairs(validKeys) do
         if keyInput == key then return true end
@@ -69,7 +64,7 @@ local function isKeyValid(keyInput)
     return false
 end
 
--- ====== Build Key Links UI ======
+-- ====== Key Links UI ======
 local function buildKeyLinksUI()
     if parentGui:FindFirstChild("STREE_KeyLinksUI") then
         parentGui.STREE_KeyLinksUI:Destroy()
@@ -96,7 +91,6 @@ local function buildKeyLinksUI()
 
     local title = Instance.new("TextLabel", titleBar)
     title.Size = UDim2.new(1, -40, 1, 0)
-    title.Position = UDim2.new(0, 0, 0, 0)
     title.BackgroundTransparency = 1
     title.Font = Enum.Font.GothamBold
     title.TextSize = 18
@@ -113,9 +107,7 @@ local function buildKeyLinksUI()
     closeBtn.BackgroundTransparency = 1
     closeBtn.MouseButton1Click:Connect(function()
         gui:Destroy()
-        -- Kembali ke Key UI
         if not parentGui:FindFirstChild("STREE_KeyUI") then
-            -- jika kebetulan sudah ditutup, tampilkan lagi
             buildKeyUI()
         end
     end)
@@ -130,7 +122,6 @@ local function buildKeyLinksUI()
     uiList.FillDirection = Enum.FillDirection.Vertical
     uiList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    -- helper: kartu link dengan icon
     local function createLinkCard(name, link, imageId)
         local card = Instance.new("TextButton")
         card.AutoButtonColor = true
@@ -145,7 +136,7 @@ local function buildKeyLinksUI()
         icon.Size = UDim2.new(0, 44, 0, 44)
         icon.Position = UDim2.new(0, 10, 0.5, -22)
         icon.BackgroundTransparency = 1
-        icon.Image = imageId or "rbxassetid://0" -- fallback
+        icon.Image = imageId or "rbxassetid://0"
         icon.ScaleType = Enum.ScaleType.Fit
 
         local lbl = Instance.new("TextLabel", card)
@@ -159,43 +150,171 @@ local function buildKeyLinksUI()
         lbl.Text = name
 
         local note = Instance.new("TextLabel", card)
-        note.Size = UDim2.new(1, -70, 0, 18)
-        note.Position = UDim2.new(0, 64, 1, -24)
-        note.BackgroundTransparency = 1
-        note.TextXAlignment = Enum.TextXAlignment.Left
-        note.Font = Enum.Font.Gotham
-        note.TextSize = 13
-        note.TextColor3 = Color3.fromRGB(180,180,180)
-        note.Text = "Klik untuk copy link"
+-- STREE HUB - Loader & UI Final (Fixed)
+repeat task.wait() until game:IsLoaded()
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Parent GUI
+local success, result = pcall(function()
+    return game:GetService("CoreGui")
+end)
+local parentGui = success and result or LocalPlayer:WaitForChild("PlayerGui")
+
+-- ====== UTIL: DRAGGABLE ======
+local function MakeDraggable(frame:Frame, dragHandle: GuiObject?)
+    dragHandle = dragHandle or frame
+    local dragging, dragStart, startPos = false, nil, nil
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+
+    dragHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    dragHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            if dragging then
+                update(input)
+            end
+        end
+    end)
+end
+
+-- ====== STYLE HELPERS ======
+local function corner(parent, r)
+    local c = Instance.new("UICorner", parent)
+    c.CornerRadius = UDim.new(0, r or 8)
+    return c
+end
+
+local function stroke(parent, color, th)
+    local s = Instance.new("UIStroke", parent)
+    s.Color = color or Color3.fromRGB(0, 255, 0)
+    s.Thickness = th or 2
+    s.Transparency = 0.15
+    return s
+end
+
+-- ====== KEY LIST ======
+local validKeys = {
+    "STREEHUB-INDONESIA-9GHTQ7ZP4M",
+    "STREE-KeySystem-82ghtQRSM",
+    "StreeCommunity-7g81ht7NO22"
+}
+local function isKeyValid(keyInput)
+    for _, key in ipairs(validKeys) do
+        if keyInput == key then
+            return true
+        end
+    end
+    return false
+end
+
+-- ====== Key Links UI ======
+local function buildKeyLinksUI()
+    if parentGui:FindFirstChild("STREE_KeyLinksUI") then
+        parentGui.STREE_KeyLinksUI:Destroy()
+    end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "STREE_KeyLinksUI"
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    gui.Parent = parentGui
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 380, 0, 260)
+    frame.Position = UDim2.new(0.5, -190, 0.5, -130)
+    frame.BackgroundColor3 = Color3.fromRGB(24,24,24)
+    frame.BorderSizePixel = 0
+    corner(frame,12)
+    stroke(frame,Color3.fromRGB(0,255,0), 3)
+
+    local titleBar = Instance.new("Frame", frame)
+    titleBar.Size = UDim2.new(1, -20, 0, 40)
+    titleBar.Position = UDim2.new(0, 10, 0, 8)
+    titleBar.BackgroundTransparency = 1
+
+    local title = Instance.new("TextLabel", titleBar)
+    title.Size = UDim2.new(1, -40, 1, 0)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.TextColor3 = Color3.fromRGB(0,255,0)
+    title.Text = "Key Links"
+
+    local closeBtn = Instance.new("TextButton", titleBar)
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -30, 0, 5)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(255,80,80)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 16
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.MouseButton1Click:Connect(function()
+        gui:Destroy()
+        if not parentGui:FindFirstChild("STREE_KeyUI") then
+            buildKeyUI()
+        end
+    end)
+
+    local list = Instance.new("Frame", frame)
+    list.Size = UDim2.new(1, -20, 1, -60)
+    list.Position = UDim2.new(0, 10, 0, 50)
+    list.BackgroundTransparency = 1
+
+    local uiList = Instance.new("UIListLayout", list)
+    uiList.Padding = UDim.new(0, 8)
+    uiList.FillDirection = Enum.FillDirection.Vertical
+    uiList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    local function createLinkCard(name, link, imageId)
+        local card = Instance.new("TextButton")
+        card.AutoButtonColor = true
+        card.Text = name
+        card.Size = UDim2.new(1, 0, 0, 60)
+        card.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        card.TextColor3 = Color3.fromRGB(0,255,120)
+        card.Font = Enum.Font.GothamBold
+        card.TextSize = 16
+        corner(card, 10)
+        stroke(card, Color3.fromRGB(0,255,120), 1.5)
+        card.Parent = list
 
         card.MouseButton1Click:Connect(function()
-            if setclipboard then setclipboard(link) end
-            note.Text = "Copied!"
-            TweenService:Create(note, TweenInfo.new(0.35), {TextColor3 = Color3.fromRGB(0,255,120)}):Play()
-            task.delay(1.2, function()
-                note.Text = "Klik untuk copy link"
-                note.TextColor3 = Color3.fromRGB(180,180,180)
-            end)
-        end)
-
-        -- hover kecil
-        card.MouseEnter:Connect(function()
-            TweenService:Create(card, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(36,36,36)}):Play()
-        end)
-        card.MouseLeave:Connect(function()
-            TweenService:Create(card, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()
+            if setclipboard then
+                setclipboard(link)
+            end
         end)
     end
 
-    -- Ganti IMAGE_ID_... dengan id asset logo kamu agar tampil
-    createLinkCard("Rekonise",   "https://rkns.link/2vbo0",                         "rbxassetid://IMAGE_ID_REKONISE")
-    createLinkCard("Linkvertise","https://link-hub.net/1365203/NqhrZrvoQhoi",       "rbxassetid://IMAGE_ID_LINKVERTISE")
-    createLinkCard("Lootlabs",   "https://lootdest.org/s?VooVvLbJ",                 "rbxassetid://IMAGE_ID_LOOTLABS")
+    createLinkCard("Rekonise",    "https://rkns.link/2vbo0",                   "rbxassetid://IMAGE_ID_REKONISE")
+    createLinkCard("Linkvertise","https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://IMAGE_ID_LINKVERTISE")
+    createLinkCard("Lootlabs",   "https://lootdest.org/s?VooVvLbJ",            "rbxassetid://IMAGE_ID_LOOTLABS")
 
     MakeDraggable(frame, titleBar)
 end
 
--- ====== Build Main UI ======
+-- ====== Main UI ======
 local function buildMainUI()
     if parentGui:FindFirstChild("STREE_HUB_UI") then parentGui.STREE_HUB_UI:Destroy() end
 
@@ -204,7 +323,7 @@ local function buildMainUI()
     ui.IgnoreGuiInset = true
     ui.ResetOnSpawn = false
 
-    -- Logo STREE HUB (toggle main window)
+    -- Toggle logo
     local logoButton = Instance.new("ImageButton", ui)
     logoButton.Name = "HubIcon"
     logoButton.Size = UDim2.new(0, 44, 0, 44)
@@ -213,7 +332,7 @@ local function buildMainUI()
     logoButton.BackgroundTransparency = 1
     MakeDraggable(logoButton, logoButton)
 
-    -- Window Utama
+    -- Window
     local window = Instance.new("Frame", ui)
     window.Name = "MainWindow"
     window.Size = UDim2.new(0, 560, 0, 360)
@@ -251,9 +370,7 @@ local function buildMainUI()
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.TextSize = 16
     closeBtn.BackgroundTransparency = 1
-    closeBtn.MouseButton1Click:Connect(function()
-        ui:Destroy()
-    end)
+    closeBtn.MouseButton1Click:Connect(function() ui:Destroy() end)
 
     local minimizeBtn = Instance.new("TextButton", titleBar)
     minimizeBtn.Size = UDim2.new(0, 34, 0, 30)
@@ -263,9 +380,7 @@ local function buildMainUI()
     minimizeBtn.Font = Enum.Font.GothamBold
     minimizeBtn.TextSize = 16
     minimizeBtn.BackgroundTransparency = 1
-    minimizeBtn.MouseButton1Click:Connect(function()
-        window.Visible = false
-    end)
+    minimizeBtn.MouseButton1Click:Connect(function() window.Visible = false end)
 
     logoButton.MouseButton1Click:Connect(function()
         window.Visible = not window.Visible
@@ -279,11 +394,14 @@ local function buildMainUI()
     corner(tabMenu, 10)
     stroke(tabMenu, Color3.fromRGB(0,255,120), 1)
 
-    -- Konten
-    local contentFrame = Instance.new("Frame", window)
+    -- Konten (ScrollingFrame supaya CanvasSize berfungsi)
+    local contentFrame = Instance.new("ScrollingFrame", window)
     contentFrame.Size = UDim2.new(1,-180,1,-70)
     contentFrame.Position = UDim2.new(0,15,0,55)
     contentFrame.BackgroundTransparency = 1
+    contentFrame.CanvasSize = UDim2.new(0,0,0,0)
+    contentFrame.ScrollBarThickness = 6
+    contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.None
 
     local function clearContent()
         for _,v in pairs(contentFrame:GetChildren()) do
@@ -292,8 +410,9 @@ local function buildMainUI()
     end
 
     local yOffset = 0
-    local function nextY(height) local y = yOffset; yOffset=yOffset+height+8; return y end
+    local function nextY(h) local y=yOffset; yOffset=yOffset+h+8; return y end
     local function resetYOffset() yOffset=0 end
+    local function refreshCanvas() contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0) end
 
     local function createLabel(text)
         local lbl = Instance.new("TextLabel", contentFrame)
@@ -384,83 +503,74 @@ local function buildMainUI()
 
         switch.MouseButton1Click:Connect(toggle)
         row.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                -- klik di mana saja pada row juga toggle
-                toggle()
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then toggle() end
+        end)
+    end
+
+    local function createSlider(text, min, max, default, callback)
+        local row = Instance.new("Frame", contentFrame)
+        row.Size = UDim2.new(1,-20,0,50)
+        row.Position = UDim2.new(0,10,0,nextY(50))
+        row.BackgroundColor3 = Color3.fromRGB(28,28,28)
+        corner(row, 8)
+
+        local lbl = Instance.new("TextLabel", row)
+        lbl.Size = UDim2.new(0.5, -10, 0, 20)
+        lbl.Position = UDim2.new(0,10,0,5)
+        lbl.BackgroundTransparency = 1
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Font = Enum.Font.Gotham
+        lbl.TextSize = 14
+        lbl.TextColor3 = Color3.fromRGB(220,220,220)
+        lbl.Text = text
+
+        local valueLbl = Instance.new("TextLabel", row)
+        valueLbl.Size = UDim2.new(0.3, -10, 0, 20)
+        valueLbl.Position = UDim2.new(1, -110, 0, 5)
+        valueLbl.BackgroundTransparency = 1
+        valueLbl.TextXAlignment = Enum.TextXAlignment.Right
+        valueLbl.Font = Enum.Font.Gotham
+        valueLbl.TextSize = 14
+        valueLbl.TextColor3 = Color3.fromRGB(0,255,120)
+        valueLbl.Text = tostring(default)
+
+        local sliderBG = Instance.new("Frame", row)
+        sliderBG.Size = UDim2.new(1,-20,0,8)
+        sliderBG.Position = UDim2.new(0,10,1,-18)
+        sliderBG.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        corner(sliderBG, 4)
+
+        local sliderFill = Instance.new("Frame", sliderBG)
+        sliderFill.Size = UDim2.new((default-min)/(max-min),0,1,0)
+        sliderFill.BackgroundColor3 = Color3.fromRGB(0,200,0)
+        corner(sliderFill, 4)
+
+        local dragging = false
+        local function update(inputPos)
+            local relative = math.clamp((inputPos.X - sliderBG.AbsolutePosition.X) / sliderBG.AbsoluteSize.X, 0, 1)
+            local value = math.floor((min + (max-min) * relative) * 10)/10
+            sliderFill.Size = UDim2.new(relative,0,1,0)
+            valueLbl.Text = tostring(value)
+            if callback then pcall(callback, value) end
+        end
+        sliderBG.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                update(input.Position)
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then dragging = false end
+                end)
+            end
+        end)
+        sliderBG.InputChanged:Connect(function(input)
+            if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragging then
+                update(input.Position)
             end
         end)
     end
 
-local function createSlider(text, min, max, default, callback)
-    local row = Instance.new("Frame", contentFrame)
-    row.Size = UDim2.new(1,-20,0,50)
-    row.Position = UDim2.new(0,10,0,nextY(50))
-    row.BackgroundColor3 = Color3.fromRGB(28,28,28)
-    corner(row, 8)
-
-    local lbl = Instance.new("TextLabel", row)
-    lbl.Size = UDim2.new(0.5, -10, 0, 20)
-    lbl.Position = UDim2.new(0,10,0,5)
-    lbl.BackgroundTransparency = 1
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Font = Enum.Font.Gotham
-    lbl.TextSize = 14
-    lbl.TextColor3 = Color3.fromRGB(220,220,220)
-    lbl.Text = text
-
-    local valueLbl = Instance.new("TextLabel", row)
-    valueLbl.Size = UDim2.new(0.3, -10, 0, 20)
-    valueLbl.Position = UDim2.new(1, -110, 0, 5)
-    valueLbl.BackgroundTransparency = 1
-    valueLbl.TextXAlignment = Enum.TextXAlignment.Right
-    valueLbl.Font = Enum.Font.Gotham
-    valueLbl.TextSize = 14
-    valueLbl.TextColor3 = Color3.fromRGB(0,255,120)
-    valueLbl.Text = tostring(default)
-
-    local sliderBG = Instance.new("Frame", row)
-    sliderBG.Size = UDim2.new(1,-20,0,8)
-    sliderBG.Position = UDim2.new(0,10,1,-18)
-    sliderBG.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    corner(sliderBG, 4)
-
-    local sliderFill = Instance.new("Frame", sliderBG)
-    sliderFill.Size = UDim2.new((default-min)/(max-min),0,1,0)
-    sliderFill.BackgroundColor3 = Color3.fromRGB(0,200,0)
-    corner(sliderFill, 4)
-
-    local dragging = false
-
-    local function update(inputPos)
-        local relative = math.clamp((inputPos.X - sliderBG.AbsolutePosition.X) / sliderBG.AbsoluteSize.X, 0, 1)
-        local value = math.floor((min + (max-min) * relative) * 10)/10
-        sliderFill.Size = UDim2.new(relative,0,1,0)
-        valueLbl.Text = tostring(value)
-        if callback then
-            pcall(callback, value)
-        end
-    end
-
-    sliderBG.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            update(input.Position)
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    sliderBG.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            if dragging then update(input.Position) end
-        end
-    end)
-    end
-
     local lastTabY = 0
+    local firstTabCallback -- simpan callback Home untuk auto-open
     local function createTab(name, callback)
         local btn = Instance.new("TextButton", tabMenu)
         btn.Size = UDim2.new(1,-12,0,32)
@@ -476,6 +586,7 @@ local function createSlider(text, min, max, default, callback)
             clearContent()
             resetYOffset()
             callback()
+            refreshCanvas()
         end)
         btn.MouseEnter:Connect(function()
             TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(70,70,70)}):Play()
@@ -483,64 +594,99 @@ local function createSlider(text, min, max, default, callback)
         btn.MouseLeave:Connect(function()
             TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()
         end)
+        if not firstTabCallback then firstTabCallback = callback end
     end
 
-    -- Tab Home
+    -- ===== Tabs =====
     createTab("Home", function()
-        resetYOffset()
-        createLabel("Infomation")
+        createLabel("Information")
 
         createButton("Discord", function()
-            setclipboard("https://discord.gg/jdmX43t5mY")
+            if setclipboard then setclipboard("https://discord.gg/jdmX43t5mY") end
         end)
-
         createButton("WhatsApp", function()
-            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+            if setclipboard then setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N") end
         end)
-
         createButton("Telegram", function()
-            setclipboard("https://t.me/StreeCoumminty")
+            if setclipboard then setclipboard("https://t.me/StreeCoumminty") end
         end)
-
         createButton("Website", function()
-            setclipboard("https://streehub.netlify.app")
+            if setclipboard then setclipboard("https://streehub.netlify.app") end
         end)
 
-        createLabel("Test")
+        createLabel("⚙️ Utility")
 
-        createToggleModern("Auto sell", false, function(on)
-            pcall(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
-        end)
+-- Simpan thread / koneksi tiap feature
+local featureThreads = {}
 
-        createToggleModern("Auto Plant & Harvest", false, function(on)
-            pcall(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()
+createToggleModern("Auto sell", false, function(on)
+    if on then
+        -- Jalankan ulang
+        local success, err = pcall(function()
+            featureThreads["autosell"] = loadstring(game:HttpGet(
+                "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"
+            ))()
         end)
+        if not success then warn("Auto sell error:", err) end
+    else
+        -- Hentikan kalau script menyediakan stop()
+        if featureThreads["autosell"] and typeof(featureThreads["autosell"])=="function" then
+            pcall(featureThreads["autosell"]) -- misalnya fungsi stop
+        end
+        featureThreads["autosell"] = nil
+    end
+end)
 
-        createToggleModern("Auto watering", false, function(on)
-            pcall(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()
+createToggleModern("Auto Plant & Harvest", false, function(on)
+    if on then
+        local success, err = pcall(function()
+            featureThreads["autoplant"] = loadstring(game:HttpGet(
+                "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"
+            ))()
         end)
-            
+        if not success then warn("Auto Plant error:", err) end
+    else
+        if featureThreads["autoplant"] and typeof(featureThreads["autoplant"])=="function" then
+            pcall(featureThreads["autoplant"])
+        end
+        featureThreads["autoplant"] = nil
+    end
+end)
+
+createToggleModern("Auto watering", false, function(on)
+    if on then
+        local success, err = pcall(function()
+            featureThreads["autowater"] = loadstring(game:HttpGet(
+                "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"
+            ))()
+        end)
+        if not success then warn("Auto watering error:", err) end
+    else
+        if featureThreads["autowater"] and typeof(featureThreads["autowater"])=="function" then
+            pcall(featureThreads["autowater"])
+        end
+        featureThreads["autowater"] = nil
+    end
+end)
+
         createLabel("Players")
 
-        local walkSlider = Instance.new("Frame", contentFrame)
-        walkSlider.Size = UDim2.new(1,-20,0,40)
-        walkSlider.Position = UDim2.new(0,10,0,nextY(40))
-        walkSlider.BackgroundTransparency = 1
+        -- WalkSpeed input
+        local row = Instance.new("Frame", contentFrame)
+        row.Size = UDim2.new(1,-20,0,40)
+        row.Position = UDim2.new(0,10,0,nextY(40))
+        row.BackgroundTransparency = 1
 
-        local walkLabel = Instance.new("TextLabel", walkSlider)
+        local walkLabel = Instance.new("TextLabel", row)
         walkLabel.Size = UDim2.new(0.5,0,1,0)
-        walkLabel.Position = UDim2.new(0,0,0,0)
+        walkLabel.TextXAlignment = Enum.TextXAlignment.Left
         walkLabel.BackgroundTransparency = 1
         walkLabel.TextColor3 = Color3.fromRGB(200,200,200)
         walkLabel.Text = "WalkSpeed: 16"
         walkLabel.Font = Enum.Font.Gotham
         walkLabel.TextSize = 14
-        walkLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-        local walkBox = Instance.new("TextBox", walkSlider)
+        local walkBox = Instance.new("TextBox", row)
         walkBox.Size = UDim2.new(0.3,0,0.7,0)
         walkBox.Position = UDim2.new(0.65,0,0.15,0)
         walkBox.PlaceholderText = "16"
@@ -550,41 +696,33 @@ local function createSlider(text, min, max, default, callback)
         walkBox.TextSize = 14
         corner(walkBox, 6)
 
-        walkBox.FocusLost:Connect(function(enterPressed)
+        walkBox.FocusLost:Connect(function()
             local val = tonumber(walkBox.Text)
-            if val then
-                LocalPlayer.Character.Humanoid.WalkSpeed = val
+            if val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val
                 walkLabel.Text = "WalkSpeed: "..val
             end
         end)
+    end)
 
-    contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
-end)
+    createTab("Visual", function()
+        createLabel("Coming soon: ESP, Highlight, dll.")
+    end)
 
--- Tab Visual
-createTab("Visual"), function()
-    resetYOffset()
+    createTab("Credits", function()
+        createLabel("Created by: STREE Community")
+        createLabel("STREE HUB | create-stree")
+        createLabel("Thank you for using our script 😄")
+        createLabel("This UI still has shortcomings [Beta]")
+    end)
 
--- Tab Credits
-createTab("Credits", function()
-    resetYOffset()
-    createLabel("Created by: STREE Community")
-    createLabel("STREE HUB | create-stree")
-    createLabel("Thank you for using our script😄")
-    createLabel("This UI still has shortcomings [Beta]")
-    contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0)
-end)
+    -- Buka tab pertama (Home)
+    if firstTabCallback then firstTabCallback() end
 
-    -- Default buka Home
-    for _,b in ipairs(tabMenu:GetChildren()) do
-        if b:IsA("TextButton") then b:Activate(); break end
-    end
-
-    -- draggable semua window utama via titleBar
     MakeDraggable(window, titleBar)
 end
 
--- ====== Build Key UI utama ======
+-- ====== Key UI ======
 function buildKeyUI()
     if parentGui:FindFirstChild("STREE_KeyUI") then parentGui.STREE_KeyUI:Destroy() end
 
@@ -608,7 +746,6 @@ function buildKeyUI()
 
     local title = Instance.new("TextLabel", titleBar)
     title.Size = UDim2.new(1, -40, 1, 0)
-    title.Position = UDim2.new(0,0,0,0)
     title.BackgroundTransparency = 1
     title.Font = Enum.Font.GothamBold
     title.TextSize = 18
@@ -635,15 +772,15 @@ function buildKeyUI()
     status.TextColor3 = Color3.fromRGB(200,200,200)
     status.Text = ""
 
-    local enterBtn = Instance.new("TextButton", frame)
-    enterBtn.Size = UDim2.new(0.47,-6,0,32)
-    enterBtn.Position = UDim2.new(0,10,0,130)
-    enterBtn.Text = "Enter"
-    enterBtn.Font = Enum.Font.GothamBold
-    enterBtn.TextSize = 16
-    enterBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-    enterBtn.TextColor3 = Color3.fromRGB(0,0,0)
-    corner(enterBtn, 8)
+    local submitBtn = Instance.new("TextButton", frame)
+    submitBtn.Size = UDim2.new(0.47,-6,0,32)
+    submitBtn.Position = UDim2.new(0,10,0,130)
+    submitBtn.Text = "Submit"
+    submitBtn.Font = Enum.Font.GothamBold
+    submitBtn.TextSize = 16
+    submitBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+    submitBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    corner(submitBtn, 8)
 
     local discordBtn = Instance.new("TextButton", frame)
     discordBtn.Size = UDim2.new(0.47,-6,0,32)
@@ -674,7 +811,7 @@ function buildKeyUI()
         buildKeyLinksUI()
     end)
 
-    enterBtn.MouseButton1Click:Connect(function()
+    submitBtn.MouseButton1Click:Connect(function()
         local key = input.Text
         if isKeyValid(key) then
             status.TextColor3 = Color3.fromRGB(0,255,0)
