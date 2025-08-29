@@ -508,15 +508,19 @@ local function createSlider(text, min, max, default, callback)
 
         createLabel("Test")
 
-        createToggleModern("Night Mode", false, function(on)
+        createToggleModern("Auto sell", false, function(on)
             pcall(function()
-                game.Lighting.TimeOfDay = on and "00:00:00" or "14:00:00"
-                game.Lighting.Brightness = on and 1 or 2
-            end)
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
         end)
 
-        createToggleModern("Shiftlock", false, function(on)
-            pcall(function() LocalPlayer.DevEnableMouseLock = on end)
+        createToggleModern("Auto Plant & Harvest", false, function(on)
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()
+        end)
+
+        createToggleModern("Auto watering", false, function(on)
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()
         end)
             
         createLabel("Players")
