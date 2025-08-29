@@ -614,60 +614,31 @@ local function buildMainUI()
             if setclipboard then setclipboard("https://streehub.netlify.app") end
         end)
 
-        createLabel("⚙️ Utility")
-
--- Simpan thread / koneksi tiap feature
-local featureThreads = {}
-
-createToggleModern("Auto sell", false, function(on)
-    if on then
-        -- Jalankan ulang
-        local success, err = pcall(function()
-            featureThreads["autosell"] = loadstring(game:HttpGet(
-                "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"
-            ))()
-        end)
-        if not success then warn("Auto sell error:", err) end
-    else
-        -- Hentikan kalau script menyediakan stop()
-        if featureThreads["autosell"] and typeof(featureThreads["autosell"])=="function" then
-            pcall(featureThreads["autosell"]) -- misalnya fungsi stop
-        end
-        featureThreads["autosell"] = nil
-    end
-end)
-
-createToggleModern("Auto Plant & Harvest", false, function(on)
-    if on then
-        local success, err = pcall(function()
-            featureThreads["autoplant"] = loadstring(game:HttpGet(
-                "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"
-            ))()
-        end)
-        if not success then warn("Auto Plant error:", err) end
-    else
-        if featureThreads["autoplant"] and typeof(featureThreads["autoplant"])=="function" then
-            pcall(featureThreads["autoplant"])
-        end
-        featureThreads["autoplant"] = nil
-    end
-end)
-
-createToggleModern("Auto watering", false, function(on)
-    if on then
-        local success, err = pcall(function()
-            featureThreads["autowater"] = loadstring(game:HttpGet(
-                "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"
-            ))()
-        end)
-        if not success then warn("Auto watering error:", err) end
-    else
-        if featureThreads["autowater"] and typeof(featureThreads["autowater"])=="function" then
-            pcall(featureThreads["autowater"])
-        end
-        featureThreads["autowater"] = nil
-    end
-end)
+        createLabel("⚙️ Utility")    
+    
+        createToggleModern("Auto sell", false, function(on)    
+            if on then    
+                pcall(function()    
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()    
+                end)    
+            end    
+        end)    
+    
+        createToggleModern("Auto Plant & Harvest", false, function(on)    
+            if on then    
+                pcall(function()    
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()    
+                end)    
+            end    
+        end)    
+    
+        createToggleModern("Auto watering", false, function(on)    
+            if on then    
+                pcall(function()    
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()    
+                end)    
+            end    
+        end)    
 
         createLabel("Players")
 
