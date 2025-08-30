@@ -202,7 +202,7 @@ local function buildMainUI()
     headerLogo.BackgroundTransparency = 1
 
     local title = Instance.new("TextLabel", titleBar)
-    title.Text = "STREE HUB | Grow A Garden | v0.00.01"
+    title.Text = "STREE HUB | Grow A Garden | v0.00.02"
     title.Size = UDim2.new(1, -120, 1, 0)
     title.Position = UDim2.new(0,40,0,0)
     title.TextSize = 22
