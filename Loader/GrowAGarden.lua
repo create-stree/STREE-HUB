@@ -464,29 +464,40 @@ local function buildMainUI()
 
         createLabel("⚙️ Utility")    
     
-        createToggleModern("Auto sell", false, 
-        function(on)
-            _G.AutoSell = on
-            if on then
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
-            end
+        createToggleModern("Auto Sell", false, function(on)
+    _G.AutoSell = on
+    if on then
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()
         end)
+    end
+end)
     
-        createToggleModern("Auto Plant & Harvest", false, function(on)    
-            if on then    
-                pcall(function()    
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()    
-                end)    
-            end    
-        end)    
+        createToggleModern("Auto Plant & Harvest", false, function(on)
+    if on then
+        -- Toggle ON
+        _G.STREE_AutoFarm = true
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()
+        end)
+    else
+        -- Toggle OFF
+        _G.STREE_AutoFarm = false
+    end
+end)
     
-        createToggleModern("Auto watering", false, function(on)    
-            if on then    
-                pcall(function()    
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()    
-                end)    
-            end    
-        end)    
+        createToggleModern("Auto Watering", false, function(on)
+    if on then
+        -- Toggle ON
+        _G.STREE_AutoWatering = true
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()
+        end)
+    else
+        -- Toggle OFF
+        _G.STREE_AutoWatering = false
+    end
+end)
 
         createLabel("Players")
 
@@ -525,8 +536,20 @@ local function buildMainUI()
     end)
 
     createTab("Visual", function()
-        createLabel("Coming soon: ESP, Highlight, dll.")
+    createToggleModern("Esp Grow", false, function(value)
+        if value then
+            -- Toggle ON
+            _G.GAG_PrismaticESP_Enabled = true
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Espprismatic.lua"))()
+        else
+            -- Toggle OFF
+            _G.GAG_PrismaticESP_Enabled = false
+            if _G.__GAG_PRISMATIC_ESP and _G.__GAG_PRISMATIC_ESP.Destroy then
+                _G.__GAG_PRISMATIC_ESP.Destroy()
+            end
+        end
     end)
+end)
 
     createTab("Credits", function()
         createLabel("Created by: STREE Community")
