@@ -160,7 +160,7 @@ local function buildMainUI()
     local yOffset = 0  
     local function nextY(h) local y=yOffset; yOffset=yOffset+h+8; return y end  
     local function resetYOffset() yOffset=0 end  
-    local function refreshCanvas() contentFrame.CanvasSize = UDim2.new(0,0,yOffset,0) end  
+    local function refreshCanvas() contentFrame.CanvasSize = UDim2.new(0,0,0,yOffset) end  
   
     local function createLabel(text)  
         local lbl = Instance.new("TextLabel", contentFrame)  
@@ -172,9 +172,10 @@ local function buildMainUI()
         lbl.TextSize = 14  
         lbl.TextXAlignment = Enum.TextXAlignment.Left  
         lbl.BackgroundTransparency = 1  
+        return lbl
     end  
   
-local function createButton(text, callback)  
+    local function createButton(text, callback)  
         local btn = Instance.new("TextButton", contentFrame)  
         btn.Size = UDim2.new(1,-20,0,34)  
         btn.Position = UDim2.new(0,10,0,nextY(34))  
@@ -191,6 +192,7 @@ local function createButton(text, callback)
         btn.MouseLeave:Connect(function()  
             TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()  
         end)  
+        return btn
     end  
   
     local function createToggleModern(text, default, callback)  
@@ -248,6 +250,10 @@ local function createButton(text, callback)
                 end)  
             end  
         end  
+  
+        switch.MouseButton1Click:Connect(toggle)
+        return {Toggle = toggle, GetState = function() return state end}
+    end  
   
     local function createSlider(text, min, max, default, callback)  
         local row = Instance.new("Frame", contentFrame)  
@@ -309,6 +315,11 @@ local function createButton(text, callback)
                 update(input.Position)  
             end  
         end)  
+        return {Update = function(value) 
+            local relative = math.clamp((value-min)/(max-min), 0, 1)
+            sliderFill.Size = UDim2.new(relative,0,1,0)
+            valueLbl.Text = tostring(value)
+        end}
     end  
   
     local lastTabY = 0  
@@ -337,135 +348,137 @@ local function createButton(text, callback)
             TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()  
         end)  
         if not firstTabCallback then firstTabCallback = callback end  
+        return btn
     end  
   
-_G.AutoSell = false  
-_G.STREE_AutoFarm = false  
-_G.STREE_AutoWatering = false  
-_G.GAG_PrismaticESP_Enabled = false  
+    _G.AutoSell = false  
+    _G.STREE_AutoFarm = false  
+    _G.STREE_AutoWatering = false  
+    _G.GAG_PrismaticESP_Enabled = false  
   
--- ===== TABS =====  
+    -- ===== TABS =====  
+    createTab("Home", function()  
+        createLabel("Information")  
   
-createTab("Home", function()  
-    createLabel("Information")  
+        createButton("Discord", function()  
+            if setclipboard then setclipboard("https://discord.gg/jdmX43t5mY") end  
+        end)  
+        createButton("WhatsApp", function()  
+            if setclipboard then setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N") end  
+        end)  
+        createButton("Telegram", function()  
+            if setclipboard then setclipboard("https://t.me/StreeCoumminty") end  
+        end)  
+        createButton("Website", function()  
+            if setclipboard then setclipboard("https://stree-hub-nexus.lovable.app") end  
+        end)  
   
-    createButton("Discord", function()  
-        if setclipboard then setclipboard("https://discord.gg/jdmX43t5mY") end  
-    end)  
-    createButton("WhatsApp", function()  
-        if setclipboard then setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N") end  
-    end)  
-    createButton("Telegram", function()  
-        if setclipboard then setclipboard("https://t.me/StreeCoumminty") end  
-    end)  
-    createButton("Website", function()  
-        if setclipboard then setclipboard("https://stree-hub-nexus.lovable.app") end  
-    end)  
+        createLabel("Players")  
   
-    createLabel("Players")  
+        -- WalkSpeed input  
+        local row = Instance.new("Frame", contentFrame)  
+        row.Size = UDim2.new(1,-20,0,40)  
+        row.Position = UDim2.new(0,10,0,nextY(40))  
+        row.BackgroundTransparency = 1  
   
-    -- WalkSpeed input  
-    local row = Instance.new("Frame", contentFrame)  
-    row.Size = UDim2.new(1,-20,0,40)  
-    row.Position = UDim2.new(0,10,0,nextY(40))  
-    row.BackgroundTransparency = 1  
+        local walkLabel = Instance.new("TextLabel", row)  
+        walkLabel.Size = UDim2.new(0.5,0,1,0)  
+        walkLabel.TextXAlignment = Enum.TextXAlignment.Left  
+        walkLabel.BackgroundTransparency = 1  
+        walkLabel.TextColor3 = Color3.fromRGB(200,200,200)  
+        walkLabel.Text = "WalkSpeed: 16"  
+        walkLabel.Font = Enum.Font.Gotham  
+        walkLabel.TextSize = 14  
   
-    local walkLabel = Instance.new("TextLabel", row)  
-    walkLabel.Size = UDim2.new(0.5,0,1,0)  
-    walkLabel.TextXAlignment = Enum.TextXAlignment.Left  
-    walkLabel.BackgroundTransparency = 1  
-    walkLabel.TextColor3 = Color3.fromRGB(200,200,200)  
-    walkLabel.Text = "WalkSpeed: 16"  
-    walkLabel.Font = Enum.Font.Gotham  
-    walkLabel.TextSize = 14  
+        local walkBox = Instance.new("TextBox", row)  
+        walkBox.Size = UDim2.new(0.3,0,0.7,0)  
+        walkBox.Position = UDim2.new(0.65,0,0.15,0)  
+        walkBox.PlaceholderText = "16"  
+        walkBox.BackgroundColor3 = Color3.fromRGB(36,36,36)  
+        walkBox.TextColor3 = Color3.fromRGB(255,255,255)  
+        walkBox.Font = Enum.Font.Gotham  
+        walkBox.TextSize = 14  
+        corner(walkBox, 6)  
   
-    local walkBox = Instance.new("TextBox", row)  
-    walkBox.Size = UDim2.new(0.3,0,0.7,0)  
-    walkBox.Position = UDim2.new(0.65,0,0.15,0)  
-    walkBox.PlaceholderText = "16"  
-    walkBox.BackgroundColor3 = Color3.fromRGB(36,36,36)  
-    walkBox.TextColor3 = Color3.fromRGB(255,255,255)  
-    walkBox.Font = Enum.Font.Gotham  
-    walkBox.TextSize = 14  
-    corner(walkBox, 6)  
-  
-    walkBox.FocusLost:Connect(function()  
-        local val = tonumber(walkBox.Text)  
-        if val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then  
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val  
-            walkLabel.Text = "WalkSpeed: "..val  
-        end  
-    end)  
-end)  
-  
-createTab("Auto", function()  
-    createLabel("⚙️ Utility")      
-  
-    createToggleModern("Auto Sell", false, function(on)  
-        _G.AutoSell = on  
-        if on then  
-            warn("[STREE HUB] Auto Sell ENABLED")  
-            pcall(function()  
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()  
-            end)  
-        else  
-            warn("[STREE HUB] Auto Sell DISABLED")  
-        end  
-    end)  
-  
-    createToggleModern("Auto Plant & Harvest", false, function(on)  
-        _G.STREE_AutoFarm = on  
-        if on then  
-            warn("[STREE HUB] Auto Plant & Harvest ENABLED")  
-            pcall(function()  
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()  
-            end)  
-        else  
-            warn("[STREE HUB] Auto Plant & Harvest DISABLED")  
-        end  
-    end)  
-  
-    createToggleModern("Auto Watering", false, function(on)  
-        _G.STREE_AutoWatering = on  
-        if on then  
-            warn("[STREE HUB] Auto Watering ENABLED")  
-            pcall(function()  
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()  
-            end)  
-        else  
-            warn("[STREE HUB] Auto Watering DISABLED")  
-        end  
-    end)  
-end)  
-  
-createTab("Visual", function()  
-    createToggleModern("Esp Grow", false, function(on)  
-        _G.GAG_PrismaticESP_Enabled = on  
-        if on then  
-            warn("[STREE HUB] ESP Grow ENABLED")  
-            pcall(function()  
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Espprismatic.lua"))()  
-            end)  
-        else  
-            warn("[STREE HUB] ESP Grow DISABLED")  
-            if _G.__GAG_PRISMATIC_ESP and _G.__GAG_PRISMATIC_ESP.Destroy then  
-                _G.__GAG_PRISMATIC_ESP.Destroy()  
+        walkBox.FocusLost:Connect(function()  
+            local val = tonumber(walkBox.Text)  
+            if val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then  
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val  
+                walkLabel.Text = "WalkSpeed: "..val  
             end  
-        end  
+        end)  
     end)  
-end)  
   
-createTab("Credits", function()  
-    createLabel("Created by: STREE Community")  
-    createLabel("STREE HUB | create-stree")  
-    createLabel("Thank you for using our script 😄")  
-    createLabel("This UI still has shortcomings [Beta]")  
-end)  
+    createTab("Auto", function()  
+        createLabel("⚙️ Utility")      
   
-if firstTabCallback then firstTabCallback() end  
+        createToggleModern("Auto Sell", false, function(on)  
+            _G.AutoSell = on  
+            if on then  
+                warn("[STREE HUB] Auto Sell ENABLED")  
+                pcall(function()  
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20sell.lua"))()  
+                end)  
+            else  
+                warn("[STREE HUB] Auto Sell DISABLED")  
+            end  
+        end)  
   
--- Draggable  
-MakeDraggable(window, titleBar) 
+        createToggleModern("Auto Plant & Harvest", false, function(on)  
+            _G.STREE_AutoFarm = on  
+            if on then  
+                warn("[STREE HUB] Auto Plant & Harvest ENABLED")  
+                pcall(function()  
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20plant%20%26%20Auto%20Harvest.lua"))()  
+                end)  
+            else  
+                warn("[STREE HUB] Auto Plant & Harvest DISABLED")  
+            end  
+        end)  
+  
+        createToggleModern("Auto Watering", false, function(on)  
+            _G.STREE_AutoWatering = on  
+            if on then  
+                warn("[STREE HUB] Auto Watering ENABLED")  
+                pcall(function()  
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Auto%20Watering.lua"))()  
+                end)  
+            else  
+                warn("[STREE HUB] Auto Watering DISABLED")  
+            end  
+        end)  
+    end)  
+  
+    createTab("Visual", function()  
+        createToggleModern("Esp Grow", false, function(on)  
+            _G.GAG_PrismaticESP_Enabled = on  
+            if on then  
+                warn("[STREE HUB] ESP Grow ENABLED")  
+                pcall(function()  
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Grow/Espprismatic.lua"))()  
+                end)  
+            else  
+                warn("[STREE HUB] ESP Grow DISABLED")  
+                if _G.__GAG_PRISMATIC_ESP and _G.__GAG_PRISMATIC_ESP.Destroy then  
+                    _G.__GAG_PRISMATIC_ESP.Destroy()  
+                end  
+            end  
+        end)  
+    end)  
+  
+    createTab("Credits", function()  
+        createLabel("Created by: STREE Community")  
+        createLabel("STREE HUB | create-stree")  
+        createLabel("Thank you for using our script 😄")  
+        createLabel("This UI still has shortcomings [Beta]")  
+    end)  
+  
+    if firstTabCallback then firstTabCallback() end  
+    refreshCanvas()
+  
+    -- Draggable  
+    MakeDraggable(window, titleBar) 
+end
 
 -- START
-builMainUI()
+buildMainUI()
