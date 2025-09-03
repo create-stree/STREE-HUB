@@ -8,24 +8,27 @@ if not success or not WindUI then
     return
 end
 
--- Buat Window WindUI
 local Window = WindUI:CreateWindow({
-    Title = "STREE HUB | Blox Fruits v1.0",
-    Icon = "door-open",
-    Author = "Kirsia",
+    Title = "STREE HUB",
+    Icon = "computer",
+    Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
     Folder = "STREE_HUB",
 })
 
--- Cek Window berhasil dibuat
-if not Window then
-    warn("Window gagal dibuat")
-    return
-end
-
--- === Tambah Tab
-local Tab = Window:Tab({
+-- Buat Tab
+local Tab1 = Window:Tab({
     Title = "Main",
     Icon = "bird",
+})
+
+local Tab2 = Window:Tab({
+    Title = "Visual",
+    Icon = "eye",
+})
+
+local Tab3 = Window:Tab({
+    Title = "Settings",
+    Icon = "settings",
 })
 
 Tab:Button({
