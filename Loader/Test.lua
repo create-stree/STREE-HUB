@@ -18,7 +18,7 @@ local Window = WindUI:CreateWindow({
 -- Buat Tab
 local Tab1 = Window:Tab({
     Title = "Main",
-    Icon = "bird",
+    Icon = "Main",
 })
 
 local Tab2 = Window:Tab({
