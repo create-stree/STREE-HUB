@@ -47,3 +47,5 @@ logoBtn.MouseButton1Click:Connect(function()
     isOpen = not isOpen
     Window.Visible = isOpen
 end)
+
+myConfig:Load()
