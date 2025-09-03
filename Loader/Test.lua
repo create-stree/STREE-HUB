@@ -1,51 +1,75 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+-- Load WindUI
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+end)
 
--- Buat Window WindUI (Hub utama)
-local Window = Library:Window("STREE HUB", "Blox Fruits v1.0")
+if not success or not WindUI then
+    warn("WindUI gagal dimuat")
+    return
+end
 
+-- Buat Window WindUI
 local Window = WindUI:CreateWindow({
-    Title = "My Super script | Test Hub",
+    Title = "STREE HUB | Blox Fruits v1.0",
     Icon = "door-open",
-    Author = "Example UI",
-    Folder = "MyTestHub",
+    Author = "Kirsia",
+    Folder = "STREE_HUB",
 })
 
+-- Cek Window berhasil dibuat
+if not Window then
+    warn("Window gagal dibuat")
+    return
+end
+
+-- === Tambah Tab
 local Tab = Window:Tab({
-    Title = "Tab Title",
+    Title = "Main",
     Icon = "bird",
-    Locked = false,
 })
 
-local Button = Tab:Button({
-    Title = "Button",
-    Desc = "Test Button",
-    Locked = false,
+Tab:Button({
+    Title = "Test Button",
+    Desc = "Klik ini",
     Callback = function()
-        print("clicked")
+        print("Button clicked!")
     end
 })
 
--- === Logo bulat di pojok layar ===
-local logoGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+-- === Logo bulat toggle (pojok kanan atas)
+local logoGui = Instance.new("ScreenGui")
 logoGui.Name = "STREEHUB_Logo"
+logoGui.Parent = game:GetService("CoreGui")
 
 local logoBtn = Instance.new("ImageButton")
 logoBtn.Parent = logoGui
 logoBtn.Size = UDim2.new(0, 60, 0, 60)
-logoBtn.Position = UDim2.new(1, -80, 0, 150) -- kanan atas
-logoBtn.AnchorPoint = Vector2.new(0,0)
-logoBtn.Image = "rbxassetid://101447877507131" -- ganti ke asset ID planet/logo kamu
+logoBtn.Position = UDim2.new(1, -80, 0, 150)
+logoBtn.Image = "rbxassetid://101447877507131" -- Ganti ke logo kamu
 logoBtn.BackgroundTransparency = 1
 
--- Biar bulat
 local uicorner = Instance.new("UICorner", logoBtn)
 uicorner.CornerRadius = UDim.new(1,0)
 
--- === Fungsi buka/tutup Window WindUI
+-- Toggle buka/tutup Window
 local isOpen = true
 logoBtn.MouseButton1Click:Connect(function()
     isOpen = not isOpen
-    Window.Visible = isOpen
+    if isOpen then
+        if Window.Open then
+            Window:Open()
+        elseif Window.Show then
+            Window:Show()
+        else
+            print("⚠️ WindUI tidak punya :Open() / :Show()")
+        end
+    else
+        if Window.Close then
+            Window:Close()
+        elseif Window.Hide then
+            Window:Hide()
+        else
+            print("⚠️ WindUI tidak punya :Close() / :Hide()")
+        end
+    end
 end)
-
-myConfig:Load()
