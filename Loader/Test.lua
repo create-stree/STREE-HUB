@@ -1,18 +1,49 @@
--- Contoh penggunaan WindUI
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/username/WindUI/main/source.lua"))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
-local Window = Library:Window("My Hub", "WindUI Example", Enum.KeyCode.RightControl)
+-- Buat Window WindUI (Hub utama)
+local Window = Library:Window("STREE HUB", "Blox Fruits v1.0")
 
-local Tab = Window:Tab("Main")
+local Window = WindUI:CreateWindow({
+    Title = "My Super script | Test Hub",
+    Icon = "door-open",
+    Author = "Example UI",
+    Folder = "MyTestHub",
+})
 
-Tab:Button("Click Me", function()
-    print("Button clicked!")
-end)
+local Tab = Window:Tab({
+    Title = "Tab Title",
+    Icon = "bird",
+    Locked = false,
+})
 
-Tab:Toggle("Enable Feature", false, function(value)
-    print("Feature: ", value)
-end)
+local Button = Tab:Button({
+    Title = "Button",
+    Desc = "Test Button",
+    Locked = false,
+    Callback = function()
+        print("clicked")
+    end
+})
 
-Tab:Slider("WalkSpeed", 16, 100, 16, function(speed)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+-- === Logo bulat di pojok layar ===
+local logoGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+logoGui.Name = "STREEHUB_Logo"
+
+local logoBtn = Instance.new("ImageButton")
+logoBtn.Parent = logoGui
+logoBtn.Size = UDim2.new(0, 60, 0, 60)
+logoBtn.Position = UDim2.new(1, -80, 0, 150) -- kanan atas
+logoBtn.AnchorPoint = Vector2.new(0,0)
+logoBtn.Image = "rbxassetid://101447877507131" -- ganti ke asset ID planet/logo kamu
+logoBtn.BackgroundTransparency = 1
+
+-- Biar bulat
+local uicorner = Instance.new("UICorner", logoBtn)
+uicorner.CornerRadius = UDim.new(1,0)
+
+-- === Fungsi buka/tutup Window WindUI
+local isOpen = true
+logoBtn.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    Window.Visible = isOpen
 end)
