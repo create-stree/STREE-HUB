@@ -10,7 +10,7 @@ end
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "Saturn",
+    Icon = "101447877507131",
     Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
     Folder = "STREE_HUB",
 })
@@ -18,7 +18,7 @@ local Window = WindUI:CreateWindow({
 -- Buat Tab
 local Tab1 = Window:Tab({
     Title = "Main",
-    Icon = "Main",
+    Icon = "96170009430978",
 })
 
 local Tab2 = Window:Tab({
