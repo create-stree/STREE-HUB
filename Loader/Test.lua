@@ -14,6 +14,11 @@ local Window = WindUI:CreateWindow({
     Icon = "monitor",
     Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
     Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(560, 400),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 170,
+    HasOutline = true
 })
 
 -- ===== Tabs =====
