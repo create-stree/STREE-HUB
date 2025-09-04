@@ -24,14 +24,9 @@ local Tab1 = Window:Tab({
 
 Tab1:Button({
     Title = "Discord Server",
-    Desc = "Klik untuk salin link",
+    Desc = "Klik untuk lihat link",
     Callback = function()
-        if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
-            print("✅ Discord link dicopy ke clipboard")
-        else
-            warn("❌ setclipboard tidak tersedia di executor ini")
-        end
+        print("🌐 Discord: https://discord.gg/jdmX43t5mY")
     end
 })
 
