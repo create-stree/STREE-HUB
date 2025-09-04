@@ -67,5 +67,5 @@ local Tab7 = Window:Tab({
 
 local Tab8 = Window:Tab({
     Title = "Misc",
-    Icon = "settings",
+    Icon = "list",
 })
