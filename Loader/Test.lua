@@ -18,8 +18,8 @@ local Window = WindUI:CreateWindow({
 
 -- ===== Tabs =====
 local Tab1 = Window:Tab({
-    Title = "Main",
-    Icon = "gamepad-2",
+    Title = "Home",
+    Icon = "house",
 })
 
 Tab1:Button({
@@ -36,11 +36,16 @@ Tab1:Button({
 })
 
 local Tab2 = Window:Tab({
+    Title = "Game",
+    Icon = "gamepad-2",
+})
+
+local Tab3 = Window:Tab({
     Title = "Visual",
     Icon = "eye",
 })
 
-local Tab3 = Window:Tab({
+local Tab4 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
