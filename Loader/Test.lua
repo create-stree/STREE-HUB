@@ -36,16 +36,36 @@ Tab1:Button({
 })
 
 local Tab2 = Window:Tab({
-    Title = "Game",
+    Title = "Main",
     Icon = "gamepad-2",
 })
 
 local Tab3 = Window:Tab({
+    Title = "Raid",
+    Icon = "shield",
+})
+
+local Tab4 = Window:Tab({
+    Title = "Shop",
+    Icon = "landmark",
+})
+
+local Tab5 = Window:Tab({
+    Title = "PVP",
+    Icon = "swords",
+})
+
+local Tab6 = Window:Tab({
     Title = "Visual",
     Icon = "eye",
 })
 
-local Tab4 = Window:Tab({
+local Tab7 = Window:Tab({
     Title = "Settings",
+    Icon = "settings",
+})
+
+local Tab8 = Window:Tab({
+    Title = "Misc",
     Icon = "settings",
 })
