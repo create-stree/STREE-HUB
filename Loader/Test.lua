@@ -11,7 +11,7 @@ end
 -- Buat Window
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "eclipse",
+    Icon = "monitor",
     Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
     Folder = "STREE_HUB",
 })
@@ -24,9 +24,14 @@ local Tab1 = Window:Tab({
 
 Tab1:Button({
     Title = "Discord Server",
-    Desc = "Klik untuk lihat link",
+    Desc = "Klik untuk salin link",
     Callback = function()
-        print("🌐 Discord: https://discord.gg/jdmX43t5mY")
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+            print("✅ Discord link dicopy ke clipboard")
+        else
+            warn("❌ Executor kamu tidak support setclipboard")
+        end
     end
 })
 
