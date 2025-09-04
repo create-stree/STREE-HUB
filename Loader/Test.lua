@@ -10,7 +10,7 @@ end
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "monitor",
+    Icon = "planet",
     Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
     Folder = "STREE_HUB",
 })
@@ -18,7 +18,15 @@ local Window = WindUI:CreateWindow({
 -- Buat Tab
 local Tab1 = Window:Tab({
     Title = "Main",
-    Icon = "Game-2",
+    Icon = "gamepad-2",
+})
+
+Tab1:Button({
+    Title = "Discord Server",
+    Desc = "Klik ini",
+    Callback = function()
+        https://discord.gg/jdmX43t5mY
+    end
 })
 
 local Tab2 = Window:Tab({
@@ -29,14 +37,6 @@ local Tab2 = Window:Tab({
 local Tab3 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
-})
-
-Tab:Button({
-    Title = "Test Button",
-    Desc = "Klik ini",
-    Callback = function()
-        print("Button clicked!")
-    end
 })
 
 -- === Logo bulat toggle (pojok kanan atas)
