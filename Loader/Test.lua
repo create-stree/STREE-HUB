@@ -11,7 +11,7 @@ end
 -- Buat Window
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "rbxassetid://101447877507131",
+    Icon = "rbxassetid://131711698212719",
     Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
     Folder = "STREE_HUB",
 })
