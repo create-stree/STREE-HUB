@@ -4,10 +4,11 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
-    warn("WindUI gagal dimuat")
+    warn("⚠️ WindUI gagal dimuat")
     return
 end
 
+-- Buat Window
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "planet",
@@ -15,7 +16,7 @@ local Window = WindUI:CreateWindow({
     Folder = "STREE_HUB",
 })
 
--- Buat Tab
+-- ===== Tabs =====
 local Tab1 = Window:Tab({
     Title = "Main",
     Icon = "gamepad-2",
@@ -23,9 +24,14 @@ local Tab1 = Window:Tab({
 
 Tab1:Button({
     Title = "Discord Server",
-    Desc = "Klik ini",
+    Desc = "Klik untuk salin link",
     Callback = function()
-        https://discord.gg/jdmX43t5mY
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+            print("✅ Discord link dicopy ke clipboard")
+        else
+            warn("❌ setclipboard tidak tersedia di executor ini")
+        end
     end
 })
 
@@ -39,7 +45,7 @@ local Tab3 = Window:Tab({
     Icon = "settings",
 })
 
--- === Logo bulat toggle (pojok kanan atas)
+-- ===== Logo Bulat Toggle (pojok kanan atas) =====
 local logoGui = Instance.new("ScreenGui")
 logoGui.Name = "STREEHUB_Logo"
 logoGui.Parent = game:GetService("CoreGui")
@@ -48,11 +54,11 @@ local logoBtn = Instance.new("ImageButton")
 logoBtn.Parent = logoGui
 logoBtn.Size = UDim2.new(0, 60, 0, 60)
 logoBtn.Position = UDim2.new(1, -80, 0, 150)
-logoBtn.Image = "rbxassetid://101447877507131" -- Ganti ke logo kamu
+logoBtn.Image = "rbxassetid://10144787750"
 logoBtn.BackgroundTransparency = 1
 
 local uicorner = Instance.new("UICorner", logoBtn)
-uicorner.CornerRadius = UDim.new(1,0)
+uicorner.CornerRadius = UDim.new(1, 0)
 
 -- Toggle buka/tutup Window
 local isOpen = true
@@ -63,16 +69,20 @@ logoBtn.MouseButton1Click:Connect(function()
             Window:Open()
         elseif Window.Show then
             Window:Show()
+        elseif Window.Toggle then
+            Window:Toggle(true)
         else
-            print("⚠️ WindUI tidak punya :Open() / :Show()")
+            print("⚠️ WindUI tidak punya fungsi Open/Show/Toggle")
         end
     else
         if Window.Close then
             Window:Close()
         elseif Window.Hide then
             Window:Hide()
+        elseif Window.Toggle then
+            Window:Toggle(false)
         else
-            print("⚠️ WindUI tidak punya :Close() / :Hide()")
+            print("⚠️ WindUI tidak punya fungsi Close/Hide/Toggle")
         end
     end
 end)
