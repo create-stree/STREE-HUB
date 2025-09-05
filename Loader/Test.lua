@@ -5,8 +5,9 @@ end)
 if not success or not WindUI then
     warn("⚠️ WindUI gagal dimuat, cek link raw GitHub WindUI!")
     return
+else
+    print("✓ WindUI berhasil dimuat!")
 end
-
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
