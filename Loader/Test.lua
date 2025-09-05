@@ -96,7 +96,7 @@ local Tab4 = Window:Tab({
 
 local Tab5 = Window:Tab({
     Title = "Teleport",
-    Icon = "landmark",
+    Icon = "telescope",
 })
 
 local Tab6 = Window:Tab({
