@@ -1,4 +1,3 @@
--- Load WindUI
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main.lua"))()
 end)
@@ -8,7 +7,7 @@ if not success or not WindUI then
     return
 end
 
--- Buat Window
+
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "monitor",
@@ -16,7 +15,7 @@ local Window = WindUI:CreateWindow({
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
-    Theme = "Green",
+    Theme = "Dark",
     SideBarWidth = 170,
     HasOutline = true
 })
