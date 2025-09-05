@@ -3,10 +3,10 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
-    warn("⚠️ WindUI gagal dimuat, cek link raw GitHub WindUI!")
+    warn("⚠️ Windows gagal dimuat, cek link raw GitHub WindUI!")
     return
 else
-    print("✓ WindUI berhasil dimuat!")
+    print("✓ Windows berhasil dimuat!")
 end
 
 local Window = WindUI:CreateWindow({
