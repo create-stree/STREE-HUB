@@ -16,12 +16,7 @@ local Window = WindUI:CreateWindow({
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
-    Theme = {
-        Background = Color3.fromRGB(0, 0, 0),       -- background hitam
-        Accent = Color3.fromRGB(57, 255, 20),       -- hijau neon (kode RGB)
-        Outline = Color3.fromRGB(57, 255, 20),      -- border neon
-        Text = Color3.fromRGB(57, 255, 20)          -- teks neon
-    },
+    Theme = "Green"
     SideBarWidth = 170,
     HasOutline = true
 })
