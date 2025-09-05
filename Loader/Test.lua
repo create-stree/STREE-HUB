@@ -16,7 +16,7 @@ local Window = WindUI:CreateWindow({
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
-    Theme = "Green"
+    Theme = "Green",
     SideBarWidth = 170,
     HasOutline = true
 })
