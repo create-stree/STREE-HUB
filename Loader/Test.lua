@@ -32,8 +32,47 @@ Tab1:Button({
     Desc = "Klik untuk salin link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
             print("✅ Discord link dicopy ke clipboard")
+        else
+            warn("❌ Executor kamu tidak support setclipboard")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "WhatsApp",
+    Desc = "Klik untuk salin link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+            print("✅ WhatsApp link dicopy ke clipboard")
+        else
+            warn("❌ Executor kamu tidak support setclipboard")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Telegram",
+    Desc = "Klik untuk salin link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://t.me/StreeCoumminty")
+            print("✅ Telegram link dicopy ke clipboard")
+        else
+            warn("❌ Executor kamu tidak support setclipboard")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Website",
+    Desc = "Klik untuk salin link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://stree-hub-nexus.lovable.app")
+            print("✅ Website link dicopy ke clipboard")
         else
             warn("❌ Executor kamu tidak support setclipboard")
         end
@@ -56,21 +95,26 @@ local Tab4 = Window:Tab({
 })
 
 local Tab5 = Window:Tab({
+    Title = "Teleport",
+    Icon = "landmark",
+})
+
+local Tab6 = Window:Tab({
     Title = "PVP",
     Icon = "swords",
 })
 
-local Tab6 = Window:Tab({
+local Tab7 = Window:Tab({
     Title = "Visual",
     Icon = "eye",
 })
 
-local Tab7 = Window:Tab({
+local Tab8 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
 
-local Tab8 = Window:Tab({
+local Tab9 = Window:Tab({
     Title = "Misc",
     Icon = "list",
 })
