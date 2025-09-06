@@ -3,13 +3,12 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
-    warn("⚠️ Windows gagal dimuat, cek link GitHub WindUI!")
+    warn("⚠️ Windows gagal dimuat, cek loadstringnya!")
     return
 else
     print("✓ Windows berhasil dimuat!")
 end
 
--- Tunggu sedikit untuk memastikan library terload sempurna
 wait(1)
 
 local Window = WindUI:CreateWindow({
@@ -129,4 +128,4 @@ local Tab7 = Window:Tab({Title = "Visual", Icon = "eye"})
 local Tab8 = Window:Tab({Title = "Settings", Icon = "settings"})
 local Tab9 = Window:Tab({Title = "Misc", Icon = "list"})
 
-print("✅ STREE HUB berhasil dimuat!")
+print("✓ STREE HUB berhasil dimuat!")
