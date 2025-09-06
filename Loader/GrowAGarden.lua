@@ -158,7 +158,6 @@ local function buildKeyLinksUI()
     createLinkCard("Rekonise",    "https://rkns.link/2vbo0",                   "rbxassetid://140280617864380")
     createLinkCard("Linkvertise","https://link-hub.net/1365203/NqhrZrvoQhoi", "rbxassetid://113798183844310")
     createLinkCard("Lootlabs",   "https://lootdest.org/s?VooVvLbJ",            "rbxassetid://112846309972303")
-    createLinkCard("Work.ink",   "https://link-hub.net/1365203/NqhrZrvoQhoi",  "rbxassetid://86953323935342")
   
     MakeDraggable(frame, titleBar)
 end
