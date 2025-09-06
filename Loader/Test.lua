@@ -1,4 +1,6 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+end)
 
 if not success or not WindUI then
     warn("⚠️ Windows gagal dimuat, cek link raw GitHub WindUI!")
@@ -19,7 +21,6 @@ local Window = WindUI:CreateWindow({
     HasOutline = true
 })
 
--- ===== Tabs =====
 local Tab1 = Window:Tab({
     Title = "Home",
     Icon = "house",
@@ -30,7 +31,7 @@ Tab1:Button({
     Desc = "Klik untuk salin link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+            setclipboard("https://discord.gg/jdmX43t5mY")
             print("✅ Discord link dicopy ke clipboard")
         else
             warn("❌ Executor kamu tidak support setclipboard")
