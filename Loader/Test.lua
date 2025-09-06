@@ -3,7 +3,7 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
-    warn("⚠️ Windows gagal dimuat, cek loadstringnya!")
+    warn("⚠️ Windows gagal dimuat!")
     return
 else
     print("✓ Windows berhasil dimuat!")
@@ -11,50 +11,15 @@ end
 
 task.wait(1)
 
--- Pastikan WindUI terload dengan benar
-if typeof(WindUI) ~= "table" then
-    warn("❌ WindUI tidak terload dengan benar!")
-    return
-end
-
--- Cek jika WindUI memiliki metode CreateWindow
-if not WindUI.CreateWindow then
-    warn("❌ WindUI tidak memiliki metode CreateWindow!")
-    return
-end
-
--- Buat window dengan konfigurasi yang lebih sederhana
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "monitor",
     Author = "KirsiaSC | Blox Fruit",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(500, 400),
-    Theme = "Green"
+    Theme = "Dark"
 })
 
-if not Window then
-    warn("❌ Gagal membuat window!")
-    return
-end
-
--- Fungsi untuk menyalin teks ke clipboard dengan fallback
-local function copyToClipboard(text)
-    if setclipboard then
-        setclipboard(text)
-        return true
-    elseif writeclipboard then
-        writeclipboard(text)
-        return true
-    elseif toclipboard then
-        toclipboard(text)
-        return true
-    else
-        return false
-    end
-end
-
--- Tab1: Home
 local Tab1 = Window:Tab({
     Title = "Home",
     Icon = "house",
@@ -181,25 +146,3 @@ local Tab6 = Window:Tab({Title = "PVP", Icon = "swords"})
 local Tab7 = Window:Tab({Title = "Visual", Icon = "eye"})
 local Tab8 = Window:Tab({Title = "Settings", Icon = "settings"})
 local Tab9 = Window:Tab({Title = "Misc", Icon = "list"})
-
-print("✓ STREE HUB berhasil dimuat!")
-
--- Coba tampilkan window jika tersembunyi
-if Window.Visible ~= nil then
-    Window.Visible = true
-elseif Window.Show then
-    pcall(function()
-        Window:Show()
-    end)
-end
-
--- Coba fokuskan window
-if Window.BringToFront then
-    pcall(function()
-        Window:BringToFront()
-    end)
-end
-
--- Debug info
-print("WindUI type:", typeof(WindUI))
-print("Window type:", typeof(Window))
