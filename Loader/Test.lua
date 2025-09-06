@@ -1,6 +1,4 @@
-local success, WindUI = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main.lua"))()
-end)
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 if not success or not WindUI then
     warn("⚠️ Windows gagal dimuat, cek link raw GitHub WindUI!")
@@ -118,4 +116,3 @@ local Tab9 = Window:Tab({
     Title = "Misc",
     Icon = "list",
 })
-    
