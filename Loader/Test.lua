@@ -1,5 +1,5 @@
 local success, WindUI = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua", true))()
 end)
 
 if not success or not WindUI then
@@ -9,10 +9,11 @@ else
     print("✓ Windows berhasil dimuat!")
 end
 
-wait(1)
+task.wait(1)
 
-if not WindUI or not WindUI.CreateWindow then
-    warn("⚠️ WindUI tidak memiliki fungsi CreateWindow!")
+-- Pastikan WindUI terload dengan benar
+if typeof(WindUI) ~= "table" or not WindUI.CreateWindow then
+    warn("❌ WindUI tidak terload dengan benar!")
     return
 end
 
@@ -29,10 +30,11 @@ local Window = WindUI:CreateWindow({
 })
 
 if not Window then
-    warn("⚠️ Gagal membuat window!")
+    warn("❌ Gagal membuat window!")
     return
 end
 
+-- Fungsi untuk menyalin teks ke clipboard dengan fallback
 local function copyToClipboard(text)
     if setclipboard then
         setclipboard(text)
@@ -48,6 +50,7 @@ local function copyToClipboard(text)
     end
 end
 
+-- Tab1: Home
 local Tab1 = Window:Tab({
     Title = "Home",
     Icon = "house",
@@ -58,17 +61,25 @@ Tab1:Button({
     Desc = "Klik untuk salin link",
     Callback = function()
         if copyToClipboard("https://discord.gg/jdmX43t5mY") then
-            Window:Notify({
-                Title = "Discord",
-                Description = "Link Discord berhasil disalin!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Discord",
+                    Description = "Link Discord berhasil disalin!",
+                    Duration = 3
+                })
+            else
+                warn("Link Discord berhasil disalin!")
+            end
         else
-            Window:Notify({
-                Title = "Error",
-                Description = "Executor tidak support clipboard!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Error",
+                    Description = "Executor tidak support clipboard!",
+                    Duration = 3
+                })
+            else
+                warn("Executor tidak support clipboard!")
+            end
         end
     end
 })
@@ -78,17 +89,25 @@ Tab1:Button({
     Desc = "Klik untuk salin link",
     Callback = function()
         if copyToClipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N") then
-            Window:Notify({
-                Title = "WhatsApp",
-                Description = "Link WhatsApp berhasil disalin!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "WhatsApp",
+                    Description = "Link WhatsApp berhasil disalin!",
+                    Duration = 3
+                })
+            else
+                warn("Link WhatsApp berhasil disalin!")
+            end
         else
-            Window:Notify({
-                Title = "Error",
-                Description = "Executor tidak support clipboard!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Error",
+                    Description = "Executor tidak support clipboard!",
+                    Duration = 3
+                })
+            else
+                warn("Executor tidak support clipboard!")
+            end
         end
     end
 })
@@ -98,17 +117,25 @@ Tab1:Button({
     Desc = "Klik untuk salin link",
     Callback = function()
         if copyToClipboard("https://t.me/StreeCoumminty") then
-            Window:Notify({
-                Title = "Telegram",
-                Description = "Link Telegram berhasil disalin!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Telegram",
+                    Description = "Link Telegram berhasil disalin!",
+                    Duration = 3
+                })
+            else
+                warn("Link Telegram berhasil disalin!")
+            end
         else
-            Window:Notify({
-                Title = "Error",
-                Description = "Executor tidak support clipboard!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Error",
+                    Description = "Executor tidak support clipboard!",
+                    Duration = 3
+                })
+            else
+                warn("Executor tidak support clipboard!")
+            end
         end
     end
 })
@@ -118,21 +145,30 @@ Tab1:Button({
     Desc = "Klik untuk salin link",
     Callback = function()
         if copyToClipboard("https://stree-hub-nexus.lovable.app") then
-            Window:Notify({
-                Title = "Website",
-                Description = "Link Website berhasil disalin!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Website",
+                    Description = "Link Website berhasil disalin!",
+                    Duration = 3
+                })
+            else
+                warn("Link Website berhasil disalin!")
+            end
         else
-            Window:Notify({
-                Title = "Error",
-                Description = "Executor tidak support clipboard!",
-                Duration = 3
-            })
+            if Window.Notify then
+                Window:Notify({
+                    Title = "Error",
+                    Description = "Executor tidak support clipboard!",
+                    Duration = 3
+                })
+            else
+                warn("Executor tidak support clipboard!")
+            end
         end
     end
 })
 
+-- Buat tab lainnya
 local Tab2 = Window:Tab({Title = "Main", Icon = "gamepad-2"})
 local Tab3 = Window:Tab({Title = "Raid", Icon = "shield"})
 local Tab4 = Window:Tab({Title = "Shop", Icon = "landmark"})
@@ -143,3 +179,10 @@ local Tab8 = Window:Tab({Title = "Settings", Icon = "settings"})
 local Tab9 = Window:Tab({Title = "Misc", Icon = "list"})
 
 print("✓ STREE HUB berhasil dimuat!")
+
+-- Coba tampilkan window jika tersembunyi
+if Window.Visible ~= nil then
+    Window.Visible = true
+elseif Window.Show then
+    Window:Show()
+end
