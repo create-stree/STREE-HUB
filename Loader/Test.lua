@@ -12,21 +12,25 @@ end
 task.wait(1)
 
 -- Pastikan WindUI terload dengan benar
-if typeof(WindUI) ~= "table" or not WindUI.CreateWindow then
+if typeof(WindUI) ~= "table" then
     warn("❌ WindUI tidak terload dengan benar!")
     return
 end
 
+-- Cek jika WindUI memiliki metode CreateWindow
+if not WindUI.CreateWindow then
+    warn("❌ WindUI tidak memiliki metode CreateWindow!")
+    return
+end
+
+-- Buat window dengan konfigurasi yang lebih sederhana
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "monitor",
-    Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
+    Author = "KirsiaSC | Blox Fruit",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(560, 400),
-    Transparent = true,
-    Theme = "Green",
-    SideBarWidth = 170,
-    HasOutline = true
+    Size = UDim2.fromOffset(500, 400),
+    Theme = "Green"
 })
 
 if not Window then
@@ -184,5 +188,18 @@ print("✓ STREE HUB berhasil dimuat!")
 if Window.Visible ~= nil then
     Window.Visible = true
 elseif Window.Show then
-    Window:Show()
+    pcall(function()
+        Window:Show()
+    end)
 end
+
+-- Coba fokuskan window
+if Window.BringToFront then
+    pcall(function()
+        Window:BringToFront()
+    end)
+end
+
+-- Debug info
+print("WindUI type:", typeof(WindUI))
+print("Window type:", typeof(Window))
