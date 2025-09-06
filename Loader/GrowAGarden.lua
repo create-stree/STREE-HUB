@@ -664,19 +664,18 @@ function buildKeyUI()
     end)
 
     submitBtn.MouseButton1Click:Connect(function()
-        local key = input.Text
-        if isKeyValid(key) then
-            status.TextColor3 = Color3.fromRGB(0,255,0)
-            status.Text = "Key Valid!"
-            task.wait(0.45)
-            keyGui:Destroy()
-            buildMainUI()
-        else
-            status.TextColor3 = Color3.fromRGB(255,0,0)
-            status.Text = "Key Invalid!"
-            TweenService:Create(input, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 3, true), {Position = input.Position + UDim2.new(0,3,0,0)}):Play()
-        end
-    end)
+    local key = input.Text
+    if isKeyValid(key) then
+        status.TextColor3 = Color3.fromRGB(0,255,0)
+        status.Text = "✓ Key Valid!"
+        task.wait(0.5)
+        keyGui:Destroy()
+        buildMainUI()
+    else
+        status.TextColor3 = Color3.fromRGB(255,80,80)
+        status.Text = "X Invalid Key!"
+    end
+end)
 
     MakeDraggable(frame, titleBar)
 end
