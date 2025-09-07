@@ -78,7 +78,7 @@ local Section = Tab1:Section({
     TextSize = 17,
 })
 
-local Paragraph = Tab:Paragraph({
+local Paragraph = Tab1:Paragraph({
     Title = "Paragraph with Image, Thumbnail, Buttons",
     Desc = "Test Paragraph",
     Color = "Red",
