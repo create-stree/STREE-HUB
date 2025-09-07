@@ -1,5 +1,4 @@
 local success, WindUI = pcall(function()
-    -- Menggunakan link raw GitHub yang benar
     return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua"))()
 end)
 
