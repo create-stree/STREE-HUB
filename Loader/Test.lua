@@ -3,7 +3,7 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
-    warn("⚠️ Windows gagal dimuat, cek link raw GitHub WindUI!")
+    warn("⚠️ Windows gagal dimuat!")
     return
 else
     print("✓ Windows berhasil dimuat!")
@@ -24,12 +24,6 @@ local Window = WindUI:CreateWindow({
 local Tab1 = Window:Tab({
     Title = "Home",
     Icon = "house",
-})
-
-Tab1:Section({ 
-    Title = "Infomation",
-    TextXAlignment = "Left",
-    TextSize = 17,
 })
 
 Tab1:Button({
