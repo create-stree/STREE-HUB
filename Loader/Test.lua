@@ -26,6 +26,12 @@ local Tab1 = Window:Tab({
     Icon = "house",
 })
 
+local Section = Tab:Section({ 
+    Title = "Information",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
 Tab1:Button({
     Title = "Discord",
     Desc = "Klik untuk salin link",
