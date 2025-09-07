@@ -21,15 +21,15 @@ local Window = WindUI:CreateWindow({
     HasOutline = true
 })
 
-local Section = Tab:Section({ 
-    Title = "Infomation",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
 local Tab1 = Window:Tab({
     Title = "Home",
     Icon = "house",
+})
+
+Tab1:Section({ 
+    Title = "Infomation",
+    TextXAlignment = "Left",
+    TextSize = 17,
 })
 
 Tab1:Button({
