@@ -27,7 +27,7 @@ local Tab1 = Window:Tab({
 })
 
 local Section = Tab:Section({ 
-    Title = "Infomation",
+    Title = "section",
     TextXAlignment = "Left",
     TextSize = 17,
 })
