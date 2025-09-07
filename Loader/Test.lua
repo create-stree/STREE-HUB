@@ -6,7 +6,7 @@ if not success or not WindUI then
     warn("⚠️ Windows gagal dimuat!")
     return
 else
-    print("✓ Windows berhasil dimuat!")
+    print("\27[32m[SUCCESS]✓ WindUI berhasil dimuat!")
 end
 
 local Window = WindUI:CreateWindow({
