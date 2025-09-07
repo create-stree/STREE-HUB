@@ -79,21 +79,14 @@ local Section = Tab1:Section({
 })
 
 local Paragraph1 = Tab1:Paragraph({
-    Title = "Paragraph with Image, Thumbnail, Buttons",
+    Title = "Paragraph with Image, Thumbnail",
     Desc = "Test Paragraph",
-    Color = "Red",
+    Color = "Dark",
     Image = "",
     ImageSize = 30,
     Thumbnail = "",
     ThumbnailSize = 80,
     Locked = false,
-    Buttons = {
-        {
-            Icon = "bird",
-            Title = "Button",
-            Callback = function() print("1 Button") end,
-        }
-    }
 })
 
 local Tab2 = Window:Tab({
