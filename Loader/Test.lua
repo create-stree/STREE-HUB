@@ -78,8 +78,8 @@ local Section = Tab1:Section({
     TextSize = 17,
 })
 
-local Paragraph = Tab1:Paragraph({
-    Title = "Paragraph with Image, Thumbnail",
+local Paragraph = Tab:Paragraph({
+    Title = "Paragraph with Image, Thumbnail, Buttons",
     Desc = "Test Paragraph",
     Color = "Red",
     Image = "",
@@ -87,6 +87,13 @@ local Paragraph = Tab1:Paragraph({
     Thumbnail = "",
     ThumbnailSize = 80,
     Locked = false,
+    Buttons = {
+        {
+            Icon = "bird",
+            Title = "Button",
+            Callback = function() print("1 Button") end,
+        }
+    }
 })
 
 local Tab2 = Window:Tab({
