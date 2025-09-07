@@ -79,7 +79,7 @@ local Section = Tab1:Section({
 })
 
 local Paragraph = Tab1:Paragraph({
-    Title = "Paragraph with Image, Thumbnail, Buttons",
+    Title = "Paragraph with Image, Thumbnail",
     Desc = "Test Paragraph",
     Color = "Red",
     Image = "",
