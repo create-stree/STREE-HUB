@@ -78,15 +78,10 @@ local Section = Tab1:Section({
     TextSize = 17,
 })
 
-local Paragraph1 = Tab1:Paragraph({
-    Title = "Paragraph with Image, Thumbnail",
-    Desc = "Test Paragraph",
-    Color = "Dark",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
+local Section = Tab1:Section({ 
+    Title = "I will update this script. Sorry if there are any blank tabs because we are still updating.",
+    TextXAlignment = "Left",
+    TextSize = 17,
 })
 
 local Tab2 = Window:Tab({
