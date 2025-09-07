@@ -107,5 +107,4 @@ local Tab9 = Window:Tab({
 })
 
 
-myConfig:Save()
 myConfig:Load()
