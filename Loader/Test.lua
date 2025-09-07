@@ -27,7 +27,7 @@ local Tab1 = Window:Tab({
 })
 
 local Section = Tab1:Section({ 
-    Title = "Information",
+    Title = "Info community",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -70,6 +70,23 @@ Tab1:Button({
             setclipboard("https://stree-hub-nexus.lovable.app")
         end
     end
+})
+
+local Section = Tab1:Section({ 
+    Title = "Information",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "Paragraph with Image, Thumbnail, Buttons",
+    Desc = "Test Paragraph",
+    Color = "Red",
+    Image = "",
+    ImageSize = 30,
+    Thumbnail = "",
+    ThumbnailSize = 80,
+    Locked = false,
 })
 
 local Tab2 = Window:Tab({
