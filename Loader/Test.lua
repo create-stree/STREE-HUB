@@ -9,7 +9,6 @@ else
     print("✓ Windows berhasil dimuat!")
 end
 
--- Tunggu sedikit untuk memastikan library terload sempurna
 wait(1)
 
 local Window = WindUI:CreateWindow({
@@ -24,7 +23,6 @@ local Window = WindUI:CreateWindow({
     HasOutline = true
 })
 
--- Pastikan window berhasil dibuat
 if not Window then
     warn("❌ Gagal membuat window!")
     return
@@ -129,4 +127,4 @@ local Tab7 = Window:Tab({Title = "Visual", Icon = "eye"})
 local Tab8 = Window:Tab({Title = "Settings", Icon = "settings"})
 local Tab9 = Window:Tab({Title = "Misc", Icon = "list"})
 
-print("✅ STREE HUB berhasil dimuat!")
+print("✓ STREE HUB berhasil dimuat!")
