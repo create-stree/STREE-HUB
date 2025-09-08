@@ -112,3 +112,6 @@ for seaName, islands in pairs(Teleports) do
         Buttons[seaName][islandName] = btn
     end
 end
+
+
+myConfig:Load()
