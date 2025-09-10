@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "monitor",
-    Author = "KirsiaSC | Blox Fruit v0.00.01 | discord.gg/jdmX43t5mY",
+    Author = "KirsiaSC | Blox Fruit | v0.00.01",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
@@ -102,6 +102,47 @@ local Tab4 = Window:Tab({
 local Tab5 = Window:Tab({
     Title = "Teleport",
     Icon = "telescope",
+})
+
+local function teleportToSea(sea)
+    local Player = game.Players.LocalPlayer
+    if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
+    local HRP = Player.Character.HumanoidRootPart
+
+    if sea == 1 then
+
+        HRP.CFrame = CFrame.new(973, 125, 3325)
+    elseif sea == 2 then
+
+        HRP.CFrame = CFrame.new(-266, 8, 5314)
+    elseif sea == 3 then
+
+        HRP.CFrame = CFrame.new(-5076, 315, -3150)
+    end
+end
+
+Tab5:Button({
+    Title = "Go to First Sea",
+    Description = "Teleport langsung ke First Sea",
+    Callback = function()
+        teleportToSea(1)
+    end
+})
+
+Tab5:Button({
+    Title = "Go to Second Sea",
+    Description = "Teleport langsung ke Second Sea",
+    Callback = function()
+        teleportToSea(2)
+    end
+})
+
+Tab5:Button({
+    Title = "Go to Third Sea",
+    Description = "Teleport langsung ke Third Sea",
+    Callback = function()
+        teleportToSea(3)
+    end
 })
 
 local Tab6 = Window:Tab({
