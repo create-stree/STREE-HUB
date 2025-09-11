@@ -104,44 +104,36 @@ local Tab5 = Window:Tab({
     Icon = "telescope",
 })
 
-local function teleportToSea(sea)
-    local Player = game.Players.LocalPlayer
-    if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then return end
-    local HRP = Player.Character.HumanoidRootPart
+local TeleportService = game:GetService("TeleportService")
+local LocalPlayer = game.Players.LocalPlayer
 
-    if sea == 1 then
-
-        HRP.CFrame = CFrame.new(973, 125, 3325)
-    elseif sea == 2 then
-
-        HRP.CFrame = CFrame.new(-266, 8, 5314)
-    elseif sea == 3 then
-
-        HRP.CFrame = CFrame.new(-5076, 315, -3150)
-    end
-end
+local Seas = {
+    FirstSea = 2753915549,
+    SecondSea = 4442272183,
+    ThirdSea = 7449423635,
+}
 
 Tab5:Button({
     Title = "Go to First Sea",
-    Description = "Teleport langsung ke First Sea",
+    Description = "Pindah ke First Sea",
     Callback = function()
-        teleportToSea(1)
+        TeleportService:Teleport(Seas.FirstSea, LocalPlayer)
     end
 })
 
 Tab5:Button({
     Title = "Go to Second Sea",
-    Description = "Teleport langsung ke Second Sea",
+    Description = "Pindah ke Second Sea",
     Callback = function()
-        teleportToSea(2)
+        TeleportService:Teleport(Seas.SecondSea, LocalPlayer)
     end
 })
 
 Tab5:Button({
     Title = "Go to Third Sea",
-    Description = "Teleport langsung ke Third Sea",
+    Description = "Pindah ke Third Sea",
     Callback = function()
-        teleportToSea(3)
+        TeleportService:Teleport(Seas.ThirdSea, LocalPlayer)
     end
 })
 
