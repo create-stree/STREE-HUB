@@ -99,8 +99,9 @@ local Tab4 = Window:Tab({
     Icon = "landmark",
 })
 
+-- Tab Teleport
 local Tab5 = Window:Tab({
-    Title = "Teleport",
+    Title = "Teleport Sea",
     Icon = "telescope",
 })
 
@@ -108,32 +109,32 @@ local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = game.Players.LocalPlayer
 
 local Seas = {
-    FirstSea = 2753915549,
-    SecondSea = 4442272183,
-    ThirdSea = 7449423635,
+    First = 2753915549,
+    Second = 4442272183,
+    Third = 7449423635,
 }
 
 Tab5:Button({
-    Title = "Go to First Sea",
-    Description = "Pindah ke First Sea",
+    Title = "🌊 Go to First Sea",
+    Description = "Teleport ke First Sea",
     Callback = function()
-        TeleportService:Teleport(Seas.FirstSea, LocalPlayer)
+        TeleportService:Teleport(Seas.First, LocalPlayer)
     end
 })
 
 Tab5:Button({
-    Title = "Go to Second Sea",
-    Description = "Pindah ke Second Sea",
+    Title = "🌊 Go to Second Sea",
+    Description = "Teleport ke Second Sea",
     Callback = function()
-        TeleportService:Teleport(Seas.SecondSea, LocalPlayer)
+        TeleportService:Teleport(Seas.Second, LocalPlayer)
     end
 })
 
 Tab5:Button({
-    Title = "Go to Third Sea",
-    Description = "Pindah ke Third Sea",
+    Title = "🌊 Go to Third Sea",
+    Description = "Teleport ke Third Sea",
     Callback = function()
-        TeleportService:Teleport(Seas.ThirdSea, LocalPlayer)
+        TeleportService:Teleport(Seas.Third, LocalPlayer)
     end
 })
 
@@ -155,6 +156,24 @@ local Tab8 = Window:Tab({
 local Tab9 = Window:Tab({
     Title = "Misc",
     Icon = "list",
+})
+
+local Section = Tab9:Section({ 
+    Title = "games that are still active or frequently change logs",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local Section = Tab9:Section({ 
+    Title = "Game Status :",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local Section = Tab9:Section({ 
+    Title = "Blox Fruit : 🟢",
+    TextXAlignment = "Left",
+    TextSize = 17,
 })
 
 
