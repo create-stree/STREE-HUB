@@ -99,6 +99,7 @@ local Tab4 = Window:Tab({
     Icon = "landmark",
 })
 
+-- Tab Teleport
 local Tab5 = Window:Tab({
     Title = "Teleport Sea",
     Icon = "telescope",
@@ -106,7 +107,6 @@ local Tab5 = Window:Tab({
 
 local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = game.Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
 
 local Seas = {
     First = 2753915549,
@@ -114,49 +114,27 @@ local Seas = {
     Third = 7449423635,
 }
 
-local function teleportToSea(placeId, seaName)
-    local notification = Tab5:Notification({
-        Title = "🌊 Teleportasi",
-        Description = "Sedang membawa Anda ke " .. seaName .. "...",
-        Duration = 3
-    })
-
-    task.wait(1.5)
-
-    local success, errorMsg = pcall(function()
-        TeleportService:Teleport(placeId, LocalPlayer)
-    end)
-    
-    if not success then
-        Tab5:Notification({
-            Title = "❌ Gagal Teleport",
-            Description = "Error: " .. errorMsg,
-            Duration = 5
-        })
-    end
-end
-
 Tab5:Button({
-    Title = "🌊 Pergi ke First Sea",
+    Title = "🌊 Go to First Sea",
     Description = "Teleport ke First Sea",
     Callback = function()
-        teleportToSea(Seas.First, "First Sea")
+        TeleportService:Teleport(Seas.2753915549, LocalPlayer)
     end
 })
 
 Tab5:Button({
-    Title = "🌊 Pergi ke Second Sea",
+    Title = "🌊 Go to Second Sea",
     Description = "Teleport ke Second Sea",
     Callback = function()
-        teleportToSea(Seas.Second, "Second Sea")
+        TeleportService:Teleport(Seas.4442272183, LocalPlayer)
     end
 })
 
 Tab5:Button({
-    Title = "🌊 Pergi ke Third Sea",
+    Title = "🌊 Go to Third Sea",
     Description = "Teleport ke Third Sea",
     Callback = function()
-        teleportToSea(Seas.Third, "Third Sea")
+        TeleportService:Teleport(Seas.7449423635, LocalPlayer)
     end
 })
 
