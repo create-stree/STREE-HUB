@@ -118,7 +118,7 @@ Tab5:Button({
     Title = "🌊 Go to First Sea",
     Description = "Teleport ke First Sea",
     Callback = function()
-        TeleportService:Teleport(Seas.2753915549, LocalPlayer)
+        TeleportService:Teleport(Seas.First, LocalPlayer)
     end
 })
 
@@ -126,7 +126,7 @@ Tab5:Button({
     Title = "🌊 Go to Second Sea",
     Description = "Teleport ke Second Sea",
     Callback = function()
-        TeleportService:Teleport(Seas.4442272183, LocalPlayer)
+        TeleportService:Teleport(Seas.Second, LocalPlayer)
     end
 })
 
@@ -134,7 +134,7 @@ Tab5:Button({
     Title = "🌊 Go to Third Sea",
     Description = "Teleport ke Third Sea",
     Callback = function()
-        TeleportService:Teleport(Seas.7449423635, LocalPlayer)
+        TeleportService:Teleport(Seas.Third, LocalPlayer)
     end
 })
 
