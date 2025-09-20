@@ -10,10 +10,10 @@ else
 end
 
 local Window = WindUI:CreateWindow({
-    Title = "STREE HUB",
+    Title = "Forsaken | STREE HUB",
     Icon = "rbxassetid://123032091977400",
-    Author = "KirsiaSC | Forsaken",
-    Folder = "STREE_HUB",
+    Author = "KirsiaSC",
+    Folder = "Forsaken_STREE",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
     Theme = "Dark",
@@ -22,12 +22,12 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.1",
+    Title = "v0.0.1 Forsaken",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
 WindUI:Notify({
-    Title = "STREE HUB Loaded",
+    Title = "Forsaken Loaded",
     Content = "UI loaded successfully!",
     Duration = 3,
     Icon = "bell",
@@ -38,13 +38,13 @@ local Tab1 = Window:Tab({
     Icon = "info"
 })
 
-local InfoSection1 = Tab1:Section({ 
+local Section1 = Tab1:Section({
     Title = "Community Support",
     TextXAlignment = "Left",
-    TextSize = 17,
+    TextSize = 17
 })
 
-InfoSection1:Button({
+Section1:Button({
     Title = "Discord",
     Desc = "click to copy link",
     Callback = function()
@@ -54,10 +54,10 @@ InfoSection1:Button({
     end
 })
 
-local InfoSection2 = Tab1:Section({ 
-    Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
+local Section2 = Tab1:Section({
+    Title = "Forsaken Hub auto update every patch!",
     TextXAlignment = "Left",
-    TextSize = 17,
+    TextSize = 17
 })
 
 local Tab2 = Window:Tab({
@@ -65,13 +65,13 @@ local Tab2 = Window:Tab({
     Icon = "user"
 })
 
-local PlayerSection = Tab2:Section({
+local Section3 = Tab2:Section({
     Title = "Movement",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-PlayerSection:Slider({
+Section3:Slider({
     Title = "WalkSpeed",
     Description = "Adjust WalkSpeed",
     Default = 16,
@@ -83,7 +83,7 @@ PlayerSection:Slider({
     end
 })
 
-PlayerSection:Slider({
+Section3:Slider({
     Title = "JumpPower",
     Description = "Adjust JumpPower",
     Default = 50,
@@ -100,31 +100,76 @@ local Tab3 = Window:Tab({
     Icon = "eye"
 })
 
+local Section4 = Tab3:Section({
+    Title = "ESP",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Section4:Toggle({
+    Title = "Player ESP",
+    Desc = "Show players through walls",
+    Default = false,
+    Callback = function(state)
+        _G.PlayerESP = state
+        while _G.PlayerESP do
+            task.wait(1)
+            for _, v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    if not v.Character:FindFirstChild("ESPHighlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "ESPHighlight"
+                        highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        highlight.Adornee = v.Character
+                        highlight.Parent = v.Character
+                    end
+                end
+            end
+        end
+    end
+})
+
 local Tab4 = Window:Tab({
     Title = "World",
     Icon = "globe"
 })
 
+local Section5 = Tab4:Section({
+    Title = "Teleport",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Section5:Button({
+    Title = "Safe Zone",
+    Desc = "Teleport to safe zone",
+    Callback = function()
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(0, 50, 0)
+        end
+    end
+})
+
 local Tab5 = Window:Tab({
-    Title = "Setting",
+    Title = "Settings",
     Icon = "settings"
 })
 
-local SettingSection = Tab5:Section({
+local Section6 = Tab5:Section({
     Title = "Main",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-SettingSection:Toggle({
+Section6:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
-    Icon = false,
     Default = false,
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
-        local player = game:GetService("Players").LocalPlayer
         task.spawn(function()
             while _G.AntiAFK do
                 task.wait(60)
@@ -134,27 +179,12 @@ SettingSection:Toggle({
                 end)
             end
         end)
-        if state then
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "AntiAFK loaded!",
-                Text = "Coded By Kirsiasc",
-                Button1 = "Okey",
-                Duration = 5
-            })
-        else
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "AntiAFK Disabled",
-                Text = "Stopped AntiAFK",
-                Duration = 3
-            })
-        end
     end
 })
 
-SettingSection:Toggle({
+Section6:Toggle({
     Title = "Auto Reconnect",
-    Desc = "Automatic reconnect if disconnected",
-    Icon = false,
+    Desc = "Reconnect if disconnected",
     Default = false,
     Callback = function(state)
         _G.AutoReconnect = state
