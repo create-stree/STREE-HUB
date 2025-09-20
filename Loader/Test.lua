@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "monitor",
-    Author = "KirsiaSC | Blox Fruit | v0.00.01",
+    Author = "KirsiaSC | Blox Fruit",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
