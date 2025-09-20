@@ -11,7 +11,7 @@ end
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "rbxassetid://120248611602330",
+    Icon = "rbxassetid://101447877507131",
     Author = "KirsiaSC | Fish It",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(270, 300),
