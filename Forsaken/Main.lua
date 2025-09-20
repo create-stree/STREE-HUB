@@ -24,6 +24,28 @@ local Tab1 = Window:Tab({
     Icon = "info"
 })
 
+local Section = Tab1:Section({ 
+    Title = "Community Support",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Section1:Button({
+    Title = "Discord",
+    Desc = "click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
+})
+
+local Section = Tab1:Section({ 
+    Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
 local Tab2 = Window:Tab({
     Title = "Players",
     Icon = "user"
