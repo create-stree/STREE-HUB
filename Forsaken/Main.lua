@@ -17,8 +17,15 @@ local VirtualUser = game:GetService("VirtualUser")
 local Camera = Workspace.CurrentCamera
 
 local Window = WindUI:CreateWindow({
-    Title = "Forsaken | STREE HUB", 
-    Icon = "rbxassetid://0"
+    Title = "STREE HUB",
+    Icon = "monitor",
+    Author = "KirsiaSC | Forsaken",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(560, 400),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 170,
+    HasOutline = true
 })
 
 local MainTab = Window:Tab({Title = "Main", Icon = "sword"})
