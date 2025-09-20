@@ -5,8 +5,6 @@ end)
 if not success or not WindUI then
     warn("⚠️ UI failed to load!")
     return
-else
-    print("✓ UI loaded successfully!")
 end
 
 local Window = WindUI:CreateWindow({
@@ -21,182 +19,68 @@ local Window = WindUI:CreateWindow({
     HasOutline = true
 })
 
-Window:Tag({
-    Title = "v0.0.1 Forsaken",
-    Color = Color3.fromRGB(0, 255, 0),
+local Tab1 = Window:Tab({
+    Title = "Info",
+    Icon = "info"
 })
 
-WindUI:Notify({
-    Title = "STREE HUB Loaded",
-    Content = "Forsaken UI loaded successfully!",
-    Duration = 3,
-    Icon = "bell",
-})
-
-local Home = Window:Tab({
-    Title = "Home",
-    Icon = "house",
-})
-
-Home:Button({
-    Title = "Discord",
-    Desc = "Copy Discord Link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
-        end
-    end
-})
-
-local Players = Window:Tab({
+local Tab2 = Window:Tab({
     Title = "Players",
-    Icon = "user",
+    Icon = "user"
 })
 
-local lp = game.Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
+local Section1 = Tab2:Section({
+    Title = "Movement",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
 
-Players:Input({
+Section1:Slider({
     Title = "WalkSpeed",
-    Value = "16",
-    Callback = function(val)
-        local s = tonumber(val)
-        if s and s >= 16 then
-            hum.WalkSpeed = s
-        else
-            hum.WalkSpeed = 16
-        end
+    Description = "Adjust WalkSpeed",
+    Default = 16,
+    Min = 16,
+    Max = 200,
+    Rounding = 1,
+    Callback = function(value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
     end
 })
 
-Players:Input({
+Section1:Slider({
     Title = "JumpPower",
-    Value = "50",
-    Callback = function(val)
-        local j = tonumber(val)
-        if j then
-            _G.CustomJumpPower = j
-            hum.UseJumpPower = true
-            hum.JumpPower = j
-        end
+    Description = "Adjust JumpPower",
+    Default = 50,
+    Min = 50,
+    Max = 300,
+    Rounding = 1,
+    Callback = function(value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
     end
 })
 
-Players:Button({
-    Title = "Reset Speed",
-    Callback = function()
-        hum.WalkSpeed = 16
-    end
+local Tab3 = Window:Tab({
+    Title = "Visual",
+    Icon = "eye"
 })
 
-Players:Button({
-    Title = "Reset Jump",
-    Callback = function()
-        hum.JumpPower = 50
-    end
+local Tab4 = Window:Tab({
+    Title = "World",
+    Icon = "globe"
 })
 
-local uis = game:GetService("UserInputService")
-
-Players:Toggle({
-    Title = "Infinite Jump",
-    Default = false,
-    Callback = function(state)
-        _G.InfJump = state
-    end
+local Tab5 = Window:Tab({
+    Title = "Setting",
+    Icon = "settings"
 })
 
-uis.JumpRequest:Connect(function()
-    if _G.InfJump then
-        local c = lp.Character or lp.CharacterAdded:Wait()
-        local h = c:FindFirstChildOfClass("Humanoid")
-        if h then
-            h:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end)
-
-local Main = Window:Tab({
-    Title = "Main",
-    Icon = "landmark",
+local Section2 = Tab5:Section({
+    Title = "System",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
-Main:Toggle({
-    Title = "Auto Farm",
-    Default = false,
-    Callback = function(state)
-        _G.AutoFarm = state
-        task.spawn(function()
-            while _G.AutoFarm do
-                task.wait(1)
-                game:GetService("ReplicatedStorage").Events.Farm:FireServer()
-            end
-        end)
-    end
-})
-
-Main:Toggle({
-    Title = "Auto Collect",
-    Default = false,
-    Callback = function(state)
-        _G.AutoCollect = state
-        task.spawn(function()
-            while _G.AutoCollect do
-                task.wait(0.5)
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("TouchTransmitter") and v.Parent then
-                        firetouchinterest(lp.Character.HumanoidRootPart, v.Parent, 0)
-                        firetouchinterest(lp.Character.HumanoidRootPart, v.Parent, 1)
-                    end
-                end
-            end
-        end)
-    end
-})
-
-local Teleport = Window:Tab({
-    Title = "Teleport",
-    Icon = "map-pin",
-})
-
-Teleport:Dropdown({
-    Title = "Locations",
-    Values = {"Spawn", "Arena", "BossRoom"},
-    Callback = function(v)
-        local loc = {
-            ["Spawn"] = Vector3.new(0,5,0),
-            ["Arena"] = Vector3.new(200,10,50),
-            ["BossRoom"] = Vector3.new(-100,20,300)
-        }
-        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-            lp.Character.HumanoidRootPart.CFrame = CFrame.new(loc[v])
-        end
-    end
-})
-
-local Settings = Window:Tab({
-    Title = "Settings",
-    Icon = "settings",
-})
-
-Settings:Toggle({
-    Title = "AntiAFK",
-    Default = false,
-    Callback = function(state)
-        _G.AntiAFK = state
-        local vu = game:GetService("VirtualUser")
-        task.spawn(function()
-            while _G.AntiAFK do
-                task.wait(60)
-                vu:CaptureController()
-                vu:ClickButton2(Vector2.new())
-            end
-        end)
-    end
-})
-
-Settings:Toggle({
+Section2:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
