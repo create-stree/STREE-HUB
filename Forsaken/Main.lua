@@ -169,21 +169,91 @@ local Section = Tab3:Section({
     TextSize = 17
 })
 
+local function createHighlight(char, color, name)
+    if not char or char:FindFirstChild(name) then return end
+    local highlight = Instance.new("Highlight")
+    highlight.Name = name
+    highlight.FillColor = color
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.Adornee = char
+    highlight.Parent = char
+end
+
+local function removeHighlight(char, name)
+    if char and char:FindFirstChild(name) then
+        char[name]:Destroy()
+    end
+end
+
+local function createBox(char, color, name)
+    if not char or not char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild(name) then return end
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = name
+    box.Adornee = char.HumanoidRootPart
+    box.AlwaysOnTop = true
+    box.ZIndex = 2
+    box.Size = Vector3.new(4,6,2)
+    box.Color3 = color
+    box.Transparency = 0.5
+    box.Parent = char
+end
+
+local function removeBox(char, name)
+    if char and char:FindFirstChild(name) then
+        char[name]:Destroy()
+    end
+end
+
+local function createNameESP(char)
+    if not char or not char:FindFirstChild("Head") or char:FindFirstChild("NameDistanceBillboard") then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NameDistanceBillboard"
+    billboard.Adornee = char.Head
+    billboard.Size = UDim2.new(0,200,0,40)
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0,3.5,0)
+    billboard.Parent = char
+
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1,0,1,0)
+    text.BackgroundTransparency = 1
+    text.TextColor3 = Color3.fromRGB(255,255,255)
+    text.TextStrokeColor3 = Color3.new(0,0,0)
+    text.TextStrokeTransparency = 0.5
+    text.Font = Enum.Font.SourceSans
+    text.TextSize = 14
+    text.TextScaled = false
+    text.Parent = billboard
+end
+
+local function removeNameESP(char)
+    if char and char:FindFirstChild("NameDistanceBillboard") then
+        char.NameDistanceBillboard:Destroy()
+    end
+end
+
 Tab3:Toggle({
     Title = "Survivor Highlight",
     Desc = "Highlight survivors",
     Default = false,
     Callback = function(state)
         _G.SurvivorHighlight = state
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" and player.Character then
-                if state then createSurvivorHighlight(player.Character) else removeSurvivorHighlight(player.Character) end
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= game.Players.LocalPlayer and p.Team and p.Team.Name == "Survivor" then
+                p.CharacterAdded:Connect(function(c)
+                    if _G.SurvivorHighlight then createHighlight(c, Color3.fromRGB(0,255,0), "SurvivorHighlight") end
+                end)
+                if p.Character then
+                    if _G.SurvivorHighlight then createHighlight(p.Character, Color3.fromRGB(0,255,0), "SurvivorHighlight") end
+                end
             end
         end
-        game.Players.PlayerAdded:Connect(function(player)
-            if _G.SurvivorHighlight and player.Team and player.Team.Name == "Survivor" then
-                player.CharacterAdded:Connect(createSurvivorHighlight)
-            end
+        game.Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function(c)
+                if _G.SurvivorHighlight and p.Team and p.Team.Name == "Survivor" then
+                    createHighlight(c, Color3.fromRGB(0,255,0), "SurvivorHighlight")
+                end
+            end)
         end)
     end
 })
@@ -194,23 +264,24 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.SurvivorBox = state
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" and player.Character then
-                if state then createSurvivorBox(player.Character) else removeSurvivorBox(player.Character) end
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= game.Players.LocalPlayer and p.Team and p.Team.Name == "Survivor" then
+                p.CharacterAdded:Connect(function(c)
+                    if _G.SurvivorBox then createBox(c, Color3.fromRGB(0,255,0), "SurvivorBox") end
+                end)
+                if p.Character then
+                    if _G.SurvivorBox then createBox(p.Character, Color3.fromRGB(0,255,0), "SurvivorBox") end
+                end
             end
         end
-        game.Players.PlayerAdded:Connect(function(player)
-            if _G.SurvivorBox and player.Team and player.Team.Name == "Survivor" then
-                player.CharacterAdded:Connect(createSurvivorBox)
-            end
+        game.Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function(c)
+                if _G.SurvivorBox and p.Team and p.Team.Name == "Survivor" then
+                    createBox(c, Color3.fromRGB(0,255,0), "SurvivorBox")
+                end
+            end)
         end)
     end
-})
-
-local Section = Tab3:Section({
-    Title = "ESP Killer",
-    TextXAlignment = "Left",
-    TextSize = 17
 })
 
 Tab3:Toggle({
@@ -219,15 +290,22 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.KillerHighlight = state
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" and player.Character then
-                if state then createKillerHighlight(player.Character) else removeKillerHighlight(player.Character) end
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= game.Players.LocalPlayer and p.Team and p.Team.Name == "Killer" then
+                p.CharacterAdded:Connect(function(c)
+                    if _G.KillerHighlight then createHighlight(c, Color3.fromRGB(255,0,0), "KillerHighlight") end
+                end)
+                if p.Character then
+                    if _G.KillerHighlight then createHighlight(p.Character, Color3.fromRGB(255,0,0), "KillerHighlight") end
+                end
             end
         end
-        game.Players.PlayerAdded:Connect(function(player)
-            if _G.KillerHighlight and player.Team and player.Team.Name == "Killer" then
-                player.CharacterAdded:Connect(createKillerHighlight)
-            end
+        game.Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function(c)
+                if _G.KillerHighlight and p.Team and p.Team.Name == "Killer" then
+                    createHighlight(c, Color3.fromRGB(255,0,0), "KillerHighlight")
+                end
+            end)
         end)
     end
 })
@@ -238,15 +316,22 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.KillerBox = state
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" and player.Character then
-                if state then createKillerBox(player.Character) else removeKillerBox(player.Character) end
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= game.Players.LocalPlayer and p.Team and p.Team.Name == "Killer" then
+                p.CharacterAdded:Connect(function(c)
+                    if _G.KillerBox then createBox(c, Color3.fromRGB(255,0,0), "KillerBox") end
+                end)
+                if p.Character then
+                    if _G.KillerBox then createBox(p.Character, Color3.fromRGB(255,0,0), "KillerBox") end
+                end
             end
         end
-        game.Players.PlayerAdded:Connect(function(player)
-            if _G.KillerBox and player.Team and player.Team.Name == "Killer" then
-                player.CharacterAdded:Connect(createKillerBox)
-            end
+        game.Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function(c)
+                if _G.KillerBox and p.Team and p.Team.Name == "Killer" then
+                    createBox(c, Color3.fromRGB(255,0,0), "KillerBox")
+                end
+            end)
         end)
     end
 })
@@ -260,111 +345,21 @@ Tab3:Toggle({
     end
 })
 
-function createSurvivorHighlight(char)
-    if not char or char:FindFirstChild("SurvivorHighlight") then return end
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "SurvivorHighlight"
-    highlight.FillColor = Color3.fromRGB(0,255,0)
-    highlight.OutlineColor = Color3.fromRGB(255,255,255)
-    highlight.Adornee = char
-    highlight.Parent = char
-end
-
-function removeSurvivorHighlight(char)
-    if char and char:FindFirstChild("SurvivorHighlight") then
-        char.SurvivorHighlight:Destroy()
-    end
-end
-
-function createSurvivorBox(char)
-    if not char or not char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("SurvivorBox") then return end
-    local box = Instance.new("BoxHandleAdornment")
-    box.Name = "SurvivorBox"
-    box.Adornee = char.HumanoidRootPart
-    box.AlwaysOnTop = true
-    box.ZIndex = 2
-    box.Size = Vector3.new(4,6,2)
-    box.Color3 = Color3.fromRGB(0,255,0)
-    box.Transparency = 0.5
-    box.Parent = char
-end
-
-function removeSurvivorBox(char)
-    if char and char:FindFirstChild("SurvivorBox") then
-        char.SurvivorBox:Destroy()
-    end
-end
-
-function createKillerHighlight(char)
-    if not char or char:FindFirstChild("KillerHighlight") then return end
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "KillerHighlight"
-    highlight.FillColor = Color3.fromRGB(255,0,0)
-    highlight.OutlineColor = Color3.fromRGB(255,255,255)
-    highlight.Adornee = char
-    highlight.Parent = char
-end
-
-function removeKillerHighlight(char)
-    if char and char:FindFirstChild("KillerHighlight") then
-        char.KillerHighlight:Destroy()
-    end
-end
-
-function createKillerBox(char)
-    if not char or not char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("KillerBox") then return end
-    local box = Instance.new("BoxHandleAdornment")
-    box.Name = "KillerBox"
-    box.Adornee = char.HumanoidRootPart
-    box.AlwaysOnTop = true
-    box.ZIndex = 2
-    box.Size = Vector3.new(4,6,2)
-    box.Color3 = Color3.fromRGB(255,0,0)
-    box.Transparency = 0.5
-    box.Parent = char
-end
-
-function removeKillerBox(char)
-    if char and char:FindFirstChild("KillerBox") then
-        char.KillerBox:Destroy()
-    end
-end
-
-function createNameDistanceESP(char)
-    if not char or not char:FindFirstChild("Head") or char:FindFirstChild("NameDistanceBillboard") then return end
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "NameDistanceBillboard"
-    billboard.Adornee = char.Head
-    billboard.Size = UDim2.new(0,200,0,40)
-    billboard.AlwaysOnTop = true
-    billboard.StudsOffset = Vector3.new(0,3.5,0)
-    billboard.Parent = char
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.new(1,0,1,0)
-    text.BackgroundTransparency = 1
-    text.TextColor3 = Color3.fromRGB(255,255,255)
-    text.TextStrokeColor3 = Color3.new(0,0,0)
-    text.TextStrokeTransparency = 0.5
-    text.Font = Enum.Font.SourceSans
-    text.TextSize = 14
-    text.TextScaled = false
-    text.Text = char.Name
-    text.Parent = billboard
-end
-
-function removeNameDistanceESP(char)
-    if char and char:FindFirstChild("NameDistanceBillboard") then
-        char.NameDistanceBillboard:Destroy()
-    end
-end
-
 task.spawn(function()
     while true do
         task.wait(0.1)
         if _G.NameDistanceESP then
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                    createNameDistanceESP(player.Character)
+            local lp = game.Players.LocalPlayer
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                for _, p in pairs(game.Players:GetPlayers()) do
+                    if p ~= lp and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("HumanoidRootPart") then
+                        createNameESP(p.Character)
+                        local bp = p.Character:FindFirstChild("NameDistanceBillboard")
+                        if bp and bp:FindFirstChildOfClass("TextLabel") then
+                            local dist = (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                            bp:FindFirstChildOfClass("TextLabel").Text = p.Name.." | "..math.floor(dist).." studs"
+                        end
+                    end
                 end
             end
         end
