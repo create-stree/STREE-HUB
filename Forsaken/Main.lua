@@ -38,13 +38,13 @@ local Tab1 = Window:Tab({
     Icon = "info"
 })
 
-local Section1 = Tab1:Section({
+local Section = Tab1:Section({
     Title = "Community Support",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Section1:Button({
+Tab1:Button({
     Title = "Discord",
     Desc = "click to copy link",
     Callback = function()
@@ -54,7 +54,7 @@ Section1:Button({
     end
 })
 
-local Section2 = Tab1:Section({
+local Section = Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17
@@ -65,13 +65,13 @@ local Tab2 = Window:Tab({
     Icon = "user"
 })
 
-local Section3 = Tab2:Section({
+local Section = Tab2:Section({
     Title = "Movement",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Section3:Slider({
+Tab2:Slider({
     Title = "WalkSpeed",
     Description = "Adjust WalkSpeed",
     Default = 16,
@@ -83,7 +83,7 @@ Section3:Slider({
     end
 })
 
-Section3:Slider({
+Tab2:Slider({
     Title = "JumpPower",
     Description = "Adjust JumpPower",
     Default = 50,
@@ -95,7 +95,7 @@ Section3:Slider({
     end
 })
 
-local Toggle = Tab2:Toggle({
+Tab2:Toggle({
     Title = "Infinite Energy",
     Desc = "Energy never decrease",
     Default = false,
@@ -124,13 +124,13 @@ local Tab3 = Window:Tab({
     Icon = "eye"
 })
 
-local Section4 = Tab3:Section({
+local Section = Tab3:Section({
     Title = "ESP",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Section4:Toggle({
+Tab3:Toggle({
     Title = "Player ESP",
     Desc = "Show players through walls",
     Default = false,
@@ -159,13 +159,13 @@ local Tab4 = Window:Tab({
     Icon = "globe"
 })
 
-local Section5 = Tab4:Section({
+local section = Tab4:Section({
     Title = "Teleport",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Section5:Button({
+Tab4:Button({
     Title = "Safe Zone",
     Desc = "Teleport to safe zone",
     Callback = function()
@@ -181,13 +181,13 @@ local Tab5 = Window:Tab({
     Icon = "settings"
 })
 
-local Section6 = Tab5:Section({
+local Section = Tab5:Section({
     Title = "Main",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Section6:Toggle({
+Tab5:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Default = false,
@@ -206,7 +206,7 @@ Section6:Toggle({
     end
 })
 
-Section6:Toggle({
+Tab5:Toggle({
     Title = "Auto Reconnect",
     Desc = "Reconnect if disconnected",
     Default = false,
