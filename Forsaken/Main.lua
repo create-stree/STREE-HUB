@@ -101,21 +101,54 @@ Tab2:Toggle({
     Default = false,
     Callback = function(state)
         _G.InfiniteEnergy = state
-        task.spawn(function()
-            while _G.InfiniteEnergy do
-                task.wait(0.5)
-                local lp = game.Players.LocalPlayer
-                if lp then
-                    local stats = lp:FindFirstChild("leaderstats")
-                    if stats and stats:FindFirstChild("Energy") then
-                        stats.Energy.Value = math.huge
+        
+        if state then
+            task.spawn(function()
+                while _G.InfiniteEnergy do
+                    task.wait(0.1)
+                    
+                    local player = game.Players.LocalPlayer
+                    
+                    if player and player.Character then
+                        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                        if humanoid then
+                            if humanoid:GetAttribute("Stamina") then
+                                humanoid:SetAttribute("Stamina", 100)
+                            end
+                            
+                            if humanoid:GetAttribute("Energy") then
+                                humanoid:SetAttribute("Energy", 100)
+                            end
+                        end
+                        
+                        for _, child in pairs(player.Character:GetChildren()) do
+                            if (child.Name:lower():find("stamina") or child.Name:lower():find("energy")) and child:IsA("NumberValue") then
+                                child.Value = child.MaxValue or 100
+                            end
+                        end
                     end
-                    if lp:FindFirstChild("Energy") and lp.Energy:IsA("NumberValue") then
-                        lp.Energy.Value = math.huge
+                    
+                    if player then
+                        local stats = player:FindFirstChild("leaderstats")
+                        if stats then
+                            for _, stat in pairs(stats:GetChildren()) do
+                                if (stat.Name:lower():find("stamina") or stat.Name:lower():find("energy")) and stat:IsA("NumberValue") then
+                                    stat.Value = stat.MaxValue or 100
+                                end
+                            end
+                        end
+                        
+                        if player:GetAttribute("Stamina") then
+                            player:SetAttribute("Stamina", 100)
+                        end
+                        
+                        if player:GetAttribute("Energy") then
+                            player:SetAttribute("Energy", 100)
+                        end
                     end
                 end
-            end
-        end)
+            end)
+        end
     end
 })
 
@@ -136,23 +169,58 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.PlayerESP = state
-        while _G.PlayerESP do
-            task.wait(1)
-            for _, v in pairs(game.Players:GetPlayers()) do
-                if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    if not v.Character:FindFirstChild("ESPHighlight") then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Name = "ESPHighlight"
-                        highlight.FillColor = Color3.fromRGB(0, 255, 0)
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        highlight.Adornee = v.Character
-                        highlight.Parent = v.Character
+        
+        if state then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    setupESP(player)
+                end
+            end
+            
+            game.Players.PlayerAdded:Connect(function(player)
+                if _G.PlayerESP then
+                    setupESP(player)
+                end
+            end)
+        else
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer and player.Character then
+                    local highlight = player.Character:FindFirstChild("ESPHighlight")
+                    if highlight then
+                        highlight:Destroy()
                     end
                 end
             end
         end
     end
 })
+
+function setupESP(player)
+    if player.Character then
+        createHighlight(player.Character)
+    end
+    
+    player.CharacterAdded:Connect(function(character)
+        if _G.PlayerESP then
+            createHighlight(character)
+        end
+    end)
+end
+
+function createHighlight(character)
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESPHighlight"
+    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.Adornee = character
+    highlight.Parent = character
+    
+    character.AncestryChanged:Connect(function()
+        if not character:IsDescendantOf(game.Workspace) then
+            highlight:Destroy()
+        end
+    end)
+end
 
 local Tab4 = Window:Tab({
     Title = "World",
@@ -194,15 +262,18 @@ Tab5:Toggle({
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
-        task.spawn(function()
-            while _G.AntiAFK do
-                task.wait(60)
-                pcall(function()
-                    VirtualUser:CaptureController()
-                    VirtualUser:ClickButton2(Vector2.new())
-                end)
-            end
-        end)
+        
+        if state then
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(60)
+                    pcall(function()
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton2(Vector2.new())
+                    end)
+                end
+            end)
+        end
     end
 })
 
