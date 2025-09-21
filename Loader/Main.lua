@@ -18,6 +18,30 @@ elseif placeId == 121864768012064 then
     gameName = "Fish It"
     loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua"))()
     success = true
+elseif placeId == 123921593837160 then
+    gameName = "Climb and Jump tower"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-5/main.lua"))()
+    success = true
+elseif placeId == 2345678901 then
+    gameName = "Game 6"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-6/main.lua"))()
+    success = true
+elseif placeId == 3456789012 then
+    gameName = "Game 7"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-7/main.lua"))()
+    success = true
+elseif placeId == 4567890123 then
+    gameName = "Game 8"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-8/main.lua"))()
+    success = true
+elseif placeId == 5678901234 then
+    gameName = "Game 9"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-9/main.lua"))()
+    success = true
+elseif placeId == 6789012345 then
+    gameName = "Game 10"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-10/main.lua"))()
+    success = true
 end
 
 if success and gameName then
@@ -29,8 +53,8 @@ if success and gameName then
     })
 else
     StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB Loaded!",
-        Text = "Scripts Not Found!",
+        Title = "STREE HUB",
+        Text = (gameName or "Game") .. " Not Found!",
         Duration = 6,
         Icon = "rbxassetid://6023426923"
     })
