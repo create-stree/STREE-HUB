@@ -34,14 +34,44 @@ WindUI:Notify({
 })
 
 local Tab1 = Window:Tab({
-    Title = "Home",
-    Icon = "house",
+    Title = "Info",
+    Icon = "info",
 })
 
 local Section = Tab1:Section({ 
     Title = "Community Support",
     TextXAlignment = "Left",
     TextSize = 17,
+})
+
+Tab1:Button({
+    Title = "Discord",
+    Desc = "click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Discord",
+    Desc = "click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Discord",
+    Desc = "click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
 })
 
 Tab1:Button({
@@ -185,8 +215,8 @@ local Section = Tab3:Section({
 local Toggle = Tab3:Toggle({
     Title = "Auto fishing",
     Desc = "Automatic fishing",
-    Icon = "coins",
-    Type = "Checkbox",
+    Icon = false,
+    Type = false,
     Default = false,
     Callback = function(state)
         math.randomseed(tick())
@@ -335,8 +365,8 @@ local Toggle = Tab3:Toggle({
 local Toggle = Tab3:Toggle({
     Title = "Auto Sell",
     Desc = "Automatic fish sales",
-    Icon = "coins",
-    Type = "Checkbox",
+    Icon = false,
+    Type = false,
     Default = false,
     Callback = function(state)
         _G.AutoSell = state
@@ -367,8 +397,8 @@ local Section = Tab3:Section({
 local ToggleCatch = Tab3:Toggle({
     Title = "Instant Catch",
     Desc = "Get fish straight away",
-    Icon = "fish",
-    Type = "Checkbox",
+    Icon = false,
+    Type = false,
     Default = false,
     Callback = function(state)
         _G.InstantCatch = state
@@ -380,7 +410,7 @@ local ToggleCatch = Tab3:Toggle({
 
             task.spawn(function()
                 while _G.InstantCatch do
-                    local remote = findRemote(REMOTE_NAME)
+                    local remote = findRemote(REMOTE_CATCH)
                     if remote then
                         local success, err = tryFire(remote)
                         if success then
@@ -389,7 +419,7 @@ local ToggleCatch = Tab3:Toggle({
                             warn("❌ error:", err)
                         end
                     else
-                        warn("⚠️ Remote '" .. REMOTE_NAME .. "' tidak ditemukan. Jalankan scanner dulu.")
+                        warn("⚠️ Remote '" .. REMOTE_CATCH .. "' tidak ditemukan. Jalankan scanner dulu.")
                     end
                     task.wait(TRY_INTERVAL)
                 end
