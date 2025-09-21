@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://123032091977400",
-    Author = "KirsiaSC",
+    Author = "KirsiaSC | Forsaken",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
@@ -92,6 +92,30 @@ Section3:Slider({
     Rounding = 1,
     Callback = function(value)
         game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+    end
+})
+
+local Toggle = Tab2:Toggle({
+    Title = "Infinite Energy",
+    Desc = "Energy never decrease",
+    Default = false,
+    Callback = function(state)
+        _G.InfiniteEnergy = state
+        task.spawn(function()
+            while _G.InfiniteEnergy do
+                task.wait(0.5)
+                local lp = game.Players.LocalPlayer
+                if lp then
+                    local stats = lp:FindFirstChild("leaderstats")
+                    if stats and stats:FindFirstChild("Energy") then
+                        stats.Energy.Value = math.huge
+                    end
+                    if lp:FindFirstChild("Energy") and lp.Energy:IsA("NumberValue") then
+                        lp.Energy.Value = math.huge
+                    end
+                end
+            end
+        end)
     end
 })
 
