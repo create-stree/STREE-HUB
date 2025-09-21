@@ -157,3 +157,274 @@ Tab2:Toggle({
         end)
     end
 })
+
+local Tab3 = Window:Tab({
+    Title = "Visual",
+    Icon = "eye"
+})
+
+local Section = Tab3:Section({
+    Title = "ESP Survivor",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Toggle({
+    Title = "Survivor Highlight",
+    Desc = "Highlight survivors",
+    Default = false,
+    Callback = function(state)
+        _G.SurvivorHighlight = state
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" and player.Character then
+                if state then createSurvivorHighlight(player.Character) else removeSurvivorHighlight(player.Character) end
+            end
+        end
+        game.Players.PlayerAdded:Connect(function(player)
+            if _G.SurvivorHighlight and player.Team and player.Team.Name == "Survivor" then
+                player.CharacterAdded:Connect(createSurvivorHighlight)
+            end
+        end)
+    end
+})
+
+Tab3:Toggle({
+    Title = "Survivor Box",
+    Desc = "Box survivors",
+    Default = false,
+    Callback = function(state)
+        _G.SurvivorBox = state
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" and player.Character then
+                if state then createSurvivorBox(player.Character) else removeSurvivorBox(player.Character) end
+            end
+        end
+        game.Players.PlayerAdded:Connect(function(player)
+            if _G.SurvivorBox and player.Team and player.Team.Name == "Survivor" then
+                player.CharacterAdded:Connect(createSurvivorBox)
+            end
+        end)
+    end
+})
+
+local Section = Tab3:Section({
+    Title = "ESP Killer",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Toggle({
+    Title = "Killer Highlight",
+    Desc = "Highlight killer",
+    Default = false,
+    Callback = function(state)
+        _G.KillerHighlight = state
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" and player.Character then
+                if state then createKillerHighlight(player.Character) else removeKillerHighlight(player.Character) end
+            end
+        end
+        game.Players.PlayerAdded:Connect(function(player)
+            if _G.KillerHighlight and player.Team and player.Team.Name == "Killer" then
+                player.CharacterAdded:Connect(createKillerHighlight)
+            end
+        end)
+    end
+})
+
+Tab3:Toggle({
+    Title = "Killer Box",
+    Desc = "Box killer",
+    Default = false,
+    Callback = function(state)
+        _G.KillerBox = state
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" and player.Character then
+                if state then createKillerBox(player.Character) else removeKillerBox(player.Character) end
+            end
+        end
+        game.Players.PlayerAdded:Connect(function(player)
+            if _G.KillerBox and player.Team and player.Team.Name == "Killer" then
+                player.CharacterAdded:Connect(createKillerBox)
+            end
+        end)
+    end
+})
+
+Tab3:Toggle({
+    Title = "Name & Distance",
+    Desc = "Show player names and distance",
+    Default = false,
+    Callback = function(state)
+        _G.NameDistanceESP = state
+    end
+})
+
+function createSurvivorHighlight(char)
+    if not char or char:FindFirstChild("SurvivorHighlight") then return end
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "SurvivorHighlight"
+    highlight.FillColor = Color3.fromRGB(0,255,0)
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.Adornee = char
+    highlight.Parent = char
+end
+
+function removeSurvivorHighlight(char)
+    if char and char:FindFirstChild("SurvivorHighlight") then
+        char.SurvivorHighlight:Destroy()
+    end
+end
+
+function createSurvivorBox(char)
+    if not char or not char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("SurvivorBox") then return end
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "SurvivorBox"
+    box.Adornee = char.HumanoidRootPart
+    box.AlwaysOnTop = true
+    box.ZIndex = 2
+    box.Size = Vector3.new(4,6,2)
+    box.Color3 = Color3.fromRGB(0,255,0)
+    box.Transparency = 0.5
+    box.Parent = char
+end
+
+function removeSurvivorBox(char)
+    if char and char:FindFirstChild("SurvivorBox") then
+        char.SurvivorBox:Destroy()
+    end
+end
+
+function createKillerHighlight(char)
+    if not char or char:FindFirstChild("KillerHighlight") then return end
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "KillerHighlight"
+    highlight.FillColor = Color3.fromRGB(255,0,0)
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.Adornee = char
+    highlight.Parent = char
+end
+
+function removeKillerHighlight(char)
+    if char and char:FindFirstChild("KillerHighlight") then
+        char.KillerHighlight:Destroy()
+    end
+end
+
+function createKillerBox(char)
+    if not char or not char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("KillerBox") then return end
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "KillerBox"
+    box.Adornee = char.HumanoidRootPart
+    box.AlwaysOnTop = true
+    box.ZIndex = 2
+    box.Size = Vector3.new(4,6,2)
+    box.Color3 = Color3.fromRGB(255,0,0)
+    box.Transparency = 0.5
+    box.Parent = char
+end
+
+function removeKillerBox(char)
+    if char and char:FindFirstChild("KillerBox") then
+        char.KillerBox:Destroy()
+    end
+end
+
+function createNameDistanceESP(char)
+    if not char or not char:FindFirstChild("Head") or char:FindFirstChild("NameDistanceBillboard") then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NameDistanceBillboard"
+    billboard.Adornee = char.Head
+    billboard.Size = UDim2.new(0,200,0,40)
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0,3.5,0)
+    billboard.Parent = char
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1,0,1,0)
+    text.BackgroundTransparency = 1
+    text.TextColor3 = Color3.fromRGB(255,255,255)
+    text.TextStrokeColor3 = Color3.new(0,0,0)
+    text.TextStrokeTransparency = 0.5
+    text.Font = Enum.Font.SourceSans
+    text.TextSize = 14
+    text.TextScaled = false
+    text.Text = char.Name
+    text.Parent = billboard
+end
+
+function removeNameDistanceESP(char)
+    if char and char:FindFirstChild("NameDistanceBillboard") then
+        char.NameDistanceBillboard:Destroy()
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if _G.NameDistanceESP then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                    createNameDistanceESP(player.Character)
+                end
+            end
+        end
+    end
+end)
+
+local Tab5 = Window:Tab({
+    Title = "Settings",
+    Icon = "settings"
+})
+
+local Section = Tab5:Section({
+    Title = "Main",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab5:Toggle({
+    Title = "AntiAFK",
+    Desc = "Prevent Roblox from kicking you when idle",
+    Default = false,
+    Callback = function(state)
+        _G.AntiAFK = state
+        local VirtualUser = game:GetService("VirtualUser")
+        if state then
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(60)
+                    pcall(function()
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton2(Vector2.new())
+                    end)
+                end
+            end)
+        end
+    end
+})
+
+Tab5:Toggle({
+    Title = "Auto Reconnect",
+    Desc = "Reconnect if disconnected",
+    Default = false,
+    Callback = function(state)
+        _G.AutoReconnect = state
+        if state then
+            task.spawn(function()
+                while _G.AutoReconnect do
+                    task.wait(2)
+                    local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
+                    if reconnectUI then
+                        local prompt = reconnectUI:FindFirstChild("promptOverlay")
+                        if prompt then
+                            local button = prompt:FindFirstChild("ButtonPrimary")
+                            if button and button.Visible then
+                                firesignal(button.MouseButton1Click)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
