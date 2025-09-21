@@ -10,10 +10,10 @@ else
 end
 
 local Window = WindUI:CreateWindow({
-    Title = "Forsaken | STREE HUB",
+    Title = "STREE HUB",
     Icon = "rbxassetid://123032091977400",
     Author = "KirsiaSC",
-    Folder = "Forsaken_STREE",
+    Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
     Theme = "Dark",
@@ -22,7 +22,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1 Forsaken",
+    Title = "v0.0.0.1",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
