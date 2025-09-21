@@ -96,59 +96,54 @@ Tab2:Slider({
 })
 
 Tab2:Toggle({
-    Title = "Infinite Energy",
+    Title = "Infinite Stamina",
     Desc = "Energy never decrease",
     Default = false,
     Callback = function(state)
         _G.InfiniteEnergy = state
-        
-        if state then
-            task.spawn(function()
-                while _G.InfiniteEnergy do
-                    task.wait(0.1)
-                    
-                    local player = game.Players.LocalPlayer
-                    
-                    if player and player.Character then
-                        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-                        if humanoid then
-                            if humanoid:GetAttribute("Stamina") then
-                                humanoid:SetAttribute("Stamina", 100)
-                            end
-                            
-                            if humanoid:GetAttribute("Energy") then
-                                humanoid:SetAttribute("Energy", 100)
-                            end
-                        end
-                        
-                        for _, child in pairs(player.Character:GetChildren()) do
-                            if (child.Name:lower():find("stamina") or child.Name:lower():find("energy")) and child:IsA("NumberValue") then
-                                child.Value = child.MaxValue or 100
-                            end
-                        end
+        task.spawn(function()
+            while _G.InfiniteEnergy do
+                task.wait(0.2)
+                local lp = game.Players.LocalPlayer
+                if lp and lp.Character then
+                    local char = lp.Character
+
+                    if char:FindFirstChild("Energy") then
+                        pcall(function()
+                            char.Energy.Value = math.huge
+                        end)
                     end
-                    
-                    if player then
-                        local stats = player:FindFirstChild("leaderstats")
-                        if stats then
-                            for _, stat in pairs(stats:GetChildren()) do
-                                if (stat.Name:lower():find("stamina") or stat.Name:lower():find("energy")) and stat:IsA("NumberValue") then
-                                    stat.Value = stat.MaxValue or 100
-                                end
-                            end
+
+                    if char:FindFirstChild("Stamina") then
+                        pcall(function()
+                            char.Stamina.Value = math.huge
+                        end)
+                    end
+
+                    if lp:FindFirstChild("Energy") then
+                        pcall(function()
+                            lp.Energy.Value = math.huge
+                        end)
+                    end
+
+                    if lp:FindFirstChild("Stamina") then
+                        pcall(function()
+                            lp.Stamina.Value = math.huge
+                        end)
+                    end
+
+                    if char:FindFirstChild("Humanoid") then
+                        local hum = char.Humanoid
+                        if hum:GetAttribute("Energy") then
+                            hum:SetAttribute("Energy", 999999)
                         end
-                        
-                        if player:GetAttribute("Stamina") then
-                            player:SetAttribute("Stamina", 100)
-                        end
-                        
-                        if player:GetAttribute("Energy") then
-                            player:SetAttribute("Energy", 100)
+                        if hum:GetAttribute("Stamina") then
+                            hum:SetAttribute("Stamina", 999999)
                         end
                     end
                 end
-            end)
-        end
+            end
+        end)
     end
 })
 
