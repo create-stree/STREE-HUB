@@ -193,7 +193,7 @@ local Tab3 = Window:Tab({
 })
 
 local Section = Tab3:Section({
-    Title = "ESP",
+    Title = "ESP Survivor",
     TextXAlignment = "Left",
     TextSize = 17
 })
@@ -250,6 +250,12 @@ Tab3:Toggle({
             end
         end)
     end
+})
+
+local Section = Tab3:Section({
+    Title = "ESP Killer",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
 Tab3:Toggle({
