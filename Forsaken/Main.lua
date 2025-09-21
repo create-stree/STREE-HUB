@@ -27,7 +27,7 @@ Window:Tag({
 })
 
 WindUI:Notify({
-    Title = "Forsaken Loaded",
+    Title = "STREE HUB Loaded",
     Content = "UI loaded successfully!",
     Duration = 3,
     Icon = "bell",
@@ -55,7 +55,7 @@ Section1:Button({
 })
 
 local Section2 = Tab1:Section({
-    Title = "Forsaken Hub auto update every patch!",
+    Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17
 })
