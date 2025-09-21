@@ -109,7 +109,10 @@ Tab2:Slider({
     Max = 200,
     Rounding = 1,
     Callback = function(value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+            lp.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        end
     end
 })
 
@@ -121,7 +124,10 @@ Tab2:Slider({
     Max = 300,
     Rounding = 1,
     Callback = function(value)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+            lp.Character:FindFirstChildOfClass("Humanoid").JumpPower = value
+        end
     end
 })
 
@@ -137,31 +143,26 @@ Tab2:Toggle({
                 local lp = game.Players.LocalPlayer
                 if lp and lp.Character then
                     local char = lp.Character
-
                     if char:FindFirstChild("Energy") then
                         pcall(function()
                             char.Energy.Value = math.huge
                         end)
                     end
-
                     if char:FindFirstChild("Stamina") then
                         pcall(function()
                             char.Stamina.Value = math.huge
                         end)
                     end
-
                     if lp:FindFirstChild("Energy") then
                         pcall(function()
                             lp.Energy.Value = math.huge
                         end)
                     end
-
                     if lp:FindFirstChild("Stamina") then
                         pcall(function()
                             lp.Stamina.Value = math.huge
                         end)
                     end
-
                     if char:FindFirstChild("Humanoid") then
                         local hum = char.Humanoid
                         if hum:GetAttribute("Energy") then
@@ -189,62 +190,78 @@ local Section = Tab3:Section({
 })
 
 Tab3:Toggle({
-    Title = "Player ESP",
-    Desc = "Show players through walls",
+    Title = "Survivor ESP",
+    Desc = "Highlight survivors",
     Default = false,
     Callback = function(state)
-        _G.PlayerESP = state
-        
-        if state then
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer then
-                    setupESP(player)
-                end
-            end
-            
-            game.Players.PlayerAdded:Connect(function(player)
-                if _G.PlayerESP then
-                    setupESP(player)
-                end
-            end)
-        else
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer and player.Character then
-                    local highlight = player.Character:FindFirstChild("ESPHighlight")
-                    if highlight then
-                        highlight:Destroy()
-                    end
+        _G.SurvivorESP = state
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" then
+                if state then
+                    setupCustomESP(player, Color3.fromRGB(0, 255, 0))
+                else
+                    removeESP(player)
                 end
             end
         end
+        game.Players.PlayerAdded:Connect(function(player)
+            if _G.SurvivorESP and player.Team and player.Team.Name == "Survivor" then
+                setupCustomESP(player, Color3.fromRGB(0, 255, 0))
+            end
+        end)
     end
 })
 
-function setupESP(player)
-    if player.Character then
-        createHighlight(player.Character)
+Tab3:Toggle({
+    Title = "Killer ESP",
+    Desc = "Highlight killer",
+    Default = false,
+    Callback = function(state)
+        _G.KillerESP = state
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" then
+                if state then
+                    setupCustomESP(player, Color3.fromRGB(255, 0, 0))
+                else
+                    removeESP(player)
+                end
+            end
+        end
+        game.Players.PlayerAdded:Connect(function(player)
+            if _G.KillerESP and player.Team and player.Team.Name == "Killer" then
+                setupCustomESP(player, Color3.fromRGB(255, 0, 0))
+            end
+        end)
     end
-    
-    player.CharacterAdded:Connect(function(character)
-        if _G.PlayerESP then
-            createHighlight(character)
+})
+
+function setupCustomESP(player, color)
+    if player.Character then
+        createCustomHighlight(player.Character, color)
+    end
+    player.CharacterAdded:Connect(function(char)
+        if (player.Team and ((player.Team.Name == "Survivor" and _G.SurvivorESP) or (player.Team.Name == "Killer" and _G.KillerESP))) then
+            createCustomHighlight(char, color)
         end
     end)
 end
 
-function createHighlight(character)
+function createCustomHighlight(character, color)
     local highlight = Instance.new("Highlight")
     highlight.Name = "ESPHighlight"
-    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+    highlight.FillColor = color
     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.Adornee = character
     highlight.Parent = character
-    
-    character.AncestryChanged:Connect(function()
-        if not character:IsDescendantOf(game.Workspace) then
+end
+
+function removeESP(player)
+    if player.Character then
+        local highlight = player.Character:FindFirstChild("ESPHighlight")
+        if highlight then
             highlight:Destroy()
         end
-    end)
+    end
 end
 
 local Tab4 = Window:Tab({
@@ -287,7 +304,6 @@ Tab5:Toggle({
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
-        
         if state then
             task.spawn(function()
                 while _G.AntiAFK do
