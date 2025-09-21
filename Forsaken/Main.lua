@@ -137,46 +137,29 @@ Tab2:Toggle({
     Default = false,
     Callback = function(state)
         _G.InfiniteEnergy = state
-        
         task.spawn(function()
             while _G.InfiniteEnergy do
                 task.wait(0.2)
-                
                 local lp = game.Players.LocalPlayer
                 if lp and lp.Character then
                     local char = lp.Character
-                    
                     if char:FindFirstChild("Energy") then
-                        pcall(function()
-                            char.Energy.Value = math.huge
-                        end)
+                        pcall(function() char.Energy.Value = math.huge end)
                     end
-                    
                     if char:FindFirstChild("Stamina") then
-                        pcall(function()
-                            char.Stamina.Value = math.huge
-                        end)
+                        pcall(function() char.Stamina.Value = math.huge end)
                     end
-                    
                     if lp:FindFirstChild("Energy") then
-                        pcall(function()
-                            lp.Energy.Value = math.huge
-                        end)
+                        pcall(function() lp.Energy.Value = math.huge end)
                     end
-                    
                     if lp:FindFirstChild("Stamina") then
-                        pcall(function()
-                            lp.Stamina.Value = math.huge
-                        end)
+                        pcall(function() lp.Stamina.Value = math.huge end)
                     end
-                    
                     if char:FindFirstChild("Humanoid") then
                         local hum = char.Humanoid
-                        
                         if hum:GetAttribute("Energy") then
                             hum:SetAttribute("Energy", 999999)
                         end
-                        
                         if hum:GetAttribute("Stamina") then
                             hum:SetAttribute("Stamina", 999999)
                         end
@@ -204,7 +187,6 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.SurvivorHighlight = state
-        
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" then
                 if state then
@@ -214,12 +196,9 @@ Tab3:Toggle({
                 end
             end
         end
-        
         game.Players.PlayerAdded:Connect(function(player)
             if _G.SurvivorHighlight and player.Team and player.Team.Name == "Survivor" then
-                player.CharacterAdded:Connect(function(char)
-                    createSurvivorHighlight(char)
-                end)
+                player.CharacterAdded:Connect(createSurvivorHighlight)
             end
         end)
     end
@@ -231,7 +210,6 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.SurvivorBox = state
-        
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Survivor" then
                 if state then
@@ -241,12 +219,9 @@ Tab3:Toggle({
                 end
             end
         end
-        
         game.Players.PlayerAdded:Connect(function(player)
             if _G.SurvivorBox and player.Team and player.Team.Name == "Survivor" then
-                player.CharacterAdded:Connect(function(char)
-                    createSurvivorBox(char)
-                end)
+                player.CharacterAdded:Connect(createSurvivorBox)
             end
         end)
     end
@@ -264,7 +239,6 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.KillerHighlight = state
-        
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" then
                 if state then
@@ -274,12 +248,9 @@ Tab3:Toggle({
                 end
             end
         end
-        
         game.Players.PlayerAdded:Connect(function(player)
             if _G.KillerHighlight and player.Team and player.Team.Name == "Killer" then
-                player.CharacterAdded:Connect(function(char)
-                    createKillerHighlight(char)
-                end)
+                player.CharacterAdded:Connect(createKillerHighlight)
             end
         end)
     end
@@ -291,7 +262,6 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.KillerBox = state
-        
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer and player.Team and player.Team.Name == "Killer" then
                 if state then
@@ -301,12 +271,9 @@ Tab3:Toggle({
                 end
             end
         end
-        
         game.Players.PlayerAdded:Connect(function(player)
             if _G.KillerBox and player.Team and player.Team.Name == "Killer" then
-                player.CharacterAdded:Connect(function(char)
-                    createKillerBox(char)
-                end)
+                player.CharacterAdded:Connect(createKillerBox)
             end
         end)
     end
@@ -318,7 +285,6 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.NameDistanceESP = state
-        
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
                 if state then
@@ -328,12 +294,9 @@ Tab3:Toggle({
                 end
             end
         end
-        
         game.Players.PlayerAdded:Connect(function(player)
             if _G.NameDistanceESP and player ~= game.Players.LocalPlayer then
-                player.CharacterAdded:Connect(function(char)
-                    createNameDistanceESP(char)
-                end)
+                player.CharacterAdded:Connect(createNameDistanceESP)
             end
         end)
     end
@@ -341,7 +304,6 @@ Tab3:Toggle({
 
 function createSurvivorHighlight(character)
     if not character or character:FindFirstChild("SurvivorHighlight") then return end
-    
     local highlight = Instance.new("Highlight")
     highlight.Name = "SurvivorHighlight"
     highlight.FillColor = Color3.fromRGB(0, 255, 0)
@@ -359,7 +321,6 @@ end
 
 function createSurvivorBox(character)
     if not character or not character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("SurvivorBox") then return end
-    
     local box = Instance.new("BoxHandleAdornment")
     box.Name = "SurvivorBox"
     box.Adornee = character:FindFirstChild("HumanoidRootPart")
@@ -380,7 +341,6 @@ end
 
 function createKillerHighlight(character)
     if not character or character:FindFirstChild("KillerHighlight") then return end
-    
     local highlight = Instance.new("Highlight")
     highlight.Name = "KillerHighlight"
     highlight.FillColor = Color3.fromRGB(255, 0, 0)
@@ -398,7 +358,6 @@ end
 
 function createKillerBox(character)
     if not character or not character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("KillerBox") then return end
-    
     local box = Instance.new("BoxHandleAdornment")
     box.Name = "KillerBox"
     box.Adornee = character:FindFirstChild("HumanoidRootPart")
@@ -419,7 +378,6 @@ end
 
 function createNameDistanceESP(character)
     if not character or not character:FindFirstChild("Head") or not character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("NameDistanceBillboard") then return end
-    
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "NameDistanceBillboard"
     billboard.Adornee = character:FindFirstChild("Head")
@@ -427,7 +385,6 @@ function createNameDistanceESP(character)
     billboard.AlwaysOnTop = true
     billboard.StudsOffset = Vector3.new(0, 3.5, 0)
     billboard.Parent = character
-
     local text = Instance.new("TextLabel")
     text.Size = UDim2.new(1, 0, 1, 0)
     text.BackgroundTransparency = 1
@@ -464,7 +421,6 @@ Tab4:Button({
     Desc = "Teleport to safe zone",
     Callback = function()
         local lp = game.Players.LocalPlayer
-        
         if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
             lp.Character.HumanoidRootPart.CFrame = CFrame.new(0, 50, 0)
         end
@@ -489,12 +445,10 @@ Tab5:Toggle({
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
-        
         if state then
             task.spawn(function()
                 while _G.AntiAFK do
                     task.wait(60)
-                    
                     pcall(function()
                         VirtualUser:CaptureController()
                         VirtualUser:ClickButton2(Vector2.new())
@@ -511,20 +465,15 @@ Tab5:Toggle({
     Default = false,
     Callback = function(state)
         _G.AutoReconnect = state
-        
         if state then
             task.spawn(function()
                 while _G.AutoReconnect do
                     task.wait(2)
-                    
                     local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
-                    
                     if reconnectUI then
                         local prompt = reconnectUI:FindFirstChild("promptOverlay")
-                        
                         if prompt then
                             local button = prompt:FindFirstChild("ButtonPrimary")
-                            
                             if button and button.Visible then
                                 firesignal(button.MouseButton1Click)
                             end
