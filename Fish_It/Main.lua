@@ -55,31 +55,31 @@ Tab1:Button({
 })
 
 Tab1:Button({
-    Title = "Discord",
+    Title = "WhatsApp",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
         end
     end
 })
 
 Tab1:Button({
-    Title = "Discord",
+    Title = "Telegram",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
+            setclipboard("https://t.me/StreeCoumminty")
         end
     end
 })
 
 Tab1:Button({
-    Title = "Discord",
+    Title = "Website",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
+            setclipboard("https://stree-hub-nexus.lovable.app/")
         end
     end
 })
