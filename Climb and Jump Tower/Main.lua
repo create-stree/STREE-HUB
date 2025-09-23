@@ -97,17 +97,23 @@ local Section = Tab2:Section({
 
 Tab2:Toggle({
     Title = "Auto Farm Win",
-    Desc = "Auto claim win by touching win part",
+    Desc = "Auto claim win",
     Default = false,
     Callback = function(state)
         _G.AutoFarmWin = state
         task.spawn(function()
             while _G.AutoFarmWin do
-                task.wait(3)
+                task.wait(2)
                 local lp = game.Players.LocalPlayer
-                if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = lp.Character.HumanoidRootPart
-                    local winPart = workspace:FindFirstChild("Win") or workspace:FindFirstChild("WinPart")
+                local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local winPart = nil
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if v:IsA("Part") and v.Name:lower():find("win") then
+                            winPart = v
+                            break
+                        end
+                    end
                     if winPart then
                         firetouchinterest(hrp, winPart, 0)
                         task.wait(0.1)
