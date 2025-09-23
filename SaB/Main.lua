@@ -32,3 +32,59 @@ WindUI:Notify({
     Duration = 3,  
     Icon = "bell",  
 })
+
+local Tab1 = Window:Tab({
+    Title = "Info",
+    Icon = "info"
+})
+
+local Section = Tab1:Section({
+    Title = "Community Support",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab1:Button({
+    Title = "Discord",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "WhatsApp",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Telegram",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://t.me/StreeCoumminty")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Website",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://stree-hub-nexus.lovable.app")
+        end
+    end
+})
+
+local Tab2 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark"
+})
