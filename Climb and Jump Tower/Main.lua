@@ -1,46 +1,157 @@
--- Load WindUI
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
 
 if not success or not WindUI then
-    warn("⚠️ WindUI gagal dimuat!")
+    warn("⚠️ UI failed to load!")
     return
 end
 
--- Buat Window
-local Window = WindUI:CreateWindow("Climb & Jump Tower Hub")
+local Window = WindUI:CreateWindow({
+    Title = "STREE HUB | Climb & Jump Tower",
+    Icon = "rbxassetid://123032091977400",
+    Author = "KirsiaSC | Forsaken",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(560, 400),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 170,
+    HasOutline = true
+})
 
--- Tab Gameplay
-local Tab = Window:CreateTab("Gameplay")
+Window:Tag({
+    Title = "v0.0.0.1",
+    Color = Color3.fromRGB(0, 255, 0),
+})
 
--- Infinite Jump
-_G.InfiniteJump = false
+WindUI:Notify({
+    Title = "STREE HUB Loaded",
+    Content = "UI loaded successfully!",
+    Duration = 3,
+    Icon = "bell",
+})
+
+local Tab1 = Window:Tab({
+    Title = "Info",
+    Icon = "info"
+})
+
+local Section = Tab1:Section({
+    Title = "Community Support",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab1:Button({
+    Title = "Discord",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "WhatsApp",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Telegram",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://t.me/StreeCoumminty")
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "Website",
+    Desc = "Click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://stree-hub-nexus.lovable.app")
+        end
+    end
+})
+
+local Tab2 = Window:Tab({
+    Title = "Players",
+    Icon = "user"
+})
+
+local Section = Tab2:Section({
+    Title = "Movement",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab2:Slider({
+    Title = "WalkSpeed",
+    Description = "Adjust WalkSpeed",
+    Default = 16,
+    Min = 16,
+    Max = 200,
+    Rounding = 1,
+    Callback = function(value)
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+            lp.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        end
+    end
+})
+
+Tab2:Slider({
+    Title = "JumpPower",
+    Description = "Adjust JumpPower",
+    Default = 50,
+    Min = 50,
+    Max = 300,
+    Rounding = 1,
+    Callback = function(value)
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+            lp.Character:FindFirstChildOfClass("Humanoid").JumpPower = value
+        end
+    end
+})
+
+Tab2:Toggle({
+    Title = "Infinite Jump",
+    Desc = "Jump without limit",
+    Default = false,
+    Callback = function(state)
+        _G.InfiniteJump = state
+    end
+})
+
 game:GetService("UserInputService").JumpRequest:Connect(function()
     if _G.InfiniteJump then
-        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+            lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
     end
 end)
 
-Tab:CreateToggle("Infinite Jump", false, function(v)
-    _G.InfiniteJump = v
-end)
-
--- Speed Hack
-_G.SpeedHack = false
-local speed = 50
-Tab:CreateToggle("Speed Hack", false, function(v)
-    _G.SpeedHack = v
-    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = v and speed or 16
+Tab2:Toggle({
+    Title = "NoClip",
+    Desc = "Walk through walls",
+    Default = false,
+    Callback = function(state)
+        _G.NoClip = state
     end
-end)
+})
 
--- NoClip
-_G.NoClip = false
 game:GetService("RunService").Stepped:Connect(function()
-    if _G.NoClip then
+    if _G.NoClip and game.Players.LocalPlayer.Character then
         for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
             if v:IsA("BasePart") then
                 v.CanCollide = false
@@ -49,14 +160,132 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-Tab:CreateToggle("NoClip", false, function(v)
-    _G.NoClip = v
-end)
+Tab2:Button({
+    Title = "Teleport To Top",
+    Desc = "Skip tower",
+    Callback = function()
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(0, 500, 0)
+        end
+    end
+})
 
--- Teleport ke atas
-Tab:CreateButton("Teleport to Top", function()
-    local char = game.Players.LocalPlayer.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        char.HumanoidRootPart.CFrame = CFrame.new(0, 200, 0) -- ubah angka Y biar langsung ke atas tower
+local Tab3 = Window:Tab({
+    Title = "Visual",
+    Icon = "eye"
+})
+
+local function createNameESP(char)
+    if not char or not char:FindFirstChild("Head") or char:FindFirstChild("NameDistanceBillboard") then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NameDistanceBillboard"
+    billboard.Adornee = char.Head
+    billboard.Size = UDim2.new(0,200,0,40)
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0,3.5,0)
+    billboard.Parent = char
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1,0,1,0)
+    text.BackgroundTransparency = 1
+    text.TextColor3 = Color3.fromRGB(255,255,255)
+    text.TextStrokeColor3 = Color3.new(0,0,0)
+    text.TextStrokeTransparency = 0.5
+    text.Font = Enum.Font.SourceSans
+    text.TextSize = 14
+    text.Parent = billboard
+end
+
+local function removeNameESP(char)
+    if char and char:FindFirstChild("NameDistanceBillboard") then
+        char.NameDistanceBillboard:Destroy()
+    end
+end
+
+Tab3:Toggle({
+    Title = "Name & Distance ESP",
+    Desc = "Show player names and distance",
+    Default = false,
+    Callback = function(state)
+        _G.NameDistanceESP = state
+    end
+})
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if _G.NameDistanceESP then
+            local lp = game.Players.LocalPlayer
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                for _, p in pairs(game.Players:GetPlayers()) do
+                    if p ~= lp and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("HumanoidRootPart") then
+                        createNameESP(p.Character)
+                        local bp = p.Character:FindFirstChild("NameDistanceBillboard")
+                        if bp and bp:FindFirstChildOfClass("TextLabel") then
+                            local dist = (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                            bp:FindFirstChildOfClass("TextLabel").Text = p.Name.." | "..math.floor(dist).." studs"
+                        end
+                    end
+                end
+            end
+        else
+            for _, p in pairs(game.Players:GetPlayers()) do
+                if p.Character then
+                    removeNameESP(p.Character)
+                end
+            end
+        end
     end
 end)
+
+local Tab4 = Window:Tab({
+    Title = "Settings",
+    Icon = "settings"
+})
+
+Tab4:Toggle({
+    Title = "AntiAFK",
+    Desc = "Stay active",
+    Default = false,
+    Callback = function(state)
+        _G.AntiAFK = state
+        local vu = game:GetService("VirtualUser")
+        if state then
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(60)
+                    pcall(function()
+                        vu:CaptureController()
+                        vu:ClickButton2(Vector2.new())
+                    end)
+                end
+            end)
+        end
+    end
+})
+
+Tab4:Toggle({
+    Title = "Auto Reconnect",
+    Desc = "Reconnect if disconnected",
+    Default = false,
+    Callback = function(state)
+        _G.AutoReconnect = state
+        if state then
+            task.spawn(function()
+                while _G.AutoReconnect do
+                    task.wait(2)
+                    local ui = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
+                    if ui then
+                        local prompt = ui:FindFirstChild("promptOverlay")
+                        if prompt then
+                            local button = prompt:FindFirstChild("ButtonPrimary")
+                            if button and button.Visible then
+                                firesignal(button.MouseButton1Click)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
