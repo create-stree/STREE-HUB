@@ -5,10 +5,12 @@ end)
 if not success or not WindUI then
     warn("⚠️ UI failed to load!")
     return
+else
+    print("✓ UI loaded successfully!")
 end
 
 local Window = WindUI:CreateWindow({
-    Title = "STREE HUB | Climb & Jump Tower",
+    Title = "STREE HUB",
     Icon = "rbxassetid://123032091977400",
     Author = "KirsiaSC | Forsaken",
     Folder = "STREE_HUB",
