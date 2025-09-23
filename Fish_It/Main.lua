@@ -568,3 +568,73 @@ local Toggle = Tab5:Toggle({
         end
     end
 })
+
+local ConfigFolder = "STREE_HUB/Configs"
+if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
+if not isfolder(ConfigFolder) then makefolder(ConfigFolder) end
+
+local ConfigName = "default.json"
+
+local function GetConfig()
+    return {
+        WalkSpeed = Humanoid.WalkSpeed,
+        JumpPower = _G.CustomJumpPower or 50,
+        InfiniteJump = _G.InfiniteJump or false,
+        AutoSell = _G.AutoSell or false,
+        InstantCatch = _G.InstantCatch or false,
+        AntiAFK = _G.AntiAFK or false,
+        AutoReconnect = _G.AutoReconnect or false,
+    }
+end
+
+local function ApplyConfig(data)
+    if data.WalkSpeed then Humanoid.WalkSpeed = data.WalkSpeed end
+    if data.JumpPower then
+        _G.CustomJumpPower = data.JumpPower
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = data.JumpPower
+    end
+    _G.InfiniteJump = data.InfiniteJump or false
+    _G.AutoSell = data.AutoSell or false
+    _G.InstantCatch = data.InstantCatch or false
+    _G.AntiAFK = data.AntiAFK or false
+    _G.AutoReconnect = data.AutoReconnect or false
+end
+
+Tab5:Button({
+    Title = "Save Config",
+    Desc = "Simpan semua setting",
+    Callback = function()
+        local data = GetConfig()
+        writefile(ConfigFolder.."/"..ConfigName, game:GetService("HttpService"):JSONEncode(data))
+        print("✅ Config disimpan!")
+    end
+})
+
+Tab5:Button({
+    Title = "Load Config",
+    Desc = "Gunakan config yang sudah disimpan",
+    Callback = function()
+        if isfile(ConfigFolder.."/"..ConfigName) then
+            local data = readfile(ConfigFolder.."/"..ConfigName)
+            local decoded = game:GetService("HttpService"):JSONDecode(data)
+            ApplyConfig(decoded)
+            print("✅ Config diterapkan!")
+        else
+            warn("⚠️ Config belum ada, silakan Save dulu.")
+        end
+    end
+})
+
+Tab5:Button({
+    Title = "Delete Config",
+    Desc = "Hapus config tersimpan",
+    Callback = function()
+        if isfile(ConfigFolder.."/"..ConfigName) then
+            delfile(ConfigFolder.."/"..ConfigName)
+            print("🗑 Config dihapus!")
+        else
+            warn("⚠️ Tidak ada config untuk dihapus.")
+        end
+    end
+})
