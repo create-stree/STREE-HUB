@@ -97,7 +97,7 @@ local Section = Tab2:Section({
 
 Tab2:Toggle({
     Title = "Auto Farm Win",
-    Desc = "Auto claim win",
+    Desc = "Auto claim win [BETA]",
     Default = false,
     Callback = function(state)
         _G.AutoFarmWin = state
@@ -122,6 +122,85 @@ Tab2:Toggle({
                         hrp.CFrame = CFrame.new(-4, 14401, -115)
                     end
                 end
+            end
+        end)
+    end
+})
+
+Tab2:Toggle({
+    Title = "Auto Farm Coins",
+    Desc = "Auto collect coins [Normal]",
+    Default = false,
+    Callback = function(state)
+        _G.AutoFarmCoins = state
+        task.spawn(function()
+            while _G.AutoFarmCoins do
+                local lp = game.Players.LocalPlayer
+                local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, coin in pairs(workspace:GetDescendants()) do
+                        if coin:IsA("Part") and coin.Name:lower():find("coin") then
+                            hrp.CFrame = coin.CFrame + Vector3.new(0, 3, 0)
+                            firetouchinterest(hrp, coin, 0)
+                            task.wait(0.1)
+                            firetouchinterest(hrp, coin, 1)
+                            task.wait(0.2)
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+Tab2:Toggle({
+    Title = "Auto Farm Coins",
+    Desc = "Auto collect coins [Fast]",
+    Default = false,
+    Callback = function(state)
+        _G.AutoFarmCoins = state
+        task.spawn(function()
+            while _G.AutoFarmCoins do
+                local lp = game.Players.LocalPlayer
+                local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, coin in pairs(workspace:GetDescendants()) do
+                        if coin:IsA("Part") and coin.Name:lower():find("coin") then
+                            hrp.CFrame = coin.CFrame + Vector3.new(0, 3, 0)
+                            firetouchinterest(hrp, coin, 0)
+                            firetouchinterest(hrp, coin, 1)
+                        end
+                    end
+                end
+                task.wait(0.2)
+            end
+        end)
+    end
+})
+
+Tab2:Toggle({
+    Title = "Auto Farm Coins",
+    Desc = "Auto collect coins [Safe]",
+    Default = false,
+    Callback = function(state)
+        _G.AutoFarmCoins = state
+        task.spawn(function()
+            while _G.AutoFarmCoins do
+                local lp = game.Players.LocalPlayer
+                local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, coin in pairs(workspace:GetDescendants()) do
+                        if coin:IsA("Part") and coin.Name:lower():find("coin") then
+                            hrp.CFrame = coin.CFrame + Vector3.new(0, 3, 0)
+                            firetouchinterest(hrp, coin, 0)
+                            task.wait(0.1)
+                            firetouchinterest(hrp, coin, 1)
+                            task.wait(0.3)
+                        end
+                    end
+                end
+                task.wait(1)
             end
         end)
     end
