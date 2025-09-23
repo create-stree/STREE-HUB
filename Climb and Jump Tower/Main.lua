@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://123032091977400",
-    Author = "KirsiaSC | Forsaken",
+    Author = "KirsiaSC | Climb and Jump Tower",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
@@ -84,18 +84,18 @@ Tab1:Button({
     end
 })
 
-local Tab2 = Window:Tab({
+local Tab3 = Window:Tab({
     Title = "Players",
     Icon = "user"
 })
 
-local Section = Tab2:Section({
+local Section = Tab3:Section({
     Title = "Movement",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Tab2:Slider({
+Tab3:Slider({
     Title = "WalkSpeed",
     Description = "Adjust WalkSpeed",
     Default = 16,
@@ -110,7 +110,7 @@ Tab2:Slider({
     end
 })
 
-Tab2:Slider({
+Tab3:Slider({
     Title = "JumpPower",
     Description = "Adjust JumpPower",
     Default = 50,
@@ -125,7 +125,7 @@ Tab2:Slider({
     end
 })
 
-Tab2:Toggle({
+Tab3:Toggle({
     Title = "Infinite Jump",
     Desc = "Jump without limit",
     Default = false,
@@ -143,7 +143,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-Tab2:Toggle({
+Tab3:Toggle({
     Title = "NoClip",
     Desc = "Walk through walls",
     Default = false,
@@ -162,18 +162,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-Tab2:Button({
-    Title = "Teleport To Top",
-    Desc = "Skip tower",
-    Callback = function()
-        local lp = game.Players.LocalPlayer
-        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-            lp.Character.HumanoidRootPart.CFrame = CFrame.new(0, 500, 0)
-        end
-    end
-})
-
-local Tab3 = Window:Tab({
+local Tab4 = Window:Tab({
     Title = "Visual",
     Icon = "eye"
 })
@@ -204,7 +193,7 @@ local function removeNameESP(char)
     end
 end
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Name & Distance ESP",
     Desc = "Show player names and distance",
     Default = false,
@@ -240,12 +229,12 @@ task.spawn(function()
     end
 end)
 
-local Tab4 = Window:Tab({
+local Tab5 = Window:Tab({
     Title = "Settings",
     Icon = "settings"
 })
 
-Tab4:Toggle({
+Tab5:Toggle({
     Title = "AntiAFK",
     Desc = "Stay active",
     Default = false,
@@ -266,7 +255,7 @@ Tab4:Toggle({
     end
 })
 
-Tab4:Toggle({
+Tab5:Toggle({
     Title = "Auto Reconnect",
     Desc = "Reconnect if disconnected",
     Default = false,
