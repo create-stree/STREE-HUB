@@ -84,6 +84,35 @@ Tab1:Button({
     end
 })
 
+local Tab2 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark"
+})
+
+local Section = Tab2:Section({
+    Title = "Auto",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab2:Toggle({
+    Title = "Auto Farm Win",
+    Desc = "Auto teleport to top for wins",
+    Default = false,
+    Callback = function(state)
+        _G.AutoFarmWin = state
+        task.spawn(function()
+            while _G.AutoFarmWin do
+                task.wait(3)
+                local lp = game.Players.LocalPlayer
+                if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                    lp.Character.HumanoidRootPart.CFrame = CFrame.new(0, 1500, 0)
+                end
+            end
+        end)
+    end
+})
+
 local Tab3 = Window:Tab({
     Title = "Players",
     Icon = "user"
