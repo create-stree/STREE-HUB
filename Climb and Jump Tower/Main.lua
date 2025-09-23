@@ -97,7 +97,7 @@ local Section = Tab2:Section({
 
 Tab2:Toggle({
     Title = "Auto Farm Win",
-    Desc = "Auto teleport to top for wins",
+    Desc = "Auto claim win by touching win part",
     Default = false,
     Callback = function(state)
         _G.AutoFarmWin = state
@@ -106,7 +106,15 @@ Tab2:Toggle({
                 task.wait(3)
                 local lp = game.Players.LocalPlayer
                 if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                    lp.Character.HumanoidRootPart.CFrame = CFrame.new(0, 1500, 0)
+                    local hrp = lp.Character.HumanoidRootPart
+                    local winPart = workspace:FindFirstChild("Win") or workspace:FindFirstChild("WinPart")
+                    if winPart then
+                        firetouchinterest(hrp, winPart, 0)
+                        task.wait(0.1)
+                        firetouchinterest(hrp, winPart, 1)
+                    else
+                        hrp.CFrame = CFrame.new(-4, 14401, -115)
+                    end
                 end
             end
         end)
