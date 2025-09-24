@@ -97,7 +97,7 @@ local function AutoClimb()
         task.wait(0.05)
         local char = player.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0) -- naik cepat
+            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0)
         end
     end
 end
