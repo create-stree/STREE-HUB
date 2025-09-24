@@ -91,8 +91,6 @@ local Tab2 = Window:Tab({
 
 _G.AutoClimb = false
 
-local AutoTab = Window:CreateTab("Auto", 4483362458)
-
 local function AutoClimb()
     local player = game.Players.LocalPlayer
     while _G.AutoClimb do
