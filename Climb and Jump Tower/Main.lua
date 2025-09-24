@@ -102,7 +102,7 @@ local function AutoClimb()
     end
 end
 
-MainTab:Toggle({
+Tab2:Toggle({
     Text = "Auto Climb Super Fast",
     Callback = function(Value)
         _G.AutoClimb = Value
