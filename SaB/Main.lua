@@ -89,24 +89,35 @@ local Tab2 = Window:Tab({
     Icon = "landmark"
 })
 
-local Section = Tab3:Section({
+local Section = Tab2:Section({
+    Title = "Base",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+local Section = Tab2:Section({
+    Title = "Buy",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+local Section = Tab2:Section({
     Title = "Steal",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
 local Tab3 = Window:Tab({
+    Title = "Players",
+    Icon = "user"
+})
+
+local Tab4 = Window:Tab({
     Title = "Settings",
     Icon = "settings"
 })
 
-local Section = Tab3:Section({
-    Title = "Main",
-    TextXAlignment = "Left",
-    TextSize = 17
-})
-
-Tabe:Toggle({
+Tab4:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Default = false,
@@ -127,7 +138,7 @@ Tabe:Toggle({
     end
 })
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Auto Reconnect",
     Desc = "Reconnect if disconnected",
     Default = false,
