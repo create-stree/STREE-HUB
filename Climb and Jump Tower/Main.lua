@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://123032091977400",
-    Author = "KirsiaSC | Climb and Jump Tower ",
+    Author = "KirsiaSC | Climb and Jump Tower",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
@@ -89,30 +89,6 @@ local Tab2 = Window:Tab({
     Icon = "landmark"
 })
 
-_G.AutoClimb = false
-
-local function AutoClimb()
-    local player = game.Players.LocalPlayer
-    while _G.AutoClimb do
-        task.wait(0.05)
-        local char = player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.CFrame = hrp.CFrame + Vector3.new(0, 50, 0)
-        end
-    end
-end
-
-Tab2:Toggle({
-    Text = "Auto Climb Super Fast",
-    Callback = function(Value)
-        _G.AutoClimb = Value
-        if Value then
-            task.spawn(AutoClimb)
-        end
-    end,
-})
-
 local Section = Tab2:Section({
     Title = "Auto (first place)",
     TextXAlignment = "Left",
@@ -156,9 +132,9 @@ Tab2:Toggle({
     Desc = "Auto collect coins [Normal]",
     Default = false,
     Callback = function(state)
-        _G.AutoFarmCoins = state
+        _G.AutoFarmCoinsNormal = state
         task.spawn(function()
-            while _G.AutoFarmCoins do
+            while _G.AutoFarmCoinsNormal do
                 local lp = game.Players.LocalPlayer
                 local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
                 if hrp then
@@ -183,9 +159,9 @@ Tab2:Toggle({
     Desc = "Auto collect coins [Fast]",
     Default = false,
     Callback = function(state)
-        _G.AutoFarmCoins = state
+        _G.AutoFarmCoinsFast = state
         task.spawn(function()
-            while _G.AutoFarmCoins do
+            while _G.AutoFarmCoinsFast do
                 local lp = game.Players.LocalPlayer
                 local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
                 if hrp then
@@ -208,9 +184,9 @@ Tab2:Toggle({
     Desc = "Auto collect coins [Safe]",
     Default = false,
     Callback = function(state)
-        _G.AutoFarmCoins = state
+        _G.AutoFarmCoinsSafe = state
         task.spawn(function()
-            while _G.AutoFarmCoins do
+            while _G.AutoFarmCoinsSafe do
                 local lp = game.Players.LocalPlayer
                 local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
                 if hrp then
