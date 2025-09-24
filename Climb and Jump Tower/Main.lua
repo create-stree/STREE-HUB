@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://123032091977400",
-    Author = "KirsiaSC | Climb and Jump Tower",
+    Author = "KirsiaSC | Climb and Jump Tower  ",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
