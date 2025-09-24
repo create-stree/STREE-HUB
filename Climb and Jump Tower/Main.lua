@@ -90,13 +90,13 @@ local Tab2 = Window:Tab({
 })
 
 local Section = Tab2:Section({
-    Title = "Auto (first place)",
+    Title = "first place",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
 Tab2:Toggle({
-    Title = "Auto Farm Win",
+    Title = "Auto Win",
     Desc = "Auto claim win [BETA]",
     Default = false,
     Callback = function(state)
