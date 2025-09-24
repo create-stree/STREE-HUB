@@ -22,7 +22,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.4",
+    Title = "v0.0.0.5",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -274,11 +274,73 @@ local Toggle = Tab3:Toggle({
                     elseif v:IsA("RemoteFunction") and v.Name:lower():find("sell") then
                         pcall(function()
                             v:InvokeServer()
-                        end)
+                        end
                     end
                 end
             end
         end)
+    end
+})
+
+local Toggle = Tab3:Toggle({
+    Title = "Auto Favorite",
+    Desc = "Automatically favorite fish",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.AutoFavorite = state
+        if state then
+            print("✅ Auto Favorite Active")
+            task.spawn(function()
+                while _G.AutoFavorite do
+                    pcall(function()
+                        local rs = game:GetService("ReplicatedStorage")
+                        for _, v in pairs(rs:GetDescendants()) do
+                            if v:IsA("RemoteEvent") and (v.Name:lower():find("favorite") or v.Name:lower():find("fav")) then
+                                v:FireServer(true)
+                            elseif v:IsA("RemoteFunction") and (v.Name:lower():find("favorite") or v.Name:lower():find("fav")) then
+                                v:InvokeServer(true)
+                            end
+                        end
+                    end)
+                    task.wait(1)
+                end
+            end)
+        else
+            print("❌ Auto Favorite Inactive")
+        end
+    end
+})
+
+local Toggle = Tab3:Toggle({
+    Title = "Auto Unfavorite",
+    Desc = "Automatically unfavorite fish",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.AutoUnfavorite = state
+        if state then
+            print("✅ Auto Unfavorite Active")
+            task.spawn(function()
+                while _G.AutoUnfavorite do
+                    pcall(function()
+                        local rs = game:GetService("ReplicatedStorage")
+                        for _, v in pairs(rs:GetDescendants()) do
+                            if v:IsA("RemoteEvent") and (v.Name:lower():find("favorite") or v.Name:lower():find("fav")) then
+                                v:FireServer(false)
+                            elseif v:IsA("RemoteFunction") and (v.Name:lower():find("favorite") or v.Name:lower():find("fav")) then
+                                v:InvokeServer(false)
+                            end
+                        end
+                    end)
+                    task.wait(1)
+                end
+            end)
+        else
+            print("❌ Auto Unfavorite Inactive")
+        end
     end
 })
 
@@ -522,6 +584,8 @@ local function GetConfig()
         JumpPower = _G.CustomJumpPower or 50,
         InfiniteJump = _G.InfiniteJump or false,
         AutoSell = _G.AutoSell or false,
+        AutoFavorite = _G.AutoFavorite or false,
+        AutoUnfavorite = _G.AutoUnfavorite or false,
         InstantCatch = _G.InstantCatch or false,
         AntiAFK = _G.AntiAFK or false,
         AutoReconnect = _G.AutoReconnect or false,
@@ -545,6 +609,12 @@ local function ApplyConfig(data)
     end
     if data.AutoSell ~= nil then
         _G.AutoSell = data.AutoSell
+    end
+    if data.AutoFavorite ~= nil then
+        _G.AutoFavorite = data.AutoFavorite
+    end
+    if data.AutoUnfavorite ~= nil then
+        _G.AutoUnfavorite = data.AutoUnfavorite
     end
     if data.InstantCatch ~= nil then
         _G.InstantCatch = data.InstantCatch
