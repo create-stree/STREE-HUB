@@ -100,6 +100,8 @@ local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
+_G.CustomJumpPower = 50
+
 local Input = Tab2:Input({
     Title = "WalkSpeed",
     Desc = "Minimum 16 speed",
@@ -128,16 +130,16 @@ local Input = Tab2:Input({
     Placeholder = "Enter number...",
     Callback = function(input) 
         local value = tonumber(input)
-        if value then
+        if value and value >= 50 then
             _G.CustomJumpPower = value
             local humanoid = game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             if humanoid then
                 humanoid.UseJumpPower = true
                 humanoid.JumpPower = value
             end
-            print("🔼 Jump Power diatur ke: " .. value)
+            print("Jump Power set to: " .. value)
         else
-            warn("⚠️ Harus angka, bukan teks!")
+            warn("⚠️ Must be number and minimum 50!")
         end
     end
 })
@@ -152,15 +154,14 @@ local Button = Tab2:Button({
             humanoid.UseJumpPower = true
             humanoid.JumpPower = 50
         end
-        print("🔄 Jump Power di-reset ke 50")
+        print("🔄 Jump Power reset to 50")
     end
 })
 
-local Player = game:GetService("Players").LocalPlayer
 Player.CharacterAdded:Connect(function(char)
-    local Humanoid = char:WaitForChild("Humanoid")
-    Humanoid.UseJumpPower = true
-    Humanoid.JumpPower = _G.CustomJumpPower or 50
+    local humanoid = char:WaitForChild("Humanoid")
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = _G.CustomJumpPower or 50
 end)
 
 Tab2:Button({
@@ -168,12 +169,11 @@ Tab2:Button({
     Desc = "Return speed to normal (16)",
     Callback = function()
         Humanoid.WalkSpeed = 16
-        print("WalkSpeed reset ke default (16)")
+        print("WalkSpeed reset to default (16)")
     end
 })
 
 local UserInputService = game:GetService("UserInputService")
-local Player = game.Players.LocalPlayer
 
 local Toggle = Tab2:Toggle({
     Title = "Infinite Jump",
@@ -184,9 +184,9 @@ local Toggle = Tab2:Toggle({
     Callback = function(state) 
         _G.InfiniteJump = state
         if state then
-            print("✅ Infinite Jump Aktif")
+            print("✅ Infinite Jump Active")
         else
-            print("❌ Infinite Jump Nonaktif")
+            print("❌ Infinite Jump Inactive")
         end
     end
 })
@@ -212,7 +212,7 @@ local Section = Tab3:Section({
     TextSize = 17,
 })
 
-local Tab3:Toggle({
+local Toggle = Tab3:Toggle({
     Title = "Auto Fishing",
     Desc = "Automatic fishing v1",
     Icon = false,
@@ -223,194 +223,38 @@ local Tab3:Toggle({
     end
 })
 
-local Players = game:GetService("Players")
 local RepStorage = game:GetService("ReplicatedStorage")
-local player = game.Players.LocalPlayer
 
 spawn(function()
     while wait() do
         if _G.AutoFishing then
-            repeat
-                  pcall(function()
-                       local char = player.Character or player.CharacterAdded:Wait()
-                       if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-                       end                    
-                       local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                       if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                          wait(0.5)
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                       end
-                  end)
-            wait(0.2)
-            until not _G.AutoFishing
-        end
-    end
-end)
-
-spawn(function()
-    while wait() do
-        if _G.AutoFishing then
-            repeat
-                  pcall(function()
-                       RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
-                  end)
-            wait(0.2)
-            until not _G.AutoFishing
-        end
-    end
-end)
-
-local Toggle = Tab3:Toggle({
-    Title = "Auto fishing",
-    Desc = "Automatic fishing v2",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(state)
-        math.randomseed(tick())
-
-        local segA1 = {string.char(112), string.char(101)}
-        local segA2 = {string.char(110), string.char(103), string.char(117)}
-        local segA3 = {string.char(105), string.char(110)}
-        local segA4 = {string.char(32)}
-        local segA5 = {string.char(99), string.char(97)}
-        local segA6 = {string.char(110), string.char(116)}
-        local segA7 = {string.char(105), string.char(107)}
-
-        local function join(tbl)
-            local s=""
-            for i=1,#tbl do
-                s=s..tbl[i]
-            end
-            return s
-        end
-
-        local function shuffle(tbl)
-            local copy={}
-            for i,v in ipairs(tbl)do
-                table.insert(copy,v)
-            end
-            for i=#copy,2,-1 do
-                local j=math.random(i)
-                copy[i],copy[j]=copy[j],copy[i]
-            end
-            return copy
-        end
-
-        local function reverse(str)
-            local r=""
-            for i=#str,1,-1 do
-                r=r..str:sub(i,i)
-            end
-            return r
-        end
-
-        local function deepProcess(str)
-            local tmp=""
-            for i=1,#str do
-                local c=string.byte(str,i)
-                tmp=tmp..string.char(c+0)
-            end
-            return tmp
-        end
-
-        local function layerOne(str)
-            return reverse(reverse(str))
-        end
-
-        local function layerTwo(str)
-            return deepProcess(str)
-        end
-
-        local function layerThree(str)
-            return layerOne(layerTwo(layerOne(str)))
-        end
-
-        local function uselessCalc(a,b,c)
-            local v=(a*b)+c
-            for i=1,10 do
-                if i%2==0 then
-                    v=v+i
-                else
-                    v=v-i
-                end
-            end
-            return v
-        end
-
-        for a=1,8 do
-            for b=1,6 do
-                for c=1,4 do
-                    for d=1,2 do
-                        local _=uselessCalc(a,b,c)+d
-                    end
-                end
-            end
-        end
-
-        local function deepBuild()
-            local part1=join(shuffle(segA1))..join(shuffle(segA2))..join(shuffle(segA3))
-            local part2=join(shuffle(segA5))..join(shuffle(segA6))..join(shuffle(segA7))
-            local combined=part1..segA4[1]..part2
-            local stage1=layerThree(combined)
-            local stage2=reverse(reverse(stage1))
-            return stage2
-        end
-
-        local result=nil
-        do
-            local s1=deepBuild()
-            local s2=reverse(reverse(s1))
-            local s3=layerTwo(s2)
-            local s4=layerOne(s3)
-            result=s4
-        end
-
-        for i=1,5 do
-            local tmp=reverse(result)
-            tmp=reverse(tmp)
-        end
-
-        local function nestedLayers()
-            local function inner1()
-                return result
-            end
-            local function inner2()
-                return inner1()
-            end
-            local function inner3()
-                return inner2()
-            end
-            return inner3()
-        end
-
-        local finalResult=nestedLayers()
-
-        for i=1,3 do
-            for j=1,3 do
-                for k=1,3 do
-                    local dummy=uselessCalc(i,j,k)
-                end
-            end
-        end
-
-        print(finalResult)
-
-        local function notify(title,text,dur)
             pcall(function()
-                game:GetService("StarterGui"):SetCore("SendNotification",{
-                    Title=title,
-                    Text=text,
-                    Duration=dur
-                })
+                local char = Player.Character or Player.CharacterAdded:Wait()
+                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+                end                    
+                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(Player.UserId)) then
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
+                    wait(0.5)
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+                end
             end)
         end
-
-        notify("🐧 Info",finalResult,5)
+        wait(0.2)
     end
-})
+end)
+
+spawn(function()
+    while wait() do
+        if _G.AutoFishing then
+            pcall(function()
+                RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
+            end)
+        end
+        wait(0.2)
+    end
+end)
 
 local Toggle = Tab3:Toggle({
     Title = "Auto Sell",
@@ -444,6 +288,53 @@ local Section = Tab3:Section({
     TextSize = 17,
 })
 
+local REMOTE_CATCH = "FishingCompleted"
+local TRY_INTERVAL = 0.1
+local _loopRunning = false
+
+local function findRemote(name)
+    local rs = game:GetService("ReplicatedStorage")
+    for _, v in pairs(rs:GetDescendants()) do
+        if v:IsA("RemoteEvent") and v.Name:lower():find(name:lower()) then
+            return v
+        elseif v:IsA("RemoteFunction") and v.Name:lower():find(name:lower()) then
+            return v
+        end
+    end
+    return nil
+end
+
+local function tryFire(remote)
+    if remote:IsA("RemoteEvent") then
+        remote:FireServer()
+        return true
+    elseif remote:IsA("RemoteFunction") then
+        remote:InvokeServer()
+        return true
+    end
+    return false
+end
+
+local function scanRemotes()
+    local rs = game:GetService("ReplicatedStorage")
+    local found = {}
+    
+    for _, v in pairs(rs:GetDescendants()) do
+        if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) and v.Name:lower():find("fish") then
+            table.insert(found, v.Name)
+        end
+    end
+    
+    if #found > 0 then
+        print("Found fishing remotes:")
+        for i, name in ipairs(found) do
+            print(i .. ". " .. name)
+        end
+    else
+        print("No fishing remotes found")
+    end
+end
+
 local ToggleCatch = Tab3:Toggle({
     Title = "Instant Catch",
     Desc = "Get fish straight away",
@@ -462,14 +353,16 @@ local ToggleCatch = Tab3:Toggle({
                 while _G.InstantCatch do
                     local remote = findRemote(REMOTE_CATCH)
                     if remote then
-                        local success, err = tryFire(remote)
-                        if success then
-                            print("🎣 Instant catch success!")
-                        else
+                        local success, err = pcall(function()
+                            if remote:IsA("RemoteEvent") then
+                                remote:FireServer()
+                            else
+                                remote:InvokeServer()
+                            end
+                        end)
+                        if not success then
                             warn("❌ error:", err)
                         end
-                    else
-                        warn("⚠️ Remote '" .. REMOTE_CATCH .. "' tidak ditemukan. Jalankan scanner dulu.")
                     end
                     task.wait(TRY_INTERVAL)
                 end
@@ -503,7 +396,7 @@ local Section = Tab4:Section({
 
 local Dropdown = Tab4:Dropdown({
     Title = "Select Location",
-    Values = {"Esoteric Island", "Konoha", "Coral Refs", "Enchant Room", "Tropical Grove", "Weather Machine"},
+    Values = {"Esoteric Island", "Konoha", "Coral Refs", "Enchant Room", "Tropical Grove", "Weather Machine", "Treasure Room"},
     Callback = function(Value)
         local Locations = {
             ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
@@ -515,9 +408,9 @@ local Dropdown = Tab4:Dropdown({
             ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
         }
 
-        local Player = game.Players.LocalPlayer
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(Locations[Value])
+        local location = Locations[Value]
+        if location and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(location)
         end
     end
 })
@@ -540,13 +433,12 @@ local Dropdown = Tab4:Dropdown({
             ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
         }
 
-        local Player = game.Players.LocalPlayer
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(Locations[Value])
+        local location = Locations[Value]
+        if location and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(location)
         end
     end
 })
-
 
 local Tab5 = Window:Tab({
     Title = "Settings",
@@ -562,19 +454,18 @@ local Toggle = Tab5:Toggle({
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
-        local player = game:GetService("Players").LocalPlayer
-
-        task.spawn(function()
-            while _G.AntiAFK do
-                task.wait(60)
-                pcall(function()
-                    VirtualUser:CaptureController()
-                    VirtualUser:ClickButton2(Vector2.new())
-                end)
-            end
-        end)
 
         if state then
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(60)
+                    pcall(function()
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton2(Vector2.new())
+                    end)
+                end
+            end)
+
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "AntiAFK loaded!",
                 Text = "Coded By Kirsiasc",
@@ -638,53 +529,78 @@ local function GetConfig()
 end
 
 local function ApplyConfig(data)
-    if data.WalkSpeed then Humanoid.WalkSpeed = data.WalkSpeed end
+    if data.WalkSpeed then 
+        Humanoid.WalkSpeed = data.WalkSpeed 
+    end
     if data.JumpPower then
         _G.CustomJumpPower = data.JumpPower
-        Humanoid.UseJumpPower = true
-        Humanoid.JumpPower = data.JumpPower
+        local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.UseJumpPower = true
+            humanoid.JumpPower = data.JumpPower
+        end
     end
-    _G.InfiniteJump = data.InfiniteJump or false
-    _G.AutoSell = data.AutoSell or false
-    _G.InstantCatch = data.InstantCatch or false
-    _G.AntiAFK = data.AntiAFK or false
-    _G.AutoReconnect = data.AutoReconnect or false
+    if data.InfiniteJump ~= nil then
+        _G.InfiniteJump = data.InfiniteJump
+    end
+    if data.AutoSell ~= nil then
+        _G.AutoSell = data.AutoSell
+    end
+    if data.InstantCatch ~= nil then
+        _G.InstantCatch = data.InstantCatch
+    end
+    if data.AntiAFK ~= nil then
+        _G.AntiAFK = data.AntiAFK
+    end
+    if data.AutoReconnect ~= nil then
+        _G.AutoReconnect = data.AutoReconnect
+    end
 end
 
 Tab5:Button({
     Title = "Save Config",
-    Desc = "Simpan semua setting",
+    Desc = "Save all settings",
     Callback = function()
         local data = GetConfig()
         writefile(ConfigFolder.."/"..ConfigName, game:GetService("HttpService"):JSONEncode(data))
-        print("✅ Config disimpan!")
+        print("✅ Config saved!")
     end
 })
 
 Tab5:Button({
     Title = "Load Config",
-    Desc = "Gunakan config yang sudah disimpan",
+    Desc = "Use saved config",
     Callback = function()
         if isfile(ConfigFolder.."/"..ConfigName) then
             local data = readfile(ConfigFolder.."/"..ConfigName)
             local decoded = game:GetService("HttpService"):JSONDecode(data)
             ApplyConfig(decoded)
-            print("✅ Config diterapkan!")
+            print("✅ Config applied!")
         else
-            warn("⚠️ Config belum ada, silakan Save dulu.")
+            warn("⚠️ Config not found, please Save first.")
         end
     end
 })
 
 Tab5:Button({
     Title = "Delete Config",
-    Desc = "Hapus config tersimpan",
+    Desc = "Delete saved config",
     Callback = function()
         if isfile(ConfigFolder.."/"..ConfigName) then
             delfile(ConfigFolder.."/"..ConfigName)
-            print("🗑 Config dihapus!")
+            print("🗑 Config deleted!")
         else
-            warn("⚠️ Tidak ada config untuk dihapus.")
+            warn("⚠️ No config to delete.")
         end
     end
 })
+
+Player.CharacterAdded:Connect(function(char)
+    local humanoid = char:WaitForChild("Humanoid")
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = _G.CustomJumpPower or 50
+    
+    if _G.InfiniteJump then
+        humanoid.WalkSpeed = _G.CustomWalkSpeed or 16
+    end
+end)
