@@ -88,3 +88,67 @@ local Tab2 = Window:Tab({
     Title = "Main",
     Icon = "landmark"
 })
+
+local Section = Tab3:Section({
+    Title = "Steal",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+local Tab3 = Window:Tab({
+    Title = "Settings",
+    Icon = "settings"
+})
+
+local Section = Tab3:Section({
+    Title = "Main",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tabe:Toggle({
+    Title = "AntiAFK",
+    Desc = "Prevent Roblox from kicking you when idle",
+    Default = false,
+    Callback = function(state)
+        _G.AntiAFK = state
+        local VirtualUser = game:GetService("VirtualUser")
+        if state then
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(60)
+                    pcall(function()
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton2(Vector2.new())
+                    end)
+                end
+            end)
+        end
+    end
+})
+
+Tab3:Toggle({
+    Title = "Auto Reconnect",
+    Desc = "Reconnect if disconnected",
+    Default = false,
+    Callback = function(state)
+        _G.AutoReconnect = state
+        if state then
+            task.spawn(function()
+                while _G.AutoReconnect do
+                    task.wait(2)
+                    local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
+                    if reconnectUI then
+                        local prompt = reconnectUI:FindFirstChild("promptOverlay")
+                        if prompt then
+                            local button = prompt:FindFirstChild("ButtonPrimary")
+                            if button and button.Visible then
+                                firesignal(button.MouseButton1Click)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
