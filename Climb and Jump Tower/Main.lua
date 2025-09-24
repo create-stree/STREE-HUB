@@ -91,13 +91,16 @@ local Tab2 = Window:Tab({
 
 _G.AutoClimb = false
 
+local AutoTab = Window:CreateTab("Auto", 4483362458)
+
 local function AutoClimb()
     local player = game.Players.LocalPlayer
     while _G.AutoClimb do
         task.wait(0.05)
         local char = player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0)
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CFrame = hrp.CFrame + Vector3.new(0, 50, 0)
         end
     end
 end
