@@ -89,8 +89,31 @@ local Tab2 = Window:Tab({
     Icon = "landmark"
 })
 
+_G.AutoClimb = false
+
+local function AutoClimb()
+    local player = game.Players.LocalPlayer
+    while _G.AutoClimb do
+        task.wait(0.05)
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0) -- naik cepat
+        end
+    end
+end
+
+MainTab:Toggle({
+    Text = "Auto Climb Super Fast",
+    Callback = function(Value)
+        _G.AutoClimb = Value
+        if Value then
+            task.spawn(AutoClimb)
+        end
+    end,
+})
+
 local Section = Tab2:Section({
-    Title = "Auto",
+    Title = "Auto (first place)",
     TextXAlignment = "Left",
     TextSize = 17
 })
