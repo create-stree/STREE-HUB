@@ -102,7 +102,7 @@ local Section = Tab2:Section({
 })
 
 local Section = Tab2:Section({
-    Title = "Steal",
+    Title = "Steal [Is Comming]",
     TextXAlignment = "Left",
     TextSize = 17
 })
