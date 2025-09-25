@@ -20,7 +20,7 @@ elseif placeId == 121864768012064 then
     success = true
 elseif placeId == 123921593837160 then
     gameName = "Climb and Jump tower"
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-5/main.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"))()
     success = true
 elseif placeId == 2345678901 then
     gameName = "Game 6"
