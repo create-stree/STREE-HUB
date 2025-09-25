@@ -284,6 +284,12 @@ Tab3:Toggle({
     end
 })
 
+local Section = Tab3:Section({
+    Title = "ESP Killer",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
 Tab3:Toggle({
     Title = "Killer Highlight",
     Desc = "Highlight killer",
@@ -334,6 +340,12 @@ Tab3:Toggle({
             end)
         end)
     end
+})
+
+local Section = Tab3:Section({
+    Title = "ESP Other",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
 Tab3:Toggle({
