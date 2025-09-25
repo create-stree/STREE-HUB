@@ -37,6 +37,7 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+local VirtualUser = game:GetService("VirtualUser")
 
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -57,8 +58,8 @@ Player.CharacterAdded:Connect(function(char)
     Character = char
     Humanoid = char:WaitForChild("Humanoid")
     Humanoid.UseJumpPower = true
-    Humanoid.JumpPower = _G.CustomJumpPower or 50
-    Humanoid.WalkSpeed = _G.CustomWalkSpeed or 16
+    Humanoid.JumpPower = _G.CustomJumpPower
+    Humanoid.WalkSpeed = _G.CustomWalkSpeed
 end)
 
 local Tab1 = Window:Tab({
@@ -128,34 +129,32 @@ local Tab2 = Window:Tab({
 })
 
 local function updateWalkSpeed(speed)
-    if speed and speed >= 16 then
-        _G.CustomWalkSpeed = speed
+    local numSpeed = tonumber(speed)
+    if numSpeed and numSpeed >= 16 then
+        _G.CustomWalkSpeed = numSpeed
         if Humanoid then
-            Humanoid.WalkSpeed = speed
+            Humanoid.WalkSpeed = numSpeed
         end
-        print("WalkSpeed set to: " .. speed)
         return true
     else
         if Humanoid then
             Humanoid.WalkSpeed = 16
         end
-        print("⚠️ Invalid input, set to default (16)")
         return false
     end
 end
 
 local function updateJumpPower(power)
-    if power and power >= 50 then
-        _G.CustomJumpPower = power
+    local numPower = tonumber(power)
+    if numPower and numPower >= 50 then
+        _G.CustomJumpPower = numPower
         local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.UseJumpPower = true
-            humanoid.JumpPower = power
+            humanoid.JumpPower = numPower
         end
-        print("Jump Power set to: " .. power)
         return true
     else
-        warn("⚠️ Must be number and minimum 50!")
         return false
     end
 end
@@ -168,7 +167,14 @@ Tab2:Input({
     Type = "Input",
     Placeholder = "Enter number...",
     Callback = function(input) 
-        updateWalkSpeed(tonumber(input))
+        if not updateWalkSpeed(input) then
+            WindUI:Notify({
+                Title = "Invalid Input",
+                Content = "Must be number and minimum 16!",
+                Duration = 2,
+                Icon = "x",
+            })
+        end
     end
 })
 
@@ -180,7 +186,14 @@ Tab2:Input({
     Type = "Input",
     Placeholder = "Enter number...",
     Callback = function(input) 
-        updateJumpPower(tonumber(input))
+        if not updateJumpPower(input) then
+            WindUI:Notify({
+                Title = "Invalid Input",
+                Content = "Must be number and minimum 50!",
+                Duration = 2,
+                Icon = "x",
+            })
+        end
     end
 })
 
@@ -189,7 +202,12 @@ Tab2:Button({
     Desc = "Return WalkSpeed to normal (16)",
     Callback = function()
         updateWalkSpeed(16)
-        print("🔄 WalkSpeed reset to 16")
+        WindUI:Notify({
+            Title = "WalkSpeed Reset",
+            Content = "WalkSpeed reset to 16",
+            Duration = 2,
+            Icon = "refresh-cw",
+        })
     end
 })
 
@@ -198,7 +216,12 @@ Tab2:Button({
     Desc = "Return Jump Power to normal (50)",
     Callback = function()
         updateJumpPower(50)
-        print("🔄 Jump Power reset to 50")
+        WindUI:Notify({
+            Title = "Jump Power Reset",
+            Content = "Jump Power reset to 50",
+            Duration = 2,
+            Icon = "refresh-cw",
+        })
     end
 })
 
@@ -209,11 +232,12 @@ Tab2:Toggle({
     Default = false,
     Callback = function(state) 
         _G.InfiniteJump = state
-        if state then
-            print("✅ Infinite Jump Active")
-        else
-            print("❌ Infinite Jump Inactive")
-        end
+        WindUI:Notify({
+            Title = "Infinite Jump",
+            Content = state and "Active" or "Inactive",
+            Duration = 2,
+            Icon = state and "check" or "x",
+        })
     end
 })
 
@@ -243,11 +267,12 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state) 
         _G.AutoFishing = state
-        if state then
-            print("✅ Auto Fishing Active")
-        else
-            print("❌ Auto Fishing Inactive")
-        end
+        WindUI:Notify({
+            Title = "Auto Fishing",
+            Content = state and "Active" or "Inactive",
+            Duration = 2,
+            Icon = state and "check" or "x",
+        })
     end
 })
 
@@ -257,11 +282,12 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.AutoSell = state
-        if state then
-            print("✅ Auto Sell Active")
-        else
-            print("❌ Auto Sell Inactive")
-        end
+        WindUI:Notify({
+            Title = "Auto Sell",
+            Content = state and "Active" or "Inactive",
+            Duration = 2,
+            Icon = state and "check" or "x",
+        })
     end
 })
 
@@ -271,11 +297,12 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.AutoFavorite = state
-        if state then
-            print("✅ Auto Favorite Active")
-        else
-            print("❌ Auto Favorite Inactive")
-        end
+        WindUI:Notify({
+            Title = "Auto Favorite",
+            Content = state and "Active" or "Inactive",
+            Duration = 2,
+            Icon = state and "check" or "x",
+        })
     end
 })
 
@@ -285,11 +312,12 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.AutoUnfavorite = state
-        if state then
-            print("✅ Auto Unfavorite Active")
-        else
-            print("❌ Auto Unfavorite Inactive")
-        end
+        WindUI:Notify({
+            Title = "Auto Unfavorite",
+            Content = state and "Active" or "Inactive",
+            Duration = 2,
+            Icon = state and "check" or "x",
+        })
     end
 })
 
@@ -305,13 +333,23 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.InstantCatch = state
-        if state then
-            print("✅ Instant Catch Active")
-        else
-            print("❌ Instant Catch Inactive")
-        end
+        WindUI:Notify({
+            Title = "Instant Catch",
+            Content = state and "Active" or "Inactive",
+            Duration = 2,
+            Icon = state and "check" or "x",
+        })
     end
 })
+
+local function findRemote(namePattern)
+    for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+        if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) and v.Name:lower():find(namePattern:lower()) then
+            return v
+        end
+    end
+    return nil
+end
 
 task.spawn(function()
     while task.wait(0.2) do
@@ -325,9 +363,26 @@ task.spawn(function()
                 local playerCosmetic = cosmeticFolder and cosmeticFolder:FindFirstChild(tostring(Player.UserId))
                 
                 if not fishingViewModel and not playerCosmetic then
-                    ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+                    local equipRemote = findRemote("EquipToolFromHotbar")
+                    local chargeRemote = findRemote("ChargeFishingRod")
+                    
+                    if equipRemote then
+                        if equipRemote:IsA("RemoteEvent") then
+                            equipRemote:FireServer(1)
+                        else
+                            equipRemote:InvokeServer(1)
+                        end
+                    end
+                    
                     task.wait(0.5)
-                    ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
+                    
+                    if chargeRemote then
+                        if chargeRemote:IsA("RemoteEvent") then
+                            chargeRemote:FireServer(2)
+                        else
+                            chargeRemote:InvokeServer(2)
+                        end
+                    end
                 end
             end)
         end
@@ -338,11 +393,12 @@ task.spawn(function()
     while task.wait(0.5) do
         if _G.AutoSell then
             pcall(function()
-                for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-                    if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
-                        v:FireServer()
-                    elseif v:IsA("RemoteFunction") and v.Name:lower():find("sell") then
-                        v:InvokeServer()
+                local sellRemote = findRemote("sell")
+                if sellRemote then
+                    if sellRemote:IsA("RemoteEvent") then
+                        sellRemote:FireServer()
+                    else
+                        sellRemote:InvokeServer()
                     end
                 end
             end)
@@ -354,13 +410,12 @@ task.spawn(function()
     while task.wait(1) do
         if _G.AutoFavorite then
             pcall(function()
-                for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-                    if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) and (v.Name:lower():find("favorite") or v.Name:lower():find("fav")) then
-                        if v:IsA("RemoteEvent") then
-                            v:FireServer(true)
-                        else
-                            v:InvokeServer(true)
-                        end
+                local favoriteRemote = findRemote("favorite") or findRemote("fav")
+                if favoriteRemote then
+                    if favoriteRemote:IsA("RemoteEvent") then
+                        favoriteRemote:FireServer(true)
+                    else
+                        favoriteRemote:InvokeServer(true)
                     end
                 end
             end)
@@ -368,13 +423,12 @@ task.spawn(function()
         
         if _G.AutoUnfavorite then
             pcall(function()
-                for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-                    if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) and (v.Name:lower():find("favorite") or v.Name:lower():find("fav")) then
-                        if v:IsA("RemoteEvent") then
-                            v:FireServer(false)
-                        else
-                            v:InvokeServer(false)
-                        end
+                local favoriteRemote = findRemote("favorite") or findRemote("fav")
+                if favoriteRemote then
+                    if favoriteRemote:IsA("RemoteEvent") then
+                        favoriteRemote:FireServer(false)
+                    else
+                        favoriteRemote:InvokeServer(false)
                     end
                 end
             end)
@@ -382,25 +436,16 @@ task.spawn(function()
     end
 end)
 
-local function findRemote(name)
-    for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-        if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) and v.Name:lower():find(name:lower()) then
-            return v
-        end
-    end
-    return nil
-end
-
 task.spawn(function()
     while task.wait(0.1) do
         if _G.InstantCatch then
             pcall(function()
-                local remote = findRemote("FishingCompleted")
-                if remote then
-                    if remote:IsA("RemoteEvent") then
-                        remote:FireServer()
+                local catchRemote = findRemote("FishingCompleted")
+                if catchRemote then
+                    if catchRemote:IsA("RemoteEvent") then
+                        catchRemote:FireServer()
                     else
-                        remote:InvokeServer()
+                        catchRemote:InvokeServer()
                     end
                 end
             end)
@@ -494,8 +539,6 @@ Tab5:Toggle({
     Default = false,
     Callback = function(state)
         _G.AntiAFK = state
-        local VirtualUser = game:GetService("VirtualUser")
-
         if state then
             task.spawn(function()
                 while _G.AntiAFK do
@@ -529,21 +572,12 @@ Tab5:Toggle({
     Default = false,
     Callback = function(state)
         _G.AutoReconnect = state
-        if state then
-            WindUI:Notify({
-                Title = "Auto Reconnect Enabled",
-                Content = "Will automatically reconnect if disconnected",
-                Duration = 3,
-                Icon = "refresh-cw",
-            })
-        else
-            WindUI:Notify({
-                Title = "Auto Reconnect Disabled",
-                Content = "Auto reconnect turned off",
-                Duration = 3,
-                Icon = "refresh-cw",
-            })
-        end
+        WindUI:Notify({
+            Title = "Auto Reconnect",
+            Content = state and "Enabled" or "Disabled",
+            Duration = 3,
+            Icon = state and "refresh-cw" or "refresh-cw",
+        })
     end
 })
 
@@ -681,11 +715,14 @@ task.spawn(function()
                 if reconnectUI then
                     local prompt = reconnectUI:FindFirstChild("promptOverlay")
                     if prompt then
-                        local button = prompt:FindFirstChild("ErrorPrompt") and prompt.ErrorPrompt:FindFirstChild("ButtonArea")
-                        if button then
-                            local primaryButton = button:FindFirstChild("Button1")
-                            if primaryButton and primaryButton.Visible then
-                                firesignal(primaryButton.MouseButton1Click)
+                        local errorPrompt = prompt:FindFirstChild("ErrorPrompt")
+                        if errorPrompt then
+                            local buttonArea = errorPrompt:FindFirstChild("ButtonArea")
+                            if buttonArea then
+                                local primaryButton = buttonArea:FindFirstChild("Button1")
+                                if primaryButton and primaryButton.Visible then
+                                    firesignal(primaryButton.MouseButton1Click)
+                                end
                             end
                         end
                     end
