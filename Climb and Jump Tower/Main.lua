@@ -96,7 +96,7 @@ local Tab2 = Window:Tab({
 })
 
 local Section2 = Tab2:Section({
-    Title = "Auto Farm",
+    Title = "First Place",
     TextXAlignment = "Left",
     TextSize = 17
 })
