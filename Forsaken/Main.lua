@@ -133,7 +133,7 @@ Tab2:Slider({
 
 Tab2:Toggle({
     Title = "Infinite Stamina",
-    Desc = "Energy never decrease",
+    Desc = "Energy never decrease [Beta]",
     Default = false,
     Callback = function(state)
         _G.InfiniteEnergy = state
