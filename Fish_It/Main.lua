@@ -213,6 +213,38 @@ local Section = Tab3:Section({
 })
 
 Tab3:Toggle({
+    Title = "Auto Equip Rod",
+    Desc = "Selalu equip pancing otomatis",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(value)
+        _G.AutoEquipRod = value
+    end
+})
+
+local player = game.Players.LocalPlayer
+
+spawn(function()
+    while task.wait(1) do
+        if _G.AutoEquipRod then
+            pcall(function()
+                local backpack = player:FindFirstChild("Backpack")
+                if backpack then
+                    local rod = backpack:FindFirstChild("Rod") 
+                        or backpack:FindFirstChild("FishingRod") 
+                        or backpack:FindFirstChild("OldRod") 
+                        or backpack:FindFirstChild("BasicRod")
+                    if rod and not player.Character:FindFirstChild(rod.Name) then
+                        player.Character.Humanoid:EquipTool(rod)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+Tab3:Toggle({
     Title = "Auto Fishing",
     Desc = "Automatic Auto Fishing v1",
     Icon = false,
