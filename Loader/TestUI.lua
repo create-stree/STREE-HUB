@@ -2,14 +2,14 @@ local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/rel
 
 WindUI:AddTheme({
     Name = "Neon Green", 
-    Accent = "#39ff14",
+    Accent = "#ffffff",
     Dialog = "#1a1a1a",
-    Outline = "#39ff14",
-    Text = "#39ff14",
+    Outline = "#ffffff",
+    Text = "#ffffff",
     Placeholder = "#00cc00",
-    Background = "#0d0d0d",
+    Background = "#39ff14",
     Button = "#262626",
-    Icon = "#39ff14",
+    Icon = "#ffffff",
 })
 
 WindUI:SetNotificationLower(true)
