@@ -11,15 +11,23 @@ end
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "monitor",
+    Icon = "rbxassetid://123032091977400",
     Author = "KirsiaSC | Blox Fruit",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(560, 400),
+    Size = UDim2.fromOffset(580, 400),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
     HasOutline = true
 })
+
+User = {
+        Enabled = true,
+        Anonymous = true,
+        Callback = function()
+            print("clicked")
+    end
+}
 
 local Tab1 = Window:Tab({
     Title = "Home",
