@@ -1,13 +1,60 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
-local WindUI:AddTheme({
-               Name="ChunkHub",
-               Accent="#ffffff",
-               Dialog="#ffffff",
-               Outline="#5787d2",
-               Text="#090909",
-               Placeholder="#999999",
-               Background="#ffffff",
-               Button="#090909",
-               Icon="#090909",
-               })
+WindUI:AddTheme({
+    Name = "Dark",
+    Accent = "#000000",
+    Dialog = "#1a1a1a",
+    Outline = "#333333", 
+    Text = "#ffffff",
+    Placeholder = "#666666",
+    Background = "#0d0d0d",
+    Button = "#262626",
+    Icon = "#ffffff",
+})
+
+WindUI:AddTheme({
+    Name = "Neon Green", 
+    Accent = "#39ff14",
+    Dialog = "#1a1a1a",
+    Outline = "#39ff14",
+    Text = "#39ff14",
+    Placeholder = "#00cc00",
+    Background = "#0d0d0d",
+    Button = "#262626",
+    Icon = "#39ff14",
+})
+
+WindUI:SetNotificationLower(true)
+
+local themes = {"Dark", "Neon Green"}
+local currentThemeIndex = 1
+
+getgenv().TransparencyEnabled = true
+
+local Window = WindUI:CreateWindow({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://123032091977400", 
+    Author = "KirsiaSC | Steal A Brainrot",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(500, 350),
+    Transparent = getgenv().TransparencyEnabled,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 150,
+    BackgroundImageTransparency = 1.0,
+    HideSearchBar = true,
+    ScrollBarEnabled = true,
+    User = {
+        Enabled = true,
+        Anonymous = true,
+        Callback = function()
+            currentThemeIndex = currentThemeIndex + 1
+            if currentThemeIndex > #themes then
+                currentThemeIndex = 1
+            end
+            
+            local newTheme = themes[currentThemeIndex]
+            WindUI:SetTheme(newTheme)
+        end,
+    },
+})
