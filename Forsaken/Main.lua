@@ -14,7 +14,7 @@ local Window = WindUI:CreateWindow({
     Icon = "rbxassetid://123032091977400",
     Author = "KirsiaSC | Forsaken",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(560, 400),
+    Size = UDim2.fromOffset(560, 380),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
@@ -22,7 +22,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.2",
+    Title = "v0.0.0.3",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
