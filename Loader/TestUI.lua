@@ -1,18 +1,6 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 WindUI:AddTheme({
-    Name = "Dark",
-    Accent = "#000000",
-    Dialog = "#1a1a1a",
-    Outline = "#333333", 
-    Text = "#ffffff",
-    Placeholder = "#666666",
-    Background = "#0d0d0d",
-    Button = "#262626",
-    Icon = "#ffffff",
-})
-
-WindUI:AddTheme({
     Name = "Neon Green", 
     Accent = "#39ff14",
     Dialog = "#1a1a1a",
@@ -26,7 +14,7 @@ WindUI:AddTheme({
 
 WindUI:SetNotificationLower(true)
 
-local themes = {"Dark", "Neon Green"}
+local themes = {"Neon Green"}
 local currentThemeIndex = 1
 
 getgenv().TransparencyEnabled = true
