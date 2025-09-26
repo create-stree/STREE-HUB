@@ -11,9 +11,7 @@ local Window = WindUI:CreateWindow({
     Background = WindUI:Gradient({
     ["0"] = { Color = Color3.fromHex("#0f0c29"), Transparency = 1 },
     ["100"] = { Color = Color3.fromHex("#302b63"), Transparency = 0.9 },
-{
+}, {
     Rotation = 45,
-}
 }),
 })
-
