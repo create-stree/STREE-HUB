@@ -13,10 +13,10 @@ WindUI:AddTheme({
 })
 
 local Window = WindUI:CreateWindow({
-    Title = "Jawa Hub",
+    Title = "ChunkHub",
     Icon = "house",
     Author = "Jawa",
     Folder = "Jawa",
     Size = UDim2.fromOffset(560, 400),
-    Theme = "JawaTheme",
+    Theme = "ChunkHub",
 })
