@@ -1,15 +1,15 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 WindUI:AddTheme({
-    Name = "JawaTheme",
-    Accent = "#ffffff",
-    Dialog = "#ffffff",
-    Outline = "#5787d2",
-    Text = "#090909",
-    Placeholder = "#999999",
-    Background = "#ffffff",
-    Button = "#090909",
-    Icon = "#090909",
+    Name="ChunkHub",
+    Accent="#ffffff",
+    Dialog="#ffffff",
+    Outline="#5787d2",
+    Text="#090909",
+    Placeholder="#999999",
+    Background="#ffffff",
+    Button="#090909",
+    Icon="#090909",
 })
 
 local Window = WindUI:CreateWindow({
