@@ -27,7 +27,7 @@ elseif placeId == 109983668079237 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-6/main.lua"))()
     success = true
 elseif placeId == 3456789012 then
-    gameName = "Game 7"
+    gameName = "Plants Vs Brainrot"
     loadstring(game:HttpGet("https://raw.githubusercontent.com/username/game-7/main.lua"))()
     success = true
 elseif placeId == 4567890123 then
