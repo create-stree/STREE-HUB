@@ -35,7 +35,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.6",
+    Title = "v0.0.0.7",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -445,7 +445,7 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
-local selectedRod = "BasicRod"
+local selectedRod = "Rod"
 local rodDropdown = Tab4:Dropdown({
     Title = "Select Rod",
     Values = {"BasicRod", "ProRod", "GoldenRod", "OldRod", "FishingRod"},
