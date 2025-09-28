@@ -435,17 +435,70 @@ local ScanButton = Tab3:Button({
 })
 
 local Tab4 = Window:Tab({
+    Title = "Shop",
+    Icon = "badge-dollar-sign",
+})
+
+local Section = Tab4:Section({
+    Title = "Buy Rod",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local selectedRod = "BasicRod"
+local rodDropdown = Tab4:Dropdown({
+    Title = "Select Rod",
+    Values = {"BasicRod", "ProRod", "GoldenRod", "OldRod", "FishingRod"},
+    Callback = function(Value)
+        selectedRod = Value
+    end
+})
+
+Tab4:Button({
+    Title = "Buy Selected Rod",
+    Desc = "Purchase the selected fishing rod",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/PurchaseItem"]:FireServer(selectedRod)
+        print("Purchased: " .. selectedRod)
+    end
+})
+
+local Section = Tab4:Section({
+    Title = "Buy Baits",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local selectedBait = "Bait"
+local baitDropdown = Tab4:Dropdown({
+    Title = "Select Bait",
+    Values = {"Bait", "Worm", "Shrimp", "Squid", "SpecialBait"},
+    Callback = function(Value)
+        selectedBait = Value
+    end
+})
+
+Tab4:Button({
+    Title = "Buy Selected Bait",
+    Desc = "Purchase the selected bait",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/PurchaseItem"]:FireServer(selectedBait, 10)
+        print("Purchased: " .. selectedBait .. " x10")
+    end
+})
+
+local Tab5 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
 
-local Section = Tab4:Section({ 
+local Section = Tab5:Section({ 
     Title = "Island",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Dropdown = Tab4:Dropdown({
+local Dropdown = Tab5:Dropdown({
     Title = "Select Location",
     Values = {"Esoteric Island", "Konoha", "Coral Refs", "Enchant Room", "Tropical Grove", "Weather Machine", "Treasure Room"},
     Callback = function(Value)
@@ -466,13 +519,13 @@ local Dropdown = Tab4:Dropdown({
     end
 })
 
-local Section = Tab4:Section({ 
+local Section = Tab5:Section({ 
     Title = "fishing spot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Dropdown = Tab4:Dropdown({
+local Dropdown = Tab5:Dropdown({
     Title = "Select Location",
     Values = {"Spawn", "Konoha", "Coral Refs", "Volcano", "Sysyphus Statue"},
     Callback = function(Value)
@@ -491,12 +544,12 @@ local Dropdown = Tab4:Dropdown({
     end
 })
 
-local Tab5 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
 
-local Toggle = Tab5:Toggle({
+local Toggle = Tab6:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -533,7 +586,7 @@ local Toggle = Tab5:Toggle({
     end
 })
 
-local Toggle = Tab5:Toggle({
+local Toggle = Tab6:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -608,7 +661,7 @@ local function ApplyConfig(data)
     end
 end
 
-Tab5:Button({
+Tab6:Button({
     Title = "Save Config",
     Desc = "Save all settings",
     Callback = function()
@@ -618,7 +671,7 @@ Tab5:Button({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Load Config",
     Desc = "Use saved config",
     Callback = function()
@@ -633,7 +686,7 @@ Tab5:Button({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
     Callback = function()
