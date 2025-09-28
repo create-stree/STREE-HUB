@@ -9,44 +9,151 @@ else
     print("✓ UI loaded successfully!")
 end
 
+local AutoHitBrainrot = false
+local AutoEquipBatToggle = false
+local autoClicking = false
+local player = game.Players.LocalPlayer
+local Character = player.Character or player.CharacterAdded:Wait()
+local HeldToolName = "Bat"
+local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
+local AttackDelayInput = 0.5
+
+local function EquipBat()
+    local backpack = player:FindFirstChildOfClass("Backpack")
+    if backpack then
+        local bat = backpack:FindFirstChild(HeldToolName)
+        if bat then
+            local humanoid = Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:EquipTool(bat)
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function AutoEquipBat()
+    if AutoEquipBatToggle then
+        if not Character:FindFirstChild(HeldToolName) then
+            local backpack = player:FindFirstChildOfClass("Backpack")
+            if backpack then
+                local bat = backpack:FindFirstChild(HeldToolName)
+                if bat then
+                    local humanoid = Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:EquipTool(bat)
+                        return true
+                    end
+                end
+            end
+        else
+            return true
+        end
+    end
+    return false
+end
+
+local brainrotsCache = {}
+local function UpdateBrainrotsCache()
+    brainrotsCache = {}
+    for _, enemy in ipairs(workspace:GetDescendants()) do
+        if enemy.Name:lower():find("brainrot") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            table.insert(brainrotsCache, enemy)
+        end
+    end
+end
+
+local function GetNearestBrainrot()
+    local nearest = nil
+    local minDistance = math.huge
+    local charRoot = Character:FindFirstChild("HumanoidRootPart")
+    if not charRoot then return nil end
+    
+    for _, enemy in ipairs(brainrotsCache) do
+        local root = enemy:FindFirstChild("HumanoidRootPart")
+        if root and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            local distance = (charRoot.Position - root.Position).Magnitude
+            if distance < minDistance then
+                nearest = enemy
+                minDistance = distance
+            end
+        end
+    end
+    return nearest
+end
+
+local function InstantWarpToBrainrot(target)
+    local charRoot = Character:FindFirstChild("HumanoidRootPart")
+    local targetRoot = target:FindFirstChild("HumanoidRootPart")
+    if charRoot and targetRoot then
+        charRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
+    end
+end
+
+local function AttackBrainrot(target)
+    if Character:FindFirstChild(HeldToolName) then
+        if UserInputService.TouchEnabled then
+            VirtualUser:Button1Down(Vector2.new(0,0))
+            task.wait(0.1)
+            VirtualUser:Button1Up(Vector2.new(0,0))
+        else
+            local mouse = player:GetMouse()
+            if mouse then
+                mouse1click()
+            end
+        end
+    end
+end
+
+player.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    task.wait(2)
+    if AutoHitBrainrot then
+        AutoEquipBat()
+        UpdateBrainrotsCache()
+    end
+    if AutoEquipBatToggle then
+        AutoEquipBat()
+    end
+end)
+
+workspace.ChildAdded:Connect(function(child)
+    if AutoHitBrainrot and child.Name:lower():find("brainrot") then
+        task.wait(1)
+        UpdateBrainrotsCache()
+    end
+end)
+
+workspace.ChildRemoved:Connect(function(child)
+    if AutoHitBrainrot and child.Name:lower():find("brainrot") then
+        UpdateBrainrotsCache()
+    end
+end)
+
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | Plants Vs Brainrot",
+    Author = "KirsiaSC | Plants Vs Zombie",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
-    HasOutline = true,
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-            if not themes then
-                themes = {"Dark","Light","Green","Red"}
-                currentThemeIndex = 1
-            end
-            currentThemeIndex = currentThemeIndex + 1
-            if currentThemeIndex > #themes then
-                currentThemeIndex = 1
-            end
-            local newTheme = themes[currentThemeIndex]
-            WindUI:SetTheme(newTheme)
-        end,
-    },
+    HasOutline = true
 })
 
-Window:Tag({
-    Title = "v0.0.0.1",
-    Color = Color3.fromRGB(0,255,0),
+Window:Tag({  
+    Title = "v0.0.0.1",  
+    Color = Color3.fromRGB(0, 255, 0),  
 })
 
-WindUI:Notify({
-    Title = "STREE HUB Loaded",
-    Content = "UI loaded successfully!",
-    Duration = 3,
-    Icon = "bell",
+WindUI:Notify({  
+    Title = "STREE HUB Loaded",  
+    Content = "UI loaded successfully!",  
+    Duration = 3,  
+    Icon = "bell",  
 })
 
 local Tab1 = Window:Tab({
@@ -105,93 +212,61 @@ local Tab2 = Window:Tab({
     Icon = "landmark"
 })
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local VirtualUser = game:GetService("VirtualUser")
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HeldToolName = "Bat"
-local AutoFarm = false
-local autoClicking = false
-local AttackDelayInput = 0.5
-
-local function EquipBat()
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if backpack then
-        local tool = backpack:FindFirstChild(HeldToolName)
-        if tool then
-            LocalPlayer.Character.Humanoid:EquipTool(tool)
-        end
-    end
-end
-
-local function GetNearestBrainrot()
-    local nearest, dist = nil, math.huge
-    local hrp = Character and Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-    for _,v in pairs(workspace:GetDescendants()) do
-        if v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Name == "Brainrot" then
-            local d = (v.HumanoidRootPart.Position - hrp.Position).Magnitude
-            if d < dist then
-                dist = d
-                nearest = v
-            end
-        end
-    end
-    return nearest
-end
-
-local function InstantWarpToBrainrot(brainrot)
-    local hrp = Character and Character:FindFirstChild("HumanoidRootPart")
-    if hrp and brainrot and brainrot:FindFirstChild("HumanoidRootPart") then
-        hrp.CFrame = brainrot.HumanoidRootPart.CFrame * CFrame.new(0,0,3)
-    end
-end
-
-local function AttackBrainrot(brainrot)
-    if Character and Character:FindFirstChild(HeldToolName) then
-        if UserInputService.TouchEnabled then
-            VirtualUser:Button1Down(Vector2.new(0,0))
-            task.wait(tonumber(AttackDelayInput) or 0.5)
-            VirtualUser:Button1Up(Vector2.new(0,0))
-        else
-            VirtualUser:Button1Down(Vector2.new(0,0))
-            task.wait(tonumber(AttackDelayInput) or 0.5)
-            VirtualUser:Button1Up(Vector2.new(0,0))
-        end
-    end
-end
-
 Tab2:Toggle({
-    Title = "Auto Farm",
+    Title = "Auto Equip Bat",
     Default = false,
     Callback = function(state)
-        AutoFarm = state
-        autoClicking = state
+        AutoEquipBatToggle = state
         if state then
             EquipBat()
             task.spawn(function()
+                while AutoEquipBatToggle do
+                    AutoEquipBat()
+                    task.wait(1)
+                end
+            end)
+        end
+    end
+})
+
+Tab2:Toggle({
+    Title = "Auto Hit Brainrot",
+    Default = false,
+    Callback = function(state)
+        AutoHitBrainrot = state
+        autoClicking = state
+        
+        if state then
+            AutoEquipBat()
+            UpdateBrainrotsCache()
+
+            task.spawn(function()
                 while autoClicking do
-                    if Character and Character:FindFirstChild(HeldToolName) then
-                        AttackBrainrot()
+                    if Character:FindFirstChild(HeldToolName) then
+                        if UserInputService.TouchEnabled then
+                            VirtualUser:Button1Down(Vector2.new(0,0))
+                            task.wait(0.1)
+                            VirtualUser:Button1Up(Vector2.new(0,0))
+                        else
+                            local mouse = player:GetMouse()
+                            if mouse then
+                                mouse1click()
+                            end
+                        end
                     end
                     task.wait(tonumber(AttackDelayInput) or 0.5)
                 end
             end)
+
             task.spawn(function()
-                while AutoFarm do
-                    if Character and not Character:FindFirstChild(HeldToolName) then
-                        EquipBat()
-                    end
-                    task.wait(1)
-                end
-            end)
-            task.spawn(function()
-                while AutoFarm do
+                while AutoHitBrainrot do
                     local nearest = GetNearestBrainrot()
                     if nearest then
                         InstantWarpToBrainrot(nearest)
+                        task.wait(0.1)
                         AttackBrainrot(nearest)
+                    else
+                        UpdateBrainrotsCache()
                     end
                     task.wait(tonumber(AttackDelayInput) or 0.5)
                 end
