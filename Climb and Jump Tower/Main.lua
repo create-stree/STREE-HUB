@@ -35,7 +35,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.1",
+    Title = "v0.0.0.2",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -232,50 +232,108 @@ local Section3 = Tab3:Section({
     TextSize = 17
 })
 
-Tab3:Slider({
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+_G.CustomJumpPower = 50
+
+local Input = Tab2:Input({
     Title = "WalkSpeed",
-    Description = "Adjust WalkSpeed",
-    Default = 16,
-    Min = 16,
-    Max = 200,
-    Rounding = 1,
-    Callback = function(value)
-        local lp = game.Players.LocalPlayer
-        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-            lp.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+    Desc = "Minimum 16 speed",
+    Value = "16",
+    InputIcon = "bird",
+    Type = "Input",
+    Placeholder = "Enter number...",
+    Callback = function(input) 
+        local speed = tonumber(input)
+        if speed and speed >= 16 then
+            Humanoid.WalkSpeed = speed
+            print("WalkSpeed set to: " .. speed)
+        else
+            Humanoid.WalkSpeed = 16
+            print("⚠️ Invalid input, set to default (16)")
         end
     end
 })
 
-Tab3:Slider({
-    Title = "JumpPower",
-    Description = "Adjust JumpPower",
-    Default = 50,
-    Min = 50,
-    Max = 300,
-    Rounding = 1,
-    Callback = function(value)
-        local lp = game.Players.LocalPlayer
-        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-            lp.Character:FindFirstChildOfClass("Humanoid").JumpPower = value
+local Input = Tab2:Input({
+    Title = "Jump Power",
+    Desc = "Minimum 50 jump",
+    Value = "50",
+    InputIcon = "bird",
+    Type = "Input",
+    Placeholder = "Enter number...",
+    Callback = function(input) 
+        local value = tonumber(input)
+        if value and value >= 50 then
+            _G.CustomJumpPower = value
+            local humanoid = game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = value
+            end
+            print("Jump Power set to: " .. value)
+        else
+            warn("⚠️ Must be number and minimum 50!")
         end
     end
 })
 
-Tab3:Toggle({
+local Button = Tab2:Button({
+    Title = "Reset Jump Power",
+    Desc = "Return Jump Power to normal (50)",
+    Callback = function()
+        _G.CustomJumpPower = 50
+        local humanoid = game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.UseJumpPower = true
+            humanoid.JumpPower = 50
+        end
+        print("🔄 Jump Power reset to 50")
+    end
+})
+
+Player.CharacterAdded:Connect(function(char)
+    local humanoid = char:WaitForChild("Humanoid")
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = _G.CustomJumpPower or 50
+end)
+
+Tab2:Button({
+    Title = "Reset Speed",
+    Desc = "Return speed to normal (16)",
+    Callback = function()
+        Humanoid.WalkSpeed = 16
+        print("WalkSpeed reset to default (16)")
+    end
+})
+
+local UserInputService = game:GetService("UserInputService")
+
+local Toggle = Tab2:Toggle({
     Title = "Infinite Jump",
-    Desc = "Jump without limit",
+    Desc = "activate to use infinite jump",
+    Icon = "bird",
+    Type = "Checkbox",
     Default = false,
-    Callback = function(state)
+    Callback = function(state) 
         _G.InfiniteJump = state
+        if state then
+            print("✅ Infinite Jump Active")
+        else
+            print("❌ Infinite Jump Inactive")
+        end
     end
 })
 
-game:GetService("UserInputService").JumpRequest:Connect(function()
+UserInputService.JumpRequest:Connect(function()
     if _G.InfiniteJump then
-        local lp = game.Players.LocalPlayer
-        if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-            lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        local character = Player.Character or Player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
 end)
