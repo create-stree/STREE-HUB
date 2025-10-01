@@ -11,13 +11,14 @@ end
 
 local AutoHitBrainrot = false
 local AutoEquipBatToggle = false
+local AutoCollectToggle = false
 local autoClicking = false
 local player = game.Players.LocalPlayer
 local Character = player.Character or player.CharacterAdded:Wait()
 local HeldToolName = "Bat"
 local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
-local AttackDelayInput = 0.5
+local RunService = game:GetService("RunService")
 
 local function EquipBat()
     local backpack = player:FindFirstChildOfClass("Backpack")
@@ -92,16 +93,38 @@ local function InstantWarpToBrainrot(target)
     end
 end
 
-local function AttackBrainrot(target)
+local function AttackBrainrot()
     if Character:FindFirstChild(HeldToolName) then
         if UserInputService.TouchEnabled then
             VirtualUser:Button1Down(Vector2.new(0,0))
             task.wait(0.1)
             VirtualUser:Button1Up(Vector2.new(0,0))
         else
-            local mouse = player:GetMouse()
-            if mouse then
-                mouse1click()
+            mouse1click()
+        end
+    end
+end
+
+local function AutoCollectItems()
+    while AutoCollectToggle do
+        task.wait(0.2)
+        
+        local character = player.Character
+        if not character then continue end
+        
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart then continue end
+        
+        for _, item in pairs(workspace:GetDescendants()) do
+            if not AutoCollectToggle then break end
+            
+            if item:IsA("Part") then
+                if string.lower(item.Name):find("sun") or string.lower(item.Name):find("coin") or string.lower(item.Name):find("money") then
+                    if (humanoidRootPart.Position - item.Position).Magnitude < 50 then
+                        humanoidRootPart.CFrame = item.CFrame
+                        task.wait(0.1)
+                    end
+                end
             end
         end
     end
@@ -142,12 +165,6 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     SideBarWidth = 170,
     HasOutline = true
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-        end,
-    },
 })
 
 Window:Tag({  
@@ -247,39 +264,44 @@ Tab2:Toggle({
             UpdateBrainrotsCache()
 
             task.spawn(function()
-                while autoClicking do
-                    if Character:FindFirstChild(HeldToolName) then
-                        if UserInputService.TouchEnabled then
-                            VirtualUser:Button1Down(Vector2.new(0,0))
-                            task.wait(0.1)
-                            VirtualUser:Button1Up(Vector2.new(0,0))
-                        else
-                            local mouse = player:GetMouse()
-                            if mouse then
-                                mouse1click()
-                            end
-                        end
-                    end
-                    task.wait(tonumber(AttackDelayInput) or 0.5)
-                end
-            end)
-
-            task.spawn(function()
                 while AutoHitBrainrot do
                     local nearest = GetNearestBrainrot()
                     if nearest then
                         InstantWarpToBrainrot(nearest)
                         task.wait(0.1)
-                        AttackBrainrot(nearest)
+                        AttackBrainrot()
                     else
                         UpdateBrainrotsCache()
                     end
-                    task.wait(tonumber(AttackDelayInput) or 0.5)
+                    task.wait(0.3)
                 end
-                autoClicking = false
             end)
         else
             autoClicking = false
         end
+    end
+})
+
+local Section = Tab2:Section({
+    Title = "Auto Collect",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab2:Toggle({
+    Title = "Auto Collect Sun/Coins",
+    Default = false,
+    Callback = function(state)
+        AutoCollectToggle = state
+        if state then
+            task.spawn(AutoCollectItems)
+        end
+    end
+})
+
+Tab2:Button({
+    Title = "Equip Bat Now",
+    Callback = function()
+        EquipBat()
     end
 })
