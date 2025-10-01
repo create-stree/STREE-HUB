@@ -18,7 +18,7 @@ local Character = player.Character or player.CharacterAdded:Wait()
 local HeldToolName = "Bat"
 local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
-local RunService = game:GetService("RunService")
+local AttackDelayInput = 0.5
 
 local function EquipBat()
     local backpack = player:FindFirstChildOfClass("Backpack")
@@ -71,7 +71,6 @@ local function GetNearestBrainrot()
     local minDistance = math.huge
     local charRoot = Character:FindFirstChild("HumanoidRootPart")
     if not charRoot then return nil end
-    
     for _, enemy in ipairs(brainrotsCache) do
         local root = enemy:FindFirstChild("HumanoidRootPart")
         if root and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
@@ -93,7 +92,7 @@ local function InstantWarpToBrainrot(target)
     end
 end
 
-local function AttackBrainrot()
+local function AttackBrainrot(target)
     if Character:FindFirstChild(HeldToolName) then
         if UserInputService.TouchEnabled then
             VirtualUser:Button1Down(Vector2.new(0,0))
@@ -105,26 +104,13 @@ local function AttackBrainrot()
     end
 end
 
-local function AutoCollectItems()
-    while AutoCollectToggle do
-        task.wait(0.2)
-        
-        local character = player.Character
-        if not character then continue end
-        
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if not humanoidRootPart then continue end
-        
-        for _, item in pairs(workspace:GetDescendants()) do
-            if not AutoCollectToggle then break end
-            
-            if item:IsA("Part") then
-                if string.lower(item.Name):find("sun") or string.lower(item.Name):find("coin") or string.lower(item.Name):find("money") then
-                    if (humanoidRootPart.Position - item.Position).Magnitude < 50 then
-                        humanoidRootPart.CFrame = item.CFrame
-                        task.wait(0.1)
-                    end
-                end
+local function CollectNearestDrops()
+    if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
+    local root = Character.HumanoidRootPart
+    for _, drop in ipairs(workspace:GetDescendants()) do
+        if drop:IsA("BasePart") and drop.Name:lower():find("coin") or drop.Name:lower():find("drop") then
+            if (drop.Position - root.Position).Magnitude < 20 then
+                root.CFrame = drop.CFrame
             end
         end
     end
@@ -164,19 +150,24 @@ local Window = WindUI:CreateWindow({
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
-    HasOutline = true
+    HasOutline = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function() end,
+    },
 })
 
-Window:Tag({  
-    Title = "v0.0.0.1",  
-    Color = Color3.fromRGB(0, 255, 0),  
+Window:Tag({
+    Title = "v0.0.0.1",
+    Color = Color3.fromRGB(0, 255, 0),
 })
 
-WindUI:Notify({  
-    Title = "STREE HUB Loaded",  
-    Content = "UI loaded successfully!",  
-    Duration = 3,  
-    Icon = "bell",  
+WindUI:Notify({
+    Title = "STREE HUB Loaded",
+    Content = "UI loaded successfully!",
+    Duration = 3,
+    Icon = "bell",
 })
 
 local Tab1 = Window:Tab({
@@ -258,23 +249,36 @@ Tab2:Toggle({
     Callback = function(state)
         AutoHitBrainrot = state
         autoClicking = state
-        
         if state then
             AutoEquipBat()
             UpdateBrainrotsCache()
-
+            task.spawn(function()
+                while autoClicking do
+                    if Character:FindFirstChild(HeldToolName) then
+                        if UserInputService.TouchEnabled then
+                            VirtualUser:Button1Down(Vector2.new(0,0))
+                            task.wait(0.1)
+                            VirtualUser:Button1Up(Vector2.new(0,0))
+                        else
+                            mouse1click()
+                        end
+                    end
+                    task.wait(tonumber(AttackDelayInput) or 0.5)
+                end
+            end)
             task.spawn(function()
                 while AutoHitBrainrot do
                     local nearest = GetNearestBrainrot()
                     if nearest then
                         InstantWarpToBrainrot(nearest)
                         task.wait(0.1)
-                        AttackBrainrot()
+                        AttackBrainrot(nearest)
                     else
                         UpdateBrainrotsCache()
                     end
-                    task.wait(0.3)
+                    task.wait(tonumber(AttackDelayInput) or 0.5)
                 end
+                autoClicking = false
             end)
         else
             autoClicking = false
@@ -289,20 +293,18 @@ local Section = Tab2:Section({
 })
 
 Tab2:Toggle({
-    Title = "Auto Collect Sun/Coins",
+    Title = "Auto Collect",
     Default = false,
     Callback = function(state)
         AutoCollectToggle = state
         if state then
-            task.spawn(AutoCollectItems)
+            task.spawn(function()
+                while AutoCollectToggle do
+                    CollectNearestDrops()
+                    task.wait(0.7)
+                end
+            end)
         end
-    end
-})
-
-Tab2:Button({
-    Title = "Equip Bat Now",
-    Callback = function()
-        EquipBat()
     end
 })
 
@@ -311,7 +313,7 @@ local Tab3 = Window:Tab({
     Icon = "badge-dollar-sign"
 })
 
-local Tab3 = Window:Tab({
+local Tab4 = Window:Tab({
     Title = "Settings",
     Icon = "settings"
 })
