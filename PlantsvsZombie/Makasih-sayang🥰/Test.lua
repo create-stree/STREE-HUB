@@ -305,3 +305,13 @@ Tab2:Button({
         EquipBat()
     end
 })
+
+local Tab3 = Window:Tab({
+    Title = "Shop",
+    Icon = "badge-dollar-sign"
+})
+
+local Tab3 = Window:Tab({
+    Title = "Settings",
+    Icon = "settings"
+})
