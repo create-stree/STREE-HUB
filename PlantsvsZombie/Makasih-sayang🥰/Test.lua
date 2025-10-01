@@ -67,8 +67,7 @@ local function UpdateBrainrotsCache()
 end
 
 local function GetNearestBrainrot()
-    local nearest = nil
-    local minDistance = math.huge
+    local nearest, minDistance = nil, math.huge
     local charRoot = Character:FindFirstChild("HumanoidRootPart")
     if not charRoot then return nil end
     for _, enemy in ipairs(brainrotsCache) do
@@ -108,7 +107,7 @@ local function CollectNearestDrops()
     if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
     local root = Character.HumanoidRootPart
     for _, drop in ipairs(workspace:GetDescendants()) do
-        if drop:IsA("BasePart") and drop.Name:lower():find("coin") or drop.Name:lower():find("drop") then
+        if drop:IsA("BasePart") and (drop.Name:lower():find("coin") or drop.Name:lower():find("drop")) then
             if (drop.Position - root.Position).Magnitude < 20 then
                 root.CFrame = drop.CFrame
             end
