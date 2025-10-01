@@ -310,10 +310,15 @@ Tab2:Toggle({
 
 local Tab3 = Window:Tab({
     Title = "Shop",
-    Icon = "badge-dollar-sign"
+    Icon = "shopping-cart"
 })
 
 local Tab4 = Window:Tab({
+    Title = "Sell",
+    Icon = "badge-dollar-sign"
+})
+
+local Tab5 = Window:Tab({
     Title = "Settings",
     Icon = "settings"
 })
