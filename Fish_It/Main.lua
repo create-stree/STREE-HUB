@@ -702,7 +702,7 @@ local Section = Tab6:Section({
     Opened = true,
 })
 
-local Button = Tab6:Button({
+Button = Tab6:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -711,7 +711,7 @@ local Button = Tab6:Button({
     end
 })
 
-local Button = Tab6:Button({
+Button = Tab6:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
