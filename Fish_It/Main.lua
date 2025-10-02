@@ -614,6 +614,16 @@ local Toggle = Tab6:Toggle({
     end
 })
 
+local Section = Tab6:Section({ 
+    Title = "Config",
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = true,
+})
+
 local ConfigFolder = "STREE_HUB/Configs"
 if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
 if not isfolder(ConfigFolder) then makefolder(ConfigFolder) end
@@ -696,6 +706,34 @@ Tab6:Button({
         else
             warn("⚠️ No config to delete.")
         end
+    end
+})
+
+local Section = Tab6:Section({ 
+    Title = "Other",
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = true,
+})
+
+local Button = Tab6:Button({
+    Title = "FLY",
+    Desc = "Scripts Fly Gui",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    end
+})
+
+local Button = Tab6:Button({
+    Title = "Infinite Yield",
+    Desc = "Other Scripts",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
 
