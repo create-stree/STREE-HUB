@@ -23,7 +23,7 @@ local Window = WindUI:CreateWindow({
         Enabled = true,
         Anonymous = false,
         Callback = function()
-            WindUI:SetTheme("Dark")
+            WindUI:GetThemes("Dark")
         end,
     },
 })
@@ -45,7 +45,7 @@ local Tab1 = Window:Tab({
     Icon = "info",
 })
 
-local Section = Tab1:Section({ 
+Tab1:Section({ 
     Title = "Community Support",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -91,7 +91,7 @@ Tab1:Button({
     end
 })
 
-local Section = Tab1:Section({ 
+Tab1:Section({ 
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -109,7 +109,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 
 _G.CustomJumpPower = 50
 
-local Input = Tab2:Input({
+Tab2:Input({
     Title = "WalkSpeed",
     Desc = "Minimum 16 speed",
     Value = "16",
@@ -120,15 +120,13 @@ local Input = Tab2:Input({
         local speed = tonumber(input)
         if speed and speed >= 16 then
             Humanoid.WalkSpeed = speed
-            print("WalkSpeed set to: " .. speed)
         else
             Humanoid.WalkSpeed = 16
-            print("⚠️ Invalid input, set to default (16)")
         end
     end
 })
 
-local Input = Tab2:Input({
+Tab2:Input({
     Title = "Jump Power",
     Desc = "Minimum 50 jump",
     Value = "50",
@@ -139,29 +137,25 @@ local Input = Tab2:Input({
         local value = tonumber(input)
         if value and value >= 50 then
             _G.CustomJumpPower = value
-            local humanoid = game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
             if humanoid then
                 humanoid.UseJumpPower = true
                 humanoid.JumpPower = value
             end
-            print("Jump Power set to: " .. value)
-        else
-            warn("⚠️ Must be number and minimum 50!")
         end
     end
 })
 
-local Button = Tab2:Button({
+Tab2:Button({
     Title = "Reset Jump Power",
     Desc = "Return Jump Power to normal (50)",
     Callback = function()
         _G.CustomJumpPower = 50
-        local humanoid = game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid.UseJumpPower = true
             humanoid.JumpPower = 50
         end
-        print("🔄 Jump Power reset to 50")
     end
 })
 
@@ -176,13 +170,12 @@ Tab2:Button({
     Desc = "Return speed to normal (16)",
     Callback = function()
         Humanoid.WalkSpeed = 16
-        print("WalkSpeed reset to default (16)")
     end
 })
 
 local UserInputService = game:GetService("UserInputService")
 
-local Toggle = Tab2:Toggle({
+Tab2:Toggle({
     Title = "Infinite Jump",
     Desc = "activate to use infinite jump",
     Icon = "bird",
@@ -190,11 +183,6 @@ local Toggle = Tab2:Toggle({
     Default = false,
     Callback = function(state) 
         _G.InfiniteJump = state
-        if state then
-            print("✅ Infinite Jump Active")
-        else
-            print("❌ Infinite Jump Inactive")
-        end
     end
 })
 
@@ -213,7 +201,7 @@ local Tab3 = Window:Tab({
     Icon = "landmark",
 })
 
-local Section = Tab3:Section({ 
+Tab3:Section({ 
     Title = "Main",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -222,8 +210,6 @@ local Section = Tab3:Section({
 Tab3:Toggle({
     Title = "Auto Equip Rod",
     Desc = "Selalu equip pancing otomatis",
-    Icon = false,
-    Type = false,
     Default = false,
     Callback = function(value)
         _G.AutoEquipRod = value
@@ -254,58 +240,48 @@ end)
 Tab3:Toggle({
     Title = "Auto Fishing",
     Desc = "Automatic Auto Fishing v1",
-    Icon = false,
-    Type = false,
     Default = false,
     Callback = function(value) 
         _G.AutoFishing = value
     end
 })
 
-local Players = game:GetService("Players")
 local RepStorage = game:GetService("ReplicatedStorage")
-local player = game.Players.LocalPlayer
 
 spawn(function()
     while wait() do
         if _G.AutoFishing then
-            repeat
-                  pcall(function()
-                       local char = player.Character or player.CharacterAdded:Wait()
-                       if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-                       end                    
-                       local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                       if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                          wait(0.5)
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                       end
-                  end)
-            wait(0.2)
-            until not _G.AutoFishing
+            pcall(function()
+                local char = player.Character or player.CharacterAdded:Wait()
+                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+                end                    
+                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
+                    wait(0.5)
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+                end
+            end)
         end
+        wait(0.2)
     end
 end)
 
 spawn(function()
     while wait() do
         if _G.AutoFishing then
-            repeat
-                  pcall(function()
-                       RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
-                  end)
-            wait(0.2)
-            until not _G.AutoFishing
+            pcall(function()
+                RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
+            end)
         end
+        wait(0.2)
     end
 end)
 
-local Toggle = Tab3:Toggle({
+Tab3:Toggle({
     Title = "Auto Sell",
     Desc = "Automatic fish sales",
-    Icon = false,
-    Type = false,
     Default = false,
     Callback = function(state)
         _G.AutoSell = state
@@ -327,7 +303,7 @@ local Toggle = Tab3:Toggle({
     end
 })
 
-local Section = Tab3:Section({ 
+Tab3:Section({ 
     Title = "Opsional",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -360,26 +336,20 @@ local function scanRemotes()
     end
     
     if #found > 0 then
-        print("Found fishing remotes:")
         for i, name in ipairs(found) do
             print(i .. ". " .. name)
         end
-    else
-        print("No fishing remotes found")
     end
 end
 
-local ToggleCatch = Tab3:Toggle({
+Tab3:Toggle({
     Title = "Instant Catch",
     Desc = "Get fish straight away",
-    Icon = false,
-    Type = false,
     Default = false,
     Callback = function(state)
         _G.InstantCatch = state
 
         if state then
-            print("✅ Instant Catch ON")
             if _loopRunning then return end
             _loopRunning = true
 
@@ -387,29 +357,23 @@ local ToggleCatch = Tab3:Toggle({
                 while _G.InstantCatch do
                     local remote = findRemote(REMOTE_CATCH)
                     if remote then
-                        local success, err = pcall(function()
+                        pcall(function()
                             if remote:IsA("RemoteEvent") then
                                 remote:FireServer()
                             else
                                 remote:InvokeServer()
                             end
                         end)
-                        if not success then
-                            warn("❌ error:", err)
-                        end
                     end
                     task.wait(TRY_INTERVAL)
                 end
                 _loopRunning = false
-                print("❌ Instant Catch OFF")
             end)
-        else
-            print("❌ Instant Catch is turned off")
         end
     end
 })
 
-local ScanButton = Tab3:Button({
+Tab3:Button({
     Title = "Scan Fish Remotes",
     Desc = "Search for remote with the word 'fish'",
     Callback = function()
@@ -422,14 +386,14 @@ local Tab4 = Window:Tab({
     Icon = "badge-dollar-sign",
 })
 
-local Section = Tab4:Section({
+Tab4:Section({
     Title = "Buy Rod",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
 local selectedRod = "Rod"
-local rodDropdown = Tab4:Dropdown({
+Tab4:Dropdown({
     Title = "Select Rod",
     Values = {"BasicRod", "ProRod", "GoldenRod", "OldRod", "FishingRod"},
     Callback = function(Value)
@@ -442,18 +406,17 @@ Tab4:Button({
     Desc = "Purchase the selected fishing rod",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/PurchaseItem"]:FireServer(selectedRod)
-        print("Purchased: " .. selectedRod)
     end
 })
 
-local Section = Tab4:Section({
+Tab4:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
 local selectedBait = "Bait"
-local baitDropdown = Tab4:Dropdown({
+Tab4:Dropdown({
     Title = "Select Bait",
     Values = {"Bait", "Worm", "Shrimp", "Squid", "SpecialBait"},
     Callback = function(Value)
@@ -466,7 +429,6 @@ Tab4:Button({
     Desc = "Purchase the selected bait",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/PurchaseItem"]:FireServer(selectedBait, 10)
-        print("Purchased: " .. selectedBait .. " x10")
     end
 })
 
@@ -475,13 +437,13 @@ local Tab5 = Window:Tab({
     Icon = "map-pin",
 })
 
-local Section = Tab5:Section({ 
+Tab5:Section({ 
     Title = "Island",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Dropdown = Tab5:Dropdown({
+Tab5:Dropdown({
     Title = "Select Location",
     Values = {"Esoteric Island", "Konoha", "Coral Refs", "Enchant Room", "Tropical Grove", "Weather Machine", "Treasure Room"},
     Callback = function(Value)
@@ -502,13 +464,13 @@ local Dropdown = Tab5:Dropdown({
     end
 })
 
-local Section = Tab5:Section({ 
+Tab5:Section({ 
     Title = "fishing spot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Dropdown = Tab5:Dropdown({
+Tab5:Dropdown({
     Title = "Select Location",
     Values = {"Spawn", "Konoha", "Coral Refs", "Volcano", "Sysyphus Statue"},
     Callback = function(Value)
@@ -532,11 +494,9 @@ local Tab6 = Window:Tab({
     Icon = "settings",
 })
 
-local Toggle = Tab6:Toggle({
+Tab6:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
-    Icon = false,
-    Type = false,
     Default = false,
     Callback = function(state)
         _G.AntiAFK = state
@@ -552,27 +512,13 @@ local Toggle = Tab6:Toggle({
                     end)
                 end
             end)
-
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "AntiAFK loaded!",
-                Text = "Coded By Kirsiasc",
-                Button1 = "Okey",
-                Duration = 5
-            })
-        else
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "AntiAFK Disabled",
-                Text = "Stopped AntiAFK",
-                Duration = 3
-            })
         end
     end
 })
 
-local Toggle = Tab6:Toggle({
+Tab6:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
-    Icon = false,
     Default = false,
     Callback = function(state)
         _G.AutoReconnect = state
@@ -580,7 +526,6 @@ local Toggle = Tab6:Toggle({
             task.spawn(function()
                 while _G.AutoReconnect do
                     task.wait(2)
-
                     local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
                     if reconnectUI then
                         local prompt = reconnectUI:FindFirstChild("promptOverlay")
@@ -597,7 +542,7 @@ local Toggle = Tab6:Toggle({
     end
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Config",
     Box = false,
     FontWeight = "SemiBold",
@@ -660,7 +605,6 @@ Tab6:Button({
     Callback = function()
         local data = GetConfig()
         writefile(ConfigFolder.."/"..ConfigName, game:GetService("HttpService"):JSONEncode(data))
-        print("✅ Config saved!")
     end
 })
 
@@ -672,9 +616,6 @@ Tab6:Button({
             local data = readfile(ConfigFolder.."/"..ConfigName)
             local decoded = game:GetService("HttpService"):JSONDecode(data)
             ApplyConfig(decoded)
-            print("✅ Config applied!")
-        else
-            warn("⚠️ Config not found, please Save first.")
         end
     end
 })
@@ -685,14 +626,11 @@ Tab6:Button({
     Callback = function()
         if isfile(ConfigFolder.."/"..ConfigName) then
             delfile(ConfigFolder.."/"..ConfigName)
-            print("🗑 Config deleted!")
-        else
-            warn("⚠️ No config to delete.")
         end
     end
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Other",
     Box = false,
     FontWeight = "SemiBold",
@@ -702,19 +640,17 @@ local Section = Tab6:Section({
     Opened = true,
 })
 
-Button = Tab6:Button({
+Tab6:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
-    Locked = false,
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
     end
 })
 
-Button = Tab6:Button({
+Tab6:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
-    Locked = false,
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
@@ -724,8 +660,4 @@ Player.CharacterAdded:Connect(function(char)
     local humanoid = char:WaitForChild("Humanoid")
     humanoid.UseJumpPower = true
     humanoid.JumpPower = _G.CustomJumpPower or 50
-    
-    if _G.InfiniteJump then
-        humanoid.WalkSpeed = _G.CustomWalkSpeed or 16
-    end
 end)
