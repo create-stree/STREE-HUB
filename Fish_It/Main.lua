@@ -23,19 +23,13 @@ local Window = WindUI:CreateWindow({
         Enabled = true,
         Anonymous = false,
         Callback = function()
-            currentThemeIndex = currentThemeIndex + 1
-            if currentThemeIndex > #themes then
-                currentThemeIndex = 1
-            end
-            
-            local newTheme = themes[currentThemeIndex]
-            WindUI:SetTheme(newTheme)
+            WindUI:SetTheme("Dark")
         end,
     },
 })
 
 Window:Tag({
-    Title = "v0.0.0.7",
+    Title = "v0.0.0.8",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -353,17 +347,6 @@ local function findRemote(name)
         end
     end
     return nil
-end
-
-local function tryFire(remote)
-    if remote:IsA("RemoteEvent") then
-        remote:FireServer()
-        return true
-    elseif remote:IsA("RemoteFunction") then
-        remote:InvokeServer()
-        return true
-    end
-    return false
 end
 
 local function scanRemotes()
