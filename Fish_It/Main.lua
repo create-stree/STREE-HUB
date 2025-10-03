@@ -325,6 +325,94 @@ spawn(function()
     end
 end)
 
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local camera = Workspace.CurrentCamera
+
+local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
+local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
+
+local autoHoldEnabled = false
+AutofarmTab:Toggle({
+    Title = "Auto Fishing",
+    Value = false,
+    Callback = function(state)
+        autoHoldEnabled = state
+
+        if state then
+            WindUI:Notify({
+                Title = "Auto Fishing ",
+                Content = "Enabled",
+                Duration = 3
+            })
+
+            task.spawn(function()
+                local holdDuration = 0.4
+                local loopDelay = 0.2
+
+                while autoHoldEnabled do
+                    pcall(function()
+                        REEquipToolFromHotbar:FireServer(1)
+
+                        local clickX = 5
+                        local clickY = camera.ViewportSize.Y - 5
+                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
+                        task.wait(holdDuration)
+                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
+                    end)
+
+                    task.wait(loopDelay)
+                    RunService.Heartbeat:Wait()
+                end
+            end)
+        else
+            WindUI:Notify({
+                Title = "Auto Fishing",
+                Content = "Disabled",
+                Duration = 3
+            })
+        end
+    end
+})
+
+local autoInstantFishEnabled = true
+local delayTime = 0.1
+
+local function startAutoFish()
+    task.spawn(function()
+        while autoInstantFishEnabled do
+            pcall(function()
+                REFishingCompleted:FireServer()
+            end)
+            task.wait(delayTime)
+        end
+    end)
+end
+
+local toggle = AutofarmTab:Toggle({
+    Title = "Auto Instant complete Fishing",
+    Value = autoInstantFishEnabled,
+    Callback = function(state)
+        autoInstantFishEnabled = state
+        if state then
+            WindUI:Notify({
+                Title = "Auto Instant Fish",
+                Content = "Enabled (Delay: " .. delayTime .. "s)",
+                Duration = 3
+            })
+            startAutoFish()
+        else
+            WindUI:Notify({
+                Title = "Auto Instant Fish",
+                Content = "Disabled",
+                Duration = 3
+            })
+        end
+    end
+})
+
 local Toggle = Tab3:Toggle({
     Title = "Auto Sell",
     Desc = "Automatic fish sales",
