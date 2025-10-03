@@ -815,6 +815,15 @@ local Button = Tab6:Button({
 })
 
 local Button = Tab6:Button({
+    Title = "Simple Shader",
+    Desc = "Shader",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
+    end
+})
+
+local Button = Tab6:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
