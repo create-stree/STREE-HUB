@@ -103,14 +103,13 @@ local function AttackBrainrot(target)
     end
 end
 
-local function CollectNearestDrops()
+local function CollectBrains()
     if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
-    local root = Character.HumanoidRootPart
-    for _, drop in ipairs(workspace:GetDescendants()) do
-        if drop:IsA("BasePart") and (drop.Name:lower():find("coin") or drop.Name:lower():find("drop")) then
-            if (drop.Position - root.Position).Magnitude < 20 then
-                root.CFrame = drop.CFrame
-            end
+    local hrp = Character.HumanoidRootPart
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent.Name:lower():find("brain") then
+            firetouchinterest(hrp, obj.Parent, 0)
+            firetouchinterest(hrp, obj.Parent, 1)
         end
     end
 end
@@ -153,7 +152,9 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,
         Anonymous = false,
-        Callback = function() end,
+        Callback = function()
+            WindUI:SetTheme("Dark")
+        end,
     },
 })
 
@@ -292,15 +293,15 @@ local Section = Tab2:Section({
 })
 
 Tab2:Toggle({
-    Title = "Auto Collect",
+    Title = "Auto Collect Brain",
     Default = false,
     Callback = function(state)
         AutoCollectToggle = state
         if state then
             task.spawn(function()
                 while AutoCollectToggle do
-                    CollectNearestDrops()
-                    task.wait(0.7)
+                    CollectBrains()
+                    task.wait(0.5)
                 end
             end)
         end
