@@ -374,6 +374,7 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 local autoHoldEnabled = false
 Toggle = Tab3:Toggle({
     Title = "Auto Fishing",
+    Desc = "Automatic Auto Fishing v2",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
@@ -409,42 +410,6 @@ Toggle = Tab3:Toggle({
     end
 })
 
-local autoInstantFishEnabled = true
-local delayTime = 0.1
-
-local function startAutoFish()
-    task.spawn(function()
-        while autoInstantFishEnabled do
-            pcall(function()
-                REFishingCompleted:FireServer()
-            end)
-            task.wait(delayTime)
-        end
-    end)
-end
-
-Toggle = Tab3:Toggle({
-    Title = "Auto Instant complete Fishing",
-    Value = autoInstantFishEnabled,
-    Callback = function(state)
-        autoInstantFishEnabled = state
-        if state then
-            WindUI:Notify({
-                Title = "Auto Instant Fish",
-                Content = "Enabled (Delay: " .. delayTime .. "s)",
-                Duration = 3
-            })
-            startAutoFish()
-        else
-            WindUI:Notify({
-                Title = "Auto Instant Fish",
-                Content = "Disabled",
-                Duration = 3
-            })
-        end
-    end
-})
-    
 local Toggle = Tab3:Toggle({    
     Title = "Auto Sell",    
     Desc = "Automatic fish sales",    
@@ -472,10 +437,47 @@ local Toggle = Tab3:Toggle({
 })    
     
 local Section = Tab3:Section({     
-    Title = "Opsional",    
+    Title = "Other",    
     TextXAlignment = "Left",    
     TextSize = 17,    
-})    
+})
+
+local autoInstantFishEnabled = true
+local delayTime = 0.1
+
+local function startAutoFish()
+    task.spawn(function()
+        while autoInstantFishEnabled do
+            pcall(function()
+                REFishingCompleted:FireServer()
+            end)
+            task.wait(delayTime)
+        end
+    end)
+end
+
+Toggle = Tab3:Toggle({
+    Title = "Auto Instant complete Fishing",
+    Desc = "Instant Fishing For v2 (It is mandatory to turn it on if you want to use Auto Fishing V2)",
+    Value = autoInstantFishEnabled,
+    Callback = function(state)
+        autoInstantFishEnabled = state
+        if state then
+            WindUI:Notify({
+                Title = "Auto Instant Fish",
+                Content = "Enabled (Delay: " .. delayTime .. "s)",
+                Duration = 3
+            })
+            startAutoFish()
+        else
+            WindUI:Notify({
+                Title = "Auto Instant Fish",
+                Content = "Disabled",
+                Duration = 3
+            })
+        end
+    end
+})
     
 local Toggle = Tab3:Toggle({    
     Title = "Instant Catch",    
