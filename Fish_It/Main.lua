@@ -14,7 +14,7 @@ local Window = WindUI:CreateWindow({
     Icon = "rbxassetid://122683047852451",
     Author = "KirsiaSC | Fish It",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(560, 400),
+    Size = UDim2.fromOffset(600, 400),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.8",
+    Title = "v0.0.0.9",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
