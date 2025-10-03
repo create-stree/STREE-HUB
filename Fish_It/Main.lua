@@ -819,7 +819,7 @@ local Button = Tab6:Button({
     Desc = "Shader",
     Locked = false,
     Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/p0e1/1/refs/heads/main/SimpleShader.lua"))()
     end
 })
 
