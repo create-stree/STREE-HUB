@@ -14,7 +14,7 @@ local Window = WindUI:CreateWindow({
     Icon = "rbxassetid://122683047852451",
     Author = "KirsiaSC | Fish It",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(280, 310),
+    Size = UDim2.fromOffset(260, 290),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.1",
+    Title = "v0.0.1.2",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -45,7 +45,7 @@ local Tab1 = Window:Tab({
     Icon = "info",
 })
 
-local Section = Tab1:Section({ 
+local Section = Tab1:Section({
     Title = "Community Support",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -91,7 +91,7 @@ Tab1:Button({
     end
 })
 
-local Section = Tab1:Section({ 
+local Section = Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -116,7 +116,7 @@ local Input = Tab2:Input({
     InputIcon = "bird",
     Type = "Input",
     Placeholder = "Enter number...",
-    Callback = function(input) 
+    Callback = function(input)
         local speed = tonumber(input)
         if speed and speed >= 16 then
             Humanoid.WalkSpeed = speed
@@ -135,7 +135,7 @@ local Input = Tab2:Input({
     InputIcon = "bird",
     Type = "Input",
     Placeholder = "Enter number...",
-    Callback = function(input) 
+    Callback = function(input)
         local value = tonumber(input)
         if value and value >= 50 then
             _G.CustomJumpPower = value
@@ -188,7 +188,7 @@ local Toggle = Tab2:Toggle({
     Icon = false,
     Type = false,
     Default = false,
-    Callback = function(state) 
+    Callback = function(state)
         _G.InfiniteJump = state
         if state then
             print("✅ Infinite Jump Active")
@@ -237,7 +237,7 @@ local Tab3 = Window:Tab({
     Icon = "landmark",
 })
 
-local Section = Tab3:Section({ 
+local Section = Tab3:Section({
     Title = "Main",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -262,9 +262,9 @@ spawn(function()
             pcall(function()
                 local backpack = player:FindFirstChild("Backpack")
                 if backpack then
-                    local rod = backpack:FindFirstChild("Rod") 
-                        or backpack:FindFirstChild("FishingRod") 
-                        or backpack:FindFirstChild("OldRod") 
+                    local rod = backpack:FindFirstChild("Rod")
+                        or backpack:FindFirstChild("FishingRod")
+                        or backpack:FindFirstChild("OldRod")
                         or backpack:FindFirstChild("BasicRod")
                     if rod and not player.Character:FindFirstChild(rod.Name) then
                         player.Character.Humanoid:EquipTool(rod)
@@ -281,32 +281,30 @@ Tab3:Toggle({
     Icon = false,
     Type = false,
     Default = false,
-    Callback = function(value) 
+    Callback = function(value)
         _G.AutoFishing = value
     end
 })
 
-local Players = game:GetService("Players")
 local RepStorage = game:GetService("ReplicatedStorage")
-local player = game.Players.LocalPlayer
 
 spawn(function()
     while wait() do
         if _G.AutoFishing then
             repeat
-                  pcall(function()
-                       local char = player.Character or player.CharacterAdded:Wait()
-                       if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-                       end                    
-                       local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                       if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                          wait(0.5)
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                       end
-                  end)
-            wait(0.2)
+                pcall(function()
+                    local char = player.Character or player.CharacterAdded:Wait()
+                    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+                    end
+                    local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                    if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
+                        wait(0.5)
+                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+                    end
+                end)
+                wait(0.2)
             until not _G.AutoFishing
         end
     end
@@ -316,223 +314,14 @@ spawn(function()
     while wait() do
         if _G.AutoFishing then
             repeat
-                  pcall(function()
-                       RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
-                  end)
-            wait(0.2)
+                pcall(function()
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
+                end)
+                wait(0.2)
             until not _G.AutoFishing
         end
     end
 end)
-
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local camera = Workspace.CurrentCamera
-
-local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
-local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
-
-local autoHoldEnabled = false
-AutofarmTab:Toggle({
-    Title = "Auto Fishing",
-    Value = false,
-    Callback = function(state)
-        autoHoldEnabled = state
-
-        if state then
-            WindUI:Notify({
-                Title = "Auto Fishing ",
-                Content = "Enabled",
-                Duration = 3
-            })
-
-            task.spawn(function()
-                local holdDuration = 0.4
-                local loopDelay = 0.2
-
-                while autoHoldEnabled do
-                    pcall(function()
-                        REEquipToolFromHotbar:FireServer(1)
-
-                        local clickX = 5
-                        local clickY = camera.ViewportSize.Y - 5
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-                        task.wait(holdDuration)
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-                    end)
-
-                    task.wait(loopDelay)
-                    RunService.Heartbeat:Wait()
-                end
-            end)
-        else
-            WindUI:Notify({
-                Title = "Auto Fishing",
-                Content = "Disabled",
-                Duration = 3
-            })
-        end
-    end
-})
-
-local autoInstantFishEnabled = true
-local delayTime = 0.1
-
-local function startAutoFish()
-    task.spawn(function()
-        while autoInstantFishEnabled do
-            pcall(function()
-                REFishingCompleted:FireServer()
-            end)
-            task.wait(delayTime)
-        end
-    end)
-end
-
-local toggle = AutofarmTab:Toggle({
-    Title = "Auto Instant complete Fishing",
-    Value = autoInstantFishEnabled,
-    Callback = function(state)
-        autoInstantFishEnabled = state
-        if state then
-            WindUI:Notify({
-                Title = "Auto Instant Fish",
-                Content = "Enabled (Delay: " .. delayTime .. "s)",
-                Duration = 3
-            })
-            startAutoFish()
-        else
-            WindUI:Notify({
-                Title = "Auto Instant Fish",
-                Content = "Disabled",
-                Duration = 3
-            })
-        end
-    end
-})
-
-local Toggle = Tab3:Toggle({
-    Title = "Auto Sell",
-    Desc = "Automatic fish sales",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(state)
-        _G.AutoSell = state
-        task.spawn(function()
-            while _G.AutoSell do
-                task.wait(0.5)
-                local rs = game:GetService("ReplicatedStorage")
-                for _, v in pairs(rs:GetDescendants()) do
-                    if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
-                        v:FireServer()
-                    elseif v:IsA("RemoteFunction") and v.Name:lower():find("sell") then
-                        pcall(function()
-                            v:InvokeServer()
-                        end)
-                    end
-                end
-            end
-        end)
-    end
-})
-
-local Section = Tab3:Section({ 
-    Title = "Opsional",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-local Toggle = Tab3:Toggle({
-    Title = "Instant Catch",
-    Desc = "Get fish straight away",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(state)
-        _G.InstantCatch = state
-
-        if state then
-            print("✅ Instant Catch ON")
-            if _loopRunning then return end
-            _loopRunning = true
-
-            task.spawn(function()
-                while _G.InstantCatch do
-                    local remote = findRemote(REMOTE_CATCH)
-                    if remote then
-                        local success, err = pcall(function()
-                            if remote:IsA("RemoteEvent") then
-                                remote:FireServer()
-                            else
-                                remote:InvokeServer()
-                            end
-                        end)
-                        if not success then
-                            warn("❌ error:", err)
-                        end
-                    end
-                    task.wait(TRY_INTERVAL)
-                end
-                _loopRunning = false
-                print("❌ Instant Catch OFF")
-            end)
-        else
-            print("❌ Instant Catch is turned off")
-        end
-    end
-})
-
-local Toggle = Tab3:Toggle({
-    Title = "Radar",
-    Desc = "Toggle fishing radar",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(state)
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local Lighting = game:GetService("Lighting")
-
-        local Replion = require(ReplicatedStorage.Packages.Replion)
-        local Net = require(ReplicatedStorage.Packages.Net)
-        local spr = require(ReplicatedStorage.Packages.spr)
-        local Soundbook = require(ReplicatedStorage.Shared.Soundbook)
-        local ClientTimeController = require(ReplicatedStorage.Controllers.ClientTimeController)
-        local TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)
-
-        local RemoteRadar = Net:RemoteFunction("UpdateFishingRadar")
-
-        local Data = Replion.Client:GetReplion("Data")
-        if Data then
-            if RemoteRadar:InvokeServer(state) then
-                Soundbook.Sounds.RadarToggle:Play().PlaybackSpeed = 1 + math.random() * 0.3
-                local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
-                if effect then
-                    spr.stop(effect)
-                    local profile = ClientTimeController:_getLightingProfile()
-                    local cc = (profile and profile.ColorCorrection) and profile.ColorCorrection or {}
-                    if not cc.Brightness then cc.Brightness = 0.04 end
-                    if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end
-                    effect.TintColor = Color3.fromRGB(42, 226, 118)
-                    effect.Brightness = 0.4
-                    spr.target(effect, 1, 1, cc)
-                end
-                spr.stop(Lighting)
-                Lighting.ExposureCompensation = 1
-                spr.target(Lighting, 1, 2, {
-                    ["ExposureCompensation"] = 0
-                })
-                TextNotificationController:DeliverNotification({
-                    ["Type"] = "Text",
-                    ["Text"] = ("Radar: %*"):format(state and "Enabled" or "Disabled"),
-                    ["TextColor"] = state and {["R"] = 9,["G"] = 255,["B"] = 0} or {["R"] = 255,["G"] = 0,["B"] = 0}
-                })
-            end
-        end
-    end
-})
 
 local Tab4 = Window:Tab({
     Title = "Shop",
