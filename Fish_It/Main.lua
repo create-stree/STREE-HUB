@@ -492,48 +492,130 @@ local Section = Tab5:Section({
     TextSize = 17,
 })
 
-local Dropdown = Tab5:Dropdown({
-    Title = "Select Location",
-    Values = {"Esoteric Island", "Konoha", "Coral Refs", "Enchant Room", "Tropical Grove", "Weather Machine", "Treasure Room"},
-    Callback = function(Value)
-        local Locations = {
-            ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
-            ["Konoha"] = Vector3.new(-603, 3, 719),
-            ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
-            ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
-            ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
-            ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
-            ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
-        }
+local IslandLocations = {
+    ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+    ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
+    ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
+    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
+    ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
+    ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
+}
 
-        local location = Locations[Value]
-        if location and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(location)
+local SelectedIsland = nil
+
+local IslandDropdown = Tab5:Dropdown({
+    Title = "Select Island",
+    Values = (function()
+        local keys = {}
+        for name in pairs(IslandLocations) do
+            table.insert(keys, name)
+        end
+        table.sort(keys)
+        return keys
+    end)(),
+    Callback = function(Value)
+        SelectedIsland = Value
+    end
+})
+
+Tab5:Button({
+    Title = "Teleport to Island",
+    Callback = function()
+        if SelectedIsland and IslandLocations[SelectedIsland] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(IslandLocations[SelectedIsland])
         end
     end
 })
 
 local Section = Tab5:Section({ 
-    Title = "fishing spot",
+    Title = "Fishing Spot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Dropdown = Tab5:Dropdown({
-    Title = "Select Location",
-    Values = {"Spawn", "Konoha", "Coral Refs", "Volcano", "Sysyphus Statue"},
-    Callback = function(Value)
-        local Locations = {
-            ["Spawn"] = Vector3.new(33, 9, 2810),
-            ["Konoha"] = Vector3.new(-603, 3, 719),
-            ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
-            ["Volcano"] = Vector3.new(-632, 55, 197),
-            ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
-        }
+local FishingLocations = {
+    ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Spawn"] = Vector3.new(33, 9, 2810),
+    ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
+    ["Volcano"] = Vector3.new(-632, 55, 197),
+}
 
-        local location = Locations[Value]
-        if location and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(location)
+local SelectedFishing = nil
+
+local FishingDropdown = Tab5:Dropdown({
+    Title = "Select Spot",
+    Values = (function()
+        local keys = {}
+        for name in pairs(FishingLocations) do
+            table.insert(keys, name)
+        end
+        table.sort(keys)
+        return keys
+    end)(),
+    Callback = function(Value)
+        SelectedFishing = Value
+    end
+})
+
+Tab5:Button({
+    Title = "Teleport to Fishing Spot",
+    Callback = function()
+        if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(FishingLocations[SelectedFishing])
+        end
+    end
+})
+
+local Section = Tab5:Section({
+    Title = "Location NPC",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local NPC_Locations = {
+    ["Alex"] = Vector3.new(43,17,2876),
+    ["Aura kid"] = Vector3.new(70,17,2835),
+    ["Billy Bob"] = Vector3.new(84,17,2876),
+    ["Boat Expert"] = Vector3.new(32,9,2789),
+    ["Esoteric Gatekeeper"] = Vector3.new(2101,-30,1350),
+    ["Jeffery"] = Vector3.new(-2771,4,2132),
+    ["Joe"] = Vector3.new(144,20,2856),
+    ["Jones"] = Vector3.new(-671,16,596),
+    ["Lava Fisherman"] = Vector3.new(-593,59,130),
+    ["McBoatson"] = Vector3.new(-623,3,719),
+    ["Ram"] = Vector3.new(-2838,47,1962),
+    ["Ron"] = Vector3.new(-48,17,2856),
+    ["Scott"] = Vector3.new(-19,9,2709),
+    ["Scientist"] = Vector3.new(-6,17,2881),
+    ["Seth"] = Vector3.new(107,17,2877),
+    ["Silly Fisherman"] = Vector3.new(97,9,2694),
+    ["Tim"] = Vector3.new(-604,16,609),
+}
+
+local SelectedNPC = nil
+
+local NPCDropdown = Tab5:Dropdown({
+    Title = "Select NPC",
+    Values = (function()
+        local keys = {}
+        for name in pairs(NPC_Locations) do
+            table.insert(keys, name)
+        end
+        table.sort(keys)
+        return keys
+    end)(),
+    Callback = function(Value)
+        SelectedNPC = Value
+    end
+})
+
+Tab5:Button({
+    Title = "Teleport to NPC",
+    Callback = function()
+        if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = CFrame.new(NPC_Locations[SelectedNPC])
         end
     end
 })
