@@ -14,7 +14,7 @@ local Window = WindUI:CreateWindow({
     Icon = "rbxassetid://122683047852451",
     Author = "KirsiaSC | Climb and Jump Tower",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(560, 400),
+    Size = UDim2.fromOffset(260, 290),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
@@ -23,13 +23,7 @@ local Window = WindUI:CreateWindow({
         Enabled = true,
         Anonymous = false,
         Callback = function()
-            currentThemeIndex = currentThemeIndex + 1
-            if currentThemeIndex > #themes then
-                currentThemeIndex = 1
-            end
-            
-            local newTheme = themes[currentThemeIndex]
-            WindUI:SetTheme(newTheme)
+            WindUI:SetTheme("Dark")
         end,
     },
 })
