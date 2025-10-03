@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.0",
+    Title = "v0.0.1.1",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -357,53 +357,6 @@ local Section = Tab3:Section({
     TextSize = 17,
 })
 
-local REMOTE_CATCH = "FishingCompleted"
-local TRY_INTERVAL = 0.1
-local _loopRunning = false
-
-local function findRemote(name)
-    local rs = game:GetService("ReplicatedStorage")
-    for _, v in pairs(rs:GetDescendants()) do
-        if v:IsA("RemoteEvent") and v.Name:lower():find(name:lower()) then
-            return v
-        elseif v:IsA("RemoteFunction") and v.Name:lower():find(name:lower()) then
-            return v
-        end
-    end
-    return nil
-end
-
-local function tryFire(remote)
-    if remote:IsA("RemoteEvent") then
-        remote:FireServer()
-        return true
-    elseif remote:IsA("RemoteFunction") then
-        remote:InvokeServer()
-        return true
-    end
-    return false
-end
-
-local function scanRemotes()
-    local rs = game:GetService("ReplicatedStorage")
-    local found = {}
-    
-    for _, v in pairs(rs:GetDescendants()) do
-        if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) and v.Name:lower():find("fish") then
-            table.insert(found, v.Name)
-        end
-    end
-    
-    if #found > 0 then
-        print("Found fishing remotes:")
-        for i, name in ipairs(found) do
-            print(i .. ". " .. name)
-        end
-    else
-        print("No fishing remotes found")
-    end
-end
-
 local Toggle = Tab3:Toggle({
     Title = "Instant Catch",
     Desc = "Get fish straight away",
@@ -444,20 +397,6 @@ local Toggle = Tab3:Toggle({
     end
 })
 
-Button = Tab3:Button({
-    Title = "Scan Fish Remotes",
-    Desc = "Search for remote with the word 'fish'",
-    Callback = function()
-        scanRemotes()
-    end
-})
-
-local Section = Tab3:Section({ 
-    Title = "Other",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
 local Toggle = Tab3:Toggle({
     Title = "Radar",
     Desc = "Toggle fishing radar",
@@ -465,53 +404,45 @@ local Toggle = Tab3:Toggle({
     Type = false,
     Default = false,
     Callback = function(state)
-        _G.RadarToggle = state
-        task.spawn(function()
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local Lighting = game:GetService("Lighting")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Lighting = game:GetService("Lighting")
 
-            local Replion = require(ReplicatedStorage.Packages.Replion)
-            local Net = require(ReplicatedStorage.Packages.Net)
-            local spr = require(ReplicatedStorage.Packages.spr)
-            local Soundbook = require(ReplicatedStorage.Shared.Soundbook)
-            local ClientTimeController = require(ReplicatedStorage.Controllers.ClientTimeController)
-            local TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)
+        local Replion = require(ReplicatedStorage.Packages.Replion)
+        local Net = require(ReplicatedStorage.Packages.Net)
+        local spr = require(ReplicatedStorage.Packages.spr)
+        local Soundbook = require(ReplicatedStorage.Shared.Soundbook)
+        local ClientTimeController = require(ReplicatedStorage.Controllers.ClientTimeController)
+        local TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)
 
-            local RemoteRadar = Net:RemoteFunction("UpdateFishingRadar")
+        local RemoteRadar = Net:RemoteFunction("UpdateFishingRadar")
 
-            while _G.RadarToggle do
-                task.wait(0.5)
-
-                local Data = Replion.Client:GetReplion("Data")
-                if Data then
-                    local visible = not Data:Get("RegionsVisible")
-                    if RemoteRadar:InvokeServer(visible) then
-                        Soundbook.Sounds.RadarToggle:Play().PlaybackSpeed = 1 + math.random() * 0.3
-                        local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
-                        if effect then
-                            spr.stop(effect)
-                            local profile = ClientTimeController:_getLightingProfile()
-                            local cc = (profile and profile.ColorCorrection) and profile.ColorCorrection or {}
-                            if not cc.Brightness then cc.Brightness = 0.04 end
-                            if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end
-                            effect.TintColor = Color3.fromRGB(42, 226, 118)
-                            effect.Brightness = 0.4
-                            spr.target(effect, 1, 1, cc)
-                        end
-                        spr.stop(Lighting)
-                        Lighting.ExposureCompensation = 1
-                        spr.target(Lighting, 1, 2, {
-                            ["ExposureCompensation"] = 0
-                        })
-                        TextNotificationController:DeliverNotification({
-                            ["Type"] = "Text",
-                            ["Text"] = ("Radar: %*"):format(visible and "Enabled" or "Disabled"),
-                            ["TextColor"] = visible and {["R"] = 9,["G"] = 255,["B"] = 0} or {["R"] = 255,["G"] = 0,["B"] = 0}
-                        })
-                    end
+        local Data = Replion.Client:GetReplion("Data")
+        if Data then
+            if RemoteRadar:InvokeServer(state) then
+                Soundbook.Sounds.RadarToggle:Play().PlaybackSpeed = 1 + math.random() * 0.3
+                local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
+                if effect then
+                    spr.stop(effect)
+                    local profile = ClientTimeController:_getLightingProfile()
+                    local cc = (profile and profile.ColorCorrection) and profile.ColorCorrection or {}
+                    if not cc.Brightness then cc.Brightness = 0.04 end
+                    if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end
+                    effect.TintColor = Color3.fromRGB(42, 226, 118)
+                    effect.Brightness = 0.4
+                    spr.target(effect, 1, 1, cc)
                 end
+                spr.stop(Lighting)
+                Lighting.ExposureCompensation = 1
+                spr.target(Lighting, 1, 2, {
+                    ["ExposureCompensation"] = 0
+                })
+                TextNotificationController:DeliverNotification({
+                    ["Type"] = "Text",
+                    ["Text"] = ("Radar: %*"):format(state and "Enabled" or "Disabled"),
+                    ["TextColor"] = state and {["R"] = 9,["G"] = 255,["B"] = 0} or {["R"] = 255,["G"] = 0,["B"] = 0}
+                })
             end
-        end)
+        end
     end
 })
 
