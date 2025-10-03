@@ -372,7 +372,7 @@ local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0
 local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
 
 local autoHoldEnabled = false
-Tab2:Toggle({
+Toggle = Tab3:Toggle({
     Title = "Auto Fishing",
     Value = false,
     Callback = function(state)
@@ -423,7 +423,7 @@ local function startAutoFish()
     end)
 end
 
-Tab3:Toggle({
+Toggle = Tab3:Toggle({
     Title = "Auto Instant complete Fishing",
     Value = autoInstantFishEnabled,
     Callback = function(state)
