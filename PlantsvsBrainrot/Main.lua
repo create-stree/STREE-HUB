@@ -12,7 +12,7 @@ end
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | Plants Vs Zombie",
+    Author = "KirsiaSC | Plants Vs Brainrot",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(560, 400),
     Transparent = true,
