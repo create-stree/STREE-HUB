@@ -27,22 +27,19 @@ local function GetBatTool()
             return tool
         end
     end
-    return nil
 end
 
 local function EquipBat()
     local tool = GetBatTool()
     if tool and not Character:FindFirstChildOfClass("Tool") then
         Humanoid:EquipTool(tool)
-        return true
     end
-    return false
 end
 
 local function GetNearestBrainrot()
     local nearest, dist = nil, math.huge
     for _, v in ipairs(workspace:GetDescendants()) do
-        if v:FindFirstChild("Humanoid") and v.Name:lower():find("brainrot") and v.Humanoid.Health > 0 then
+        if v:IsA("Model") and v:FindFirstChild("Humanoid") and v.Name:lower():find("brainrot") and v.Humanoid.Health > 0 then
             local hrp = v:FindFirstChild("HumanoidRootPart")
             if hrp then
                 local mag = (RootPart.Position - hrp.Position).Magnitude
@@ -62,19 +59,17 @@ local function AttackBrainrot()
         task.wait(0.1)
         VirtualUser:Button1Up(Vector2.new(0,0))
     else
-        pcall(function()
-            mouse1click()
-        end)
+        pcall(function() mouse1click() end)
     end
 end
 
 local function CollectBrains()
     local hrp = RootPart
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent.Name:lower():find("brain") then
+        if obj:IsA("Part") and obj.Name:lower():find("brain") then
             pcall(function()
-                firetouchinterest(hrp, obj.Parent, 0)
-                firetouchinterest(hrp, obj.Parent, 1)
+                firetouchinterest(hrp, obj, 0)
+                firetouchinterest(hrp, obj, 1)
             end)
         end
     end
@@ -82,7 +77,7 @@ end
 
 player.CharacterAdded:Connect(function(char)
     Character = char
-    task.wait(2)
+    task.wait(1.5)
     Humanoid = char:WaitForChild("Humanoid")
     RootPart = char:WaitForChild("HumanoidRootPart")
 end)
@@ -153,7 +148,7 @@ Main:Toggle({
                         AttackBrainrot()
                     end
                 end
-                task.wait(0.4)
+                task.wait(0.3)
             end
         end)
     end
@@ -167,7 +162,7 @@ Main:Toggle({
         task.spawn(function()
             while AutoCollect do
                 CollectBrains()
-                task.wait(0.5)
+                task.wait(0.4)
             end
         end)
     end
