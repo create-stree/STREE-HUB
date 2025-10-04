@@ -163,6 +163,11 @@ Window:Tag({
     Color = Color3.fromRGB(0, 255, 0),
 })
 
+Window:Tag({
+    Title = "Free",
+    Color = Color3.fromRGB(0, 255, 0),
+})
+
 WindUI:Notify({
     Title = "STREE HUB Loaded",
     Content = "UI loaded successfully!",
