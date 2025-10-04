@@ -2,36 +2,8 @@ local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local gameName, success = nil, false
 
-local scripts_key = "FREE_USER"  -- Tetap FREE_USER
-
-local premiumKeys = {
-    "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
-    "kRpXaVnqZyLhTjBfGmWcSdEoUiNpQvJ",
-    "YtHqFzPaKrXeBwNuDjMiVsGoClLrSnQe",
-    "pZxYvQmAaTrWnGfBqCkJdEoHsLuVtSiN",
-    "wJzDnQyGmTcLkVxEoPaFbSgRrUuMiZh",
-    "eBtXqNpRzVhLkCmSgJaWiFuTdOyQnPc",
-    "qYwRzEbTgLkPmDaVxHnUiFsCoSjMvN",
-    "ZkWmNtGpQrHxSaJlDyCfVuEbLoPiTn",
-    "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuN",
-    "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsM",
-    "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
-    "developer_access"
-}
-
-function validateKey(key)
-    for _, validKey in ipairs(premiumKeys) do
-        if key == validKey then
-            return true
-        end
-    end
-    return false
-end
-
-local isPremiumUser = validateKey(scripts_key)
-
--- 🎯 FORCE PREMIUM UNTUK TESTING
-isPremiumUser = true
+-- 🎯 LANGSUNG SET PREMIUM
+local isPremiumUser = true
 
 if isPremiumUser then
     StarterGui:SetCore("SendNotification", {
@@ -54,7 +26,12 @@ wait(2)
 function safeLoadScript(url)
     local success, result = pcall(function()
         local scriptContent = game:HttpGet(url)
-        return loadstring(scriptContent)()
+        local loadedFunction = loadstring(scriptContent)
+        if loadedFunction then
+            return loadedFunction()
+        else
+            return false
+        end
     end)
     
     if not success then
@@ -65,32 +42,27 @@ function safeLoadScript(url)
     return true
 end
 
--- Mapping game
+-- Mapping game dengan URL yang lebih realistis
 local gameScripts = {
-    [2753915549] = {
+    [2753915549] = { -- Blox Fruit
         name = "Blox Fruit",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua"
+        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua"
     },
-    [79546208627805] = {
+    [79546208627805] = { -- 99 Night In The Forest
         name = "99 Night In The Forest", 
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua"
+        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua"
     },
-    [18687417158] = {
+    [18687417158] = { -- Forsaken
         name = "Forsaken",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua"
+        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua"
     },
-    [121864768012064] = {
+    [121864768012064] = { -- Fish It
         name = "Fish It",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
+        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua"
     },
-    [123921593837160] = {
+    [123921593837160] = { -- Climb and Jump Tower
         name = "Climb and Jump Tower",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"
+        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"
     }
 }
 
@@ -98,18 +70,21 @@ local gameData = gameScripts[placeId]
 
 if gameData then
     gameName = gameData.name
-    local url = isPremiumUser and gameData.premium or gameData.free
-    success = safeLoadScript(url)
+    print("Loading script for: " .. gameName)
+    print("URL: " .. gameData.url)
+    success = safeLoadScript(gameData.url)
 else
+    print("Game not supported. PlaceId: " .. placeId)
     success = false
 end
 
+-- ✅ PERBAIKI SYNTAX ERROR DI SINI:
 if success and gameName then
     local userType = isPremiumUser and "PREMIUM" or "FREE"
-    local featuresText = isPremiumUser and "All features unlocked!" : "Limited features available"
+    local featuresText = isPremiumUser and "All features unlocked!" or "Limited features available"  -- ✅ Fix: pakai 'or' bukan ':'
     
     StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB" .. userType,
+        Title = "STREE HUB " .. userType,  -- ✅ Fix: pakai '..' bukan ':'
         Text = gameName .. " loaded! " .. featuresText,
         Duration = 6,
         Icon = isPremiumUser and "rbxassetid://6023426926" or "rbxassetid://6023426923"
@@ -132,3 +107,10 @@ else
         Icon = "rbxassetid://6023426923"
     })
 end
+
+-- Debug info
+print("=== DEBUG INFO ===")
+print("PlaceId: " .. placeId)
+print("Game Name: " .. (gameName or "Unknown"))
+print("Premium User: " .. tostring(isPremiumUser))
+print("Load Success: " .. tostring(success))
