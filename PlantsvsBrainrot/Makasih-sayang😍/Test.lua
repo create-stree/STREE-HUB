@@ -57,6 +57,7 @@ local function AutoEquipBat()
 end
 
 local brainrotsCache = {}
+
 local function UpdateBrainrotsCache()
     brainrotsCache = {}
     for _, enemy in ipairs(workspace:GetDescendants()) do
