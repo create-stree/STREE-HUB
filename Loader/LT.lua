@@ -2,8 +2,7 @@ local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local gameName, success = nil, false
 
--- Ganti key ini dengan key premium yang valid
-local scripts_key = "FREE_USER" -- atau gunakan salah satu key dari premiumKeys
+local scripts_key = "FREE_USER"  -- Tetap FREE_USER
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
@@ -17,7 +16,7 @@ local premiumKeys = {
     "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuN",
     "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsM",
     "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
-    "developer_access" -- Ditambahkan
+    "developer_access"
 }
 
 function validateKey(key)
@@ -31,19 +30,19 @@ end
 
 local isPremiumUser = validateKey(scripts_key)
 
--- Test dengan force premium (sementara)
--- isPremiumUser = true -- Hapus komentar ini untuk testing
+-- 🎯 FORCE PREMIUM UNTUK TESTING
+isPremiumUser = true
 
 if isPremiumUser then
     StarterGui:SetCore("SendNotification", {
-        Title = "PREMIUM USER DETECTED",
+        Title = "🎉 PREMIUM USER DETECTED",
         Text = "Welcome back, Premium User!",
         Duration = 3,
         Icon = "rbxassetid://6023426926"
     })
 else
     StarterGui:SetCore("SendNotification", {
-        Title = "FREE USER",
+        Title = "🔓 FREE USER",
         Text = "Limited features available",
         Duration = 3,
         Icon = "rbxassetid://6023426923"
@@ -66,32 +65,32 @@ function safeLoadScript(url)
     return true
 end
 
--- Mapping game yang lebih spesifik
+-- Mapping game
 local gameScripts = {
-    [2753915549] = { -- Blox Fruit
+    [2753915549] = {
         name = "Blox Fruit",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Premium.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua"
     },
-    [79546208627805] = { -- 99 Night In The Forest
+    [79546208627805] = {
         name = "99 Night In The Forest", 
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/PremiumScript.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua"
     },
-    [18687417158] = { -- Forsaken
+    [18687417158] = {
         name = "Forsaken",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/PremiumScript.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua"
     },
-    [121864768012064] = { -- Fish It
+    [121864768012064] = {
         name = "Fish It",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
     },
-    [123921593837160] = { -- Climb and Jump Tower
+    [123921593837160] = {
         name = "Climb and Jump Tower",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/PremiumScript.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"
     }
 }
 
@@ -105,32 +104,31 @@ else
     success = false
 end
 
--- Handle result
 if success and gameName then
     local userType = isPremiumUser and "PREMIUM" or "FREE"
-    local featuresText = isPremiumUser and "All features unlocked!" or "Limited features available"
+    local featuresText = isPremiumUser and "All features unlocked!" : "Limited features available"
     
     StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB " .. userType,
+        Title = "STREE HUB" .. userType,
         Text = gameName .. " loaded! " .. featuresText,
         Duration = 6,
         Icon = isPremiumUser and "rbxassetid://6023426926" or "rbxassetid://6023426923"
     })
+    
+    if isPremiumUser then
+        wait(1)
+        StarterGui:SetCore("SendNotification", {
+            Title = "💖 THANK YOU!",
+            Text = "Thanks for purchasing Premium!",
+            Duration = 4,
+            Icon = "rbxassetid://6023426926"
+        })
+    end
 else
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
         Text = (gameName or "Game") .. " Not Supported!",
         Duration = 6,
-        Icon = "rbxassetid://6023426923"
-    })
-end
-
-if not isPremiumUser then
-    wait(3)
-    StarterGui:SetCore("SendNotification", {
-        Title = "UPGRADE TO PREMIUM",
-        Text = "Get full features with Premium key!",
-        Duration = 5,
         Icon = "rbxassetid://6023426923"
     })
 end
