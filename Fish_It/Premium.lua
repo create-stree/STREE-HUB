@@ -865,3 +865,137 @@ local Toggle = Tab6:Toggle({
         end
     end
 })
+
+local Section = Tab6:Section({ 
+    Title = "Config",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local ConfigFolder = "STREE_HUB/Configs"
+if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
+if not isfolder(ConfigFolder) then makefolder(ConfigFolder) end
+
+local ConfigName = "default.json"
+
+local function GetConfig()
+    return {
+        WalkSpeed = Humanoid.WalkSpeed,
+        JumpPower = _G.CustomJumpPower or 50,
+        InfiniteJump = _G.InfiniteJump or false,
+        AutoSell = _G.AutoSell or false,
+        InstantCatch = _G.InstantCatch or false,
+        AntiAFK = _G.AntiAFK or false,
+        AutoReconnect = _G.AutoReconnect or false,
+    }
+end
+
+local function ApplyConfig(data)
+    if data.WalkSpeed then 
+        Humanoid.WalkSpeed = data.WalkSpeed 
+    end
+    if data.JumpPower then
+        _G.CustomJumpPower = data.JumpPower
+        local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.UseJumpPower = true
+            humanoid.JumpPower = data.JumpPower
+        end
+    end
+    if data.InfiniteJump ~= nil then
+        _G.InfiniteJump = data.InfiniteJump
+    end
+    if data.AutoSell ~= nil then
+        _G.AutoSell = data.AutoSell
+    end
+    if data.InstantCatch ~= nil then
+        _G.InstantCatch = data.InstantCatch
+    end
+    if data.AntiAFK ~= nil then
+        _G.AntiAFK = data.AntiAFK
+    end
+    if data.AutoReconnect ~= nil then
+        _G.AutoReconnect = data.AutoReconnect
+    end
+end
+
+Tab6:Button({
+    Title = "Save Config",
+    Desc = "Save all settings",
+    Callback = function()
+        local data = GetConfig()
+        writefile(ConfigFolder.."/"..ConfigName, game:GetService("HttpService"):JSONEncode(data))
+        print("✅ Config saved!")
+    end
+})
+
+Tab6:Button({
+    Title = "Load Config",
+    Desc = "Use saved config",
+    Callback = function()
+        if isfile(ConfigFolder.."/"..ConfigName) then
+            local data = readfile(ConfigFolder.."/"..ConfigName)
+            local decoded = game:GetService("HttpService"):JSONDecode(data)
+            ApplyConfig(decoded)
+            print("✅ Config applied!")
+        else
+            warn("⚠️ Config not found, please Save first.")
+        end
+    end
+})
+
+Tab6:Button({
+    Title = "Delete Config",
+    Desc = "Delete saved config",
+    Callback = function()
+        if isfile(ConfigFolder.."/"..ConfigName) then
+            delfile(ConfigFolder.."/"..ConfigName)
+            print("🗑 Config deleted!")
+        else
+            warn("⚠️ No config to delete.")
+        end
+    end
+})
+
+local Section = Tab6:Section({ 
+    Title = "Other Scripts",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local Button = Tab6:Button({
+    Title = "FLY",
+    Desc = "Scripts Fly Gui",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    end
+})
+
+local Button = Tab6:Button({
+    Title = "Simple Shader",
+    Desc = "Shader",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/p0e1/1/refs/heads/main/SimpleShader.lua"))()
+    end
+})
+
+local Button = Tab6:Button({
+    Title = "Infinite Yield",
+    Desc = "Other Scripts",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
+    end
+})
+
+Player.CharacterAdded:Connect(function(char)
+    local humanoid = char:WaitForChild("Humanoid")
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = _G.CustomJumpPower or 50
+    
+    if _G.InfiniteJump then
+        humanoid.WalkSpeed = _G.CustomWalkSpeed or 16
+    end
+end)
