@@ -795,3 +795,73 @@ Tab5:Button({
         end
     end
 })
+
+local Tab6 = Window:Tab({
+    Title = "Settings",
+    Icon = "settings",
+})
+
+local Toggle = Tab6:Toggle({
+    Title = "AntiAFK",
+    Desc = "Prevent Roblox from kicking you when idle",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.AntiAFK = state
+        local VirtualUser = game:GetService("VirtualUser")
+
+        if state then
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(60)
+                    pcall(function()
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton2(Vector2.new())
+                    end)
+                end
+            end)
+
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "AntiAFK loaded!",
+                Text = "Coded By Kirsiasc",
+                Button1 = "Okey",
+                Duration = 5
+            })
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "AntiAFK Disabled",
+                Text = "Stopped AntiAFK",
+                Duration = 3
+            })
+        end
+    end
+})
+
+local Toggle = Tab6:Toggle({
+    Title = "Auto Reconnect",
+    Desc = "Automatic reconnect if disconnected",
+    Icon = false,
+    Default = false,
+    Callback = function(state)
+        _G.AutoReconnect = state
+        if state then
+            task.spawn(function()
+                while _G.AutoReconnect do
+                    task.wait(2)
+
+                    local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
+                    if reconnectUI then
+                        local prompt = reconnectUI:FindFirstChild("promptOverlay")
+                        if prompt then
+                            local button = prompt:FindFirstChild("ButtonPrimary")
+                            if button and button.Visible then
+                                firesignal(button.MouseButton1Click)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
