@@ -9,135 +9,82 @@ else
     print("✓ UI loaded successfully!")
 end
 
-local AutoHitBrainrot = false
-local AutoEquipBatToggle = false
-local AutoCollectToggle = false
-local autoClicking = false
 local player = game.Players.LocalPlayer
 local Character = player.Character or player.CharacterAdded:Wait()
-local HeldToolName = "Bat"
-local UserInputService = game:GetService("UserInputService")
+local Humanoid, RootPart = Character:WaitForChild("Humanoid"), Character:WaitForChild("HumanoidRootPart")
+local UIS = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
-local AttackDelayInput = 0.5
+
+local AutoEquip = false
+local AutoHit = false
+local AutoCollect = false
+
+local function GetBatTool()
+    local backpack = player:FindFirstChildOfClass("Backpack")
+    if not backpack then return end
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name:lower():find("bat") then
+            return tool
+        end
+    end
+    return nil
+end
 
 local function EquipBat()
-    local backpack = player:FindFirstChildOfClass("Backpack")
-    if backpack then
-        local bat = backpack:FindFirstChild(HeldToolName)
-        if bat then
-            local humanoid = Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid:EquipTool(bat)
-                return true
-            end
-        end
+    local tool = GetBatTool()
+    if tool and not Character:FindFirstChildOfClass("Tool") then
+        Humanoid:EquipTool(tool)
+        return true
     end
     return false
-end
-
-local function AutoEquipBat()
-    if AutoEquipBatToggle then
-        if not Character:FindFirstChild(HeldToolName) then
-            local backpack = player:FindFirstChildOfClass("Backpack")
-            if backpack then
-                local bat = backpack:FindFirstChild(HeldToolName)
-                if bat then
-                    local humanoid = Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        humanoid:EquipTool(bat)
-                        return true
-                    end
-                end
-            end
-        else
-            return true
-        end
-    end
-    return false
-end
-
-local brainrotsCache = {}
-
-local function UpdateBrainrotsCache()
-    brainrotsCache = {}
-    for _, enemy in ipairs(workspace:GetDescendants()) do
-        if enemy.Name:lower():find("brainrot") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-            table.insert(brainrotsCache, enemy)
-        end
-    end
 end
 
 local function GetNearestBrainrot()
-    local nearest, minDistance = nil, math.huge
-    local charRoot = Character:FindFirstChild("HumanoidRootPart")
-    if not charRoot then return nil end
-    for _, enemy in ipairs(brainrotsCache) do
-        local root = enemy:FindFirstChild("HumanoidRootPart")
-        if root and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-            local distance = (charRoot.Position - root.Position).Magnitude
-            if distance < minDistance then
-                nearest = enemy
-                minDistance = distance
+    local nearest, dist = nil, math.huge
+    for _, v in ipairs(workspace:GetDescendants()) do
+        if v:FindFirstChild("Humanoid") and v.Name:lower():find("brainrot") and v.Humanoid.Health > 0 then
+            local hrp = v:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local mag = (RootPart.Position - hrp.Position).Magnitude
+                if mag < dist then
+                    dist = mag
+                    nearest = v
+                end
             end
         end
     end
     return nearest
 end
 
-local function InstantWarpToBrainrot(target)
-    local charRoot = Character:FindFirstChild("HumanoidRootPart")
-    local targetRoot = target:FindFirstChild("HumanoidRootPart")
-    if charRoot and targetRoot then
-        charRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
-    end
-end
-
-local function AttackBrainrot(target)
-    if Character:FindFirstChild(HeldToolName) then
-        if UserInputService.TouchEnabled then
-            VirtualUser:Button1Down(Vector2.new(0,0))
-            task.wait(0.1)
-            VirtualUser:Button1Up(Vector2.new(0,0))
-        else
+local function AttackBrainrot()
+    if UIS.TouchEnabled then
+        VirtualUser:Button1Down(Vector2.new(0,0))
+        task.wait(0.1)
+        VirtualUser:Button1Up(Vector2.new(0,0))
+    else
+        pcall(function()
             mouse1click()
-        end
+        end)
     end
 end
 
 local function CollectBrains()
-    if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = Character.HumanoidRootPart
+    local hrp = RootPart
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent.Name:lower():find("brain") then
-            firetouchinterest(hrp, obj.Parent, 0)
-            firetouchinterest(hrp, obj.Parent, 1)
+            pcall(function()
+                firetouchinterest(hrp, obj.Parent, 0)
+                firetouchinterest(hrp, obj.Parent, 1)
+            end)
         end
     end
 end
 
-player.CharacterAdded:Connect(function(newChar)
-    Character = newChar
+player.CharacterAdded:Connect(function(char)
+    Character = char
     task.wait(2)
-    if AutoHitBrainrot then
-        AutoEquipBat()
-        UpdateBrainrotsCache()
-    end
-    if AutoEquipBatToggle then
-        AutoEquipBat()
-    end
-end)
-
-workspace.ChildAdded:Connect(function(child)
-    if AutoHitBrainrot and child.Name:lower():find("brainrot") then
-        task.wait(1)
-        UpdateBrainrotsCache()
-    end
-end)
-
-workspace.ChildRemoved:Connect(function(child)
-    if AutoHitBrainrot and child.Name:lower():find("brainrot") then
-        UpdateBrainrotsCache()
-    end
+    Humanoid = char:WaitForChild("Humanoid")
+    RootPart = char:WaitForChild("HumanoidRootPart")
 end)
 
 local Window = WindUI:CreateWindow({
@@ -150,24 +97,17 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     SideBarWidth = 170,
     HasOutline = true,
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-            WindUI:SetTheme("Dark")
-        end,
-    },
 })
 
 Window:Tag({
     Title = "v0.0.0.1",
-    Color = Color3.fromRGB(0, 255, 0),
+    Color = Color3.fromRGB(0,255,0),
     Radius = 17,
 })
 
 Window:Tag({
     Title = "Free",
-    Color = Color3.fromRGB(205, 127, 50),
+    Color = Color3.fromRGB(205,127,50),
     Radius = 17,
 })
 
@@ -178,155 +118,57 @@ WindUI:Notify({
     Icon = "bell",
 })
 
-local Tab1 = Window:Tab({
-    Title = "Info",
-    Icon = "info"
-})
-
-local Section = Tab1:Section({
-    Title = "Community Support",
-    TextXAlignment = "Left",
-    TextSize = 17
-})
-
-Tab1:Button({
-    Title = "Discord",
-    Desc = "Click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://discord.gg/jdmX43t5mY")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "WhatsApp",
-    Desc = "Click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "Telegram",
-    Desc = "Click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://t.me/StreeCoumminty")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "Website",
-    Desc = "Click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app")
-        end
-    end
-})
-
-local Tab2 = Window:Tab({
+local Main = Window:Tab({
     Title = "Main",
     Icon = "landmark"
 })
 
-Tab2:Toggle({
+Main:Toggle({
     Title = "Auto Equip Bat",
     Default = false,
     Callback = function(state)
-        AutoEquipBatToggle = state
-        if state then
-            EquipBat()
-            task.spawn(function()
-                while AutoEquipBatToggle do
-                    AutoEquipBat()
-                    task.wait(1)
-                end
-            end)
-        end
+        AutoEquip = state
+        task.spawn(function()
+            while AutoEquip do
+                EquipBat()
+                task.wait(1)
+            end
+        end)
     end
 })
 
-Tab2:Toggle({
+Main:Toggle({
     Title = "Auto Hit Brainrot",
     Default = false,
     Callback = function(state)
-        AutoHitBrainrot = state
-        autoClicking = state
-        if state then
-            AutoEquipBat()
-            UpdateBrainrotsCache()
-            task.spawn(function()
-                while autoClicking do
-                    if Character:FindFirstChild(HeldToolName) then
-                        if UserInputService.TouchEnabled then
-                            VirtualUser:Button1Down(Vector2.new(0,0))
-                            task.wait(0.1)
-                            VirtualUser:Button1Up(Vector2.new(0,0))
-                        else
-                            mouse1click()
-                        end
+        AutoHit = state
+        task.spawn(function()
+            while AutoHit do
+                EquipBat()
+                local nearest = GetNearestBrainrot()
+                if nearest then
+                    local root = nearest:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        RootPart.CFrame = root.CFrame * CFrame.new(0,0,3)
+                        AttackBrainrot()
                     end
-                    task.wait(tonumber(AttackDelayInput) or 0.5)
                 end
-            end)
-            task.spawn(function()
-                while AutoHitBrainrot do
-                    local nearest = GetNearestBrainrot()
-                    if nearest then
-                        InstantWarpToBrainrot(nearest)
-                        task.wait(0.1)
-                        AttackBrainrot(nearest)
-                    else
-                        UpdateBrainrotsCache()
-                    end
-                    task.wait(tonumber(AttackDelayInput) or 0.5)
-                end
-                autoClicking = false
-            end)
-        else
-            autoClicking = false
-        end
+                task.wait(0.4)
+            end
+        end)
     end
 })
 
-local Section = Tab2:Section({
-    Title = "Auto Collect",
-    TextXAlignment = "Left",
-    TextSize = 17
-})
-
-Tab2:Toggle({
+Main:Toggle({
     Title = "Auto Collect Brain",
     Default = false,
     Callback = function(state)
-        AutoCollectToggle = state
-        if state then
-            task.spawn(function()
-                while AutoCollectToggle do
-                    CollectBrains()
-                    task.wait(0.5)
-                end
-            end)
-        end
+        AutoCollect = state
+        task.spawn(function()
+            while AutoCollect do
+                CollectBrains()
+                task.wait(0.5)
+            end
+        end)
     end
-})
-
-local Tab3 = Window:Tab({
-    Title = "Shop",
-    Icon = "shopping-cart"
-})
-
-local Tab4 = Window:Tab({
-    Title = "Sell",
-    Icon = "badge-dollar-sign"
-})
-
-local Tab5 = Window:Tab({
-    Title = "Settings",
-    Icon = "settings"
 })
