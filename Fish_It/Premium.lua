@@ -616,4 +616,43 @@ local rodNames = {
 local rodKeyMap = {
     ["Luck Rod (350 Coins)"]="Luck Rod",
     ["Carbon Rod (900 Coins)"]="Carbon Rod",
-    ["Grass Rod (1.5k Coins
+    ["Grass Rod (1.5k Coins)"]="Grass Rod",
+    ["Demascus Rod (3k Coins)"]="Demascus Rod",
+    ["Ice Rod (5k Coins)"]="Ice Rod",
+    ["Lucky Rod (15k Coins)"]="Lucky Rod",
+    ["Midnight Rod (50k Coins)"]="Midnight Rod",
+    ["Steampunk Rod (215k Coins)"]="Steampunk Rod",
+    ["Chrome Rod (437k Coins)"]="Chrome Rod",
+    ["Astral Rod (1M Coins)"]="Astral Rod",
+    ["Ares Rod (3M Coins)"]="Ares Rod",
+    ["Angler Rod (8M Coins)"]="Angler Rod"
+}
+
+local selectedRod = rodNames[1]
+
+Tab4:Dropdown({
+    Title = "Select Rod",
+    Values = rodNames,
+    Value = selectedRod,
+    Callback = function(value)
+        selectedRod = value
+        WindUI:Notify({Title="Rod Selected", Content=value, Duration=3})
+    end
+})
+
+Tab4:Button({
+    Title="Buy Rod",
+    Callback=function()
+        local key = rodKeyMap[selectedRod]
+        if key and rods[key] then
+            local success, err = pcall(function()
+                RFPurchaseFishingRod:InvokeServer(rods[key])
+            end)
+            if success then
+                WindUI:Notify({Title="Rod Purchase", Content="Purchased "..selectedRod, Duration=3})
+            else
+                WindUI:Notify({Title="Rod Purchase Error", Content=tostring(err), Duration=5})
+            end
+        end
+    end
+})
