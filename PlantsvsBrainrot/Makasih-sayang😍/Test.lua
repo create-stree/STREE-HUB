@@ -166,7 +166,7 @@ Window:Tag({
 
 Window:Tag({
     Title = "Free",
-    Color = Color3.fromRGB(205, 127, 50)
+    Color = Color3.fromRGB(205, 127, 50),
     Radius = 17,
 })
 
