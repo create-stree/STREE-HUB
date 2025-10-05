@@ -2,7 +2,9 @@ local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local gameName, success = nil, false
 
-local scripts_key = "FREE_USER"
+-- 🎯 SYSTEM DUAL MODE - Bisa ganti antara FREE dan PREMIUM
+local scripts_key = "FREE_USER"  -- Untuk FREE version
+-- local scripts_key = "developer_access"  -- Untuk PREMIUM version (dikomen)
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
@@ -30,11 +32,11 @@ end
 
 local isPremiumUser = validateKey(scripts_key)
 
--- 🎯 🎯 🎯 FORCE PREMIUM DI SINI 🎯 🎯 🎯
-isPremiumUser = true
+-- 🎯 HAPUS FORCE PREMIUM - Biarkan sistem bekerja normal
+-- isPremiumUser = true  -- DIKOMEN ATAU DIHAPUS
 
 -- Debug info
-print("=== PREMIUM DEBUG ===")
+print("=== SYSTEM STATUS ===")
 print("Key Used: " .. scripts_key)
 print("Premium Status: " .. tostring(isPremiumUser))
 print("PlaceId: " .. placeId)
@@ -71,67 +73,59 @@ function safeLoadScript(url)
     return true
 end
 
+-- 🎯 PERBAIKI URL UNTUK FREE USER
 if placeId == 2753915549 then
     gameName = "Blox Fruit"
     if isPremiumUser then
-        print("Loading PREMIUM Blox Fruit...")
+        print("🎯 Loading PREMIUM Blox Fruit...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Premium.lua")
     else
-        print("Loading FREE Blox Fruit...")
+        print("🔓 Loading FREE Blox Fruit...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
     end
     
 elseif placeId == 79546208627805 then
     gameName = "99 Night In The Forest"
     if isPremiumUser then
-        print("Loading PREMIUM 99 Night...")
+        print("🎯 Loading PREMIUM 99 Night...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden-Premium.lua")
     else
-        print("Loading FREE 99 Night...")
+        print("🔓 Loading FREE 99 Night...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua")
     end
     
 elseif placeId == 18687417158 then
     gameName = "Forsaken"
     if isPremiumUser then
-        print("Loading PREMIUM Forsaken...")
+        print("🎯 Loading PREMIUM Forsaken...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua")
     else
-        print("Loading FREE Forsaken...")
+        print("🔓 Loading FREE Forsaken...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua")
     end
     
 elseif placeId == 121864768012064 then
     gameName = "Fish It"
     if isPremiumUser then
-        print("Loading PREMIUM Fish It...")
+        print("🎯 Loading PREMIUM Fish It...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua")
     else
-        print("Loading FREE Fish It...")
+        print("🔓 Loading FREE Fish It...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua")
     end
     
 elseif placeId == 123921593837160 then
     gameName = "Climb and Jump Tower"
     if isPremiumUser then
-        print("Loading PREMIUM Climb and Jump...")
+        print("🎯 Loading PREMIUM Climb and Jump...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua")
     else
-        print("Loading FREE Climb and Jump...")
+        print("🔓 Loading FREE Climb and Jump...")
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua")
     end
     
-elseif placeId == 109983668079237 then
-    gameName = "Steal A Brainrot"
-    if isPremiumUser then
-        print("Loading PREMIUM Steal A Brainrot...")
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/StealABrainrot-Premium.lua")
-    else
-        print("Loading FREE Steal A Brainrot...")
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/StealABrainrot-Free.lua")
-    end
-    
 else
+    print("❌ Game not supported: " .. placeId)
     success = false
 end
 
@@ -178,4 +172,4 @@ end
 print("=== FINAL DEBUG ===")
 print("Game Name: " .. (gameName or "Unknown"))
 print("Load Success: " .. tostring(success))
-print("Premium Features: " .. tostring(isPremiumUser))
+print("User Type: " .. (isPremiumUser and "PREMIUM" or "FREE"))
