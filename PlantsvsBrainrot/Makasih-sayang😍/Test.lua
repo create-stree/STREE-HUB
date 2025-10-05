@@ -13,7 +13,6 @@ local player = game.Players.LocalPlayer
 local Character = player.Character or player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
-local UIS = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 
 local AutoEquip = false
@@ -28,7 +27,6 @@ local function GetBatTool()
             return tool
         end
     end
-    return nil
 end
 
 local function EquipBat()
@@ -37,13 +35,22 @@ local function EquipBat()
         Humanoid:EquipTool(tool)
         return true
     end
-    return false
+end
+
+local function AttackBrainrot()
+    local tool = Character:FindFirstChildOfClass("Tool")
+    if tool and tool:FindFirstChild("Handle") then
+        pcall(function()
+            tool:Activate()
+        end)
+    end
 end
 
 local function GetNearestBrainrot()
     local nearest, dist = nil, math.huge
-    for _, v in ipairs(workspace:GetDescendants()) do
-        if v:FindFirstChild("Humanoid") and v.Name:lower():find("brainrot") and v.Humanoid.Health > 0 then
+    local enemies = workspace:FindFirstChild("Enemies") or workspace:FindFirstChild("Brainrots") or workspace
+    for _, v in ipairs(enemies:GetChildren()) do
+        if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
             local hrp = v:FindFirstChild("HumanoidRootPart")
             if hrp then
                 local mag = (RootPart.Position - hrp.Position).Magnitude
@@ -57,21 +64,10 @@ local function GetNearestBrainrot()
     return nearest
 end
 
-local function AttackBrainrot()
-    if UIS.TouchEnabled then
-        VirtualUser:Button1Down(Vector2.new(0, 0))
-        task.wait(0.1)
-        VirtualUser:Button1Up(Vector2.new(0, 0))
-    else
-        pcall(function()
-            mouse1click()
-        end)
-    end
-end
-
 local function CollectBrains()
     local hrp = RootPart
-    for _, obj in ipairs(workspace:GetDescendants()) do
+    local drops = workspace:FindFirstChild("Drops") or workspace:FindFirstChild("Collectables") or workspace
+    for _, obj in ipairs(drops:GetDescendants()) do
         if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent.Name:lower():find("brain") then
             pcall(function()
                 firetouchinterest(hrp, obj.Parent, 0)
