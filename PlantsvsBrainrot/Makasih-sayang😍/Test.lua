@@ -139,7 +139,7 @@ Main:Toggle({
 })
 
 Main:Toggle({
-    Title = "Auto Hit Brainrot",
+    Title = "Auto Hit Brainrot (Teleport Mode)",
     Default = false,
     Callback = function(state)
         AutoHit = state
@@ -152,9 +152,10 @@ Main:Toggle({
                     if root then
                         RootPart.CFrame = root.CFrame * CFrame.new(0, 0, 3)
                         AttackBrainrot()
+                        task.wait(0.15)
                     end
                 end
-                task.wait(0.4)
+                task.wait(0.05)
             end
         end)
     end
