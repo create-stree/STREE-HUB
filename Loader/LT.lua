@@ -42,27 +42,32 @@ function safeLoadScript(url)
     return true
 end
 
--- Mapping game dengan URL yang lebih realistis
+-- Mapping game dengan URL premium dan free
 local gameScripts = {
     [2753915549] = { -- Blox Fruit
         name = "Blox Fruit",
-        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Premium.lua"
     },
     [79546208627805] = { -- 99 Night In The Forest
         name = "99 Night In The Forest", 
-        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden-Premium.lua"
     },
     [18687417158] = { -- Forsaken
         name = "Forsaken",
-        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua"
     },
     [121864768012064] = { -- Fish It
         name = "Fish It",
-        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
     },
     [123921593837160] = { -- Climb and Jump Tower
         name = "Climb and Jump Tower",
-        url = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
     }
 }
 
@@ -70,21 +75,22 @@ local gameData = gameScripts[placeId]
 
 if gameData then
     gameName = gameData.name
-    print("Loading script for: " .. gameName)
-    print("URL: " .. gameData.url)
-    success = safeLoadScript(gameData.url)
+    local url = isPremiumUser and gameData.premium or gameData.free
+    print("Loading " .. (isPremiumUser and "PREMIUM" or "FREE") .. " script for: " .. gameName)
+    print("URL: " .. url)
+    success = safeLoadScript(url)
 else
     print("Game not supported. PlaceId: " .. placeId)
     success = false
 end
 
--- ✅ PERBAIKI SYNTAX ERROR DI SINI:
+-- ✅ TAMBAHKAN BAGIAN INI:
 if success and gameName then
     local userType = isPremiumUser and "PREMIUM" or "FREE"
-    local featuresText = isPremiumUser and "All features unlocked!" or "Limited features available"  -- ✅ Fix: pakai 'or' bukan ':'
+    local featuresText = isPremiumUser and "All features unlocked!" or "Limited features available"
     
     StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB " .. userType,  -- ✅ Fix: pakai '..' bukan ':'
+        Title = "STREE HUB " .. userType,
         Text = gameName .. " loaded! " .. featuresText,
         Duration = 6,
         Icon = isPremiumUser and "rbxassetid://6023426926" or "rbxassetid://6023426923"
