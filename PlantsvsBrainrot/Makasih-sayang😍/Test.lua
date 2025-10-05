@@ -32,28 +32,22 @@ local function EquipBat()
     local tool = GetBatTool()
     if tool and not Character:FindFirstChildOfClass("Tool") then
         Humanoid:EquipTool(tool)
-        return true
     end
-    return false
 end
 
 local function AttackBrainrot()
     local tool = Character:FindFirstChildOfClass("Tool")
-    if tool and tool:FindFirstChild("Handle") then
-        pcall(function()
-            tool:Activate()
-        end)
+    if tool then
+        pcall(function() tool:Activate() end)
     end
 end
 
 local function GetNearestBrainrot()
-    local folder = workspace:FindFirstChild("ScriptedMap") and workspace.ScriptedMap:FindFirstChild("Brainrots")
-    if not folder then return nil end
     local nearest, dist = nil, math.huge
-    for _, v in ipairs(folder:GetChildren()) do
-        local hrp = v:FindFirstChild("HumanoidRootPart")
+    for _, v in ipairs(workspace:GetDescendants()) do
         local hum = v:FindFirstChild("Humanoid")
-        if hrp and hum and hum.Health > 0 then
+        local hrp = v:FindFirstChild("HumanoidRootPart")
+        if hum and hrp and hum.Health > 0 and v.Name:lower():find("brain") then
             local mag = (RootPart.Position - hrp.Position).Magnitude
             if mag < dist then
                 dist = mag
@@ -65,8 +59,7 @@ local function GetNearestBrainrot()
 end
 
 local function CollectBrains()
-    local drops = workspace:FindFirstChild("Drops") or workspace
-    for _, obj in ipairs(drops:GetDescendants()) do
+    for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent.Name:lower():find("brain") then
             pcall(function()
                 firetouchinterest(RootPart, obj.Parent, 0)
@@ -86,7 +79,7 @@ end)
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | Plants Vs Brainrot",
+    Author = "KirsiaSC | PvB",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(260, 290),
     Transparent = true,
@@ -96,7 +89,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.1",
+    Title = "v0.0.0.3",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -147,10 +140,9 @@ Main:Toggle({
                     if root then
                         RootPart.CFrame = root.CFrame * CFrame.new(0, 0, 3)
                         AttackBrainrot()
-                        task.wait(0.12)
                     end
                 end
-                task.wait(0.05)
+                task.wait(0.15)
             end
         end)
     end
