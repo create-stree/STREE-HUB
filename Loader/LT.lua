@@ -2,8 +2,8 @@ local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local gameName, success = nil, false
 
--- 🎯 GUNAKAN KEY YANG VALID UNTUK PREMIUM
-local scripts_key = "developer_access"  -- <- GANTI JADI KEY PREMIUM
+-- 🎯 PASTIKAN scripts_key SELALU ADA
+local scripts_key = "FREE_USER"  -- Default untuk free user
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
@@ -17,10 +17,15 @@ local premiumKeys = {
     "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuN",
     "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsM",
     "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
-    "developer_access"  -- KEY INI VALID
+    "developer_access"
 }
 
 function validateKey(key)
+    -- 🎯 TAMBAHKAN CHECK UNTUK KEY YANG NIL/KOSONG
+    if key == nil or key == "" then
+        return false
+    end
+    
     for _, validKey in ipairs(premiumKeys) do
         if key == validKey then
             return true
@@ -63,7 +68,7 @@ function safeLoadScript(url)
     return true
 end
 
--- 🎯 PERBAIKI URL UNTUK SETIAP GAME
+-- 🎯 PERBAIKI URL UNTUK FREE USER
 if placeId == 2753915549 then
     gameName = "Blox Fruit"
     if isPremiumUser then
@@ -102,14 +107,6 @@ elseif placeId == 123921593837160 then
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua")
     else
         success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua")
-    end
-    
-elseif placeId == 109983668079237 then
-    gameName = "Steal A Brainrot"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/StealABrainrot-Premium.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/StealABrainrot-Free.lua")
     end
     
 else
