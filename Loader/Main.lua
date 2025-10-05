@@ -1,8 +1,7 @@
-local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
-local gameName, success = nil, false
+local scripts_key = "FREE_USER" 
+local placeId = game.PlaceId
 
-local scripts_key = "FREE_USER"
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
@@ -19,168 +18,91 @@ local premiumKeys = {
     "developer_access"
 }
 
-function validateKey(key)
-    for _, validKey in ipairs(premiumKeys) do
-        if key == validKey then
-            return true
+
+local gameScripts = {
+    [121864768012064] = { 
+        name = "Fish It",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
+    },
+    [2753915549] = { 
+        name = "Blox Fruit",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Premium.lua"
+    },
+    [1239215938] = {
+        name = "Climb and Jump Tower",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
+    }
+}
+
+
+local function getUserType(key)
+    for _, k in ipairs(premiumKeys) do
+        if key == k then
+            return "Premium"
         end
+    end
+    if key == "FREE_USER" then
+        return "Free"
     end
     return false
 end
 
-local isPremiumUser = validateKey(scripts_key)
 
-if isPremiumUser then
-    StarterGui:SetCore("SendNotification", {
-        Title = "PREMIUM USER DETECTED",
-        Text = "Welcome back, Premium User!",
-        Duration = 3,
-        Icon = "rbxassetid://6023426926"
-    })
-else
-    StarterGui:SetCore("SendNotification", {
-        Title = "FREE USER",
-        Text = "Limited features available",
-        Duration = 3,
-        Icon = "rbxassetid://6023426923"
-    })
-end
-
-wait(2)
-
-function safeLoadScript(url)
+local function safeLoadScript(url)
     local success, result = pcall(function()
-        local scriptContent = game:HttpGet(url)
-        return loadstring(scriptContent)()
+        return loadstring(game:HttpGet(url))()
     end)
-    
     if not success then
-        warn("Failed to load script: " .. url)
-        warn("Error: " .. tostring(result))
-        return false
+        warn("Failed to load script: "..url)
+        warn(result)
     end
-    return true
+    return success
 end
 
-if placeId == 2753915549 then
-    gameName = "Blox Fruit"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    end
-    
-elseif placeId == 79546208627805 then
-    gameName = "99 Night In The Forest"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Loader/GrowAGarden.lua")
-    end
-    
-elseif placeId == 18687417158 then
-    gameName = "Forsaken"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua")
-    end
-    
-elseif placeId == 121864768012064 then
-    gameName = "Fish It"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua")
-    end
-    
-elseif placeId == 123921593837160 then
-    gameName = "Climb and Jump Tower"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua")
-    end
-    
-elseif placeId == 109983668079237 then
-    gameName = "Steal A Brainrot"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    end
-    
-elseif placeId == 3456789012 then
-    gameName = "Plants Vs Brainrot"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    end
-    
-elseif placeId == 4567890123 then
-    gameName = "Game 8"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    end
-    
-elseif placeId == 5678901234 then
-    gameName = "Game 9"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    end
-    
-elseif placeId == 6789012345 then
-    gameName = "Game 10"
-    if isPremiumUser then
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    else
-        success = safeLoadScript("https://raw.githubusercontent.com/create-stree/STREE-HUB/main/BloxFruit-Free.lua")
-    end
-    
-else
-    success = false
-end
 
-if success and gameName then
-    local userType = isPremiumUser and "PREMIUM" or "FREE"
-    local featuresText = isPremiumUser and "All features unlocked!" or "Limited features available"
-    
+local userType = getUserType(scripts_key)
+
+if not userType then
     StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB " .. userType,
-        Text = gameName .. " loaded! " .. featuresText,
-        Duration = 6,
-        Icon = isPremiumUser and "rbxassetid://6023426926" or "rbxassetid://6023426923"
+        Title = "STREE HUB",
+        Text = "Key invalid! Access denied.",
+        Duration = 5
     })
-    
-    if isPremiumUser then
-        wait(1)
+    return
+end
+
+
+StarterGui:SetCore("SendNotification", {
+    Title = "STREE HUB",
+    Text = userType.." key detected! Loading script...",
+    Duration = 4
+})
+
+
+local gameData = gameScripts[placeId]
+if gameData then
+    local url = (userType=="Premium") and gameData.premium or gameData.free
+    local loaded = safeLoadScript(url)
+    if loaded then
         StarterGui:SetCore("SendNotification", {
-            Title = "THANK YOU!",
-            Text = "Thanks for purchasing Premium!",
-            Duration = 4,
-            Icon = "rbxassetid://6023426926"
+            Title = "STREE HUB",
+            Text = gameData.name.." loaded successfully ("..userType..")",
+            Duration = 4
+        })
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "STREE HUB",
+            Text = "Failed to load "..gameData.name.." script.",
+            Duration = 4
         })
     end
 else
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
-        Text = (gameName or "Game") .. " Not Supported!",
-        Duration = 6,
-        Icon = "rbxassetid://6023426923"
-    })
-end
-
-if not isPremiumUser then
-    wait(3)
-    StarterGui:SetCore("SendNotification", {
-        Title = "UPGRADE TO PREMIUM",
-        Text = "Get full features with Premium key!",
-        Duration = 5,
-        Icon = "rbxassetid://6023426923"
+        Text = "Game not supported!",
+        Duration = 4
     })
 end
