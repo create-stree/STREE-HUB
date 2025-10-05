@@ -13,8 +13,6 @@ local player = game.Players.LocalPlayer
 local Character = player.Character or player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
-local VirtualUser = game:GetService("VirtualUser")
-
 local AutoEquip = false
 local AutoHit = false
 local AutoCollect = false
@@ -27,6 +25,7 @@ local function GetBatTool()
             return tool
         end
     end
+    return nil
 end
 
 local function EquipBat()
@@ -35,6 +34,7 @@ local function EquipBat()
         Humanoid:EquipTool(tool)
         return true
     end
+    return false
 end
 
 local function AttackBrainrot()
@@ -47,17 +47,17 @@ local function AttackBrainrot()
 end
 
 local function GetNearestBrainrot()
+    local folder = workspace:FindFirstChild("ScriptedMap") and workspace.ScriptedMap:FindFirstChild("Brainrots")
+    if not folder then return nil end
     local nearest, dist = nil, math.huge
-    local enemies = workspace:FindFirstChild("Enemies") or workspace:FindFirstChild("Brainrots") or workspace
-    for _, v in ipairs(enemies:GetChildren()) do
-        if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-            local hrp = v:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local mag = (RootPart.Position - hrp.Position).Magnitude
-                if mag < dist then
-                    dist = mag
-                    nearest = v
-                end
+    for _, v in ipairs(folder:GetChildren()) do
+        local hrp = v:FindFirstChild("HumanoidRootPart")
+        local hum = v:FindFirstChild("Humanoid")
+        if hrp and hum and hum.Health > 0 then
+            local mag = (RootPart.Position - hrp.Position).Magnitude
+            if mag < dist then
+                dist = mag
+                nearest = v
             end
         end
     end
@@ -65,13 +65,12 @@ local function GetNearestBrainrot()
 end
 
 local function CollectBrains()
-    local hrp = RootPart
-    local drops = workspace:FindFirstChild("Drops") or workspace:FindFirstChild("Collectables") or workspace
+    local drops = workspace:FindFirstChild("Drops") or workspace
     for _, obj in ipairs(drops:GetDescendants()) do
         if obj:IsA("TouchTransmitter") and obj.Parent and obj.Parent.Name:lower():find("brain") then
             pcall(function()
-                firetouchinterest(hrp, obj.Parent, 0)
-                firetouchinterest(hrp, obj.Parent, 1)
+                firetouchinterest(RootPart, obj.Parent, 0)
+                firetouchinterest(RootPart, obj.Parent, 1)
             end)
         end
     end
@@ -87,7 +86,7 @@ end)
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | Plants Vs Zombie",
+    Author = "KirsiaSC | Plants Vs Brainrot",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(260, 290),
     Transparent = true,
@@ -148,7 +147,7 @@ Main:Toggle({
                     if root then
                         RootPart.CFrame = root.CFrame * CFrame.new(0, 0, 3)
                         AttackBrainrot()
-                        task.wait(0.15)
+                        task.wait(0.12)
                     end
                 end
                 task.wait(0.05)
@@ -158,7 +157,7 @@ Main:Toggle({
 })
 
 Main:Toggle({
-    Title = "Auto Collect",
+    Title = "Auto Collect Brain",
     Default = false,
     Callback = function(state)
         AutoCollect = state
