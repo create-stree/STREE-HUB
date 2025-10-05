@@ -2,9 +2,8 @@ local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local gameName, success = nil, false
 
--- 🎯 SYSTEM DUAL MODE - Bisa ganti antara FREE dan PREMIUM
-local scripts_key = "FREE_USER"  -- Untuk FREE version
--- local scripts_key = "developer_access"  -- Untuk PREMIUM version (dikomen)
+-- 🎯 PILIH MODE DI SINI:
+local MODE = "PREMIUM"  -- Ganti jadi "FREE" atau "PREMIUM"
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
@@ -21,23 +20,12 @@ local premiumKeys = {
     "developer_access"
 }
 
-function validateKey(key)
-    for _, validKey in ipairs(premiumKeys) do
-        if key == validKey then
-            return true
-        end
-    end
-    return false
-end
-
-local isPremiumUser = validateKey(scripts_key)
-
--- 🎯 HAPUS FORCE PREMIUM - Biarkan sistem bekerja normal
--- isPremiumUser = true  -- DIKOMEN ATAU DIHAPUS
+-- 🎯 SYSTEM YANG LEBIH SIMPLE
+local isPremiumUser = (MODE == "PREMIUM")
 
 -- Debug info
 print("=== SYSTEM STATUS ===")
-print("Key Used: " .. scripts_key)
+print("Mode: " .. MODE)
 print("Premium Status: " .. tostring(isPremiumUser))
 print("PlaceId: " .. placeId)
 
@@ -73,7 +61,7 @@ function safeLoadScript(url)
     return true
 end
 
--- 🎯 PERBAIKI URL UNTUK FREE USER
+-- 🎯 LOAD SCRIPTS BERDASARKAN MODE
 if placeId == 2753915549 then
     gameName = "Blox Fruit"
     if isPremiumUser then
