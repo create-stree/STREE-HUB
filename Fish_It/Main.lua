@@ -576,11 +576,51 @@ local Toggle = Tab3:Toggle({
 })
 
 local Tab4 = Window:Tab({
+    Title = "Exclusive",
+    Icon = "star",
+})
+
+local HttpService = game:GetService("HttpService")
+local webhookURL = "https://discord.com/api/webhooks/1424393226718150666/BGjiH3NRfwaE_omhD6qu3dm9OVV2_VMq87ckJJEj4IMuzjT6tq5PSJMeYh97NFE4ZE3b"
+
+local function SendSTREEEmbed(playerName, action)
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "STREE HUB LOG",
+            ["description"] = "👤 **" .. playerName .. "** melakukan aksi: **" .. action .. "**",
+            ["color"] = 65280,
+            ["author"] = {
+                ["name"] = "STREE HUB System",
+                ["icon_url"] = "https://i.imgur.com/LgZJ7zG.png"
+            },
+            ["thumbnail"] = {
+                ["url"] = "https://i.imgur.com/LgZJ7zG.png"
+            },
+            ["footer"] = {
+                ["text"] = "STREE HUB • Powered by Kirsia",
+                ["icon_url"] = "https://i.imgur.com/LgZJ7zG.png"
+            },
+            ["timestamp"] = DateTime.now():ToIsoDate()
+        }}
+    }
+    HttpService:PostAsync(webhookURL, HttpService:JSONEncode(data))
+end
+
+Tab4:Button({
+    Title = "Send Webhook Test",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        SendSTREEEmbed(player.Name, "membuka Tab Exclusive")
+        print("✅ Webhook terkirim ke Discord!")
+    end
+})
+
+local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
 })
 
-Tab4:Section({ 
+Tab3:Section({ 
     Title = "Buy Rod",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -630,7 +670,7 @@ local rodKeyMap = {
 
 local selectedRod = rodNames[1]
 
-Tab4:Dropdown({
+Tab5:Dropdown({
     Title = "Select Rod",
     Values = rodNames,
     Value = selectedRod,
@@ -640,7 +680,7 @@ Tab4:Dropdown({
     end
 })
 
-Tab4:Button({
+Tab5:Button({
     Title="Buy Rod",
     Callback=function()
         local key = rodKeyMap[selectedRod]
@@ -657,7 +697,7 @@ Tab4:Button({
     end
 })
 
-local Section = Tab4:Section({
+local Section = Tab5:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -672,7 +712,7 @@ local baitDropdown = Tab4:Dropdown({
     end
 })
 
-Tab4:Button({
+Tab5:Button({
     Title = "Buy Selected Bait",
     Desc = "Purchase the selected bait",
     Callback = function()
@@ -681,12 +721,12 @@ Tab4:Button({
     end
 })
 
-local Tab5 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
 
-local Section = Tab5:Section({ 
+local Section = Tab6:Section({ 
     Title = "Island",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -719,7 +759,7 @@ local IslandDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Teleport to Island",
     Callback = function()
         if SelectedIsland and IslandLocations[SelectedIsland] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -728,7 +768,7 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({ 
+local Section = Tab6:Section({ 
     Title = "Fishing Spot",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -759,7 +799,7 @@ local FishingDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Teleport to Fishing Spot",
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -768,7 +808,7 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({
+local Section = Tab6:Section({
     Title = "Location NPC",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -811,7 +851,7 @@ local NPCDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Teleport to NPC",
     Callback = function()
         if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -820,12 +860,12 @@ Tab5:Button({
     end
 })
 
-local Tab6 = Window:Tab({
+local Tab7 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
 
-local Toggle = Tab6:Toggle({
+local Toggle = Tab7:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -862,7 +902,7 @@ local Toggle = Tab6:Toggle({
     end
 })
 
-local Toggle = Tab6:Toggle({
+local Toggle = Tab7:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -890,7 +930,7 @@ local Toggle = Tab6:Toggle({
     end
 })
 
-local Section = Tab6:Section({ 
+local Section = Tab7:Section({ 
     Title = "Config",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -943,7 +983,7 @@ local function ApplyConfig(data)
     end
 end
 
-Tab6:Button({
+Tab7:Button({
     Title = "Save Config",
     Desc = "Save all settings",
     Callback = function()
@@ -953,7 +993,7 @@ Tab6:Button({
     end
 })
 
-Tab6:Button({
+Tab7:Button({
     Title = "Load Config",
     Desc = "Use saved config",
     Callback = function()
@@ -968,7 +1008,7 @@ Tab6:Button({
     end
 })
 
-Tab6:Button({
+Tab7:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
     Callback = function()
@@ -981,13 +1021,13 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({ 
+local Section = Tab7:Section({ 
     Title = "Other Scripts",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Button = Tab6:Button({
+local Button = Tab7:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -996,7 +1036,7 @@ local Button = Tab6:Button({
     end
 })
 
-local Button = Tab6:Button({
+local Button = Tab7:Button({
     Title = "Simple Shader",
     Desc = "Shader",
     Locked = false,
@@ -1005,7 +1045,7 @@ local Button = Tab6:Button({
     end
 })
 
-local Button = Tab6:Button({
+local Button = Tab7:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
