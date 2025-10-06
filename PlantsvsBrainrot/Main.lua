@@ -34,7 +34,7 @@ Window:Tag({
 })
 
 Window:Tag({  
-    Title = "Free",  
+    Title = "Freemium",  
     Color = Color3.fromRGB(0, 255, 0),  
 })
 
