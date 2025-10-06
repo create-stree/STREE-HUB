@@ -139,13 +139,20 @@ end)
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | PvB",
+    Author = "KirsiaSC | Plants Vs Brainrot",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(360, 400),
+    Size = UDim2.fromOffset(260, 290),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
-    HasOutline = true,
+    HasOutline = true
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            WindUI:SetTheme("Dark")
+        end,
+    },
 })
 
 Window:Tag({
@@ -249,298 +256,141 @@ Main:Toggle({
     end
 })
 
-local Settings = Window:Tab({
-    Title = "Settings",
-    Icon = "settings"
+local TabPvB = Window:Tab({
+    Title = "PvB",
+    Icon = "skull",
 })
 
-Settings:Slider({
-    Title = "Attack Delay",
-    Default = 0.3,
-    Min = 0.1,
-    Max = 2,
-    Callback = function(value)
-        AttackDelay = value
-    end
-})
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
 
-Settings:Slider({
-    Title = "Follow Distance",
-    Default = 5,
-    Min = 3,
-    Max = 15,
-    Callback = function(value)
-        FollowDistance = value
-    end
-})
+local autoHit = false
+local autoCollect = false
+local autoEquip = false
+local espEnabled = false
 
-Settings:Slider({
-    Title = "Attack Range",
-    Default = 10,
-    Min = 5,
-    Max = 20,
-    Callback = function(value)
-        AttackRange = value
-    end
-})
-
-Settings:Button({
-    Title = "Refresh Brainrot Cache",
-    Callback = function()
-        UpdateBrainrotCache()
-        WindUI:Notify({
-            Title = "Cache Refreshed",
-            Content = "Brainrot cache updated",
-            Duration = 2,
-        })
-    end
-})
-
-local Status = Window:Tab({
-    Title = "Status",
-    Icon = "info"
-})
-
-local statusLabel = Status:Label({
-    Title = "Status: Inactive",
-    Desc = "Waiting for activation..."
-})
-
-task.spawn(function()
-    while true do
-        if AutoHit then
-            statusLabel:Set({
-                Title = "Status: Teleport Mode Active",
-                Desc = "Teleporting to nearest brainrot"
-            })
-        elseif AutoFollowHit then
-            if CurrentTarget then
-                statusLabel:Set({
-                    Title = "Status: Following " .. CurrentTarget.Name,
-                    Desc = "Follow mode active"
-                })
-            else
-                statusLabel:Set({
-                    Title = "Status: Follow Mode - Searching",
-                    Desc = "Looking for brainrots"
-                })
-            end
-        else
-            statusLabel:Set({
-                Title = "Status: Inactive",
-                Desc = "Waiting for activation..."
-            })
-        end
-        task.wait(1)
-    end
-end)
-
--- PvB Script Tab (Dyumra Open Source Style Integration)
-local PvBTab = Window:Tab({
-    Title = "PvB Scripts",
-    Icon = "sword", -- bisa diganti sesuai ikon yang kamu mau
-})
-
--- Variabel fitur PvB
-local PvB_AutoPunch = false
-local PvB_SkillSpam = false
-local PvB_AutoFarm = false
-local PvB_ESP = false
-local highlights = {}
-
--- Konfigurasi
-local PvB_Settings = {
-    NPC_FOLDER_NAME = "Mobs",
-    AUTO_PUNCH_DELAY = 0.12,
-    SKILL_SPAM_DELAY = 0.35,
-    AUTO_FARM_MOVE_DIST = 3,
-}
-
--- Fungsi umum
-local function getNPCList()
-    local folder = workspace:FindFirstChild(PvB_Settings.NPC_FOLDER_NAME) or workspace
+local function getBrainrots()
     local list = {}
-    for _, v in pairs(folder:GetDescendants()) do
-        if v:IsA("Model") and v:FindFirstChildOfClass("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
-            local owner = game.Players:GetPlayerFromCharacter(v)
-            if not owner then
-                table.insert(list, v)
-            end
+    for _, v in ipairs(workspace:GetChildren()) do
+        if v.Name == "Brainrot" and v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") then
+            table.insert(list, v)
         end
     end
     return list
 end
 
--- ESP Helper
-local function addESP(model)
-    if highlights[model] then return end
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "PvBHighlight"
-    highlight.Adornee = model
-    highlight.FillColor = Color3.fromRGB(0, 255, 0)
-    highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
-    highlight.Parent = workspace
-    highlights[model] = highlight
-end
-
-local function removeAllESP()
-    for _, v in pairs(highlights) do
-        if v and v.Parent then v:Destroy() end
-    end
-    highlights = {}
-end
-
--- Attack dan Skill
-local lastPunch, lastSkill = 0, 0
-
-local function doPunch()
-    if tick() - lastPunch < PvB_Settings.AUTO_PUNCH_DELAY then return end
-    lastPunch = tick()
-    local tool = Character:FindFirstChildOfClass("Tool")
-    if tool then
-        pcall(function() tool:Activate() end)
-    end
-end
-
-local function doSkill()
-    if tick() - lastSkill < PvB_Settings.SKILL_SPAM_DELAY then return end
-    lastSkill = tick()
-    local tool = Character:FindFirstChildOfClass("Tool")
-    if tool then
-        pcall(function()
-            if tool:FindFirstChild("RemoteEvent") then
-                tool.RemoteEvent:FireServer("Skill")
-            else
-                tool:Activate()
-            end
-        end)
-    end
-end
-
--- AutoFarm
-local function getNearestNPC()
-    local npcs = getNPCList()
-    local nearest, dist = nil, math.huge
-    for _, npc in pairs(npcs) do
-        local hrp = npc:FindFirstChild("HumanoidRootPart")
-        local hum = npc:FindFirstChildOfClass("Humanoid")
-        if hrp and hum and hum.Health > 0 then
-            local mag = (RootPart.Position - hrp.Position).Magnitude
-            if mag < dist then
-                nearest = npc
-                dist = mag
-            end
-        end
-    end
-    return nearest, dist
-end
-
-local function farmStep()
-    local target, d = getNearestNPC()
-    if target and target:FindFirstChild("HumanoidRootPart") then
-        local hrp = target.HumanoidRootPart
-        if d > PvB_Settings.AUTO_FARM_MOVE_DIST then
-            RootPart.CFrame = CFrame.new(hrp.Position + Vector3.new(0, 0, PvB_Settings.AUTO_FARM_MOVE_DIST))
-        else
-            doPunch()
+local function equipBat()
+    for _, tool in ipairs(player.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and string.find(tool.Name:lower(), "bat") then
+            humanoid:EquipTool(tool)
         end
     end
 end
 
--- Loop
-game:GetService("RunService").Heartbeat:Connect(function()
-    if PvB_AutoPunch then
-        doPunch()
-    end
-    if PvB_SkillSpam then
-        doSkill()
-    end
-    if PvB_AutoFarm then
-        farmStep()
-    end
-    if PvB_ESP then
-        for _, m in pairs(getNPCList()) do
-            if not highlights[m] then
-                addESP(m)
+local function autoHitLoop()
+    task.spawn(function()
+        while autoHit do
+            local brainrots = getBrainrots()
+            for _, b in ipairs(brainrots) do
+                if b:FindFirstChild("Humanoid") and b.Humanoid.Health > 0 then
+                    local hrp = b:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        root.CFrame = hrp.CFrame * CFrame.new(0, 0, 2)
+                        local tool = character:FindFirstChildOfClass("Tool")
+                        if tool and tool:FindFirstChild("Handle") then
+                            firetouchinterest(hrp, tool.Handle, 0)
+                            firetouchinterest(hrp, tool.Handle, 1)
+                        end
+                    end
+                end
+            end
+            task.wait(0.3)
+        end
+    end)
+end
+
+local function autoCollectLoop()
+    task.spawn(function()
+        while autoCollect do
+            for _, v in ipairs(workspace:GetChildren()) do
+                if v:IsA("BasePart") and v.Name == "Collectable" then
+                    firetouchinterest(root, v, 0)
+                    firetouchinterest(root, v, 1)
+                end
+            end
+            task.wait(0.4)
+        end
+    end)
+end
+
+local function espLoop()
+    task.spawn(function()
+        while espEnabled do
+            for _, b in ipairs(getBrainrots()) do
+                if not b:FindFirstChild("Highlight") then
+                    local h = Instance.new("Highlight")
+                    h.FillColor = Color3.fromRGB(255, 0, 0)
+                    h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    h.Parent = b
+                end
+            end
+            task.wait(1)
+        end
+        for _, b in ipairs(getBrainrots()) do
+            if b:FindFirstChild("Highlight") then
+                b.Highlight:Destroy()
             end
         end
-    end
-end)
+    end)
+end
 
--- Toggle di WindUI
-PvBTab:Toggle({
-    Title = "Auto Punch",
+TabPvB:Toggle({
+    Title = "Auto Hit Brainrot",
     Default = false,
     Callback = function(state)
-        PvB_AutoPunch = state
-    end
-})
-
-PvBTab:Toggle({
-    Title = "Skill Spam",
-    Default = false,
-    Callback = function(state)
-        PvB_SkillSpam = state
-    end
-})
-
-PvBTab:Toggle({
-    Title = "Auto Farm (Basic)",
-    Default = false,
-    Callback = function(state)
-        PvB_AutoFarm = state
-    end
-})
-
-PvBTab:Toggle({
-    Title = "ESP Mobs",
-    Default = false,
-    Callback = function(state)
-        PvB_ESP = state
-        if not state then
-            removeAllESP()
+        autoHit = state
+        if state then
+            autoHitLoop()
         end
-    end
+    end,
 })
 
-PvBTab:Slider({
-    Title = "Auto Punch Delay",
-    Default = PvB_Settings.AUTO_PUNCH_DELAY,
-    Min = 0.05,
-    Max = 1,
-    Callback = function(value)
-        PvB_Settings.AUTO_PUNCH_DELAY = value
-    end
+TabPvB:Toggle({
+    Title = "Auto Collect",
+    Default = false,
+    Callback = function(state)
+        autoCollect = state
+        if state then
+            autoCollectLoop()
+        end
+    end,
 })
 
-PvBTab:Slider({
-    Title = "Skill Spam Delay",
-    Default = PvB_Settings.SKILL_SPAM_DELAY,
-    Min = 0.1,
-    Max = 1,
-    Callback = function(value)
-        PvB_Settings.SKILL_SPAM_DELAY = value
-    end
+TabPvB:Toggle({
+    Title = "Auto Equip Bat",
+    Default = false,
+    Callback = function(state)
+        autoEquip = state
+        if state then
+            task.spawn(function()
+                while autoEquip do
+                    equipBat()
+                    task.wait(2)
+                end
+            end)
+        end
+    end,
 })
 
-PvBTab:Slider({
-    Title = "Auto Farm Distance",
-    Default = PvB_Settings.AUTO_FARM_MOVE_DIST,
-    Min = 1,
-    Max = 10,
-    Callback = function(value)
-        PvB_Settings.AUTO_FARM_MOVE_DIST = value
-    end
-})
-
-PvBTab:Button({
-    Title = "Remove All ESP",
-    Callback = function()
-        removeAllESP()
-        WindUI:Notify({
-            Title = "ESP Cleared",
-            Content = "All highlights removed!",
-            Duration = 2,
-        })
-    end
+TabPvB:Toggle({
+    Title = "ESP Brainrot",
+    Default = false,
+    Callback = function(state)
+        espEnabled = state
+        if state then
+            espLoop()
+        end
+    end,
 })
