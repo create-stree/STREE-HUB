@@ -334,3 +334,213 @@ task.spawn(function()
         task.wait(1)
     end
 end)
+
+-- PvB Script Tab (Dyumra Open Source Style Integration)
+local PvBTab = Window:Tab({
+    Title = "PvB Scripts",
+    Icon = "sword", -- bisa diganti sesuai ikon yang kamu mau
+})
+
+-- Variabel fitur PvB
+local PvB_AutoPunch = false
+local PvB_SkillSpam = false
+local PvB_AutoFarm = false
+local PvB_ESP = false
+local highlights = {}
+
+-- Konfigurasi
+local PvB_Settings = {
+    NPC_FOLDER_NAME = "Mobs",
+    AUTO_PUNCH_DELAY = 0.12,
+    SKILL_SPAM_DELAY = 0.35,
+    AUTO_FARM_MOVE_DIST = 3,
+}
+
+-- Fungsi umum
+local function getNPCList()
+    local folder = workspace:FindFirstChild(PvB_Settings.NPC_FOLDER_NAME) or workspace
+    local list = {}
+    for _, v in pairs(folder:GetDescendants()) do
+        if v:IsA("Model") and v:FindFirstChildOfClass("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+            local owner = game.Players:GetPlayerFromCharacter(v)
+            if not owner then
+                table.insert(list, v)
+            end
+        end
+    end
+    return list
+end
+
+-- ESP Helper
+local function addESP(model)
+    if highlights[model] then return end
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "PvBHighlight"
+    highlight.Adornee = model
+    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+    highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+    highlight.Parent = workspace
+    highlights[model] = highlight
+end
+
+local function removeAllESP()
+    for _, v in pairs(highlights) do
+        if v and v.Parent then v:Destroy() end
+    end
+    highlights = {}
+end
+
+-- Attack dan Skill
+local lastPunch, lastSkill = 0, 0
+
+local function doPunch()
+    if tick() - lastPunch < PvB_Settings.AUTO_PUNCH_DELAY then return end
+    lastPunch = tick()
+    local tool = Character:FindFirstChildOfClass("Tool")
+    if tool then
+        pcall(function() tool:Activate() end)
+    end
+end
+
+local function doSkill()
+    if tick() - lastSkill < PvB_Settings.SKILL_SPAM_DELAY then return end
+    lastSkill = tick()
+    local tool = Character:FindFirstChildOfClass("Tool")
+    if tool then
+        pcall(function()
+            if tool:FindFirstChild("RemoteEvent") then
+                tool.RemoteEvent:FireServer("Skill")
+            else
+                tool:Activate()
+            end
+        end)
+    end
+end
+
+-- AutoFarm
+local function getNearestNPC()
+    local npcs = getNPCList()
+    local nearest, dist = nil, math.huge
+    for _, npc in pairs(npcs) do
+        local hrp = npc:FindFirstChild("HumanoidRootPart")
+        local hum = npc:FindFirstChildOfClass("Humanoid")
+        if hrp and hum and hum.Health > 0 then
+            local mag = (RootPart.Position - hrp.Position).Magnitude
+            if mag < dist then
+                nearest = npc
+                dist = mag
+            end
+        end
+    end
+    return nearest, dist
+end
+
+local function farmStep()
+    local target, d = getNearestNPC()
+    if target and target:FindFirstChild("HumanoidRootPart") then
+        local hrp = target.HumanoidRootPart
+        if d > PvB_Settings.AUTO_FARM_MOVE_DIST then
+            RootPart.CFrame = CFrame.new(hrp.Position + Vector3.new(0, 0, PvB_Settings.AUTO_FARM_MOVE_DIST))
+        else
+            doPunch()
+        end
+    end
+end
+
+-- Loop
+game:GetService("RunService").Heartbeat:Connect(function()
+    if PvB_AutoPunch then
+        doPunch()
+    end
+    if PvB_SkillSpam then
+        doSkill()
+    end
+    if PvB_AutoFarm then
+        farmStep()
+    end
+    if PvB_ESP then
+        for _, m in pairs(getNPCList()) do
+            if not highlights[m] then
+                addESP(m)
+            end
+        end
+    end
+end)
+
+-- Toggle di WindUI
+PvBTab:Toggle({
+    Title = "Auto Punch",
+    Default = false,
+    Callback = function(state)
+        PvB_AutoPunch = state
+    end
+})
+
+PvBTab:Toggle({
+    Title = "Skill Spam",
+    Default = false,
+    Callback = function(state)
+        PvB_SkillSpam = state
+    end
+})
+
+PvBTab:Toggle({
+    Title = "Auto Farm (Basic)",
+    Default = false,
+    Callback = function(state)
+        PvB_AutoFarm = state
+    end
+})
+
+PvBTab:Toggle({
+    Title = "ESP Mobs",
+    Default = false,
+    Callback = function(state)
+        PvB_ESP = state
+        if not state then
+            removeAllESP()
+        end
+    end
+})
+
+PvBTab:Slider({
+    Title = "Auto Punch Delay",
+    Default = PvB_Settings.AUTO_PUNCH_DELAY,
+    Min = 0.05,
+    Max = 1,
+    Callback = function(value)
+        PvB_Settings.AUTO_PUNCH_DELAY = value
+    end
+})
+
+PvBTab:Slider({
+    Title = "Skill Spam Delay",
+    Default = PvB_Settings.SKILL_SPAM_DELAY,
+    Min = 0.1,
+    Max = 1,
+    Callback = function(value)
+        PvB_Settings.SKILL_SPAM_DELAY = value
+    end
+})
+
+PvBTab:Slider({
+    Title = "Auto Farm Distance",
+    Default = PvB_Settings.AUTO_FARM_MOVE_DIST,
+    Min = 1,
+    Max = 10,
+    Callback = function(value)
+        PvB_Settings.AUTO_FARM_MOVE_DIST = value
+    end
+})
+
+PvBTab:Button({
+    Title = "Remove All ESP",
+    Callback = function()
+        removeAllESP()
+        WindUI:Notify({
+            Title = "ESP Cleared",
+            Content = "All highlights removed!",
+            Duration = 2,
+        })
+    end
+})
