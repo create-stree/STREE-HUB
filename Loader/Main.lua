@@ -1,6 +1,6 @@
 local StarterGui = game:GetService("StarterGui")
-local scripts_key = "developer_access"
 local placeId = game.PlaceId
+local scripts_key = scripts_key or "FREE_USER"
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
@@ -16,6 +16,20 @@ local premiumKeys = {
     "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
     "developer_access"
 }
+
+local function isPremiumKey(key)
+    for _, k in ipairs(premiumKeys) do
+        if key == k then
+            return true
+        end
+    end
+    return false
+end
+
+local userType = "Free"
+if isPremiumKey(scripts_key) then
+    userType = "Premium"
+end
 
 local gameScripts = {
     [2753915549] = {
@@ -40,41 +54,29 @@ local gameScripts = {
     }
 }
 
-local function isPremiumKey(key)
-    for _, k in ipairs(premiumKeys) do
-        if key == k then
-            return true
-        end
-    end
-    return false
-end
-
 local function safeLoad(url)
     local s, r = pcall(function()
         return loadstring(game:HttpGet(url))()
     end)
-    if not s then
-        warn("Load failed:", r)
-    end
+    if not s then warn(r) end
     return s
 end
 
-local isPremium = isPremiumKey(scripts_key)
 local gameData = gameScripts[placeId]
 
 if not gameData then
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
         Text = "Game not supported!",
-        Duration = 5
+        Duration = 4
     })
     return
 end
 
-if isPremium then
+if userType == "Premium" then
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
-        Text = "Premium key detected!",
+        Text = "Premium Key detected!",
         Duration = 3
     })
     safeLoad(gameData.premium)
