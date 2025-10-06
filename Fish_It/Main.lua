@@ -704,7 +704,7 @@ local Section = Tab5:Section({
 })
 
 local selectedBait = "Bait"
-local baitDropdown = Tab4:Dropdown({
+local baitDropdown = Tab5:Dropdown({
     Title = "Select Bait",
     Values = {"Bait", "Worm", "Shrimp", "Squid", "SpecialBait"},
     Callback = function(Value)
