@@ -16,6 +16,10 @@ local RootPart = Character:WaitForChild("HumanoidRootPart")
 local AutoEquip = false
 local AutoHit = false
 local AutoCollect = false
+local AutoFollowHit = false
+local AttackDelay = 0.3
+local FollowDistance = 5
+local AttackRange = 10
 
 local function GetBatTool()
     local backpack = player:FindFirstChildOfClass("Backpack")
@@ -69,6 +73,49 @@ local function CollectBrains()
     end
 end
 
+local ActiveBrainrots = {}
+local CurrentTarget = nil
+
+local function UpdateBrainrotCache()
+    ActiveBrainrots = {}
+    for _, v in ipairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+            local hum = v:FindFirstChild("Humanoid")
+            if hum.Health > 0 and v.Name:lower():find("brain") then
+                ActiveBrainrots[v.Name] = v
+            end
+        end
+    end
+end
+
+local function GetNearestBrainrotAdvanced()
+    local nearest, minDistance = nil, math.huge
+    for _, brainrot in pairs(ActiveBrainrots) do
+        if brainrot and brainrot.Parent then
+            local root = brainrot:FindFirstChild("HumanoidRootPart")
+            if root then
+                local distance = (RootPart.Position - root.Position).Magnitude
+                if distance < minDistance and distance <= 100 then
+                    minDistance = distance
+                    nearest = brainrot
+                end
+            end
+        end
+    end
+    return nearest, minDistance
+end
+
+local function FollowBrainrot(target)
+    if not target or not target.Parent then return end
+    local targetRoot = target:FindFirstChild("HumanoidRootPart")
+    if not targetRoot then return end
+    
+    local brainrotCFrame = targetRoot.CFrame
+    local behindPosition = brainrotCFrame.Position - brainrotCFrame.LookVector * FollowDistance
+    RootPart.CFrame = CFrame.new(behindPosition) * CFrame.Angles(0, brainrotCFrame.Rotation.Y, 0)
+    RootPart.CFrame = CFrame.new(RootPart.Position, targetRoot.Position)
+end
+
 player.CharacterAdded:Connect(function(char)
     Character = char
     task.wait(2)
@@ -76,12 +123,25 @@ player.CharacterAdded:Connect(function(char)
     RootPart = char:WaitForChild("HumanoidRootPart")
 end)
 
+workspace.DescendantAdded:Connect(function(descendant)
+    if AutoFollowHit and descendant:IsA("Model") and descendant.Name:lower():find("brain") then
+        task.wait(1)
+        UpdateBrainrotCache()
+    end
+end)
+
+workspace.DescendantRemoving:Connect(function(descendant)
+    if AutoFollowHit and descendant:IsA("Model") and descendant.Name:lower():find("brain") then
+        ActiveBrainrots[descendant.Name] = nil
+    end
+end)
+
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
     Author = "KirsiaSC | PvB",
     Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(260, 290),
+    Size = UDim2.fromOffset(360, 400),
     Transparent = true,
     Theme = "Dark",
     SideBarWidth = 170,
@@ -89,13 +149,13 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.3",
+    Title = "v0.0.0.1",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Free",
+    Title = "Freemium",
     Color = Color3.fromRGB(205, 127, 50),
     Radius = 17,
 })
@@ -149,6 +209,33 @@ Main:Toggle({
 })
 
 Main:Toggle({
+    Title = "Auto Hit Brainrot (Follow Mode)",
+    Default = false,
+    Callback = function(state)
+        AutoFollowHit = state
+        task.spawn(function()
+            while AutoFollowHit do
+                EquipBat()
+                UpdateBrainrotCache()
+                local nearest, distance = GetNearestBrainrotAdvanced()
+                if nearest then
+                    CurrentTarget = nearest
+                    if distance <= 50 then
+                        FollowBrainrot(nearest)
+                        if distance <= AttackRange then
+                            AttackBrainrot()
+                        end
+                    end
+                else
+                    CurrentTarget = nil
+                end
+                task.wait(AttackDelay)
+            end
+        end)
+    end
+})
+
+Main:Toggle({
     Title = "Auto Collect Brain",
     Default = false,
     Callback = function(state)
@@ -161,3 +248,89 @@ Main:Toggle({
         end)
     end
 })
+
+local Settings = Window:Tab({
+    Title = "Settings",
+    Icon = "settings"
+})
+
+Settings:Slider({
+    Title = "Attack Delay",
+    Default = 0.3,
+    Min = 0.1,
+    Max = 2,
+    Callback = function(value)
+        AttackDelay = value
+    end
+})
+
+Settings:Slider({
+    Title = "Follow Distance",
+    Default = 5,
+    Min = 3,
+    Max = 15,
+    Callback = function(value)
+        FollowDistance = value
+    end
+})
+
+Settings:Slider({
+    Title = "Attack Range",
+    Default = 10,
+    Min = 5,
+    Max = 20,
+    Callback = function(value)
+        AttackRange = value
+    end
+})
+
+Settings:Button({
+    Title = "Refresh Brainrot Cache",
+    Callback = function()
+        UpdateBrainrotCache()
+        WindUI:Notify({
+            Title = "Cache Refreshed",
+            Content = "Brainrot cache updated",
+            Duration = 2,
+        })
+    end
+})
+
+local Status = Window:Tab({
+    Title = "Status",
+    Icon = "info"
+})
+
+local statusLabel = Status:Label({
+    Title = "Status: Inactive",
+    Desc = "Waiting for activation..."
+})
+
+task.spawn(function()
+    while true do
+        if AutoHit then
+            statusLabel:Set({
+                Title = "Status: Teleport Mode Active",
+                Desc = "Teleporting to nearest brainrot"
+            })
+        elseif AutoFollowHit then
+            if CurrentTarget then
+                statusLabel:Set({
+                    Title = "Status: Following " .. CurrentTarget.Name,
+                    Desc = "Follow mode active"
+                })
+            else
+                statusLabel:Set({
+                    Title = "Status: Follow Mode - Searching",
+                    Desc = "Looking for brainrots"
+                })
+            end
+        else
+            statusLabel:Set({
+                Title = "Status: Inactive",
+                Desc = "Waiting for activation..."
+            })
+        end
+        task.wait(1)
+    end
+end)
