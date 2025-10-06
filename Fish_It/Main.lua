@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.3",
+    Title = "v0.0.1.4",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -744,7 +744,7 @@ local IslandLocations = {
 
 local SelectedIsland = nil
 
-local IslandDropdown = Tab5:Dropdown({
+local IslandDropdown = Tab6:Dropdown({
     Title = "Select Island",
     Values = (function()
         local keys = {}
@@ -784,7 +784,7 @@ local FishingLocations = {
 
 local SelectedFishing = nil
 
-local FishingDropdown = Tab5:Dropdown({
+local FishingDropdown = Tab6:Dropdown({
     Title = "Select Spot",
     Values = (function()
         local keys = {}
@@ -836,7 +836,7 @@ local NPC_Locations = {
 
 local SelectedNPC = nil
 
-local NPCDropdown = Tab5:Dropdown({
+local NPCDropdown = Tab6:Dropdown({
     Title = "Select NPC",
     Values = (function()
         local keys = {}
