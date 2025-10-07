@@ -620,7 +620,7 @@ local Tab5 = Window:Tab({
     Icon = "badge-dollar-sign",
 })
 
-Tab3:Section({ 
+Tab5:Section({ 
     Title = "Buy Rod",
     TextXAlignment = "Left",
     TextSize = 17,
