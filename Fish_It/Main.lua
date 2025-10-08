@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.4",
+    Title = "v0.0.1.5",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -895,6 +895,53 @@ local Toggle = Tab7:Toggle({
                     end
                 end
             end)
+        end
+    end
+})
+
+local Section = Tab7:Section({ 
+    Title = "Server",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab7:Button({
+    Title = "Rejoin Server",
+    Desc = "Reconnect to current server",
+    Callback = function()
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+    end
+})
+
+Tab7:Button({
+    Title = "Server Hop",
+    Desc = "Switch to another server",
+    Callback = function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        
+        local function GetServers()
+            local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"
+            local response = HttpService:JSONDecode(game:HttpGet(url))
+            return response.data
+        end
+
+        local function FindBestServer(servers)
+            for _, server in ipairs(servers) do
+                if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                    return server.id
+                end
+            end
+            return nil
+        end
+
+        local servers = GetServers()
+        local serverId = FindBestServer(servers)
+
+        if serverId then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, game.Players.LocalPlayer)
+        else
+            warn("⚠️ No suitable server found!")
         end
     end
 })
