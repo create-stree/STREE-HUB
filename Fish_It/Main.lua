@@ -829,6 +829,52 @@ Tab6:Button({
     end
 })
 
+local Section = Tab6:Section({
+    Title = "Teleport Event",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local Event_Locations = {
+    ["Black Hole"] = Vector3.new(883, -1.4, 2542),
+    ["Ghost Shark Hunt"] = Vector3.new(489.559, -1.35, 25.406),
+    ["Megalodon Hunt"] = Vector3.new(-1076.3, -1.4, 1676.2),
+    ["Meteor Rain"] = Vector3.new(383, -1.4, 2452),
+    ["Shark Hunt"] = Vector3.new(1.65, -1.35, 2095.725),
+    ["Storm Hunt"] = Vector3.new(1735.85, -1.4, -208.425),
+    ["Worm Hunt"] = Vector3.new(1591.55, -1.4, -105.925),
+}
+
+local ActiveEvent = nil
+
+local EventDropdown = Tab6:Dropdown({
+    Title = "Select Event",
+    Values = (function()
+        local keys = {}
+        for name in pairs(Event_Locations) do
+            table.insert(keys, name)
+        end
+        table.sort(keys)
+        return keys
+    end)(),
+    Callback = function(Value)
+        ActiveEvent = Value
+    end
+})
+
+Tab6:Button({
+    Title = "Teleport to Event",
+    Callback = function()
+        local Player = game.Players.LocalPlayer
+        local Char = Player.Character or Player.CharacterAdded:Wait()
+        local HRP = Char:FindFirstChild("HumanoidRootPart")
+        if not HRP then return end
+        if ActiveEvent and Event_Locations[ActiveEvent] then
+            HRP.CFrame = CFrame.new(Event_Locations[ActiveEvent])
+        end
+    end
+})
+
 local Tab7 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
