@@ -341,7 +341,7 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 
 local autoHoldEnabled = false
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing V2",
+    Title = "Auto Fishing",
     Desc = "Automatic Auto Fishing v2",
     Value = false,
     Callback = function(state)
