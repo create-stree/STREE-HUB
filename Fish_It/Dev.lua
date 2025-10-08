@@ -722,6 +722,7 @@ local Section = Tab6:Section({
 })
 
 local IslandLocations = {
+    ["Ancient Junggle"] = Vector3.new(1252,7,-153),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
@@ -764,10 +765,12 @@ local Section = Tab6:Section({
 })
 
 local FishingLocations = {
+    ["Beside the temple 1"] = Vector3.new(1475,4,-847),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Konoha"] = Vector3.new(-603, 3, 719),
     ["Spawn"] = Vector3.new(33, 9, 2810),
     ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
+    ["Temple"] = Vector3.new(1475,-22,-632),
     ["Volcano"] = Vector3.new(-632, 55, 197),
 }
 
