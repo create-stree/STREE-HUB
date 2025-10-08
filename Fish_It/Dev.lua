@@ -36,7 +36,7 @@ Window:Tag({
 
 Window:Tag({
     Title = "Dev",
-    Color = Color3.fromRGB(0, 0, 0)
+    Color = Color3.fromRGB(0, 0, 0),
     Radius = 17,
 })
 
@@ -330,45 +330,6 @@ spawn(function()
     end
 end)
 
-local Players = game:GetService("Players")    
-local RepStorage = game:GetService("ReplicatedStorage")    
-local player = game.Players.LocalPlayer    
-    
-spawn(function()    
-    while wait() do    
-        if _G.AutoFishing then    
-            repeat    
-                  pcall(function()    
-                       local char = player.Character or player.CharacterAdded:Wait()    
-                       if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then    
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)    
-                       end                        
-                       local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")    
-                       if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then    
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)    
-                          wait(0.5)    
-                          RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)    
-                       end    
-                  end)    
-            wait(0.2)    
-            until not _G.AutoFishing    
-        end    
-    end    
-end)    
-    
-spawn(function()    
-    while wait() do    
-        if _G.AutoFishing then    
-            repeat    
-                  pcall(function()    
-                       RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()    
-                  end)    
-            wait(0.2)    
-            until not _G.AutoFishing    
-        end    
-    end    
-end)    
-    
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
 local VirtualInputManager = game:GetService("VirtualInputManager")    
@@ -380,14 +341,14 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 
 local autoHoldEnabled = false
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing",
+    Title = "Auto Fishing V2",
     Desc = "Automatic Auto Fishing v2",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
         if state then
             WindUI:Notify({
-                Title = "Auto Fishing ",
+                Title = "Auto Fishing V2",
                 Content = "Enabled",
                 Duration = 3
             })
@@ -409,7 +370,7 @@ Toggle = Tab3:Toggle({
             end)
         else
             WindUI:Notify({
-                Title = "Auto Fishing",
+                Title = "Auto Fishing V2",
                 Content = "Disabled",
                 Duration = 3
             })
@@ -494,34 +455,10 @@ local Toggle = Tab3:Toggle({
     Default = false,    
     Callback = function(state)    
         _G.InstantCatch = state    
-    
         if state then    
             print("✅ Instant Catch ON")    
-            if _loopRunning then return end    
-            _loopRunning = true    
-    
-            task.spawn(function()    
-                while _G.InstantCatch do    
-                    local remote = findRemote(REMOTE_CATCH)    
-                    if remote then    
-                        local success, err = pcall(function()    
-                            if remote:IsA("RemoteEvent") then    
-                                remote:FireServer()    
-                            else    
-                                remote:InvokeServer()    
-                            end    
-                        end)    
-                        if not success then    
-                            warn("❌ error:", err)    
-                        end    
-                    end    
-                    task.wait(TRY_INTERVAL)    
-                end    
-                _loopRunning = false    
-                print("❌ Instant Catch OFF")    
-            end)    
         else    
-            print("❌ Instant Catch is turned off")    
+            print("❌ Instant Catch OFF")    
         end    
     end    
 })    
@@ -593,9 +530,6 @@ Tab5:Section({
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]
-local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]
-local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
-local RFPurchaseBoat = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBoat"]
 
 local rods = {
     ["Luck Rod"] = 79,
@@ -615,7 +549,7 @@ local rods = {
 local rodNames = {
     "Luck Rod (350 Coins)", "Carbon Rod (900 Coins)", "Grass Rod (1.5k Coins)", "Demascus Rod (3k Coins)",
     "Ice Rod (5k Coins)", "Lucky Rod (15k Coins)", "Midnight Rod (50k Coins)", "Steampunk Rod (215k Coins)",
-    "Chrome Rod (437k Coins)", "Astral Rod (1M Coins)", "Ares Rod (3M Coins)", "Angler Rod ($8M Coins)"
+    "Chrome Rod (437k Coins)", "Astral Rod (1M Coins)", "Ares Rod (3M Coins)", "Angler Rod (8M Coins)"
 }
 
 local rodKeyMap = {
@@ -826,7 +760,7 @@ Tab6:Button({
 })
 
 local Section = Tab6:Section({
-    Title = "Location Event",
+    Title = "Event Teleporter",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -937,6 +871,53 @@ local Toggle = Tab7:Toggle({
                     end
                 end
             end)
+        end
+    end
+})
+
+local Section = Tab7:Section({ 
+    Title = "Server",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab7:Button({
+    Title = "Rejoin Server",
+    Desc = "Reconnect to current server",
+    Callback = function()
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+    end
+})
+
+Tab7:Button({
+    Title = "Server Hop",
+    Desc = "Switch to another server",
+    Callback = function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        
+        local function GetServers()
+            local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"
+            local response = HttpService:JSONDecode(game:HttpGet(url))
+            return response.data
+        end
+
+        local function FindBestServer(servers)
+            for _, server in ipairs(servers) do
+                if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                    return server.id
+                end
+            end
+            return nil
+        end
+
+        local servers = GetServers()
+        local serverId = FindBestServer(servers)
+
+        if serverId then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, game.Players.LocalPlayer)
+        else
+            warn("⚠️ No suitable server found!")
         end
     end
 })
@@ -1069,8 +1050,4 @@ Player.CharacterAdded:Connect(function(char)
     local humanoid = char:WaitForChild("Humanoid")
     humanoid.UseJumpPower = true
     humanoid.JumpPower = _G.CustomJumpPower or 50
-    
-    if _G.InfiniteJump then
-        humanoid.WalkSpeed = _G.CustomWalkSpeed or 16
-    end
 end)
