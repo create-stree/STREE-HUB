@@ -580,41 +580,6 @@ local Tab4 = Window:Tab({
     Icon = "star",
 })
 
-local HttpService = game:GetService("HttpService")
-local webhookURL = "https://discord.com/api/webhooks/1424393226718150666/BGjiH3NRfwaE_omhD6qu3dm9OVV2_VMq87ckJJEj4IMuzjT6tq5PSJMeYh97NFE4ZE3b"
-
-local function SendSTREEEmbed(playerName, action)
-    local data = {
-        ["embeds"] = {{
-            ["title"] = "STREE HUB LOG",
-            ["description"] = "👤 **" .. playerName .. "** melakukan aksi: **" .. action .. "**",
-            ["color"] = 65280,
-            ["author"] = {
-                ["name"] = "STREE HUB System",
-                ["icon_url"] = "https://i.imgur.com/LgZJ7zG.png"
-            },
-            ["thumbnail"] = {
-                ["url"] = "https://i.imgur.com/LgZJ7zG.png"
-            },
-            ["footer"] = {
-                ["text"] = "STREE HUB • Powered by Kirsia",
-                ["icon_url"] = "https://i.imgur.com/LgZJ7zG.png"
-            },
-            ["timestamp"] = DateTime.now():ToIsoDate()
-        }}
-    }
-    HttpService:PostAsync(webhookURL, HttpService:JSONEncode(data))
-end
-
-Tab4:Button({
-    Title = "Send Webhook Test",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        SendSTREEEmbed(player.Name, "membuka Tab Exclusive")
-        print("✅ Webhook terkirim ke Discord!")
-    end
-})
-
 local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
@@ -722,6 +687,7 @@ Tab5:Button({
 })
 
 local Tab6 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
@@ -733,6 +699,7 @@ local Section = Tab6:Section({
 })
 
 local IslandLocations = {
+    ["Ancient Junggle"] = Vector3.new(1252,7,-153),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
@@ -775,10 +742,12 @@ local Section = Tab6:Section({
 })
 
 local FishingLocations = {
+    ["Beside the temple 1"] = Vector3.new(1475,4,-847),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Konoha"] = Vector3.new(-603, 3, 719),
     ["Spawn"] = Vector3.new(33, 9, 2810),
     ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
+    ["Temple"] = Vector3.new(1475,-22,-632),
     ["Volcano"] = Vector3.new(-632, 55, 197),
 }
 
