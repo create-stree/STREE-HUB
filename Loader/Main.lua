@@ -8,7 +8,7 @@ local streeLogo = "rbxassetid://122683047852451"
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
-    "kRpXaVnqZyLhTjBfGmWcSdEoUiNpQvJ", 
+    "kRpXaVnqZyLhTjBfGmWcSdEoUiNpQvJ",
     "YtHqFzPaKrXeBwNuDjMiVsGoClLrSnQe",
     "pZxYvQmAaTrWnGfBqCkJdEoHsLuVtSiN",
     "wJzDnQyGmTcLkVxEoPaFbSgRrUuMiZh",
@@ -39,13 +39,13 @@ local gameScripts = {
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Premium.lua"
     },
     [1239215938] = {
-        name = "Climb and Jump Tower", 
+        name = "Climb and Jump Tower",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
     },
     [121864768012064] = {
         name = "Fish It",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua", 
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
     },
     [18687417158] = {
