@@ -493,8 +493,7 @@ local Toggle = Tab3:Toggle({
                     local cc = (profile and profile.ColorCorrection) and profile.ColorCorrection or {}    
                     if not cc.Brightness then cc.Brightness = 0.04 end    
                     if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end    
-                    effect.TintColor = Color3.fromRGB(42, 226, 118)    
-                    effect.Brightness = 0.4    
+                    effect.TintColor = Color3.fromRGB(42, 226, 118)                        effect.Brightness = 0.4    
                     spr.target(effect, 1, 1, cc)    
                 end    
                 spr.stop(Lighting)    
@@ -515,96 +514,6 @@ local Toggle = Tab3:Toggle({
 local Tab4 = Window:Tab({
     Title = "Exclusive",
     Icon = "star",
-})
-
-local Section = Tab4:Section({
-    Title = "Auto Kaitun System",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-_G.KaitunEnabled = false
-_G.KaitunDelay = 1
-_G.AutoSellFish = true
-
-local function StartKaitun()
-    while _G.KaitunEnabled do
-        pcall(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            
-            local backpack = player:FindFirstChild("Backpack")
-            if backpack then
-                local rod = backpack:FindFirstChild("Rod") or backpack:FindFirstChild("FishingRod")
-                if rod and not character:FindFirstChild(rod.Name) then
-                    character.Humanoid:EquipTool(rod)
-                end
-            end
-            
-            local RepStorage = game:GetService("ReplicatedStorage")
-            local fishingRemote = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]
-            
-            if not character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                fishingRemote:InvokeServer(2)
-            end
-            
-            local completeRemote = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
-            completeRemote:FireServer()
-            
-            if _G.AutoSellFish then
-                for _, v in pairs(RepStorage:GetDescendants()) do
-                    if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
-                        v:FireServer()
-                    end
-                end
-            end
-            
-        end)
-        wait(_G.KaitunDelay)
-    end
-end
-
-Tab4:Toggle({
-    Title = "Enable Kaitun",
-    Desc = "Activate auto farming system",
-    Default = false,
-    Callback = function(state)
-        _G.KaitunEnabled = state
-        if state then
-            WindUI:Notify({
-                Title = "Kaitun Started",
-                Content = "Auto farming activated!",
-                Duration = 3
-            })
-            spawn(StartKaitun)
-        else
-            WindUI:Notify({
-                Title = "Kaitun Stopped",
-                Content = "Auto farming disabled",
-                Duration = 3
-            })
-        end
-    end
-})
-
-Tab4:Toggle({
-    Title = "Auto Sell Fish",
-    Desc = "Automatically sell caught fish",
-    Default = true,
-    Callback = function(state)
-        _G.AutoSellFish = state
-    end
-})
-
-Tab4:Slider({
-    Title = "Kaitun Delay",
-    Desc = "Farming speed (seconds)",
-    Min = 0.5,
-    Max = 5,
-    Default = 1,
-    Callback = function(value)
-        _G.KaitunDelay = value
-    end
 })
 
 local Tab5 = Window:Tab({
