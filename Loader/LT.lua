@@ -143,7 +143,7 @@ end
 if userType == "Premium" then
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
-        Text = "Premium Key detected!",
+        Text = "Premium Key User detected!",
         Icon = streeLogo,
         Duration = 3
     })
@@ -152,7 +152,7 @@ if userType == "Premium" then
 else
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
-        Text = "Free User detected",
+        Text = "Freemium User detected!",
         Icon = streeLogo,
         Duration = 3
     })
