@@ -765,12 +765,16 @@ local Section = Tab6:Section({
 })
 
 local FishingLocations = {
-    ["Beside the temple 1"] = Vector3.new(1475,4,-847),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Levers 1"] = Vector3.new(1475,4,-847),
+    ["Levers 2"] = Vector3.new(882,5,-321),
+    ["levers 3"] = Vector3.new(1425,6,126),
+    ["levers 4"] = Vector3.new(1837,4,-309),
+    ["Sacred Temple"] = Vector3.new(1475,-22,-632),
     ["Spawn"] = Vector3.new(33, 9, 2810),
     ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
-    ["Temple"] = Vector3.new(1475,-22,-632),
+    ["Underground Cellar"] = Vector3.new(2135,-92,-695),
     ["Volcano"] = Vector3.new(-632, 55, 197),
 }
 
