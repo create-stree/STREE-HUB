@@ -519,48 +519,68 @@ local TeleportService = game:GetService("TeleportService")
 local VirtualUser = game:GetService("VirtualUser")
 local Player = Players.LocalPlayer
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Name = "STREE_HUB_BACKGROUND"
-ScreenGui.Parent = CoreGui
+_G.KaitunEnabled = false
+_G.KaitunDelay = 1
+_G.AutoSellFish = true
 
-local Background = Instance.new("Frame")
-Background.BackgroundColor3 = Color3.new(0, 0, 0)
-Background.BackgroundTransparency = 0.5
-Background.Size = UDim2.new(1, 0, 1, 0)
-Background.ZIndex = 0
-Background.Parent = ScreenGui
+local ScreenGui, Background, Saturn
 
-for i = 1, 80 do
-    local star = Instance.new("Frame")
-    star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
-    star.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    star.BackgroundTransparency = math.random(40, 80) / 100
-    star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    star.ZIndex = 0
-    star.Parent = Background
+local function CreateBackground()
+    if ScreenGui then ScreenGui:Destroy() end
+    ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.Name = "STREE_KAITUN_BACKGROUND"
+    ScreenGui.Parent = CoreGui
+
+    Background = Instance.new("Frame")
+    Background.BackgroundColor3 = Color3.new(0, 0, 0)
+    Background.BackgroundTransparency = 0.5
+    Background.Size = UDim2.new(1, 0, 1, 0)
+    Background.ZIndex = 0
+    Background.Parent = ScreenGui
+
+    for i = 1, 70 do
+        local star = Instance.new("Frame")
+        star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
+        star.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        star.BackgroundTransparency = math.random(40, 80) / 100
+        star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        star.ZIndex = 0
+        star.Parent = Background
+        task.spawn(function()
+            local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+            TweenService:Create(star, tweenInfo, {BackgroundTransparency = math.random(0, 60) / 100}):Play()
+        end)
+    end
+
+    Saturn = Instance.new("ImageLabel")
+    Saturn.Image = "rbxassetid://122683047852451"
+    Saturn.BackgroundTransparency = 1
+    Saturn.Size = UDim2.new(0, 300, 0, 300)
+    Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
+    Saturn.ImageTransparency = 0.05
+    Saturn.ZIndex = 0
+    Saturn.Parent = Background
+
     task.spawn(function()
-        local tweenInfo = TweenInfo.new(math.random(3, 6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-        TweenService:Create(star, tweenInfo, {BackgroundTransparency = math.random(0, 60) / 100}):Play()
+        while ScreenGui and _G.KaitunEnabled do
+            TweenService:Create(Saturn, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 180}):Play()
+            task.wait(4)
+            TweenService:Create(Saturn, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 0}):Play()
+            task.wait(4)
+        end
     end)
 end
 
-local Saturn = Instance.new("ImageLabel")
-Saturn.Image = "rbxassetid://122683047852451"
-Saturn.BackgroundTransparency = 1
-Saturn.Size = UDim2.new(0, 280, 0, 280)
-Saturn.Position = UDim2.new(0.72, 0, 0.08, 0)
-Saturn.ImageTransparency = 0.1
-Saturn.ZIndex = 0
-Saturn.Parent = Background
-
-task.spawn(function()
-    while task.wait() do
-        TweenService:Create(Saturn, TweenInfo.new(25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Rotation = Saturn.Rotation + 360}):Play()
-        task.wait(25)
+local function RemoveBackground()
+    if ScreenGui then
+        TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+        task.wait(1)
+        ScreenGui:Destroy()
+        ScreenGui = nil
     end
-end)
+end
 
 task.spawn(function()
     while task.wait(10) do
@@ -590,15 +610,11 @@ local Tab4 = Window:Tab({
     Icon = "star",
 })
 
-local Section = Tab4:Section({     
+local Section = Tab3:Section({     
     Title = "Auto Kaitun System",    
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
-
-_G.KaitunEnabled = false
-_G.KaitunDelay = 1
-_G.AutoSellFish = true
 
 local function StartKaitun()
     task.spawn(function()
@@ -647,9 +663,11 @@ Tab4:Toggle({
     Callback = function(state)
         _G.KaitunEnabled = state
         if state then
+            CreateBackground()
             WindUI:Notify({Title = "Kaitun Started", Content = "Auto farming activated!", Duration = 3})
             StartKaitun()
         else
+            RemoveBackground()
             WindUI:Notify({Title = "Kaitun Stopped", Content = "Auto farming disabled.", Duration = 3})
         end
     end
