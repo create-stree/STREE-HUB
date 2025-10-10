@@ -22,10 +22,9 @@ local premiumKeys = {
 }
 
 local function isPremiumKey(key)
+    if type(key) ~= "string" then return false end
     for _, k in ipairs(premiumKeys) do
-        if key == k then
-            return true
-        end
+        if key == k then return true end
     end
     return false
 end
@@ -114,7 +113,7 @@ task.wait(0.3)
 ScreenGui:Destroy()
 
 local gameData = gameScripts[placeId]
-local gameName = gameData and gameData.name or "Unknown Game"
+local gameName = (gameData and gameData.name) or "Unknown Game"
 
 StarterGui:SetCore("SendNotification", {
     Title = "STREE HUB",
@@ -122,6 +121,7 @@ StarterGui:SetCore("SendNotification", {
     Icon = streeLogo,
     Duration = 3
 })
+
 StarterGui:SetCore("SendNotification", {
     Title = "STREE HUB",
     Text = "User Type: " .. userType,
@@ -131,23 +131,73 @@ StarterGui:SetCore("SendNotification", {
 
 task.wait(2)
 
+local function tryHttpGet(url)
+    local ok, body
+    ok, body = pcall(function() return game:HttpGet(url) end)
+    if ok and type(body) == "string" and #body > 10 then return true, body end
+    ok, body = pcall(function() return (game.HttpGetAsync and game:HttpGetAsync(url)) end)
+    if ok and type(body) == "string" and #body > 10 then return true, body end
+    if syn and syn.request then
+        ok, body = pcall(function() local r = syn.request({Url = url, Method = "GET"}) return r and r.Body end)
+        if ok and type(body) == "string" and #body > 10 then return true, body end
+    end
+    if http and http.request then
+        ok, body = pcall(function() local r = http.request({Url = url, Method = "GET"}) return r and r.Body end)
+        if ok and type(body) == "string" and #body > 10 then return true, body end
+    end
+    if request then
+        ok, body = pcall(function() local r = request({Url = url, Method = "GET"}) return r and r.Body end)
+        if ok and type(body) == "string" and #body > 10 then return true, body end
+    end
+    return false, nil
+end
+
+local function safeLoadLink(link)
+    local ok, body = tryHttpGet(link)
+    if not ok or type(body) ~= "string" then
+        StarterGui:SetCore("SendNotification", {
+            Title = "STREE HUB",
+            Text = "Failed to fetch script",
+            Icon = streeLogo,
+            Duration = 4
+        })
+        return false
+    end
+    local fn, err = loadstring(body)
+    if type(fn) ~= "function" then
+        StarterGui:SetCore("SendNotification", {
+            Title = "STREE HUB",
+            Text = "Failed to compile script",
+            Icon = streeLogo,
+            Duration = 4
+        })
+        return false
+    end
+    local ok2, res = pcall(fn)
+    if not ok2 then
+        StarterGui:SetCore("SendNotification", {
+            Title = "STREE HUB",
+            Text = "Script runtime error",
+            Icon = streeLogo,
+            Duration = 4
+        })
+        return false
+    end
+    return true
+end
+
 if gameData then
-    if userType == "Premium" then
-        StarterGui:SetCore("SendNotification", {
-            Title = "STREE HUB",
-            Text = "Loading Premium version for " .. gameName .. "...",
-            Icon = streeLogo,
-            Duration = 3
-        })
-        loadstring(game:HttpGet(gameData.premium))()
-    else
-        StarterGui:SetCore("SendNotification", {
-            Title = "STREE HUB",
-            Text = "Loading Freemium version for " .. gameName .. "...",
-            Icon = streeLogo,
-            Duration = 3
-        })
-        loadstring(game:HttpGet(gameData.free))()
+    local link = (isPremiumKey(_G.scripts_key) and gameData.premium) or gameData.free
+    StarterGui:SetCore("SendNotification", {
+        Title = "STREE HUB",
+        Text = (isPremiumKey(_G.scripts_key) and "Loading Premium version for " or "Loading Freemium version for ") .. gameName .. "...",
+        Icon = streeLogo,
+        Duration = 3
+    })
+    local ok = safeLoadLink(link)
+    if not ok and isPremiumKey(_G.scripts_key) then
+        local fallback = gameData.free
+        safeLoadLink(fallback)
     end
 else
     StarterGui:SetCore("SendNotification", {
