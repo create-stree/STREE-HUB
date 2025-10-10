@@ -517,13 +517,14 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local VirtualUser = game:GetService("VirtualUser")
+local SoundService = game:GetService("SoundService")
 local Player = Players.LocalPlayer
 
 _G.KaitunEnabled = false
 _G.KaitunDelay = 1
 _G.AutoSellFish = true
 
-local ScreenGui, Background, Saturn
+local ScreenGui, Background, Saturn, SpaceSound
 
 local function CreateBackground()
     if ScreenGui then ScreenGui:Destroy() end
@@ -540,40 +541,180 @@ local function CreateBackground()
     Background.ZIndex = 0
     Background.Parent = ScreenGui
 
-    for i = 1, 70 do
+    for i = 1, 80 do
         local star = Instance.new("Frame")
-        star.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
-        star.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        star.BackgroundTransparency = math.random(40, 80) / 100
+        star.Size = UDim2.new(0, math.random(3, 5), 0, math.random(3, 5))
         star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        star.BackgroundTransparency = 1
         star.ZIndex = 0
         star.Parent = Background
+
+        local circle = Instance.new("UICorner", star)
+        circle.CornerRadius = UDim.new(1, 0)
+
+        local glow = Instance.new("UIStroke", star)
+        glow.Thickness = 1
+        glow.Color = Color3.fromRGB(0, 255, 0)
+        glow.Transparency = math.random(40, 80) / 100
+
         task.spawn(function()
             local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-            TweenService:Create(star, tweenInfo, {BackgroundTransparency = math.random(0, 60) / 100}):Play()
+            TweenService:Create(glow, tweenInfo, {Transparency = math.random(0, 60) / 100}):Play()
         end)
     end
 
     Saturn = Instance.new("ImageLabel")
     Saturn.Image = "rbxassetid://122683047852451"
     Saturn.BackgroundTransparency = 1
-    Saturn.Size = UDim2.new(0, 300, 0, 300)
+    Saturn.Size = UDim2.new(0, 320, 0, 320)
     Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
     Saturn.ImageTransparency = 0.05
     Saturn.ZIndex = 0
     Saturn.Parent = Background
 
+    local rotationY = 0
     task.spawn(function()
         while ScreenGui and _G.KaitunEnabled do
-            TweenService:Create(Saturn, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 180}):Play()
-            task.wait(4)
-            TweenService:Create(Saturn, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Rotation = 0}):Play()
-            task.wait(4)
+            for i = 0, 180, 2 do
+                rotationY = i
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                Saturn.Rotation = 0
+                task.wait(0.02)
+            end
+            for i = 180, 0, -2 do
+                rotationY = i
+                task.wait(0.02)
+            end
         end
     end)
+
+    SpaceSound = Instance.new("Sound")
+    SpaceSound.SoundId = "rbxassetid://1846351427"
+    SpaceSound.Volume = 0.2
+    SpaceSound.Looped = true
+    SpaceSound.Parent = SoundService
+    SpaceSound:Play()
 end
 
 local function RemoveBackground()
+    if SpaceSound then
+        SpaceSound:Stop()
+        SpaceSound:Destroy()
+        SpaceSound = nil
+    end
     if ScreenGui then
         TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
         task.wait(1)
@@ -610,7 +751,7 @@ local Tab4 = Window:Tab({
     Icon = "star",
 })
 
-local Section = Tab3:Section({     
+local Section = Tab4:Section({     
     Title = "Auto Kaitun System",    
     TextXAlignment = "Left",    
     TextSize = 17,    
