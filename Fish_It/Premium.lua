@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.1",
+    Title = "v0.0.0.2",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -576,11 +576,129 @@ local Toggle = Tab3:Toggle({
 })
 
 local Tab4 = Window:Tab({
+    Title = "Exclusive",
+    Icon = "star",
+})
+
+local Section = Tab4:Section({ 
+    Title = "Auto Kaitun System",
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = true,
+})
+
+_G.KaitunEnabled = false
+_G.KaitunDelay = 1
+_G.AutoSellFish = true
+
+local function StartKaitun()
+    task.spawn(function()
+        while _G.KaitunEnabled do
+            local success, err = pcall(function()
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local backpack = player:WaitForChild("Backpack", 5)
+                local RepStorage = game:GetService("ReplicatedStorage")
+
+                if backpack then
+                    local rod = backpack:FindFirstChild("Rod") or backpack:FindFirstChild("FishingRod")
+                    if rod and not character:FindFirstChild(rod.Name) then
+                        character:WaitForChild("Humanoid"):EquipTool(rod)
+                    end
+                end
+
+                local fishingPackage = RepStorage:FindFirstChild("Packages") and RepStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0")
+                if not fishingPackage then return end
+                local netFolder = fishingPackage:FindFirstChild("net")
+                if not netFolder then return end
+                local chargeRemote = netFolder:FindFirstChild("RF/ChargeFishingRod")
+                local completeRemote = netFolder:FindFirstChild("RE/FishingCompleted")
+
+                if chargeRemote and completeRemote then
+                    if not character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                        chargeRemote:InvokeServer(2)
+                    end
+                    completeRemote:FireServer()
+                end
+
+                if _G.AutoSellFish then
+                    for _, v in pairs(RepStorage:GetDescendants()) do
+                        if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
+                            pcall(function() v:FireServer() end)
+                        end
+                    end
+                end
+            end)
+            if not success then
+                warn("[Kaitun Error]:", err)
+            end
+            task.wait(_G.KaitunDelay)
+        end
+    end)
+end
+
+Tab4:Toggle({
+    Title = "Enable Kaitun",
+    Desc = "Activate auto farming system",
+    Default = false,
+    Callback = function(state)
+        _G.KaitunEnabled = state
+        if state then
+            WindUI:Notify({
+                Title = "Kaitun Started",
+                Content = "Auto farming activated!",
+                Duration = 3
+            })
+            StartKaitun()
+        else
+            WindUI:Notify({
+                Title = "Kaitun Stopped",
+                Content = "Auto farming disabled.",
+                Duration = 3
+            })
+        end
+    end
+})
+
+Tab4:Toggle({
+    Title = "Auto Sell Fish",
+    Desc = "Automatically sell caught fish",
+    Default = true,
+    Callback = function(state)
+        _G.AutoSellFish = state
+        WindUI:Notify({
+            Title = "Auto Sell",
+            Content = state and "Enabled" or "Disabled",
+            Duration = 2
+        })
+    end
+})
+
+Tab4:Slider({
+    Title = "Kaitun Delay",
+    Desc = "Farming speed (seconds)",
+    Min = 0.5,
+    Max = 5,
+    Default = 1,
+    Callback = function(value)
+        _G.KaitunDelay = value
+        WindUI:Notify({
+            Title = "Kaitun Delay",
+            Content = "Delay set to " .. tostring(value) .. "s",
+            Duration = 2
+        })
+    end
+})
+
+local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
 })
 
-Tab4:Section({ 
+Tab5:Section({ 
     Title = "Buy Rod",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -630,7 +748,7 @@ local rodKeyMap = {
 
 local selectedRod = rodNames[1]
 
-Tab4:Dropdown({
+Tab5:Dropdown({
     Title = "Select Rod",
     Values = rodNames,
     Value = selectedRod,
@@ -640,7 +758,7 @@ Tab4:Dropdown({
     end
 })
 
-Tab4:Button({
+Tab5:Button({
     Title="Buy Rod",
     Callback=function()
         local key = rodKeyMap[selectedRod]
@@ -657,12 +775,12 @@ Tab4:Button({
     end
 })
 
-local Tab5 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
 
-local Section = Tab5:Section({ 
+local Section = Tab6:Section({ 
     Title = "Island",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -695,7 +813,7 @@ local IslandDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Teleport to Island",
     Callback = function()
         if SelectedIsland and IslandLocations[SelectedIsland] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -704,7 +822,7 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({ 
+local Section = Tab6:Section({ 
     Title = "Fishing Spot",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -735,7 +853,7 @@ local FishingDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Teleport to Fishing Spot",
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -744,7 +862,7 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({
+local Section = Tab6:Section({
     Title = "Location NPC",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -772,7 +890,7 @@ local NPC_Locations = {
 
 local SelectedNPC = nil
 
-local NPCDropdown = Tab5:Dropdown({
+local NPCDropdown = Tab6:Dropdown({
     Title = "Select NPC",
     Values = (function()
         local keys = {}
@@ -787,7 +905,7 @@ local NPCDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab6:Button({
     Title = "Teleport to NPC",
     Callback = function()
         if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -796,12 +914,12 @@ Tab5:Button({
     end
 })
 
-local Tab6 = Window:Tab({
+local Tab7 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
 
-local Toggle = Tab6:Toggle({
+local Toggle = Tab7:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -838,7 +956,7 @@ local Toggle = Tab6:Toggle({
     end
 })
 
-local Toggle = Tab6:Toggle({
+local Toggle = Tab7:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -866,7 +984,7 @@ local Toggle = Tab6:Toggle({
     end
 })
 
-local Section = Tab6:Section({ 
+local Section = Tab7:Section({ 
     Title = "Config",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -919,7 +1037,7 @@ local function ApplyConfig(data)
     end
 end
 
-Tab6:Button({
+Tab7:Button({
     Title = "Save Config",
     Desc = "Save all settings",
     Callback = function()
@@ -929,7 +1047,7 @@ Tab6:Button({
     end
 })
 
-Tab6:Button({
+Tab7:Button({
     Title = "Load Config",
     Desc = "Use saved config",
     Callback = function()
@@ -944,7 +1062,7 @@ Tab6:Button({
     end
 })
 
-Tab6:Button({
+Tab7:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
     Callback = function()
@@ -957,13 +1075,13 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({ 
+local Section = Tab7:Section({ 
     Title = "Other Scripts",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Button = Tab6:Button({
+local Button = Tab7:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -972,7 +1090,7 @@ local Button = Tab6:Button({
     end
 })
 
-local Button = Tab6:Button({
+local Button = Tab7:Button({
     Title = "Simple Shader",
     Desc = "Shader",
     Locked = false,
@@ -981,7 +1099,7 @@ local Button = Tab6:Button({
     end
 })
 
-local Button = Tab6:Button({
+local Button = Tab7:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
