@@ -378,6 +378,45 @@ Toggle = Tab3:Toggle({
     end
 })
 
+local Workspace = game:GetService("Workspace")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local camera = Workspace.CurrentCamera
+
+local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
+local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
+
+local autoHoldEnabled = false
+Toggle = Tab3:Toggle({
+    Title = "Auto Fishing (Instant)",
+    Desc = "Casts and catches instantly",
+    Value = false,
+    Callback = function(state)
+        autoHoldEnabled = state
+        if state then
+            WindUI:Notify({
+                Title = "Auto Fishing Instant",
+                Content = "Enabled",
+                Duration = 3
+            })
+            task.spawn(function()
+                while autoHoldEnabled do
+                    pcall(function()
+                        REEquipToolFromHotbar:FireServer(1)
+                        REFishingCompleted:FireServer("Success")
+                    end)
+                end
+            end)
+        else
+            WindUI:Notify({
+                Title = "Auto Fishing Instant",
+                Content = "Disabled",
+                Duration = 3
+            })
+        end
+    end
+})
+
 local Toggle = Tab3:Toggle({    
     Title = "Auto Sell",    
     Desc = "Automatic fish sales",    
