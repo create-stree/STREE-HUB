@@ -388,9 +388,10 @@ local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0
 local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
 
 local autoHoldEnabled = false
+
 Toggle = Tab3:Toggle({
     Title = "Auto Fishing (Instant)",
-    Desc = "Instant fishing without lag",
+    Desc = "Casts and catches instantly",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
@@ -404,9 +405,14 @@ Toggle = Tab3:Toggle({
                 while autoHoldEnabled do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
+                        local clickX = camera.ViewportSize.X / 2
+                        local clickY = camera.ViewportSize.Y / 2
+                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
+                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
+                        task.wait(0.05)
                         REFishingCompleted:FireServer("Success")
                     end)
-                    task.wait(0.01)
+                    task.wait(0.05)
                 end
             end)
         else
