@@ -379,6 +379,7 @@ Toggle = Tab3:Toggle({
 })
 
 local Workspace = game:GetService("Workspace")
+local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local camera = Workspace.CurrentCamera
@@ -389,7 +390,7 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 local autoHoldEnabled = false
 Toggle = Tab3:Toggle({
     Title = "Auto Fishing (Instant)",
-    Desc = "Casts and catches instantly",
+    Desc = "Instant fishing without lag",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
@@ -405,6 +406,7 @@ Toggle = Tab3:Toggle({
                         REEquipToolFromHotbar:FireServer(1)
                         REFishingCompleted:FireServer("Success")
                     end)
+                    task.wait(0.01)
                 end
             end)
         else
