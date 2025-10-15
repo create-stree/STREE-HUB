@@ -512,6 +512,59 @@ local Toggle = Tab3:Toggle({
     end    
 })
 
+local Section = Tab3:Section({     
+    Title = "Enchant",    
+    TextXAlignment = "Left",    
+    TextSize = 17,    
+})
+
+local Toggle = Tab3:Toggle({
+    Title = "Auto Enchant",
+    Desc = "Gacha to get good enchants",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        if state then
+            _G.AutoEnchant = true
+            print("Auto Enchant: ON")
+
+            local Enchants = {
+                {Name = "Stargazer I", Chance = 7},
+                {Name = "Shiny I", Chance = 5},
+                {Name = "Experienced I", Chance = 7},
+                {Name = "Storm Hunter I", Chance = 7},
+                {Name = "Perfection", Chance = 2},
+            }
+
+            local function RollEnchant()
+                local total = 0
+                for _, e in ipairs(Enchants) do
+                    total += e.Chance
+                end
+                local roll = math.random(1, total)
+                for _, e in ipairs(Enchants) do
+                    roll -= e.Chance
+                    if roll <= 0 then
+                        return e.Name
+                    end
+                end
+            end
+
+            task.spawn(function()
+                while _G.AutoEnchant do
+                    local result = RollEnchant()
+                    print("🎲 You got enchant:", result)
+                    task.wait(1.5)
+                end
+            end)
+        else
+            _G.AutoEnchant = false
+            print("Auto Enchant: OFF")
+        end
+    end
+})
+
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
