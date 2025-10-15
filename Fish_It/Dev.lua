@@ -752,7 +752,6 @@ local Tab5 = Window:Tab({
     Icon = "badge-dollar-sign",
 })
 
-Tab5:Section({ 
 Tab5:Section({   
     Title = "Buy Rod",  
     TextXAlignment = "Left",  
