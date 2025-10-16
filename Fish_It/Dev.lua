@@ -405,7 +405,7 @@ task.spawn(function()
                         net["RF/ChargeFishingRod"]:InvokeServer(2)
                         net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
                         net["RE/FishingCompleted"]:FireServer("Success")
-                        task.wait(0.1)
+                        task.wait(0.01)
                     end
                 end
             end)
