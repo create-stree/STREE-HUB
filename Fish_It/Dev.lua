@@ -379,7 +379,6 @@ Toggle = Tab3:Toggle({
 })
 
 local Workspace = game:GetService("Workspace")
-local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local camera = Workspace.CurrentCamera
@@ -387,39 +386,40 @@ local camera = Workspace.CurrentCamera
 local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
 local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
 
-local autoHoldEnabled = false
-
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Instant)",
-    Desc = "Casts and catches instantly",
+    Title = "Auto Fishing (Instant x3)",
+    Desc = "Casts and catches three times instantly",
     Value = false,
     Callback = function(state)
-        autoHoldEnabled = state
         if state then
             WindUI:Notify({
                 Title = "Auto Fishing Instant",
-                Content = "Enabled",
-                Duration = 3
+                Content = "Starting...",
+                Duration = 2
             })
             task.spawn(function()
-                while autoHoldEnabled do
+                for i = 1, 3 do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
-                        local clickX = camera.ViewportSize.X / 2
-                        local clickY = camera.ViewportSize.Y / 2
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-                        task.wait(0.05)
+                        local x = camera.ViewportSize.X / 2
+                        local y = camera.ViewportSize.Y / 2
+                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
+                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
                         REFishingCompleted:FireServer("Success")
                     end)
-                    task.wait(0.05)
                 end
+                WindUI:Notify({
+                    Title = "Auto Fishing Instant",
+                    Content = "Completed 3 casts",
+                    Duration = 2
+                })
+                Toggle:Set(false)
             end)
         else
             WindUI:Notify({
                 Title = "Auto Fishing Instant",
                 Content = "Disabled",
-                Duration = 3
+                Duration = 2
             })
         end
     end
