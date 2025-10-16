@@ -386,38 +386,33 @@ local camera = Workspace.CurrentCamera
 local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
 local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
 
+local autoFishing = false
+
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Instant x3)",
-    Desc = "Casts and catches three times instantly",
+    Title = "Auto Fishing (Strike+Instant)",
+    Desc = "Instant strike reaction, 0.001s catch speed",
     Value = false,
     Callback = function(state)
+        autoFishing = state
         if state then
             WindUI:Notify({
-                Title = "Auto Fishing Instant",
-                Content = "Starting...",
+                Title = "Auto Fishing",
+                Content = "Instant Mode Enabled",
                 Duration = 2
             })
             task.spawn(function()
-                for i = 1, 3 do
+                while autoFishing do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
-                        local x = camera.ViewportSize.X / 2
-                        local y = camera.ViewportSize.Y / 2
-                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
-                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
-                        REFishingCompleted:FireServer("Success")
+                        task.wait(0.001)
+                        REFishingCompleted:FireServer()
                     end)
+                    task.wait(0.001)
                 end
-                WindUI:Notify({
-                    Title = "Auto Fishing Instant",
-                    Content = "Completed 3 casts",
-                    Duration = 2
-                })
-                Toggle:Set(false)
             end)
         else
             WindUI:Notify({
-                Title = "Auto Fishing Instant",
+                Title = "Auto Fishing",
                 Content = "Disabled",
                 Duration = 2
             })
