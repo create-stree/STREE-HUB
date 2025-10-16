@@ -382,8 +382,8 @@ local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 
 Tab3:Toggle({
-    Title = "Auto Fishing",
-    Desc = "Automatic Auto Fishing v4 (TikTok Style)",
+    Title = "Auto Instant Fishing",
+    Desc = "Automatic Auto Fishing v4",
     Icon = false,
     Type = false,
     Default = false,
@@ -405,7 +405,6 @@ spawn(function()
                 if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
                     net["RF/ChargeFishingRod"]:InvokeServer(2)
                     net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                    task.wait(0.1)
                     net["RE/FishingCompleted"]:FireServer("Success")
                 end
             end)
