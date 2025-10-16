@@ -389,8 +389,8 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 local autoHoldEnabled = false
 
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Instant v3)",
-    Desc = "Fastest auto cast & catch",
+    Title = "Auto Fishing (Ultra Instant)",
+    Desc = "Fastest cast & catch loop",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
@@ -408,10 +408,9 @@ Toggle = Tab3:Toggle({
                         local y = camera.ViewportSize.Y / 2
                         VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
                         VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
-                        task.wait(0.1)
                         REFishingCompleted:FireServer("Success")
                     end)
-                    task.wait(0.15)
+                    task.wait(0.01)
                 end
             end)
         else
