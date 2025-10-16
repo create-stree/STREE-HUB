@@ -382,6 +382,10 @@ local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
+local player = game.Players.LocalPlayer
+local RepStorage = game:GetService("ReplicatedStorage")
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
     Desc = "Automatic Auto Fishing v3",
@@ -394,18 +398,17 @@ Tab3:Toggle({
 })
 
 task.spawn(function()
-    while task.wait(0.01) do
+    while task.wait(0.001) do
         if _G.AutoFishing then
             pcall(function()
                 local char = player.Character or player.CharacterAdded:Wait()
                 local view = char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
                 if view then
-                    local exMark = view:FindFirstChild("!") or view:FindFirstChild("Exclamation") or view:FindFirstChildWhichIsA("BillboardGui")
-                    if exMark then
+                    local exMark = view:FindFirstChildWhichIsA("BillboardGui", true)
+                    if exMark and exMark.Enabled then
                         net["RF/ChargeFishingRod"]:InvokeServer(2)
                         net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
                         net["RE/FishingCompleted"]:FireServer("Success")
-                        task.wait(0.01)
                     end
                 end
             end)
