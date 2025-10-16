@@ -392,30 +392,30 @@ Tab3:Toggle({
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local Net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+local EquipTool = Net["RE/EquipToolFromHotbar"]
 local ChargeRod = Net["RF/ChargeFishingRod"]
 local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
 local CompleteFish = Net["RE/FishingCompleted"]
 
 task.spawn(function()
-	while task.wait(0.0001) do
+	while task.wait() do
 		if _G.AutoFishing then
 			pcall(function()
 				local char = player.Character or player.CharacterAdded:Wait()
 				if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-					Net["RE/EquipToolFromHotbar"]:FireServer(1)
+					EquipTool:FireServer(1)
 				end
 				local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
 				if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
 					ChargeRod:InvokeServer(2)
 					StartMiniGame:InvokeServer(1, 1)
-					task.wait(0.001)
 					CompleteFish:FireServer("Success")
 				end
 			end)
+			task.wait(0.0001)
 		end
 	end
 end)
-
 local Toggle = Tab3:Toggle({    
     Title = "Auto Sell",    
     Desc = "Automatic fish sales",    
