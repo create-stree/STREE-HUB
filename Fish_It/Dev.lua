@@ -395,11 +395,7 @@ Toggle = Tab3:Toggle({
     Callback = function(state)
         autoHoldEnabled = state
         if state then
-            WindUI:Notify({
-                Title = "Auto Fishing v3",
-                Content = "Enabled",
-                Duration = 3
-            })
+            WindUI:Notify({Title = "Auto Fishing v3", Content = "Enabled", Duration = 3})
             task.spawn(function()
                 while autoHoldEnabled do
                     pcall(function()
@@ -414,11 +410,7 @@ Toggle = Tab3:Toggle({
                 end
             end)
         else
-            WindUI:Notify({
-                Title = "Auto Fishing v3",
-                Content = "Disabled",
-                Duration = 3
-            })
+            WindUI:Notify({Title = "Auto Fishing v3", Content = "Disabled", Duration = 3})
         end
     end
 })
