@@ -379,8 +379,8 @@ Toggle = Tab3:Toggle({
 })
 
 Tab3:Toggle({
-    Title = "Auto Fishing",
-    Desc = "Automatic Auto Fishing v1",
+    Title = "Auto Instant Fishing",
+    Desc = "Automatic Auto Fishing v3",
     Icon = false,
     Type = false,
     Default = false,
@@ -389,41 +389,31 @@ Tab3:Toggle({
     end
 })
 
+local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
+local Net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+local ChargeRod = Net["RF/ChargeFishingRod"]
+local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
+local CompleteFish = Net["RE/FishingCompleted"]
 
-spawn(function()
-    while wait() do
-        if _G.AutoFishing then
-            repeat
-                pcall(function()
-                    local char = player.Character or player.CharacterAdded:Wait()
-                    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-                    end
-                    local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                    if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                        wait(0.001)
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
-                    end
-                end)
-                wait(0.001)
-            until not _G.AutoFishing
-        end
-    end
-end)
-
-spawn(function()
-    while wait() do
-        if _G.AutoFishing then
-            repeat
-                pcall(function()
-                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
-                end)
-                wait(0.001)
-            until not _G.AutoFishing
-        end
-    end
+task.spawn(function()
+	while task.wait(0.0001) do
+		if _G.AutoFishing then
+			pcall(function()
+				local char = player.Character or player.CharacterAdded:Wait()
+				if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+					Net["RE/EquipToolFromHotbar"]:FireServer(1)
+				end
+				local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+				if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+					ChargeRod:InvokeServer(2)
+					StartMiniGame:InvokeServer(1, 1)
+					task.wait(0.001)
+					CompleteFish:FireServer("Success")
+				end
+			end)
+		end
+	end
 end)
 
 local Toggle = Tab3:Toggle({    
