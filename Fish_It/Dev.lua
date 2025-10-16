@@ -284,7 +284,7 @@ end)
 
 Tab3:Toggle({
     Title = "Auto Fishing Fast",
-    Desc = "Lempar sekali, narik cepat",
+    Desc = "Lempar dan narik cepat",
     Icon = false,
     Type = false,
     Default = false,
@@ -301,32 +301,20 @@ local ChargeRod = Net["RF/ChargeFishingRod"]
 local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
 local CompleteFish = Net["RE/FishingCompleted"]
 
-local function ThrowRodOnce()
-    local char = player.Character or player.CharacterAdded:Wait()
-    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-        EquipTool:FireServer(1)
-        ChargeRod:InvokeServer(2)
-        StartMiniGame:InvokeServer(1,1)
-    end
-end
-
 task.spawn(function()
-    local thrown = false
     while true do
         task.wait(0.001)
         if _G.AutoFishing then
             pcall(function()
-                if not thrown then
-                    ThrowRodOnce()
-                    thrown = true
-                end
-                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                local char = player.Character or player.CharacterAdded:Wait()
+                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                    EquipTool:FireServer(1)
+                    ChargeRod:InvokeServer(2)
+                    StartMiniGame:InvokeServer(1,1)
                     CompleteFish:FireServer("Success")
                 end
             end)
         else
-            thrown = false
             task.wait(0.001)
         end
     end
