@@ -380,6 +380,7 @@ Toggle = Tab3:Toggle({
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
@@ -387,27 +388,25 @@ Tab3:Toggle({
     Icon = false,
     Type = false,
     Default = false,
-    Callback = function(value)
-        _G.AutoFishing = value
+    Callback = function(v)
+        _G.AutoFishing = v
     end
 })
 
 task.spawn(function()
-    while task.wait(0) do
+    while task.wait(0.01) do
         if _G.AutoFishing then
             pcall(function()
                 local char = player.Character or player.CharacterAdded:Wait()
-                local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                    net["RE/EquipToolFromHotbar"]:FireServer(1)
-                    task.wait(0)
-                end
-                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                    net["RF/ChargeFishingRod"]:InvokeServer(2)
-                    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                    task.wait(0)
-                    net["RE/FishingCompleted"]:FireServer("Success")
+                local view = char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
+                if view then
+                    local exMark = view:FindFirstChild("!") or view:FindFirstChild("Exclamation") or view:FindFirstChildWhichIsA("BillboardGui")
+                    if exMark then
+                        net["RF/ChargeFishingRod"]:InvokeServer(2)
+                        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+                        net["RE/FishingCompleted"]:FireServer("Success")
+                        task.wait(0.1)
+                    end
                 end
             end)
         end
