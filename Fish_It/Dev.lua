@@ -3,7 +3,7 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
-    warn("⚠️ UI failed to load!")
+    warn("⚠️ UI failed to loaded!")
     return
 else
     print("✓ UI loaded successfully!")
@@ -393,20 +393,20 @@ Tab3:Toggle({
 })
 
 task.spawn(function()
-    while task.wait(0.001) do
+    while task.wait(0) do
         if _G.AutoFishing then
             pcall(function()
                 local char = player.Character or player.CharacterAdded:Wait()
                 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
                 if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
                     net["RE/EquipToolFromHotbar"]:FireServer(1)
-                    task.wait(0.001)
+                    task.wait(0)
                 end
                 local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
                 if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
                     net["RF/ChargeFishingRod"]:InvokeServer(2)
                     net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                    task.wait(0.001)
+                    task.wait(0)
                     net["RE/FishingCompleted"]:FireServer("Success")
                 end
             end)
