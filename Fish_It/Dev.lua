@@ -392,21 +392,21 @@ Tab3:Toggle({
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local Net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local EquipTool = Net["RE/EquipToolFromHotbar"]
-local ChargeRod = Net["RF/ChargeFishingRod"]
-local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
-local CompleteFish = Net["RE/FishingCompleted"]
+local Equip = Net["RE/EquipToolFromHotbar"]
+local Charge = Net["RF/ChargeFishingRod"]
+local Start = Net["RF/RequestFishingMinigameStarted"]
+local Complete = Net["RE/FishingCompleted"]
 
 task.spawn(function()
-	while task.wait(0.0001) do
+	while task.wait(0.001) do
 		if _G.AutoFishing then
 			pcall(function()
-				local char = player.Character
-				if char and char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-					EquipTool:FireServer(1)
-					ChargeRod:InvokeServer(2)
-					StartMiniGame:InvokeServer(1, 1)
-					CompleteFish:FireServer("Success")
+				local char = player.Character or player.CharacterAdded:Wait()
+				if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+					Equip:FireServer(1)
+					Charge:InvokeServer(2)
+					Start:InvokeServer(1,1)
+					Complete:FireServer("Success")
 				end
 			end)
 		end
