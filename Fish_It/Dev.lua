@@ -378,42 +378,39 @@ Toggle = Tab3:Toggle({
     end
 })
 
-local Workspace = game:GetService("Workspace")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local camera = Workspace.CurrentCamera
+local player = game.Players.LocalPlayer
+local RepStorage = game:GetService("ReplicatedStorage")
 
-local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
-local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
-
-local autoHoldEnabled = false
-
-Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Ultra Instant)",
-    Desc = "Fastest cast & catch loop",
-    Value = false,
-    Callback = function(state)
-        autoHoldEnabled = state
-        if state then
-            WindUI:Notify({Title = "Auto Fishing v3", Content = "Enabled", Duration = 3})
-            task.spawn(function()
-                while autoHoldEnabled do
-                    pcall(function()
-                        REEquipToolFromHotbar:FireServer(1)
-                        local x = camera.ViewportSize.X / 2
-                        local y = camera.ViewportSize.Y / 2
-                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
-                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
-                        REFishingCompleted:FireServer("Success")
-                    end)
-                    task.wait(0.01)
-                end
-            end)
-        else
-            WindUI:Notify({Title = "Auto Fishing v3", Content = "Disabled", Duration = 3})
-        end
+Tab3:Toggle({
+    Title = "Auto Fishing",
+    Desc = "Automatic Auto Fishing v1 (Ultra Fast)",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(value)
+        _G.AutoFishing = value
     end
 })
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoFishing then
+            pcall(function()
+                local char = player.Character or player.CharacterAdded:Wait()
+                local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                    net["RE/EquipToolFromHotbar"]:FireServer(1)
+                end
+                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                    net["RF/ChargeFishingRod"]:InvokeServer(2)
+                    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+                    net["RE/FishingCompleted"]:FireServer("Success")
+                end
+            end)
+        end
+    end
+end)
 
 local Toggle = Tab3:Toggle({    
     Title = "Auto Sell",    
