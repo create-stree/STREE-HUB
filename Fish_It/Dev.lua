@@ -380,7 +380,7 @@ Toggle = Tab3:Toggle({
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automatic Auto Fishing v3",
+    Desc = "Auto lempar langsung catch",
     Icon = false,
     Type = false,
     Default = false,
@@ -398,24 +398,21 @@ local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
 local CompleteFish = Net["RE/FishingCompleted"]
 
 task.spawn(function()
-	while task.wait() do
+	while task.wait(0.0001) do
 		if _G.AutoFishing then
 			pcall(function()
-				local char = player.Character or player.CharacterAdded:Wait()
-				if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+				local char = player.Character
+				if char and char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
 					EquipTool:FireServer(1)
-				end
-				local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-				if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
 					ChargeRod:InvokeServer(2)
 					StartMiniGame:InvokeServer(1, 1)
 					CompleteFish:FireServer("Success")
 				end
 			end)
-			task.wait(0.0001)
 		end
 	end
 end)
+
 local Toggle = Tab3:Toggle({    
     Title = "Auto Sell",    
     Desc = "Automatic fish sales",    
