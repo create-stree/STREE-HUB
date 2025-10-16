@@ -307,11 +307,11 @@ spawn(function()
                     local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
                     if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
                         RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                        wait(0.5)
+                        wait(0.05)
                         RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
                     end
                 end)
-                wait(0.2)
+                wait(0.02)
             until not _G.AutoFishing
         end
     end
@@ -324,7 +324,7 @@ spawn(function()
                 pcall(function()
                     RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
                 end)
-                wait(0.2)
+                wait(0.02)
             until not _G.AutoFishing
         end
     end
@@ -377,35 +377,6 @@ Toggle = Tab3:Toggle({
         end
     end
 })
-
-Tab3:Toggle({
-    Title = "Auto Instant Catch",
-    Desc = "Langsung catch saat kail di air",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(value)
-        _G.AutoFishingCatch = value
-    end
-})
-
-local player = game.Players.LocalPlayer
-local RepStorage = game:GetService("ReplicatedStorage")
-local Net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local Complete = Net["RE/FishingCompleted"]
-
-task.spawn(function()
-	while task.wait(0.001) do
-		if _G.AutoFishingCatch then
-			pcall(function()
-				local char = player.Character or player.CharacterAdded:Wait()
-				if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-					Complete:FireServer("Success")
-				end
-			end)
-		end
-	end
-end)
 
 local Toggle = Tab3:Toggle({    
     Title = "Auto Sell",    
