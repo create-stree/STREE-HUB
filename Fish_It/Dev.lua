@@ -283,8 +283,8 @@ spawn(function()
 end)
 
 Tab3:Toggle({
-    Title = "Auto Fishing Fast",
-    Desc = "Lempar dan narik cepat",
+    Title = "Auto Fishing",
+    Desc = "Automatic Auto Fishing v1",
     Icon = false,
     Type = false,
     Default = false,
@@ -293,29 +293,39 @@ Tab3:Toggle({
     end
 })
 
-local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-local Net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local EquipTool = Net["RE/EquipToolFromHotbar"]
-local ChargeRod = Net["RF/ChargeFishingRod"]
-local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
-local CompleteFish = Net["RE/FishingCompleted"]
 
-task.spawn(function()
-    while true do
-        task.wait(0.001)
+spawn(function()
+    while wait() do
         if _G.AutoFishing then
-            pcall(function()
-                local char = player.Character or player.CharacterAdded:Wait()
-                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                    EquipTool:FireServer(1)
-                    ChargeRod:InvokeServer(2)
-                    StartMiniGame:InvokeServer(1,1)
-                    CompleteFish:FireServer("Success")
-                end
-            end)
-        else
-            task.wait(0.001)
+            repeat
+                pcall(function()
+                    local char = player.Character or player.CharacterAdded:Wait()
+                    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+                    end
+                    local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                    if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
+                        wait(0.05)
+                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+                    end
+                end)
+                wait(0.02)
+            until not _G.AutoFishing
+        end
+    end
+end)
+
+spawn(function()
+    while wait() do
+        if _G.AutoFishing then
+            repeat
+                pcall(function()
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
+                end)
+                wait(0.02)
+            until not _G.AutoFishing
         end
     end
 end)
