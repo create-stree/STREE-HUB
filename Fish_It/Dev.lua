@@ -389,25 +389,29 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 local autoFishing = false
 
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Strike+Instant)",
-    Desc = "Instant strike reaction, 0.001s catch speed",
+    Title = "Auto Fishing (Perfect Instant)",
+    Desc = "Instant cast and catch with rope animation",
     Value = false,
     Callback = function(state)
         autoFishing = state
         if state then
             WindUI:Notify({
                 Title = "Auto Fishing",
-                Content = "Instant Mode Enabled",
+                Content = "Perfect Instant Mode Enabled",
                 Duration = 2
             })
             task.spawn(function()
                 while autoFishing do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
-                        task.wait(0.001)
-                        REFishingCompleted:FireServer()
+                        local x = camera.ViewportSize.X / 2
+                        local y = camera.ViewportSize.Y / 2
+                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
+                        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
+                        task.wait(0.1)
+                        REFishingCompleted:FireServer("Success")
                     end)
-                    task.wait(0.001)
+                    task.wait(0.1)
                 end
             end)
         else
