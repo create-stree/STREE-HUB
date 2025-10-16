@@ -381,6 +381,7 @@ Toggle = Tab3:Toggle({
 local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local camera = Workspace.CurrentCamera
 
 local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
@@ -389,15 +390,15 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 local autoFishing = false
 
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Perfect Instant)",
-    Desc = "Instant cast and catch with rope animation",
+    Title = "Auto Fishing (Pro Mode)",
+    Desc = "Cast, !, catch <1s loop",
     Value = false,
     Callback = function(state)
         autoFishing = state
         if state then
             WindUI:Notify({
                 Title = "Auto Fishing",
-                Content = "Perfect Instant Mode Enabled",
+                Content = "Pro Mode Enabled",
                 Duration = 2
             })
             task.spawn(function()
@@ -408,10 +409,11 @@ Toggle = Tab3:Toggle({
                         local y = camera.ViewportSize.Y / 2
                         VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
                         VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
-                        task.wait(0.1)
+                        task.wait(0.25)
                         REFishingCompleted:FireServer("Success")
                     end)
-                    task.wait(0.1)
+                    task.wait(0.35)
+                    RunService.Heartbeat:Wait()
                 end
             end)
         else
