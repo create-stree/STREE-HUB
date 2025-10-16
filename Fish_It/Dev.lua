@@ -379,33 +379,27 @@ Toggle = Tab3:Toggle({
 })
 
 Tab3:Toggle({
-    Title = "Auto Instant Fishing",
-    Desc = "Auto lempar langsung catch",
+    Title = "Auto Instant Catch",
+    Desc = "Langsung catch saat kail di air",
     Icon = false,
     Type = false,
     Default = false,
     Callback = function(value)
-        _G.AutoFishing = value
+        _G.AutoFishingCatch = value
     end
 })
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local Net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local Equip = Net["RE/EquipToolFromHotbar"]
-local Charge = Net["RF/ChargeFishingRod"]
-local Start = Net["RF/RequestFishingMinigameStarted"]
 local Complete = Net["RE/FishingCompleted"]
 
 task.spawn(function()
 	while task.wait(0.001) do
-		if _G.AutoFishing then
+		if _G.AutoFishingCatch then
 			pcall(function()
 				local char = player.Character or player.CharacterAdded:Wait()
 				if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-					Equip:FireServer(1)
-					Charge:InvokeServer(2)
-					Start:InvokeServer(1,1)
 					Complete:FireServer("Success")
 				end
 			end)
