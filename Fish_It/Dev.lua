@@ -383,7 +383,7 @@ local RepStorage = game:GetService("ReplicatedStorage")
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automatic Auto Fishing v4",
+    Desc = "Automatic Auto Fishing v3",
     Icon = false,
     Type = false,
     Default = false,
@@ -392,21 +392,21 @@ Tab3:Toggle({
     end
 })
 
-spawn(function()
-    while task.wait(0.01) do
+task.spawn(function()
+    while task.wait(0.001) do
         if _G.AutoFishing then
             pcall(function()
                 local char = player.Character or player.CharacterAdded:Wait()
                 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
                 if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
                     net["RE/EquipToolFromHotbar"]:FireServer(1)
-                    task.wait(0.01)
+                    task.wait(0.001)
                 end
                 local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
                 if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
                     net["RF/ChargeFishingRod"]:InvokeServer(2)
                     net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-                    task.wait(0.01)
+                    task.wait(0.001)
                     net["RE/FishingCompleted"]:FireServer("Success")
                 end
             end)
