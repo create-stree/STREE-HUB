@@ -381,46 +381,44 @@ Toggle = Tab3:Toggle({
 local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local camera = Workspace.CurrentCamera
 
 local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
 local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
 
-local autoFishing = false
+local autoHoldEnabled = false
 
 Toggle = Tab3:Toggle({
-    Title = "Auto Fishing (Pro Mode)",
-    Desc = "Cast, !, catch <1s loop",
+    Title = "Auto Fishing (Instant v3)",
+    Desc = "Fastest auto cast & catch",
     Value = false,
     Callback = function(state)
-        autoFishing = state
+        autoHoldEnabled = state
         if state then
             WindUI:Notify({
-                Title = "Auto Fishing",
-                Content = "Pro Mode Enabled",
-                Duration = 2
+                Title = "Auto Fishing v3",
+                Content = "Enabled",
+                Duration = 3
             })
             task.spawn(function()
-                while autoFishing do
+                while autoHoldEnabled do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
                         local x = camera.ViewportSize.X / 2
                         local y = camera.ViewportSize.Y / 2
                         VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
                         VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
-                        task.wait(0.25)
+                        task.wait(0.1)
                         REFishingCompleted:FireServer("Success")
                     end)
-                    task.wait(0.35)
-                    RunService.Heartbeat:Wait()
+                    task.wait(0.15)
                 end
             end)
         else
             WindUI:Notify({
-                Title = "Auto Fishing",
+                Title = "Auto Fishing v3",
                 Content = "Disabled",
-                Duration = 2
+                Duration = 3
             })
         end
     end
