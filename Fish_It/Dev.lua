@@ -283,8 +283,8 @@ spawn(function()
 end)
 
 Tab3:Toggle({
-    Title = "Auto Fishing",
-    Desc = "Automatic Auto Fishing v1",
+    Title = "Auto Fishing Fast",
+    Desc = "Lempar sekali, narik cepat",
     Icon = false,
     Type = false,
     Default = false,
@@ -301,25 +301,33 @@ local ChargeRod = Net["RF/ChargeFishingRod"]
 local StartMiniGame = Net["RF/RequestFishingMinigameStarted"]
 local CompleteFish = Net["RE/FishingCompleted"]
 
+local function ThrowRodOnce()
+    local char = player.Character or player.CharacterAdded:Wait()
+    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+        EquipTool:FireServer(1)
+        ChargeRod:InvokeServer(2)
+        StartMiniGame:InvokeServer(1,1)
+    end
+end
+
 task.spawn(function()
+    local thrown = false
     while true do
-        task.wait(0.01)
+        task.wait(0.001)
         if _G.AutoFishing then
             pcall(function()
-                local char = player.Character or player.CharacterAdded:Wait()
-                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                    EquipTool:FireServer(1)
-                    local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                    if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                        ChargeRod:InvokeServer(2)
-                        StartMiniGame:InvokeServer(1,1)
-                        task.wait(0.001)
-                        CompleteFish:FireServer("Success")
-                    end
+                if not thrown then
+                    ThrowRodOnce()
+                    thrown = true
+                end
+                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                    CompleteFish:FireServer("Success")
                 end
             end)
         else
-            task.wait(0.1)
+            thrown = false
+            task.wait(0.001)
         end
     end
 end)
