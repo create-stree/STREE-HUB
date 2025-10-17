@@ -250,6 +250,40 @@ local Section = Tab3:Section({
     TextSize = 17,
 })
 
+Tab3:Toggle({
+    Title = "Auto Equip Rod",
+    Desc = "Automatically equips fishing rod",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(value)
+        _G.AutoEquipRod = value
+    end
+})
+
+local player = game.Players.LocalPlayer
+
+spawn(function()
+    while task.wait(0.05) do
+        if _G.AutoEquipRod then
+            pcall(function()
+                local char = player.Character
+                local humanoid = char and char:FindFirstChild("Humanoid")
+                local backpack = player:FindFirstChild("Backpack")
+                if humanoid and backpack then
+                    local rod = backpack:FindFirstChild("Rod")
+                        or backpack:FindFirstChild("FishingRod")
+                        or backpack:FindFirstChild("OldRod")
+                        or backpack:FindFirstChild("BasicRod")
+                    if rod and not char:FindFirstChild(rod.Name) then
+                        humanoid:EquipTool(rod)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 
