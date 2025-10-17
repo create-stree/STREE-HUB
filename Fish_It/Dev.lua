@@ -288,7 +288,7 @@ local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 
 Tab3:Toggle({
-    Title = "Auto Fishing",
+    Title = "Auto Instant Fishing",
     Desc = "Automatic Auto Fishing v1",
     Icon = false,
     Type = false,
