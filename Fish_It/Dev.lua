@@ -381,11 +381,11 @@ spawn(function()
                     local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
                     if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
                         RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                        wait(0.05)
+                        wait(0.01)
                         RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
                     end
                 end)
-                wait(0.02)
+                wait(0.01)
             until not _G.AutoFishing
         end
     end
@@ -398,7 +398,7 @@ spawn(function()
                 pcall(function()
                     RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
                 end)
-                wait(0.02)
+                wait(0.01)
             until not _G.AutoFishing
         end
     end
