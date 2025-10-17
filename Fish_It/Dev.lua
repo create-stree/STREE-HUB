@@ -9,80 +9,6 @@ else
     print("✓ UI loaded successfully!")
 end
 
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
-
-local niel = Instance.new("Frame")
-niel.Name = "STREEHubContainer"
-niel.Parent = PlayerGui
-niel.Size = UDim2.new(0, 200, 0, 200)
-niel.Position = UDim2.new(0.5, -100, 0.5, -100)
-niel.BackgroundTransparency = 1
-
-local Button = Instance.new("ImageButton")
-Button.Name = "STREEHubButton"
-Button.Parent = niel
-Button.BackgroundTransparency = 0
-Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Button.Size = UDim2.new(0, 40, 0, 40)
-Button.Position = UDim2.new(0, 10, 0, 50)
-Button.Image = "rbxassetid://122683047852451"
-Button.Draggable = true
-
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 8)
-Corner.Parent = Button
-
-local Scale = Instance.new("UIScale")
-Scale.Scale = 1
-Scale.Parent = Button
-
-local Stroke = Instance.new("UIStroke")
-Stroke.Thickness = 4
-Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-Stroke.LineJoinMode = Enum.LineJoinMode.Round
-Stroke.Color = Color3.fromRGB(0, 255, 0)
-Stroke.Parent = Button
-
-local Gradient = Instance.new("UIGradient")
-Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(0, 255, 0)),
-    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 200, 0)),
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(0, 255, 0)),
-})
-Gradient.Rotation = 0
-Gradient.Parent = Button
-
-Button.MouseEnter:Connect(function()
-    TweenService:Create(Scale, TweenInfo.new(0.1), { Scale = 1.2 }):Play()
-end)
-Button.MouseLeave:Connect(function()
-    TweenService:Create(Scale, TweenInfo.new(0.1), { Scale = 1 }):Play()
-end)
-
-local Window = Instance.new("Frame")
-Window.Name = "STREEHubWindow"
-Window.Size = UDim2.new(0, 300, 0, 200)
-Window.Position = UDim2.new(0.5, -150, 0.5, -100)
-Window.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Window.BackgroundTransparency = 0.2
-Window.Visible = false
-Window.Parent = niel
-
-local isWindowOpen = false
-Button.MouseButton1Click:Connect(function()
-    isWindowOpen = not isWindowOpen
-    Window.Visible = isWindowOpen
-end)
-
-Window.AncestryChanged:Connect(function(_, parent)
-    if not parent and niel then
-        niel:Destroy()
-    end
-end)
-
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
@@ -324,7 +250,6 @@ local Section = Tab3:Section({
     TextSize = 17,
 })
 
-Tab3:Toggle({
 Tab3:Toggle({
     Title = "Auto Equip Rod",
     Desc = "Always equip an automatic fishing rod",
