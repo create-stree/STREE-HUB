@@ -9,44 +9,6 @@ else
     print("✓ UI loaded successfully!")
 end
 
-local Window = WindUI:CreateWindow({
-    Title = "STREE HUB",
-    Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | Fish It",
-    Folder = "STREE_HUB",
-    Size = UDim2.fromOffset(260, 290),
-    Transparent = true,
-    Theme = "Dark",
-    SideBarWidth = 170,
-    HasOutline = true,
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-            WindUI:SetTheme("Dark")
-        end,
-    },
-})
-
-Window:Tag({
-    Title = "Version",
-    Color = Color3.fromRGB(0, 255, 0),
-    Radius = 17,
-})
-
-Window:Tag({
-    Title = "Dev",
-    Color = Color3.fromRGB(0, 0, 0),
-    Radius = 17,
-})
-
-WindUI:Notify({
-    Title = "STREE HUB Loaded",
-    Content = "UI loaded successfully!",
-    Duration = 3,
-    Icon = "bell",
-})
-
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -120,6 +82,44 @@ Window.AncestryChanged:Connect(function(_, parent)
         niel:Destroy()
     end
 end)
+
+local Window = WindUI:CreateWindow({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://122683047852451",
+    Author = "KirsiaSC | Fish It",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(260, 290),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 170,
+    HasOutline = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            WindUI:SetTheme("Dark")
+        end,
+    },
+})
+
+Window:Tag({
+    Title = "Version",
+    Color = Color3.fromRGB(0, 255, 0),
+    Radius = 17,
+})
+
+Window:Tag({
+    Title = "Dev",
+    Color = Color3.fromRGB(0, 0, 0),
+    Radius = 17,
+})
+
+WindUI:Notify({
+    Title = "STREE HUB Loaded",
+    Content = "UI loaded successfully!",
+    Duration = 3,
+    Icon = "bell",
+})
 
 local Tab1 = Window:Tab({
     Title = "Info",
