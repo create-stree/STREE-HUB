@@ -560,79 +560,83 @@ local Tab5 = Window:Tab({
     Icon = "badge-dollar-sign",
 })
 
-Tab5:Section({ 
-    Title = "Buy Rod",
-    TextXAlignment = "Left",
-    TextSize = 17,
+Tab5:Section({   
+    Title = "Buy Rod",  
+    TextXAlignment = "Left",  
+    TextSize = 17,  
+})  
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")  
+local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]  
+
+local rods = {  
+    ["Luck Rod"] = 79,  
+    ["Carbon Rod"] = 76,  
+    ["Grass Rod"] = 85,  
+    ["Demascus Rod"] = 77,  
+    ["Ice Rod"] = 78,  
+    ["Lucky Rod"] = 4,  
+    ["Midnight Rod"] = 80,  
+    ["Steampunk Rod"] = 6,  
+    ["Chrome Rod"] = 7,  
+    ["Astral Rod"] = 5,  
+    ["Ares Rod"] = 126,  
+    ["Angler Rod"] = 168,
+    ["Bamboo Rod"] = 258
+}  
+
+local rodNames = {  
+    "Luck Rod (350 Coins)", "Carbon Rod (900 Coins)", "Grass Rod (1.5k Coins)", "Demascus Rod (3k Coins)",  
+    "Ice Rod (5k Coins)", "Lucky Rod (15k Coins)", "Midnight Rod (50k Coins)", "Steampunk Rod (215k Coins)",  
+    "Chrome Rod (437k Coins)", "Astral Rod (1M Coins)", "Ares Rod (3M Coins)", "Angler Rod (8M Coins)",
+    "Bamboo Rod (12M Coins)"
+}  
+
+local rodKeyMap = {  
+    ["Luck Rod (350 Coins)"]="Luck Rod",  
+    ["Carbon Rod (900 Coins)"]="Carbon Rod",  
+    ["Grass Rod (1.5k Coins)"]="Grass Rod",  
+    ["Demascus Rod (3k Coins)"]="Demascus Rod",  
+    ["Ice Rod (5k Coins)"]="Ice Rod",  
+    ["Lucky Rod (15k Coins)"]="Lucky Rod",  
+    ["Midnight Rod (50k Coins)"]="Midnight Rod",  
+    ["Steampunk Rod (215k Coins)"]="Steampunk Rod",  
+    ["Chrome Rod (437k Coins)"]="Chrome Rod",  
+    ["Astral Rod (1M Coins)"]="Astral Rod",  
+    ["Ares Rod (3M Coins)"]="Ares Rod",  
+    ["Angler Rod (8M Coins)"]="Angler Rod",
+    ["Bamboo Rod (12M Coins)"]="Bamboo Rod"
+}  
+
+local selectedRod = rodNames[1]  
+
+Tab5:Dropdown({  
+    Title = "Select Rod",  
+    Values = rodNames,  
+    Value = selectedRod,  
+    Callback = function(value)  
+        selectedRod = value  
+        WindUI:Notify({Title="Rod Selected", Content=value, Duration=3})  
+    end  
+})  
+
+Tab5:Button({  
+    Title="Buy Rod",  
+    Callback=function()  
+        local key = rodKeyMap[selectedRod]  
+        if key and rods[key] then  
+            local success, err = pcall(function()  
+                RFPurchaseFishingRod:InvokeServer(rods[key])  
+            end)  
+            if success then  
+                WindUI:Notify({Title="Rod Purchase", Content="Purchased "..selectedRod, Duration=3})  
+            else  
+                WindUI:Notify({Title="Rod Purchase Error", Content=tostring(err), Duration=5})  
+            end  
+        end  
+    end  
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]
-
-local rods = {
-    ["Luck Rod"] = 79,
-    ["Carbon Rod"] = 76,
-    ["Grass Rod"] = 85,
-    ["Demascus Rod"] = 77,
-    ["Ice Rod"] = 78,
-    ["Lucky Rod"] = 4,
-    ["Midnight Rod"] = 80,
-    ["Steampunk Rod"] = 6,
-    ["Chrome Rod"] = 7,
-    ["Astral Rod"] = 5,
-    ["Ares Rod"] = 126,
-    ["Angler Rod"] = 168
-}
-
-local rodNames = {
-    "Luck Rod (350 Coins)", "Carbon Rod (900 Coins)", "Grass Rod (1.5k Coins)", "Demascus Rod (3k Coins)",
-    "Ice Rod (5k Coins)", "Lucky Rod (15k Coins)", "Midnight Rod (50k Coins)", "Steampunk Rod (215k Coins)",
-    "Chrome Rod (437k Coins)", "Astral Rod (1M Coins)", "Ares Rod (3M Coins)", "Angler Rod (8M Coins)"
-}
-
-local rodKeyMap = {
-    ["Luck Rod (350 Coins)"]="Luck Rod",
-    ["Carbon Rod (900 Coins)"]="Carbon Rod",
-    ["Grass Rod (1.5k Coins)"]="Grass Rod",
-    ["Demascus Rod (3k Coins)"]="Demascus Rod",
-    ["Ice Rod (5k Coins)"]="Ice Rod",
-    ["Lucky Rod (15k Coins)"]="Lucky Rod",
-    ["Midnight Rod (50k Coins)"]="Midnight Rod",
-    ["Steampunk Rod (215k Coins)"]="Steampunk Rod",
-    ["Chrome Rod (437k Coins)"]="Chrome Rod",
-    ["Astral Rod (1M Coins)"]="Astral Rod",
-    ["Ares Rod (3M Coins)"]="Ares Rod",
-    ["Angler Rod (8M Coins)"]="Angler Rod"
-}
-
-local selectedRod = rodNames[1]
-
-Tab5:Dropdown({
-    Title = "Select Rod",
-    Values = rodNames,
-    Value = selectedRod,
-    Callback = function(value)
-        selectedRod = value
-        WindUI:Notify({Title="Rod Selected", Content=value, Duration=3})
-    end
-})
-
-Tab5:Button({
-    Title="Buy Rod",
-    Callback=function()
-        local key = rodKeyMap[selectedRod]
-        if key and rods[key] then
-            local success, err = pcall(function()
-                RFPurchaseFishingRod:InvokeServer(rods[key])
-            end)
-            if success then
-                WindUI:Notify({Title="Rod Purchase", Content="Purchased "..selectedRod, Duration=3})
-            else
-                WindUI:Notify({Title="Rod Purchase Error", Content=tostring(err), Duration=5})
-            end
-        end
-    end
-})
 
 local Section = Tab5:Section({
     Title = "Buy Baits",
