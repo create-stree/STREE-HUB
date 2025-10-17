@@ -325,8 +325,9 @@ local Section = Tab3:Section({
 })
 
 Tab3:Toggle({
+Tab3:Toggle({
     Title = "Auto Equip Rod",
-    Desc = "Selalu equip pancing otomatis",
+    Desc = "Always equip an automatic fishing rod",
     Icon = false,
     Type = false,
     Default = false,
@@ -338,23 +339,27 @@ Tab3:Toggle({
 local player = game.Players.LocalPlayer
 
 spawn(function()
-    while task.wait(1) do
+    while task.wait(0.05) do
         if _G.AutoEquipRod then
             pcall(function()
                 local backpack = player:FindFirstChild("Backpack")
-                if backpack then
+                local char = player.Character
+                if backpack and char then
                     local rod = backpack:FindFirstChild("Rod")
                         or backpack:FindFirstChild("FishingRod")
                         or backpack:FindFirstChild("OldRod")
                         or backpack:FindFirstChild("BasicRod")
-                    if rod and not player.Character:FindFirstChild(rod.Name) then
-                        player.Character.Humanoid:EquipTool(rod)
+                    if rod and not char:FindFirstChild(rod.Name) then
+                        char:FindFirstChild("Humanoid"):EquipTool(rod)
                     end
                 end
             end)
         end
     end
 end)
+
+local player = game.Players.LocalPlayer
+local RepStorage = game:GetService("ReplicatedStorage")
 
 Tab3:Toggle({
     Title = "Auto Fishing",
@@ -367,39 +372,22 @@ Tab3:Toggle({
     end
 })
 
-local RepStorage = game:GetService("ReplicatedStorage")
-
 spawn(function()
-    while wait() do
+    while wait(0.05) do
         if _G.AutoFishing then
-            repeat
-                pcall(function()
-                    local char = player.Character or player.CharacterAdded:Wait()
-                    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-                    end
-                    local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                    if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                        wait(0.01)
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
-                    end
-                end)
-                wait(0.01)
-            until not _G.AutoFishing
-        end
-    end
-end)
-
-spawn(function()
-    while wait() do
-        if _G.AutoFishing then
-            repeat
-                pcall(function()
-                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
-                end)
-                wait(0.01)
-            until not _G.AutoFishing
+            pcall(function()
+                local char = player.Character or player.CharacterAdded:Wait()
+                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+                end
+                local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
+                    wait(0.05)
+                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+                end
+                RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
+            end)
         end
     end
 end)
