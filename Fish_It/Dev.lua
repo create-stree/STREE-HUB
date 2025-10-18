@@ -640,31 +640,98 @@ local function NotifyQuestProgress()
                         Duration = 4,
                         Type = "Info"
                     })
+_G.AutoGhostfin = false
+_G.TeleportEnabled = true
+
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+local function getHumanoid()
+    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+end
+
+local function teleportTo(target)
+    if humanoidRootPart and _G.TeleportEnabled then
+        local humanoid = getHumanoid()
+        if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Dead and humanoid:GetState() ~= Enum.HumanoidStateType.Flying then
+            humanoidRootPart.CFrame = CFrame.new(target) + Vector3.new(0, 5, 0) -- Tambah ketinggian sedikit untuk hindari terjebak
+            task.wait(0.5) -- Penundaan untuk memastikan teleport sukses
+        end
+    end
+end
+
+spawn(function()
+    while task.wait(0.5) do
+        local humanoid = getHumanoid()
+        if _G.AutoGhostfin then
+            local success, errorMsg = pcall(function()
+                if humanoid then
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                    replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
+                    local quests = player:FindFirstChild("QuestProgress")
+                    if quests and quests:FindFirstChild("Ghostfin") then
+                        local progress = quests.Ghostfin.Value
+                        local goal = quests.Ghostfin.Goal.Value
+                        local remaining = math.max(goal - progress, 0)
+                        local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                        teleportTo(target)
+                    end
+                end
+            end)
+            if not success then
+                warn("Error in Auto Ghostfin loop: " .. tostring(errorMsg))
+            end
+        else
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+            end
+        end
+    end
+end)
+
+local function NotifyQuestProgress()
+    local success, errorMsg = pcall(function()
+        local quests = player:FindFirstChild("QuestProgress")
+        if quests then
+            for _, quest in pairs(quests:GetChildren()) do
+                if quest:IsA("IntValue") and quest:FindFirstChild("Goal") then
+                    local progress = quest.Value
+                    local goal = quest.Goal.Value
+                    local remaining = math.max(goal - progress, 0)
+                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
+                    local questName = quest.Name -- Gunakan nama asli quest dari data
+
+                    game.StarterGui:SetCore("SendNotification", {
+                        Title = questName .. " Quest",
+                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                        Duration = 4
+                    })
                     return
                 end
             end
-            WindUI:Notify({
+            game.StarterGui:SetCore("SendNotification", {
                 Title = "Quest Status",
-                Text = "No recognized quest data found. Available quests: " .. table.concat((function() local names = {}; for _, v in pairs(quests:GetChildren()) do table.insert(names, v.Name) end return names end)(), ", "),
-                Duration = 5,
-                Type = "Warning"
+                Text = "No active quest with progress data found. Available quests: " .. table.concat((function() local names = {}; for _, v in pairs(quests:GetChildren()) do table.insert(names, v.Name) end return names end)(), ", "),
+                Duration = 5
             })
         else
-            WindUI:Notify({
+            game.StarterGui:SetCore("SendNotification", {
                 Title = "Quest Status",
                 Text = "Quest not started or data not found",
-                Duration = 3,
-                Type = "Warning"
+                Duration = 3
             })
         end
     end)
     if not success then
         warn("Error in NotifyQuestProgress: " .. tostring(errorMsg))
-        WindUI:Notify({
+        game.StarterGui:SetCore("SendNotification", {
             Title = "Error",
             Text = "Failed to check quest progress",
-            Duration = 3,
-            Type = "Error"
+            Duration = 3
         })
     end
 end
