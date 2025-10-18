@@ -572,91 +572,10 @@ end
 
 local function teleportTo(target)
     if humanoidRootPart and _G.TeleportEnabled then
-        humanoidRootPart.CFrame = CFrame.new(target)
-    end
-end
-
-spawn(function()
-    while true do
-        local humanoid = getHumanoid()
-        if _G.AutoGhostfin then
-            local success, errorMsg = pcall(function()
-                if humanoid then
-                    humanoid.WalkSpeed = 0
-                    humanoid.JumpPower = 0
-                    replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
-                    local quests = player:FindFirstChild("QuestProgress")
-                    if quests and quests:FindFirstChild("Ghostfin") then
-                        local progress = quests.Ghostfin.Value
-                        local goal = quests.Ghostfin.Goal.Value
-                        local remaining = math.max(goal - progress, 0)
-                        local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                        teleportTo(target)
-                    end
-                end
-            end)
-            if not success then
-                warn("Error in Auto Ghostfin loop: " .. tostring(errorMsg))
-            end
-        else
-            if humanoid then
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
-            end
-        end
-        task.wait(0.5)
-    end
-end)
-
-local function NotifyQuestProgress()
-    local success, errorMsg = pcall(function()
-        local quests = player:FindFirstChild("QuestProgress")
-        if quests then
-            for _, quest in pairs(quests:GetChildren()) do
-                if quest.Name == "Ghostfin" then
-                    local progress = quest.Value
-                    local goal = quest:FindFirstChild("Goal") and quest.Goal.Value or 0
-                    local remaining = math.max(goal - progress, 0)
-                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                    
-                    WindUI:Notify({
-                        Title = "Ghostfin Quest",
-                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                        Duration = 4,
-                        Type = "Info"
-                    })
-                    return
-                elseif quest.Name == "DeepSea" then
-                    local progress = quest.Value
-                    local goal = quest:FindFirstChild("Goal") and quest.Goal.Value or 0
-                    local remaining = math.max(goal - progress, 0)
-                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                    
-                    WindUI:Notify({
-                        Title = "Deep Sea Quest",
-                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                        Duration = 4,
-                        Type = "Info"
-                    })
-_G.AutoGhostfin = false
-_G.TeleportEnabled = true
-
-local player = game.Players.LocalPlayer
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-
-local function getHumanoid()
-    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-end
-
-local function teleportTo(target)
-    if humanoidRootPart and _G.TeleportEnabled then
         local humanoid = getHumanoid()
         if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Dead and humanoid:GetState() ~= Enum.HumanoidStateType.Flying then
-            humanoidRootPart.CFrame = CFrame.new(target) + Vector3.new(0, 5, 0) -- Tambah ketinggian sedikit untuk hindari terjebak
-            task.wait(0.5) -- Penundaan untuk memastikan teleport sukses
+            humanoidRootPart.CFrame = CFrame.new(target) + Vector3.new(0, 5, 0)
+            task.wait(0.5)
         end
     end
 end
