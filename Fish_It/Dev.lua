@@ -554,7 +554,7 @@ local Toggle = Tab3:Toggle({
 })
 
 local Section = Tab3:Section({     
-    Title = "Quest",    
+    Title = "Quest [Beta]",    
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
