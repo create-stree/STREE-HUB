@@ -559,57 +559,91 @@ local Section = Tab3:Section({
     TextSize = 17,    
 })
 
-local AutoFishingToggle
+_G.AutoGhostfin = false
+
 local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local root = character:WaitForChild("HumanoidRootPart")
-local originalWalkSpeed = humanoid.WalkSpeed
-local fishCount = 0
-local maxFish = 10
+local replicatedStorage = game:GetService("ReplicatedStorage")
 
-local locations = {
-    Vector3.new(-3592,-280,-1591),
-    Vector3.new(-3718,-136,-885)
-}
+local function getHumanoid()
+    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+end
 
-Tab3:Toggle({
-    Title = "Auto Fishing",
-    Default = false,
-    Callback = function(value)
-        if value then
-            humanoid.WalkSpeed = 0
-            spawn(function()
-                while AutoFishingToggle:GetValue() do
-                    for _, pos in pairs(locations) do
-                        root.CFrame = CFrame.new(pos)
-                        wait(0.1)
-                        fishCount = fishCount + 1
-                        if fishCount >= maxFish then
-                            fishCount = maxFish
-                        end
-                        wait(0.5)
-                    end
-                    wait(1)
+spawn(function()
+    while true do
+        local humanoid = getHumanoid()
+        if _G.AutoGhostfin then
+            local success, errorMsg = pcall(function()
+                if humanoid then
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                    replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
                 end
             end)
+            if not success then
+                warn("Error in Auto Ghostfin loop: " .. tostring(errorMsg))
+            end
         else
-            humanoid.WalkSpeed = originalWalkSpeed
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+local function NotifyGhostfinProgress()
+    local success, errorMsg = pcall(function()
+        local quests = player:FindFirstChild("QuestProgress")
+        if quests and quests:FindFirstChild("Ghostfin") then
+            local progress = quests.Ghostfin.Value
+            local goal = quests.Ghostfin.Goal.Value
+            local remaining = math.max(goal - progress, 0)
+            local target = remaining > (goal / 2) and Vector3.new(-3592, -280, -1591) or Vector3.new(-3718, -136, -885)
+            local locationName = remaining > (goal / 2) and "Location 1" or "Location 2"
+            
+            WindUI:Notify({
+                Title = "Ghostfin Quest",
+                Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                Duration = 4,
+                Type = "Info"
+            })
+        else
+            WindUI:Notify({
+                Title = "Ghostfin Quest",
+                Text = "Quest not started or data not found",
+                Duration = 3,
+                Type = "Warning"
+            })
+        end
+    end)
+    if not success then
+        warn("Error in NotifyGhostfinProgress: " .. tostring(errorMsg))
+        WindUI:Notify({
+            Title = "Error",
+            Text = "Failed to check quest progress",
+            Duration = 3,
+            Type = "Error"
+        })
+    end
+end
+
+Tab3:Toggle({
+    Title = "Auto Ghostfin Quest",
+    Desc = "Enable Ghostfin quest automation (avatar will stay still)",
+    Default = false,
+    Callback = function(value)
+        _G.AutoGhostfin = value
+        if value then
+            NotifyGhostfinProgress()
         end
     end
 })
 
 Tab3:Button({
-    Title = "Fish Notification",
-    Icon = "info",
-    Callback = function()
-        local remaining = maxFish - fishCount
-        WindUI:Notify({
-            Title = "Fish It",
-            Text = "Remaining fish for mission: "..remaining.."\nLocations: "..tostring(locations[1]).." / "..tostring(locations[2]),
-            Duration = 5
-        })
-    end
+    Title = "Check Quest Progress",
+    Desc = "Show remaining fish and location (Location 1 or 2)",
+    Callback = NotifyGhostfinProgress
 })
 
 local TweenService = game:GetService("TweenService")
