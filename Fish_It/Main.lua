@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.7",
+    Title = "v0.0.1.8",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -550,17 +550,132 @@ local Toggle = Tab3:Toggle({
     end
 })
 
-local Tab4 = Window:Tab({
-    Title = "Exclusive",
-    Icon = "star",
+local Section = Tab3:Section({     
+    Title = "Quest [Beta]",    
+    TextXAlignment = "Left",    
+    TextSize = 17,    
 })
 
-local Tab5 = Window:Tab({
+_G.AutoGhostfin = false
+_G.TeleportEnabled = true
+
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+local function getHumanoid()
+    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+end
+
+local function teleportTo(target)
+    if humanoidRootPart and _G.TeleportEnabled then
+        local humanoid = getHumanoid()
+        if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Dead and humanoid:GetState() ~= Enum.HumanoidStateType.Flying then
+            humanoidRootPart.CFrame = CFrame.new(target) + Vector3.new(0, 5, 0)
+            task.wait(0.5)
+        end
+    end
+end
+
+spawn(function()
+    while task.wait(0.5) do
+        local humanoid = getHumanoid()
+        if _G.AutoGhostfin then
+            local success, errorMsg = pcall(function()
+                if humanoid then
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                    replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
+                    local quests = player:FindFirstChild("QuestProgress")
+                    if quests and quests:FindFirstChild("Ghostfin") then
+                        local progress = quests.Ghostfin.Value
+                        local goal = quests.Ghostfin.Goal.Value
+                        local remaining = math.max(goal - progress, 0)
+                        local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                        teleportTo(target)
+                    end
+                end
+            end)
+            if not success then
+                warn("Error in Auto Ghostfin loop: " .. tostring(errorMsg))
+            end
+        else
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+            end
+        end
+    end
+end)
+
+local function NotifyQuestProgress()
+    local success, errorMsg = pcall(function()
+        local quests = player:FindFirstChild("QuestProgress")
+        if quests then
+            for _, quest in pairs(quests:GetChildren()) do
+                if quest:IsA("IntValue") and quest:FindFirstChild("Goal") then
+                    local progress = quest.Value
+                    local goal = quest.Goal.Value
+                    local remaining = math.max(goal - progress, 0)
+                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
+                    local questName = quest.Name -- Gunakan nama asli quest dari data
+
+                    game.StarterGui:SetCore("SendNotification", {
+                        Title = questName .. " Quest",
+                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                        Duration = 4
+                    })
+                    return
+                end
+            end
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Quest Status",
+                Text = "No active quest with progress data found. Available quests: " .. table.concat((function() local names = {}; for _, v in pairs(quests:GetChildren()) do table.insert(names, v.Name) end return names end)(), ", "),
+                Duration = 5
+            })
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Quest Status",
+                Text = "Quest not started or data not found",
+                Duration = 3
+            })
+        end
+    end)
+    if not success then
+        warn("Error in NotifyQuestProgress: " .. tostring(errorMsg))
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Failed to check quest progress",
+            Duration = 3
+        })
+    end
+end
+
+Tab3:Toggle({
+    Title = "Auto Ghostfin Quest",
+    Desc = "Enable Ghostfin quest automation with teleport (avatar will stay still)",
+    Default = false,
+    Callback = function(value)
+        _G.AutoGhostfin = value
+        if value then
+            NotifyQuestProgress()
+        end
+    end
+})
+
+Tab3:Button({
+    Title = "Check Quest Progress",
+    Desc = "Show remaining fish and location for active quest",
+    Callback = NotifyQuestProgress
+})
+
+local Tab4 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
 })
 
-Tab5:Section({   
+Tab4:Section({   
     Title = "Buy Rod",  
     TextXAlignment = "Left",  
     TextSize = 17,  
@@ -610,7 +725,7 @@ local rodKeyMap = {
 
 local selectedRod = rodNames[1]  
 
-Tab5:Dropdown({  
+Tab4:Dropdown({  
     Title = "Select Rod",  
     Values = rodNames,  
     Value = selectedRod,  
@@ -620,7 +735,7 @@ Tab5:Dropdown({
     end  
 })  
 
-Tab5:Button({  
+Tab4:Button({  
     Title="Buy Rod",  
     Callback=function()  
         local key = rodKeyMap[selectedRod]  
@@ -638,7 +753,7 @@ Tab5:Button({
 })
 
 
-local Section = Tab5:Section({
+local Section = Tab4:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -653,7 +768,7 @@ local baitDropdown = Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab4:Button({
     Title = "Buy Selected Bait",
     Desc = "Purchase the selected bait",
     Callback = function()
@@ -662,12 +777,12 @@ Tab5:Button({
     end
 })
 
-local Tab6 = Window:Tab({
+local Tab5 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
 
-local Section = Tab6:Section({ 
+local Section = Tab5:Section({ 
     Title = "Island",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -701,7 +816,7 @@ local IslandDropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Island",
     Callback = function()
         if SelectedIsland and IslandLocations[SelectedIsland] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -710,7 +825,7 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({ 
+local Section = Tab5:Section({ 
     Title = "Fishing Spot",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -747,7 +862,7 @@ local FishingDropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Fishing Spot",
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -756,7 +871,7 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({
+local Section = Tab5:Section({
     Title = "Location NPC",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -784,7 +899,7 @@ local NPC_Locations = {
 
 local SelectedNPC = nil
 
-local NPCDropdown = Tab6:Dropdown({
+local NPCDropdown = Tab5:Dropdown({
     Title = "Select NPC",
     Values = (function()
         local keys = {}
@@ -799,7 +914,7 @@ local NPCDropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to NPC",
     Callback = function()
         if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -808,7 +923,7 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({
+local Section = Tab5:Section({
     Title = "Event Teleporter",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -841,7 +956,7 @@ local EventDropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Event",
     Callback = function()
         local Player = game.Players.LocalPlayer
@@ -854,12 +969,12 @@ Tab6:Button({
     end
 })
 
-local Tab7 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
 
-local Toggle = Tab7:Toggle({
+local Toggle = Tab6:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -896,7 +1011,7 @@ local Toggle = Tab7:Toggle({
     end
 })
 
-local Toggle = Tab7:Toggle({
+local Toggle = Tab6:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -924,13 +1039,13 @@ local Toggle = Tab7:Toggle({
     end
 })
 
-local Section = Tab7:Section({ 
+local Section = Tab6:Section({ 
     Title = "Server",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Rejoin Server",
     Desc = "Reconnect to current server",
     Callback = function()
@@ -938,7 +1053,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Server Hop",
     Desc = "Switch to another server",
     Callback = function()
@@ -971,7 +1086,7 @@ Tab7:Button({
     end
 })
 
-local Section = Tab7:Section({ 
+local Section = Tab6:Section({ 
     Title = "Config",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1024,7 +1139,7 @@ local function ApplyConfig(data)
     end
 end
 
-Tab7:Button({
+Tab6:Button({
     Title = "Save Config",
     Desc = "Save all settings",
     Callback = function()
@@ -1034,7 +1149,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Load Config",
     Desc = "Use saved config",
     Callback = function()
@@ -1049,7 +1164,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
     Callback = function()
@@ -1062,13 +1177,13 @@ Tab7:Button({
     end
 })
 
-local Section = Tab7:Section({ 
+local Section = Tab6:Section({ 
     Title = "Other Scripts",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Button = Tab7:Button({
+local Button = Tab6:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -1077,7 +1192,7 @@ local Button = Tab7:Button({
     end
 })
 
-local Button = Tab7:Button({
+local Button = Tab6:Button({
     Title = "Simple Shader",
     Desc = "Shader",
     Locked = false,
@@ -1086,7 +1201,7 @@ local Button = Tab7:Button({
     end
 })
 
-local Button = Tab7:Button({
+local Button = Tab6:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
