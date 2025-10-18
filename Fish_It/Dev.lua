@@ -553,6 +553,66 @@ local Toggle = Tab3:Toggle({
     end
 })
 
+local Section = Tab3:Section({     
+    Title = "Quest",    
+    TextXAlignment = "Left",    
+    TextSize = 17,    
+})
+
+local FishingTab = Window:CreateTab("Fishing")
+local AutoFishingToggle
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+local originalWalkSpeed = humanoid.WalkSpeed
+local fishCount = 0
+local maxFish = 10
+
+local locations = {
+    Vector3.new(-3592,-280,-1591),
+    Vector3.new(-3718,-136,-885)
+}
+
+Tab3:Toggle({
+    Title = "Auto Fishing",
+    Default = false,
+    Callback = function(value)
+        if value then
+            humanoid.WalkSpeed = 0
+            spawn(function()
+                while AutoFishingToggle:GetValue() do
+                    for _, pos in pairs(locations) do
+                        root.CFrame = CFrame.new(pos)
+                        wait(0.1)
+                        fishCount = fishCount + 1
+                        if fishCount >= maxFish then
+                            fishCount = maxFish
+                        end
+                        wait(0.5)
+                    end
+                    wait(1)
+                end
+            end)
+        else
+            humanoid.WalkSpeed = originalWalkSpeed
+        end
+    end
+})
+
+Tab3:Button({
+    Title = "Fish Notification",
+    Icon = "info",
+    Callback = function()
+        local remaining = maxFish - fishCount
+        WindUI:Notify({
+            Title = "Fish It",
+            Text = "Remaining fish for mission: "..remaining.."\nLocations: "..tostring(locations[1]).." / "..tostring(locations[2]),
+            Duration = 5
+        })
+    end
+})
+
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
