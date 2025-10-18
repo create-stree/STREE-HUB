@@ -559,7 +559,6 @@ local Section = Tab3:Section({
     TextSize = 17,    
 })
 
-local FishingTab = Window:CreateTab("Fishing")
 local AutoFishingToggle
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
