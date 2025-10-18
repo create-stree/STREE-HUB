@@ -599,8 +599,8 @@ local function NotifyGhostfinProgress()
             local progress = quests.Ghostfin.Value
             local goal = quests.Ghostfin.Goal.Value
             local remaining = math.max(goal - progress, 0)
-            local target = remaining > (goal / 2) and Vector3.new(-3592, -280, -1591) or Vector3.new(-3718, -136, -885)
-            local locationName = remaining > (goal / 2) and "Location 1" or "Location 2"
+            local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+            local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
             
             WindUI:Notify({
                 Title = "Ghostfin Quest",
@@ -630,7 +630,7 @@ end
 
 Tab3:Toggle({
     Title = "Auto Ghostfin Quest",
-    Desc = "Enable Ghostfin quest automation (avatar will stay still)",
+    Desc = "Enable Ghostfin quest automation",
     Default = false,
     Callback = function(value)
         _G.AutoGhostfin = value
@@ -642,7 +642,7 @@ Tab3:Toggle({
 
 Tab3:Button({
     Title = "Check Quest Progress",
-    Desc = "Show remaining fish and location (Location 1 or 2)",
+    Desc = "Show remaining fish",
     Callback = NotifyGhostfinProgress
 })
 
