@@ -560,12 +560,20 @@ local Section = Tab3:Section({
 })
 
 _G.AutoGhostfin = false
+_G.TeleportEnabled = true
 
 local player = game.Players.LocalPlayer
 local replicatedStorage = game:GetService("ReplicatedStorage")
+local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
 local function getHumanoid()
     return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+end
+
+local function teleportTo(target)
+    if humanoidRootPart and _G.TeleportEnabled then
+        humanoidRootPart.CFrame = CFrame.new(target)
+    end
 end
 
 spawn(function()
@@ -577,6 +585,14 @@ spawn(function()
                     humanoid.WalkSpeed = 0
                     humanoid.JumpPower = 0
                     replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
+                    local quests = player:FindFirstChild("QuestProgress")
+                    if quests and quests:FindFirstChild("Ghostfin") then
+                        local progress = quests.Ghostfin.Value
+                        local goal = quests.Ghostfin.Goal.Value
+                        local remaining = math.max(goal - progress, 0)
+                        local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                        teleportTo(target)
+                    end
                 end
             end)
             if not success then
@@ -596,42 +612,43 @@ local function NotifyQuestProgress()
     local success, errorMsg = pcall(function()
         local quests = player:FindFirstChild("QuestProgress")
         if quests then
-            -- Cek untuk Ghostfin Quest
-            if quests:FindFirstChild("Ghostfin") then
-                local progress = quests.Ghostfin.Value
-                local goal = quests.Ghostfin.Goal.Value
-                local remaining = math.max(goal - progress, 0)
-                local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                
-                WindUI:Notify({
-                    Title = "Ghostfin Quest",
-                    Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                    Duration = 4,
-                    Type = "Info"
-                })
-            -- Cek untuk Deep Sea Quest (Misi Laut Dalam)
-            elseif quests:FindFirstChild("DeepSea") then
-                local progress = quests.DeepSea.Value
-                local goal = quests.DeepSea.Goal.Value
-                local remaining = math.max(goal - progress, 0)
-                local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                
-                WindUI:Notify({
-                    Title = "Deep Sea Quest",
-                    Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                    Duration = 4,
-                    Type = "Info"
-                })
-            else
-                WindUI:Notify({
-                    Title = "Quest Status",
-                    Text = "No active quest data found",
-                    Duration = 3,
-                    Type = "Warning"
-                })
+            for _, quest in pairs(quests:GetChildren()) do
+                if quest.Name == "Ghostfin" then
+                    local progress = quest.Value
+                    local goal = quest:FindFirstChild("Goal") and quest.Goal.Value or 0
+                    local remaining = math.max(goal - progress, 0)
+                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
+                    
+                    WindUI:Notify({
+                        Title = "Ghostfin Quest",
+                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                        Duration = 4,
+                        Type = "Info"
+                    })
+                    return
+                elseif quest.Name == "DeepSea" then
+                    local progress = quest.Value
+                    local goal = quest:FindFirstChild("Goal") and quest.Goal.Value or 0
+                    local remaining = math.max(goal - progress, 0)
+                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
+                    
+                    WindUI:Notify({
+                        Title = "Deep Sea Quest",
+                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                        Duration = 4,
+                        Type = "Info"
+                    })
+                    return
+                end
             end
+            WindUI:Notify({
+                Title = "Quest Status",
+                Text = "No recognized quest data found. Available quests: " .. table.concat((function() local names = {}; for _, v in pairs(quests:GetChildren()) do table.insert(names, v.Name) end return names end)(), ", "),
+                Duration = 5,
+                Type = "Warning"
+            })
         else
             WindUI:Notify({
                 Title = "Quest Status",
@@ -654,7 +671,7 @@ end
 
 Tab3:Toggle({
     Title = "Auto Ghostfin Quest",
-    Desc = "Enable Ghostfin quest automation (avatar will stay still)",
+    Desc = "Enable Ghostfin quest automation with teleport (avatar will stay still)",
     Default = false,
     Callback = function(value)
         _G.AutoGhostfin = value
