@@ -592,25 +592,49 @@ spawn(function()
     end
 end)
 
-local function NotifyGhostfinProgress()
+local function NotifyQuestProgress()
     local success, errorMsg = pcall(function()
         local quests = player:FindFirstChild("QuestProgress")
-        if quests and quests:FindFirstChild("Ghostfin") then
-            local progress = quests.Ghostfin.Value
-            local goal = quests.Ghostfin.Goal.Value
-            local remaining = math.max(goal - progress, 0)
-            local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-            local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-            
-            WindUI:Notify({
-                Title = "Ghostfin Quest",
-                Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                Duration = 4,
-                Type = "Info"
-            })
+        if quests then
+            -- Cek untuk Ghostfin Quest
+            if quests:FindFirstChild("Ghostfin") then
+                local progress = quests.Ghostfin.Value
+                local goal = quests.Ghostfin.Goal.Value
+                local remaining = math.max(goal - progress, 0)
+                local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
+                
+                WindUI:Notify({
+                    Title = "Ghostfin Quest",
+                    Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                    Duration = 4,
+                    Type = "Info"
+                })
+            -- Cek untuk Deep Sea Quest (Misi Laut Dalam)
+            elseif quests:FindFirstChild("DeepSea") then
+                local progress = quests.DeepSea.Value
+                local goal = quests.DeepSea.Goal.Value
+                local remaining = math.max(goal - progress, 0)
+                local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
+                local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
+                
+                WindUI:Notify({
+                    Title = "Deep Sea Quest",
+                    Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
+                    Duration = 4,
+                    Type = "Info"
+                })
+            else
+                WindUI:Notify({
+                    Title = "Quest Status",
+                    Text = "No active quest data found",
+                    Duration = 3,
+                    Type = "Warning"
+                })
+            end
         else
             WindUI:Notify({
-                Title = "Ghostfin Quest",
+                Title = "Quest Status",
                 Text = "Quest not started or data not found",
                 Duration = 3,
                 Type = "Warning"
@@ -618,7 +642,7 @@ local function NotifyGhostfinProgress()
         end
     end)
     if not success then
-        warn("Error in NotifyGhostfinProgress: " .. tostring(errorMsg))
+        warn("Error in NotifyQuestProgress: " .. tostring(errorMsg))
         WindUI:Notify({
             Title = "Error",
             Text = "Failed to check quest progress",
@@ -630,20 +654,20 @@ end
 
 Tab3:Toggle({
     Title = "Auto Ghostfin Quest",
-    Desc = "Enable Ghostfin quest automation",
+    Desc = "Enable Ghostfin quest automation (avatar will stay still)",
     Default = false,
     Callback = function(value)
         _G.AutoGhostfin = value
         if value then
-            NotifyGhostfinProgress()
+            NotifyQuestProgress()
         end
     end
 })
 
 Tab3:Button({
     Title = "Check Quest Progress",
-    Desc = "Show remaining fish",
-    Callback = NotifyGhostfinProgress
+    Desc = "Show remaining fish and location for active quest",
+    Callback = NotifyQuestProgress
 })
 
 local TweenService = game:GetService("TweenService")
