@@ -291,7 +291,7 @@ _G.Delay = 0
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Spam Ikan Max Speed v4",
+    Desc = "Spam Ikan Max Speed v5",
     Icon = false,
     Type = false,
     Default = false,
@@ -320,27 +320,23 @@ local Input = Tab3:Input({
 })
 
 local function doFishing()
+    local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+    if not net then return end
     while _G.AutoFishing do
         pcall(function()
-            local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-            if net then
-                net["RE/EquipToolFromHotbar"]:FireServer(1)
-                net["RF/ChargeFishingRod"]:InvokeServer(2)
-                net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+            net["RE/EquipToolFromHotbar"]:FireServer(1)
+            net["RF/ChargeFishingRod"]:InvokeServer(2)
+            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+            for i = 1, 3 do
                 net["RE/FishingCompleted"]:FireServer({Result = "Perfect"})
+                task.wait(0.1)
             end
         end)
         task.wait(_G.Delay)
     end
 end
 
-task.spawn(function()
-    while task.wait(1) do
-        if _G.AutoFishing then
-            doFishing()
-        end
-    end
-end)
+task.spawn(doFishing)
 
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
