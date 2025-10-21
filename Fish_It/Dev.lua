@@ -302,7 +302,7 @@ Tab3:Toggle({
     end
 })
 
-local Input = Tab:Input({
+local Input = Tab3:Input({
     Title = "Blast Delay",
     Desc = "Masukkan delay dalam detik (contoh: 0.001 untuk ultra cepat, 0 untuk max)",
     Value = "0.001 / 6",
