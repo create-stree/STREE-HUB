@@ -286,24 +286,24 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
+
 _G.AutoFishing = false
 _G.Delay = 0
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Spam Ikan Max Speed v5",
+    Desc = "Spam Ikan Ultra Cepat v4",
     Icon = false,
     Type = false,
     Default = false,
     Callback = function(value)
         _G.AutoFishing = value
-        print("Auto Fishing: " .. tostring(value))
     end
 })
 
-local Input = Tab3:Input({
+local Input = Tab:Input({
     Title = "Blast Delay",
-    Desc = "Masukkan delay dalam detik (0 untuk max speed)",
+    Desc = "Masukkan delay dalam detik",
     Value = "0",
     InputIcon = false,
     Type = "Input",
@@ -312,31 +312,41 @@ local Input = Tab3:Input({
         local newDelay = tonumber(input)
         if newDelay and newDelay >= 0 then
             _G.Delay = newDelay
-            print("Delay diubah menjadi: " .. _G.Delay .. " detik")
-        else
-            print("Input invalid, gunakan angka >= 0")
         end
     end
 })
 
-local function doFishing()
-    local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-    if not net then return end
-    while _G.AutoFishing do
-        pcall(function()
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-            net["RF/ChargeFishingRod"]:InvokeServer(2)
-            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
-            for i = 1, 3 do
-                net["RE/FishingCompleted"]:FireServer({Result = "Perfect"})
-                task.wait(0.1)
-            end
-        end)
-        task.wait(_G.Delay)
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+local function fastFishing()
+    local char = player.Character or player.CharacterAdded:Wait()
+    return function()
+        if _G.AutoFishing then
+            pcall(function()
+                if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                    net["RE/EquipToolFromHotbar"]:FireServer(1)
+                end
+                if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
+                    net["RF/ChargeFishingRod"]:InvokeServer(2)
+                    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+                end
+                net["RE/FishingCompleted"]:FireServer()
+            end)
+        end
     end
 end
 
-task.spawn(doFishing)
+local fishingAction = fastFishing()
+for i = 1, 10 do
+    task.spawn(function()
+        while true do
+            fishingAction()
+            if _G.Delay > 0 then
+                task.wait(_G.Delay)
+            end
+        end
+    end)
+end
 
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
