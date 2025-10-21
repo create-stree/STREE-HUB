@@ -318,6 +318,7 @@ local Input = Tab3:Input({
 
 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
+
 local function fastFishing()
     local char = player.Character or player.CharacterAdded:Wait()
     return function()
@@ -328,7 +329,7 @@ local function fastFishing()
                 end
                 if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
                     net["RF/ChargeFishingRod"]:InvokeServer(2)
-                    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+                    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
                 end
                 net["RE/FishingCompleted"]:FireServer()
             end)
