@@ -286,7 +286,6 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-
 _G.AutoFishing = false
 _G.Delay = 0
 
@@ -323,28 +322,25 @@ local Input = Tab3:Input({
 local function doFishing()
     while _G.AutoFishing do
         pcall(function()
-            local char = player.Character or player.CharacterAdded:Wait()
-            if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+            local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+            if net then
+                net["RE/EquipToolFromHotbar"]:FireServer(1)
+                net["RF/ChargeFishingRod"]:InvokeServer(2)
+                net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+                net["RE/FishingCompleted"]:FireServer({Result = "Perfect"})
             end
-            local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-            if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
-            end
-            RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
         end)
-        if _G.Delay > 0 then
-            wait(_G.Delay)
-        end
+        task.wait(_G.Delay)
     end
 end
 
-for i = 1, 3 do
-    coroutine.wrap(function()
-        doFishing()
-    end)()
-end
+task.spawn(function()
+    while task.wait(1) do
+        if _G.AutoFishing then
+            doFishing()
+        end
+    end
+end)
 
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
