@@ -326,20 +326,26 @@ local Input = Tab3:Input({
 local function InstantFish()
     local char = player.Character or player.CharacterAdded:Wait()
     if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+        task.wait(0.00000001)
         net["RE/EquipToolFromHotbar"]:FireServer(1)
+        task.wait(0.00000001)
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        task.wait(0.00000001)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+        task.wait(0.00000001)
+        net["RE/FishingCompleted"]:FireServer()
     end
-    net["RF/ChargeFishingRod"]:InvokeServer(2)
-    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-    net["RE/FishingCompleted"]:FireServer()
 end
 
 for i = 1, 8 do
     task.spawn(function()
-        while task.wait() do
-            if _G.AutoFishing and _G.MaxSpeed then
+        while task.wait(0.00000001) do
+            if _G.AutoFishing then
                 pcall(function()
-                    InstantFish()
-                    task.wait(0.0000001)
+                    local char = player.Character or player.CharacterAdded:Wait()
+                    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                        InstantFish()
+                    end
                 end)
             end
         end
@@ -361,7 +367,7 @@ end)
 
 player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
-        task.wait(1)
+        task.wait(0.00000001)
         InstantFish()
     end
 end)
