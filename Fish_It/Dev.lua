@@ -333,24 +333,35 @@ local function InstantFish()
     net["RE/FishingCompleted"]:FireServer()
 end
 
-spawn(function()
-    while wait() do
-        if _G.AutoFishing and _G.MaxSpeed then
-            while _G.AutoFishing do
+for i = 1, 8 do
+    task.spawn(function()
+        while task.wait() do
+            if _G.AutoFishing and _G.MaxSpeed then
+                pcall(function()
+                    InstantFish()
+                    task.wait(0.0000001)
+                end)
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while task.wait() do
+        if _G.AutoFishing and not _G.MaxSpeed then
+            pcall(function()
                 InstantFish()
-                task.wait(0)
-            end
-        elseif _G.AutoFishing then
-            InstantFish()
-            if _G.Delay > 0 then
-                wait(_G.Delay)
-            end
+                if _G.Delay > 0 then
+                    task.wait(_G.Delay)
+                end
+            end)
         end
     end
 end)
 
-player.CharacterAdded:Connect(function(char)
+player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
+        task.wait(1)
         InstantFish()
     end
 end)
