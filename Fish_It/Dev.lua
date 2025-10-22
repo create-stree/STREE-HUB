@@ -294,7 +294,7 @@ _G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Spam Ikan Ultra Cepat v3 (Max Speed)",
+    Desc = "Automic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -306,8 +306,8 @@ Tab3:Toggle({
 
 local Input = Tab3:Input({
     Title = "Blast Delay",
-    Desc = "Masukkan delay dalam detik (0 untuk max speed)",
-    Value = "0",
+    Desc = "Enter delay in seconds",
+    Value = "",
     InputIcon = false,
     Type = "Input",
     Placeholder = "Enter delay...",
