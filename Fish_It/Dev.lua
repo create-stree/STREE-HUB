@@ -286,6 +286,7 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
 _G.AutoFishing = false
 _G.Delay = 0
@@ -300,15 +301,12 @@ Tab3:Toggle({
     Callback = function(value)
         _G.AutoFishing = value
         print("Auto Fishing: " .. tostring(value))
-        if value and _G.MaxSpeed then
-            print("Mode Ultra Cepat diaktifkan!")
-        end
     end
 })
 
 local Input = Tab3:Input({
     Title = "Blast Delay",
-    Desc = "Masukkan delay dalam detik (0 untuk max speed, 0.001 untuk ultra cepat)",
+    Desc = "Masukkan delay dalam detik (0 untuk max speed)",
     Value = "0",
     InputIcon = false,
     Type = "Input",
@@ -318,12 +316,7 @@ local Input = Tab3:Input({
         if newDelay and newDelay >= 0 then
             _G.Delay = newDelay
             print("Delay diubah menjadi: " .. _G.Delay .. " detik")
-            if newDelay == 0 then
-                _G.MaxSpeed = true
-                print("Mode Max Speed diaktifkan!")
-            else
-                _G.MaxSpeed = false
-            end
+            _G.MaxSpeed = (newDelay == 0)
         else
             print("Input invalid, gunakan angka >= 0")
         end
@@ -331,37 +324,27 @@ local Input = Tab3:Input({
 })
 
 local function InstantFish()
-    local success, err = pcall(function()
-        local char = player.Character or player.CharacterAdded:Wait()
-        if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-            RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-        end
-
-        local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-        net["RF/ChargeFishingRod"]:InvokeServer(2)
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        net["RE/FishingCompleted"]:FireServer()
-
-        local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-        if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-            net["RF/ChargeFishingRod"]:InvokeServer(2)
-            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        end
-    end)
-    if not success then
-        warn("Error saat memancing: " .. (err or "Unknown error"))
+    local char = player.Character or player.CharacterAdded:Wait()
+    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
     end
+    net["RF/ChargeFishingRod"]:InvokeServer(2)
+    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+    net["RE/FishingCompleted"]:FireServer()
 end
 
 spawn(function()
-    while true do
-        if _G.AutoFishing then
+    while wait() do
+        if _G.AutoFishing and _G.MaxSpeed then
+            while _G.AutoFishing do
+                InstantFish()
+                task.wait(0)
+            end
+        elseif _G.AutoFishing then
             InstantFish()
-        end
-        if _G.Delay > 0 and not _G.MaxSpeed then
-            wait(_G.Delay)
-        elseif _G.MaxSpeed then
-            task.wait(0)
+            if _G.Delay > 0 then
+                wait(_G.Delay)
+            end
         end
     end
 end)
