@@ -724,10 +724,11 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.FPSBoost = state
+        local Lighting = game:GetService("Lighting")
+        local Terrain = workspace:FindFirstChildOfClass("Terrain")
 
-        if _G.FPSBoost then
+        if state then
             if not _G.OldSettings then
-                local Lighting = game:GetService("Lighting")
                 _G.OldSettings = {
                     GlobalShadows = Lighting.GlobalShadows,
                     FogEnd = Lighting.FogEnd,
@@ -741,9 +742,8 @@ Tab3:Toggle({
                 }
             end
 
-            local Lighting = game:GetService("Lighting")
             Lighting.GlobalShadows = false
-            Lighting.FogEnd = 9e9
+            Lighting.FogEnd = 1e10
             Lighting.Brightness = 1
             Lighting.Ambient = Color3.new(1, 1, 1)
             Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
@@ -752,27 +752,29 @@ Tab3:Toggle({
             Lighting.WaterWaveSize = 0
             Lighting.WaterWaveSpeed = 0
 
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CastShadow = false
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = false
-                elseif v:IsA("Explosion") then
-                    v.BlastPressure = 0
-                    v.BlastRadius = 0
-                end
-            end
-
-            local Terrain = workspace:FindFirstChildOfClass("Terrain")
             if Terrain then
                 Terrain.WaterReflectance = 0
                 Terrain.WaterTransparency = 1
                 Terrain.WaterWaveSize = 0
                 Terrain.WaterWaveSpeed = 0
             end
+
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CastShadow = false
+                    if v.Material == Enum.Material.Glass or v.Material == Enum.Material.SmoothPlastic then
+                        v.Reflectance = 0
+                    end
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Enabled = false
+                elseif v:IsA("Explosion") then
+                    v.Visible = false
+                    v.BlastPressure = 0
+                    v.BlastRadius = 0
+                end
+            end
         else
             if _G.OldSettings then
-                local Lighting = game:GetService("Lighting")
                 Lighting.GlobalShadows = _G.OldSettings.GlobalShadows
                 Lighting.FogEnd = _G.OldSettings.FogEnd
                 Lighting.Brightness = _G.OldSettings.Brightness
@@ -784,7 +786,7 @@ Tab3:Toggle({
                 Lighting.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
             end
 
-            for _, v in pairs(workspace:GetDescendants()) do
+            for _, v in ipairs(workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") then
                     v.Enabled = true
                 elseif v:IsA("BasePart") then
@@ -809,10 +811,14 @@ Tab3:Toggle({
             local Text1 = Instance.new("TextLabel")
             local Text2 = Instance.new("TextLabel")
 
-            ScreenGui.Parent = game.CoreGui
             ScreenGui.Name = "STREE_BlackScreen"
+            ScreenGui.IgnoreGuiInset = true
+            ScreenGui.ResetOnSpawn = false
+            ScreenGui.Parent = game.CoreGui
 
             Frame.Parent = ScreenGui
+            Frame.AnchorPoint = Vector2.new(0, 0)
+            Frame.Position = UDim2.new(0, 0, 0, 0)
             Frame.Size = UDim2.new(1, 0, 1, 0)
             Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
             Frame.BorderSizePixel = 0
@@ -822,7 +828,7 @@ Tab3:Toggle({
             Image.Position = UDim2.new(0.5, 0, 0.45, 0)
             Image.Size = UDim2.new(0, 180, 0, 180)
             Image.BackgroundTransparency = 1
-            Image.Image = "rbxassetid://122683047852451"
+            Image.Image = "rbxassetid://123032091977400"
 
             Text1.Parent = Frame
             Text1.AnchorPoint = Vector2.new(0.5, 0)
@@ -839,7 +845,7 @@ Tab3:Toggle({
             Text2.Position = UDim2.new(0.5, 0, 0.78, 0)
             Text2.Size = UDim2.new(0, 400, 0, 30)
             Text2.BackgroundTransparency = 1
-            Text2.Text = "https://discord.gg/jdmX43t5mY"
+            Text2.Text = "discord.gg/jdmX43t5mY"
             Text2.TextColor3 = Color3.fromRGB(200, 200, 200)
             Text2.Font = Enum.Font.Gotham
             Text2.TextSize = 20
