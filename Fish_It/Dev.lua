@@ -334,7 +334,6 @@ local function InstantFish()
         net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
         task.wait(0.00000001)
         net["RE/FishingCompleted"]:FireServer()
-        task.wait(0.00000001)
     end
 end
 
@@ -346,7 +345,6 @@ for i = 1, 8 do
                     local char = player.Character or player.CharacterAdded:Wait()
                     if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
                         InstantFish()
-                        task.wait(0.00000001)
                     end
                 end)
             end
@@ -355,14 +353,12 @@ for i = 1, 8 do
 end
 
 task.spawn(function()
-    while task.wait(0.00000001) do
+    while task.wait() do
         if _G.AutoFishing and not _G.MaxSpeed then
             pcall(function()
                 InstantFish()
                 if _G.Delay > 0 then
                     task.wait(_G.Delay)
-                else
-                    task.wait(0.00000001)
                 end
             end)
         end
@@ -371,7 +367,7 @@ end)
 
 player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
-        task.wait(0.00000001)
+        task.wait(1)
         InstantFish()
     end
 end)
