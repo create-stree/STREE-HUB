@@ -828,7 +828,7 @@ Tab3:Toggle({
             Image.Position = UDim2.new(0.5, 0, 0.45, 0)
             Image.Size = UDim2.new(0, 180, 0, 180)
             Image.BackgroundTransparency = 1
-            Image.Image = "rbxassetid://123032091977400"
+            Image.Image = "rbxassetid://122683047852451"
 
             Text1.Parent = Frame
             Text1.AnchorPoint = Vector2.new(0.5, 0)
