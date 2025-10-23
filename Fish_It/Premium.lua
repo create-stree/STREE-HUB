@@ -342,7 +342,7 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 local autoHoldEnabled = false
 Toggle = Tab3:Toggle({
     Title = "Auto Fishing",
-    Desc = "Automatic Auto Fishing v2",
+    Desc = "Automatic Fishing v2",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
@@ -388,7 +388,7 @@ _G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
+    Desc = "Automatic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -581,6 +581,153 @@ local Toggle = Tab3:Toggle({
             end    
         end    
     end    
+})
+
+local Section = Tab3:Section({     
+    Title = "Gameplay",    
+    TextXAlignment = "Left",    
+    TextSize = 17,    
+})
+
+Tab3:Toggle({
+    Title = "FPS Boost",
+    Desc = "Optimizes performance for smooth gameplay",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.FPSBoost = state
+        local Lighting = game:GetService("Lighting")
+        local Terrain = workspace:FindFirstChildOfClass("Terrain")
+
+        if state then
+            if not _G.OldSettings then
+                _G.OldSettings = {
+                    GlobalShadows = Lighting.GlobalShadows,
+                    FogEnd = Lighting.FogEnd,
+                    Brightness = Lighting.Brightness,
+                    Ambient = Lighting.Ambient,
+                    OutdoorAmbient = Lighting.OutdoorAmbient,
+                    WaterReflectance = Lighting.WaterReflectance,
+                    WaterTransparency = Lighting.WaterTransparency,
+                    WaterWaveSize = Lighting.WaterWaveSize,
+                    WaterWaveSpeed = Lighting.WaterWaveSpeed,
+                }
+            end
+
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 1e10
+            Lighting.Brightness = 1
+            Lighting.Ambient = Color3.new(1, 1, 1)
+            Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+            Lighting.WaterReflectance = 0
+            Lighting.WaterTransparency = 1
+            Lighting.WaterWaveSize = 0
+            Lighting.WaterWaveSpeed = 0
+
+            if Terrain then
+                Terrain.WaterReflectance = 0
+                Terrain.WaterTransparency = 1
+                Terrain.WaterWaveSize = 0
+                Terrain.WaterWaveSpeed = 0
+            end
+
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CastShadow = false
+                    if v.Material == Enum.Material.Glass or v.Material == Enum.Material.SmoothPlastic then
+                        v.Reflectance = 0
+                    end
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Enabled = false
+                elseif v:IsA("Explosion") then
+                    v.Visible = false
+                    v.BlastPressure = 0
+                    v.BlastRadius = 0
+                end
+            end
+        else
+            if _G.OldSettings then
+                Lighting.GlobalShadows = _G.OldSettings.GlobalShadows
+                Lighting.FogEnd = _G.OldSettings.FogEnd
+                Lighting.Brightness = _G.OldSettings.Brightness
+                Lighting.Ambient = _G.OldSettings.Ambient
+                Lighting.OutdoorAmbient = _G.OldSettings.OutdoorAmbient
+                Lighting.WaterReflectance = _G.OldSettings.WaterReflectance
+                Lighting.WaterTransparency = _G.OldSettings.WaterTransparency
+                Lighting.WaterWaveSize = _G.OldSettings.WaterWaveSize
+                Lighting.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
+            end
+
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Enabled = true
+                elseif v:IsA("BasePart") then
+                    v.CastShadow = true
+                end
+            end
+        end
+    end
+})
+
+Tab3:Toggle({
+    Title = "Black Screen",
+    Desc = "Show STREE HUB black screen",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        if state then
+            local ScreenGui = Instance.new("ScreenGui")
+            local Frame = Instance.new("Frame")
+            local Image = Instance.new("ImageLabel")
+            local Text1 = Instance.new("TextLabel")
+            local Text2 = Instance.new("TextLabel")
+
+            ScreenGui.Name = "STREE_BlackScreen"
+            ScreenGui.IgnoreGuiInset = true
+            ScreenGui.ResetOnSpawn = false
+            ScreenGui.Parent = game.CoreGui
+
+            Frame.Parent = ScreenGui
+            Frame.AnchorPoint = Vector2.new(0, 0)
+            Frame.Position = UDim2.new(0, 0, 0, 0)
+            Frame.Size = UDim2.new(1, 0, 1, 0)
+            Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            Frame.BorderSizePixel = 0
+
+            Image.Parent = Frame
+            Image.AnchorPoint = Vector2.new(0.5, 0.5)
+            Image.Position = UDim2.new(0.5, 0, 0.45, 0)
+            Image.Size = UDim2.new(0, 180, 0, 180)
+            Image.BackgroundTransparency = 1
+            Image.Image = "rbxassetid://123032091977400"
+
+            Text1.Parent = Frame
+            Text1.AnchorPoint = Vector2.new(0.5, 0)
+            Text1.Position = UDim2.new(0.5, 0, 0.7, 0)
+            Text1.Size = UDim2.new(0, 400, 0, 50)
+            Text1.BackgroundTransparency = 1
+            Text1.Text = "STREE HUB | Fish It"
+            Text1.TextColor3 = Color3.fromRGB(0, 255, 0)
+            Text1.Font = Enum.Font.GothamBold
+            Text1.TextSize = 28
+
+            Text2.Parent = Frame
+            Text2.AnchorPoint = Vector2.new(0.5, 0)
+            Text2.Position = UDim2.new(0.5, 0, 0.78, 0)
+            Text2.Size = UDim2.new(0, 400, 0, 30)
+            Text2.BackgroundTransparency = 1
+            Text2.Text = "discord.gg/jdmX43t5mY"
+            Text2.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Text2.Font = Enum.Font.Gotham
+            Text2.TextSize = 20
+        else
+            if game.CoreGui:FindFirstChild("STREE_BlackScreen") then
+                game.CoreGui.STREE_BlackScreen:Destroy()
+            end
+        end
+    end
 })
 
 local TweenService = game:GetService("TweenService")
