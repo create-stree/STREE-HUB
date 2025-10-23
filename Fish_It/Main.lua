@@ -985,7 +985,7 @@ local IslandLocations = {
 
 local SelectedIsland = nil
 
-local IslandDropdown = Tab6:Dropdown({
+local IslandDropdown = Tab5:Dropdown({
     Title = "Select Island",
     Values = (function()
         local keys = {}
@@ -1125,7 +1125,7 @@ local Event_Locations = {
 
 local ActiveEvent = nil
 
-local EventDropdown = Tab6:Dropdown({
+local EventDropdown = Tab5:Dropdown({
     Title = "Select Event",
     Values = (function()
         local keys = {}
