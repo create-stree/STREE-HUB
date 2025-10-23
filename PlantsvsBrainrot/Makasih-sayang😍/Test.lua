@@ -1,10 +1,3 @@
-repeat task.wait() until game:IsLoaded()
-if setfpscap then
-    setfpscap(1000000)
-else
-    warn("Your exploit does not support setfpscap.")
-end
-
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
