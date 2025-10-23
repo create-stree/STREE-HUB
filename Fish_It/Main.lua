@@ -1031,7 +1031,7 @@ local FishingLocations = {
 
 local SelectedFishing = nil
 
-local FishingDropdown = Tab6:Dropdown({
+local FishingDropdown = Tab5:Dropdown({
     Title = "Select Spot",
     Values = (function()
         local keys = {}
