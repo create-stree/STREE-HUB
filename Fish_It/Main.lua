@@ -946,19 +946,31 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
 local baits = {  
-    ["Basic Bait"] = 10,  
-    ["Glow Bait"] = 25,  
-    ["Magic Bait"] = 50  
+    ["Luck Bait"] = 1000,  
+    ["Midnight Bait"] = 3000,  
+    ["Nature Bait"] = 83500,  
+    ["Chroma Bait"] = 290000,  
+    ["Dark Matter Bait"] = 630000,  
+    ["Corrupt Bait"] = 1150000,  
+    ["Aether Bait"] = 3700000,  
+    ["Floral Bait"] = 4000000  
 }  
 
 local baitNames = {  
-    "Basic Bait (50 Coins)", "Glow Bait (200 Coins)", "Magic Bait (500 Coins)"  
+    "Luck Bait (1k Coins)", "Midnight Bait (3k Coins)", "Nature Bait (83.5k Coins)",  
+    "Chroma Bait (290k Coins)", "Dark Matter Bait (630k Coins)", "Corrupt Bait (1.15M Coins)",  
+    "Aether Bait (3.7M Coins)", "Floral Bait (4M Coins)"  
 }  
 
 local baitKeyMap = {  
-    ["Basic Bait (50 Coins)"] = "Basic Bait",  
-    ["Glow Bait (200 Coins)"] = "Glow Bait",  
-    ["Magic Bait (500 Coins)"] = "Magic Bait"  
+    ["Luck Bait (1k Coins)"] = "Luck Bait",  
+    ["Midnight Bait (3k Coins)"] = "Midnight Bait",  
+    ["Nature Bait (83.5k Coins)"] = "Nature Bait",  
+    ["Chroma Bait (290k Coins)"] = "Chroma Bait",  
+    ["Dark Matter Bait (630k Coins)"] = "Dark Matter Bait",  
+    ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",  
+    ["Aether Bait (3.7M Coins)"] = "Aether Bait",  
+    ["Floral Bait (4M Coins)"] = "Floral Bait"  
 }  
 
 local selectedBait = baitNames[1]  
