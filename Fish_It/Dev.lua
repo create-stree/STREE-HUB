@@ -293,19 +293,19 @@ _G.Delay = 0
 _G.MaxSpeed = true
 
 Tab3:Toggle({
-    Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
+    Title = "Auto Fishing Mode 2",
+    Desc = "Instant Catch No Bait Rise",
     Icon = false,
     Type = false,
     Default = false,
     Callback = function(value)
         _G.AutoFishing = value
-        print("Auto Fishing: " .. tostring(value))
+        print("Auto Fishing Mode 2: " .. tostring(value))
     end
 })
 
 local Input = Tab3:Input({
-    Title = "Blast Delay",
+    Title = "Delay Mode 2",
     Desc = "Enter delay in seconds",
     Value = "",
     InputIcon = false,
@@ -315,7 +315,7 @@ local Input = Tab3:Input({
         local newDelay = tonumber(input)
         if newDelay and newDelay >= 0 then
             _G.Delay = newDelay
-            print("Delay diubah menjadi: " .. _G.Delay .. " detik")
+            print("Delay Mode 2: " .. _G.Delay .. " detik")
             _G.MaxSpeed = (newDelay == 0)
         else
             print("Input invalid, gunakan angka >= 0")
@@ -323,12 +323,11 @@ local Input = Tab3:Input({
     end
 })
 
-local function InstantFish()
+local function InstantFishMode2()
     if player.Character then
         pcall(function()
             net["RE/EquipToolFromHotbar"]:FireServer(1)
             net["RF/ChargeFishingRod"]:InvokeServer(2)
-            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
             net["RE/FishingCompleted"]:FireServer()
         end)
     end
@@ -337,7 +336,7 @@ end
 task.spawn(function()
     while true do
         if _G.AutoFishing then
-            InstantFish()
+            InstantFishMode2()
             if not _G.MaxSpeed and _G.Delay > 0 then
                 task.wait(_G.Delay)
             elseif _G.MaxSpeed then
@@ -350,9 +349,7 @@ task.spawn(function()
 end)
 
 player.CharacterAdded:Connect(function()
-    if _G.AutoFishing then
-        InstantFish()
-    end
+    if _G.AutoFishing then InstantFishMode2() end
 end)
 
 local RunService = game:GetService("RunService")    
