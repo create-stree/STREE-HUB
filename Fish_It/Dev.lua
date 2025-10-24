@@ -294,89 +294,60 @@ _G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automate instant fishing",
+    Desc = "Automic Instant Fishing",
+    Icon = false,
+    Type = false,
     Default = false,
-    Callback = function(state)
-        _G.AutoFishing = state
-        if state then
-            StartFishingLoop()
-        else
-            StopFishingLoop()
-        end
+    Callback = function(value)
+        _G.AutoFishing = value
+        print("Auto Fishing: " .. tostring(value))
     end
 })
 
-Tab3:Input({
+local Input = Tab3:Input({
     Title = "Blast Delay",
     Desc = "Enter delay in seconds",
+    Value = "",
+    InputIcon = false,
+    Type = "Input",
     Placeholder = "Enter delay...",
     Callback = function(input)
         local newDelay = tonumber(input)
         if newDelay and newDelay >= 0 then
             _G.Delay = newDelay
+            print("Delay diubah menjadi: " .. _G.Delay .. " detik")
             _G.MaxSpeed = (newDelay == 0)
-            print("Delay set to", _G.Delay)
         else
-            print("Invalid input, use number >= 0")
+            print("Input invalid, gunakan angka >= 0")
         end
     end
 })
 
-local fishingThread
-
-local function instantCatch()
-    local char = player.Character
-    if not char then return end
-
-    local rod = char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
-    if rod then
-        pcall(function()
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-            task.wait(0.05)
-            net["RF/ChargeFishingRod"]:InvokeServer(1)
-            task.wait(0.05)
-            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-            task.wait(0.05)
-            net["RE/FishingCompleted"]:FireServer()
-        end)
+local function InstantFish()
+    if player.Character then
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+        net["RE/FishingCompleted"]:FireServer()
     end
 end
 
-function StartFishingLoop()
-    if fishingThread then
-        task.cancel(fishingThread)
-        fishingThread = nil
-    end
-
-    fishingThread = task.spawn(function()
-        while _G.AutoFishing do
-            pcall(function()
-                if _G.MaxSpeed then
-                    for i = 1, 20 do
-                        instantCatch()
-                        task.wait(0.05)
-                    end
-                else
-                    instantCatch()
-                    task.wait(_G.Delay)
-                end
-            end)
-            task.wait(0.05)
+task.spawn(function()
+    while true do
+        if _G.AutoFishing then
+            InstantFish()
+            if not _G.MaxSpeed and _G.Delay > 0 then
+                task.wait(_G.Delay)
+            end
+        else
+            task.yield()
         end
-    end)
-end
-
-function StopFishingLoop()
-    if fishingThread then
-        task.cancel(fishingThread)
-        fishingThread = nil
     end
-end
+end)
 
 player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
-        task.wait(0.05)
-        StartFishingLoop()
+        InstantFish()
     end
 end)
 
