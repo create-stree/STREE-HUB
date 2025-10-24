@@ -293,19 +293,19 @@ _G.Delay = 0
 _G.MaxSpeed = true
 
 Tab3:Toggle({
-    Title = "Auto Fishing Mode 1",
-    Desc = "Perfect Catch with Bait Rise",
+    Title = "Auto Instant Fishing",
+    Desc = "Automatic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
     Callback = function(value)
         _G.AutoFishing = value
-        print("Auto Fishing Mode 1: " .. tostring(value))
+        print("Auto Instant Fishing :" .. tostring(value))
     end
 })
 
 local Input = Tab3:Input({
-    Title = "Delay Mode 1",
+    Title = "Delay",
     Desc = "Enter delay in seconds",
     Value = "",
     InputIcon = false,
@@ -315,7 +315,7 @@ local Input = Tab3:Input({
         local newDelay = tonumber(input)
         if newDelay and newDelay >= 0 then
             _G.Delay = newDelay
-            print("Delay Mode 1: " .. _G.Delay .. " detik")
+            print("Delay : " .. _G.Delay .. " detik")
             _G.MaxSpeed = (newDelay == 0)
         else
             print("Input invalid, gunakan angka >= 0")
@@ -329,7 +329,7 @@ local function InstantFishMode1()
             net["RE/EquipToolFromHotbar"]:FireServer(1)
             net["RF/ChargeFishingRod"]:InvokeServer(2)
             net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-            task.wait(0.05)
+            task.wait(0.001)
             net["RE/FishingCompleted"]:FireServer()
         end)
     end
@@ -342,7 +342,7 @@ task.spawn(function()
             if not _G.MaxSpeed and _G.Delay > 0 then
                 task.wait(_G.Delay)
             elseif _G.MaxSpeed then
-                task.wait(0.001)
+                task.wait(0.0001)
             end
         else
             task.wait(0.01)
@@ -1120,7 +1120,7 @@ Tab5:Button({
     end  
 })
 
-local Section = Tab4:Section({
+local Section = Tab5:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1159,7 +1159,7 @@ local baitKeyMap = {
 
 local selectedBait = baitNames[1]  
 
-Tab4:Dropdown({  
+Tab5:Dropdown({  
     Title = "Select Bait",  
     Values = baitNames,  
     Value = selectedBait,  
@@ -1168,7 +1168,7 @@ Tab4:Dropdown({
     end  
 })  
 
-Tab4:Button({  
+Tab5:Button({  
     Title = "Buy Bait",  
     Callback = function()  
         local key = baitKeyMap[selectedBait]  
@@ -1185,7 +1185,7 @@ Tab4:Button({
     end  
 })
 
-local Section = Tab4:Section({
+local Section = Tab5:Section({
     Title = "Buy Weather Event",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1219,7 +1219,7 @@ local weatherKeyMap = {
 
 local selectedWeather = weatherNames[1]  
 
-Tab4:Dropdown({  
+Tab5:Dropdown({  
     Title = "Select Weather Event",  
     Values = weatherNames,  
     Value = selectedWeather,  
@@ -1228,7 +1228,7 @@ Tab4:Dropdown({
     end  
 })  
 
-Tab4:Button({  
+Tab5:Button({  
     Title = "Buy Weather Event",  
     Callback = function()  
         local key = weatherKeyMap[selectedWeather]  
