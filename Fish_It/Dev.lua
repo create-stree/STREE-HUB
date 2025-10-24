@@ -1129,33 +1129,35 @@ local Section = Tab5:Section({
 local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
-local baits = {  
-    ["Luck Bait"] = 1000,  
-    ["Midnight Bait"] = 3000,  
-    ["Nature Bait"] = 83500,  
-    ["Chroma Bait"] = 290000,  
-    ["Dark Matter Bait"] = 630000,  
-    ["Corrupt Bait"] = 1150000,  
-    ["Aether Bait"] = 3700000,  
-    ["Floral Bait"] = 4000000  
-}  
+local baits = {
+    ["TopWater Bait"] = 10,
+    ["Lucky Bait"] = 2,
+    ["Midnight Bait"] = 3,
+    ["Chroma Bait"] = 6,
+    ["Dark Mater Bait"] = 8,
+    ["Corrupt Bait"] = 15,
+    ["Aether Bait"] = 16
+}
 
-local baitNames = {  
-    "Luck Bait (1k Coins)", "Midnight Bait (3k Coins)", "Nature Bait (83.5k Coins)",  
-    "Chroma Bait (290k Coins)", "Dark Matter Bait (630k Coins)", "Corrupt Bait (1.15M Coins)",  
-    "Aether Bait (3.7M Coins)", "Floral Bait (4M Coins)"  
-}  
+local baitNames = {
+    "TopWater Bait (100 Coins)",
+    "Lucky Bait (1k Coins)",
+    "Midnight Bait (3k Coins)",
+    "Chroma Bait (290k Coins)",
+    "Dark Mater Bait (630k Coins)",
+    "Corrupt Bait (1.15M Coins)",
+    "Aether Bait (3.7M Coins)"
+}
 
-local baitKeyMap = {  
-    ["Luck Bait (1k Coins)"] = "Luck Bait",  
-    ["Midnight Bait (3k Coins)"] = "Midnight Bait",  
-    ["Nature Bait (83.5k Coins)"] = "Nature Bait",  
-    ["Chroma Bait (290k Coins)"] = "Chroma Bait",  
-    ["Dark Matter Bait (630k Coins)"] = "Dark Matter Bait",  
-    ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",  
-    ["Aether Bait (3.7M Coins)"] = "Aether Bait",  
-    ["Floral Bait (4M Coins)"] = "Floral Bait"  
-}  
+local baitKeyMap = {
+    ["TopWater Bait (100 Coins)"] = "TopWater Bait",
+    ["Lucky Bait (1k Coins)"] = "Lucky Bait",
+    ["Midnight Bait (3k Coins)"] = "Midnight Bait",
+    ["Chroma Bait (290k Coins)"] = "Chroma Bait",
+    ["Dark Mater Bait (630k Coins)"] = "Dark Mater Bait",
+    ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",
+    ["Aether Bait (3.7M Coins)"] = "Aether Bait"
+}
 
 local selectedBait = baitNames[1]  
 
