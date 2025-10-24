@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.2.1",
+    Title = "v0.0.2.2",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -996,6 +996,66 @@ Tab4:Button({
                 WindUI:Notify({Title = "Bait Purchase", Content = "Purchased " .. selectedBait, Duration = 3})  
             else  
                 WindUI:Notify({Title = "Bait Purchase Error", Content = tostring(err), Duration = 5})  
+            end  
+        end  
+    end  
+})
+
+local Section = Tab4:Section({
+    Title = "Buy Weather Event",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")  
+local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
+
+local weatherEvents = {  
+    ["Windy"] = 10000,  
+    ["Cloudy"] = 20000,  
+    ["Stormy"] = 35000,  
+    ["Shining"] = 50000,  
+    ["Shark Hunt"] = 300000,  
+    ["Snow"] = 15000  
+}  
+
+local weatherNames = {  
+    "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
+    "Shining (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
+}  
+
+local weatherKeyMap = {  
+    ["Windy (10k Coins)"] = "Windy",  
+    ["Cloudy (20k Coins)"] = "Cloudy",  
+    ["Stormy (35k Coins)"] = "Stormy",  
+    ["Shining (50k Coins)"] = "Shining",  
+    ["Shark Hunt (300k Coins)"] = "Shark Hunt",  
+    ["Snow (15k Coins)"] = "Snow"  
+}  
+
+local selectedWeather = weatherNames[1]  
+
+Tab4:Dropdown({  
+    Title = "Select Weather Event",  
+    Values = weatherNames,  
+    Value = selectedWeather,  
+    Callback = function(value)  
+        selectedWeather = value  
+    end  
+})  
+
+Tab4:Button({  
+    Title = "Buy Weather Event",  
+    Callback = function()  
+        local key = weatherKeyMap[selectedWeather]  
+        if key and weatherEvents[key] then  
+            local success, err = pcall(function()  
+                RFPurchaseWeatherEvent:InvokeServer(weatherEvents[key])  
+            end)  
+            if success then  
+                WindUI:Notify({Title = "Weather Purchase", Content = "Purchased " .. selectedWeather, Duration = 3})  
+            else  
+                WindUI:Notify({Title = "Weather Purchase Error", Content = tostring(err), Duration = 5})  
             end  
         end  
     end  
