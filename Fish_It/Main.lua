@@ -935,7 +935,6 @@ Tab4:Button({
     end  
 })
 
-
 local Section = Tab4:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
