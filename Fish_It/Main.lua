@@ -656,7 +656,7 @@ local function NotifyQuestProgress()
                     local remaining = math.max(goal - progress, 0)
                     local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
                     local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                    local questName = quest.Name -- Gunakan nama asli quest dari data
+                    local questName = quest.Name
 
                     game.StarterGui:SetCore("SendNotification", {
                         Title = questName .. " Quest",
@@ -914,8 +914,7 @@ Tab4:Dropdown({
     Values = rodNames,  
     Value = selectedRod,  
     Callback = function(value)  
-        selectedRod = value  
-        WindUI:Notify({Title="Rod Selected", Content=value, Duration=3})  
+        selectedRod = value
     end  
 })  
 
@@ -943,22 +942,51 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
-local selectedBait = "Bait"
-local baitDropdown = Tab4:Dropdown({
-    Title = "Select Bait",
-    Values = {"Bait", "Worm", "Shrimp", "Squid", "SpecialBait"},
-    Callback = function(Value)
-        selectedBait = Value
-    end
-})
+local ReplicatedStorage = game:GetService("ReplicatedStorage")  
+local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
-Tab4:Button({
-    Title = "Buy Selected Bait",
-    Desc = "Purchase the selected bait",
-    Callback = function()
-        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/PurchaseItem"]:FireServer(selectedBait, 10)
-        print("Purchased: " .. selectedBait .. " x10")
-    end
+local baits = {  
+    ["Basic Bait"] = 10,  
+    ["Glow Bait"] = 25,  
+    ["Magic Bait"] = 50  
+}  
+
+local baitNames = {  
+    "Basic Bait (50 Coins)", "Glow Bait (200 Coins)", "Magic Bait (500 Coins)"  
+}  
+
+local baitKeyMap = {  
+    ["Basic Bait (50 Coins)"] = "Basic Bait",  
+    ["Glow Bait (200 Coins)"] = "Glow Bait",  
+    ["Magic Bait (500 Coins)"] = "Magic Bait"  
+}  
+
+local selectedBait = baitNames[1]  
+
+Tab4:Dropdown({  
+    Title = "Select Bait",  
+    Values = baitNames,  
+    Value = selectedBait,  
+    Callback = function(value)  
+        selectedBait = value  
+    end  
+})  
+
+Tab4:Button({  
+    Title = "Buy Bait",  
+    Callback = function()  
+        local key = baitKeyMap[selectedBait]  
+        if key and baits[key] then  
+            local success, err = pcall(function()  
+                RFPurchaseBait:InvokeServer(baits[key])  
+            end)  
+            if success then  
+                WindUI:Notify({Title = "Bait Purchase", Content = "Purchased " .. selectedBait, Duration = 3})  
+            else  
+                WindUI:Notify({Title = "Bait Purchase Error", Content = tostring(err), Duration = 5})  
+            end  
+        end  
+    end  
 })
 
 local Tab5 = Window:Tab({
