@@ -388,7 +388,7 @@ _G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automatic Instant Fishing",
+    Desc = "Automic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -401,7 +401,7 @@ Tab3:Toggle({
 local Input = Tab3:Input({
     Title = "Blast Delay",
     Desc = "Enter delay in seconds",
-    Value = "",
+    Value = "0.001",
     InputIcon = false,
     Type = "Input",
     Placeholder = "Enter delay...",
@@ -418,32 +418,32 @@ local Input = Tab3:Input({
 })
 
 local function InstantFish()
-    local char = player.Character or player.CharacterAdded:Wait()
-    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-        net["RE/EquipToolFromHotbar"]:FireServer(1)
+    if player.Character then
+        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+            net["RE/EquipToolFromHotbar"]:FireServer(1)
+        end
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+        net["RE/FishingCompleted"]:FireServer()
     end
-    net["RF/ChargeFishingRod"]:InvokeServer(2)
-    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-    net["RE/FishingCompleted"]:FireServer()
 end
 
-spawn(function()
-    while wait() do
-        if _G.AutoFishing and _G.MaxSpeed then
-            while _G.AutoFishing do
-                InstantFish()
-                task.wait(0)
-            end
-        elseif _G.AutoFishing then
+task.spawn(function()
+    while true do
+        if _G.AutoFishing then
             InstantFish()
-            if _G.Delay > 0 then
-                wait(_G.Delay)
+            if not _G.MaxSpeed and _G.Delay > 0 then
+                task.wait(_G.Delay)
+            elseif _G.MaxSpeed then
+                task.wait(0.001)
             end
+        else
+            task.wait(0.01)
         end
     end
 end)
 
-player.CharacterAdded:Connect(function(char)
+player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
         InstantFish()
     end
@@ -1141,28 +1141,129 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({
+local Section = Tab4:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local selectedBait = "Bait"
-local baitDropdown = Tab5:Dropdown({
-    Title = "Select Bait",
-    Values = {"Bait", "Worm", "Shrimp", "Squid", "SpecialBait"},
-    Callback = function(Value)
-        selectedBait = Value
-    end
+local ReplicatedStorage = game:GetService("ReplicatedStorage")  
+local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
+
+local baits = {  
+    ["Luck Bait"] = 1000,  
+    ["Midnight Bait"] = 3000,  
+    ["Nature Bait"] = 83500,  
+    ["Chroma Bait"] = 290000,  
+    ["Dark Matter Bait"] = 630000,  
+    ["Corrupt Bait"] = 1150000,  
+    ["Aether Bait"] = 3700000,  
+    ["Floral Bait"] = 4000000  
+}  
+
+local baitNames = {  
+    "Luck Bait (1k Coins)", "Midnight Bait (3k Coins)", "Nature Bait (83.5k Coins)",  
+    "Chroma Bait (290k Coins)", "Dark Matter Bait (630k Coins)", "Corrupt Bait (1.15M Coins)",  
+    "Aether Bait (3.7M Coins)", "Floral Bait (4M Coins)"  
+}  
+
+local baitKeyMap = {  
+    ["Luck Bait (1k Coins)"] = "Luck Bait",  
+    ["Midnight Bait (3k Coins)"] = "Midnight Bait",  
+    ["Nature Bait (83.5k Coins)"] = "Nature Bait",  
+    ["Chroma Bait (290k Coins)"] = "Chroma Bait",  
+    ["Dark Matter Bait (630k Coins)"] = "Dark Matter Bait",  
+    ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",  
+    ["Aether Bait (3.7M Coins)"] = "Aether Bait",  
+    ["Floral Bait (4M Coins)"] = "Floral Bait"  
+}  
+
+local selectedBait = baitNames[1]  
+
+Tab4:Dropdown({  
+    Title = "Select Bait",  
+    Values = baitNames,  
+    Value = selectedBait,  
+    Callback = function(value)  
+        selectedBait = value  
+    end  
+})  
+
+Tab4:Button({  
+    Title = "Buy Bait",  
+    Callback = function()  
+        local key = baitKeyMap[selectedBait]  
+        if key and baits[key] then  
+            local success, err = pcall(function()  
+                RFPurchaseBait:InvokeServer(baits[key])  
+            end)  
+            if success then  
+                WindUI:Notify({Title = "Bait Purchase", Content = "Purchased " .. selectedBait, Duration = 3})  
+            else  
+                WindUI:Notify({Title = "Bait Purchase Error", Content = tostring(err), Duration = 5})  
+            end  
+        end  
+    end  
 })
 
-Tab5:Button({
-    Title = "Buy Selected Bait",
-    Desc = "Purchase the selected bait",
-    Callback = function()
-        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/PurchaseItem"]:FireServer(selectedBait, 10)
-        print("Purchased: " .. selectedBait .. " x10")
-    end
+local Section = Tab4:Section({
+    Title = "Buy Weather Event",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")  
+local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
+
+local weatherEvents = {  
+    ["Windy"] = 10000,  
+    ["Cloudy"] = 20000,  
+    ["Stormy"] = 35000,  
+    ["Shining"] = 50000,  
+    ["Shark Hunt"] = 300000,  
+    ["Snow"] = 15000  
+}  
+
+local weatherNames = {  
+    "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
+    "Shining (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
+}  
+
+local weatherKeyMap = {  
+    ["Windy (10k Coins)"] = "Windy",  
+    ["Cloudy (20k Coins)"] = "Cloudy",  
+    ["Stormy (35k Coins)"] = "Stormy",  
+    ["Shining (50k Coins)"] = "Shining",  
+    ["Shark Hunt (300k Coins)"] = "Shark Hunt",  
+    ["Snow (15k Coins)"] = "Snow"  
+}  
+
+local selectedWeather = weatherNames[1]  
+
+Tab4:Dropdown({  
+    Title = "Select Weather Event",  
+    Values = weatherNames,  
+    Value = selectedWeather,  
+    Callback = function(value)  
+        selectedWeather = value  
+    end  
+})  
+
+Tab4:Button({  
+    Title = "Buy Weather Event",  
+    Callback = function()  
+        local key = weatherKeyMap[selectedWeather]  
+        if key and weatherEvents[key] then  
+            local success, err = pcall(function()  
+                RFPurchaseWeatherEvent:InvokeServer(weatherEvents[key])  
+            end)  
+            if success then  
+                WindUI:Notify({Title = "Weather Purchase", Content = "Purchased " .. selectedWeather, Duration = 3})  
+            else  
+                WindUI:Notify({Title = "Weather Purchase Error", Content = tostring(err), Duration = 5})  
+            end  
+        end  
+    end  
 })
 
 local Tab6 = Window:Tab({
