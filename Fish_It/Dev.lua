@@ -286,12 +286,7 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-local success, net = pcall(function() return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net end)
-
-if not success or not net then
-    warn("Net initialization failed!")
-    return
-end
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
 _G.AutoFishing = false
 _G.Delay = 0
@@ -330,15 +325,12 @@ local Input = Tab3:Input({
 
 local function InstantFish()
     if player.Character then
-        if net["RE/EquipToolFromHotbar"] then
+        pcall(function()
             net["RE/EquipToolFromHotbar"]:FireServer(1)
-        end
-        if net["RF/ChargeFishingRod"] then
             net["RF/ChargeFishingRod"]:InvokeServer(2)
-        end
-        if net["RE/FishingCompleted"] then
+            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
             net["RE/FishingCompleted"]:FireServer()
-        end
+        end)
     end
 end
 
