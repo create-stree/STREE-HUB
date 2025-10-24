@@ -307,7 +307,7 @@ Tab3:Toggle({
 local Input = Tab3:Input({
     Title = "Delay",
     Desc = "Enter delay in seconds",
-    Value = "",
+    Value = "0.01",
     InputIcon = false,
     Type = "Input",
     Placeholder = "Enter delay...",
