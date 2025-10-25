@@ -1,8 +1,7 @@
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-
-local placeId = tostring(game.PlaceId)
+local placeId = game.PlaceId
 
 _G.scripts_key = _G.scripts_key or scripts_key or "FREE_USER"
 local streeLogo = "rbxassetid://122683047852451"
@@ -33,31 +32,29 @@ end
 
 local userType = isPremiumKey(_G.scripts_key) and "Premium" or "Freemium"
 
--- ubah semua key jadi string
 local gameScripts = {
-    ["2753915549"] = {
+    [2753915549] = {
         name = "Blox Fruit",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Premium.lua"
     },
-    ["1239215938"] = {
+    [1239215938] = {
         name = "Climb and Jump Tower",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
     },
-    ["121864768012064"] = {
+    [121864768012064] = {
         name = "Fish It",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
     },
-    ["18687417158"] = {
+    [18687417158] = {
         name = "Forsaken",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
     }
 }
 
--- UI loading
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
@@ -117,7 +114,7 @@ task.wait(0.3)
 ScreenGui:Destroy()
 
 local gameData = gameScripts[placeId]
-local gameName = (gameData and gameData.name) or "Unknown Game"
+local gameName = gameData and gameData.name or "Unknown Game"
 
 StarterGui:SetCore("SendNotification", {
     Title = "STREE HUB",
@@ -135,32 +132,27 @@ StarterGui:SetCore("SendNotification", {
 task.wait(2)
 
 if gameData then
-    local scriptUrl = (userType == "Premium") and gameData.premium or gameData.free
-    StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB",
-        Text = "Loading " .. userType .. " version for " .. gameName .. "...",
-        Icon = streeLogo,
-        Duration = 3
-    })
-
-    local success, result = pcall(function()
-        return game:HttpGet(scriptUrl)
-    end)
-
-    if success and result then
-        loadstring(result)()
+    if userType == "Premium" then
+        StarterGui:SetCore("SendNotification", {
+            Title = "STREE HUB",
+            Text = "Loading Premium version for " .. gameName .. "...",
+            Icon = streeLogo,
+            Duration = 3
+        })
+        loadstring(game:HttpGet(gameData.premium))()
     else
         StarterGui:SetCore("SendNotification", {
             Title = "STREE HUB",
-            Text = "⚠️ Failed to load script for " .. gameName,
+            Text = "Loading Freemium version for " .. gameName .. "...",
             Icon = streeLogo,
-            Duration = 4
+            Duration = 3
         })
+        loadstring(game:HttpGet(gameData.free))()
     end
 else
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
-        Text = "❌ Game not supported!",
+        Text = "Game not supported!",
         Icon = streeLogo,
         Duration = 4
     })
