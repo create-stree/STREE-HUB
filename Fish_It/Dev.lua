@@ -285,10 +285,13 @@ spawn(function()
 end)
 
 local player = game.Players.LocalPlayer
+local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local success, net = pcall(function()
     return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 end)
+
+if not success or not net then return end
 
 _G.AutoFishing = false
 _G.Delay = 0
@@ -324,18 +327,23 @@ Tab3:Input({
 local function InstantFish()
     local char = player.Character
     if not char then return end
-    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-        pcall(function()
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-            net["RF/ChargeFishingRod"]:InvokeServer(2)
-            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-            net["RE/FishingCompleted"]:FireServer()
-        end)
-    end
+    if not char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then return end
+
+    pcall(function()
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
+        task.wait(0.05)
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        task.wait(0.05)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+        task.wait(0.05)
+        net["RE/FishingMinigameEnded"]:FireServer(true)
+        task.wait(0.05)
+        net["RE/FishingCompleted"]:FireServer()
+    end)
 end
 
 task.spawn(function()
-    while task.wait(_G.MaxSpeed and 0.001 or (_G.Delay > 0 and _G.Delay or 0.01)) do
+    while task.wait(_G.MaxSpeed and 0.01 or (_G.Delay > 0 and _G.Delay or 0.2)) do
         if _G.AutoFishing then
             InstantFish()
         end
@@ -344,6 +352,7 @@ end)
 
 player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
+        task.wait(1)
         InstantFish()
     end
 end)
