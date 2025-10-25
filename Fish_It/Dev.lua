@@ -291,8 +291,6 @@ local success, net = pcall(function()
     return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 end)
 
-if not success or not net then return end
-
 _G.AutoFishing = false
 _G.Delay = 0
 _G.MaxSpeed = true
@@ -331,13 +329,11 @@ local function InstantFish()
 
     pcall(function()
         net["RE/EquipToolFromHotbar"]:FireServer(1)
-        task.wait(0.05)
+        task.wait(0.01)
         net["RF/ChargeFishingRod"]:InvokeServer(2)
-        task.wait(0.05)
+        task.wait(0.01)
         net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        task.wait(0.05)
-        net["RE/FishingMinigameEnded"]:FireServer(true)
-        task.wait(0.05)
+        task.wait(0.01)
         net["RE/FishingCompleted"]:FireServer()
     end)
 end
