@@ -50,8 +50,8 @@ local gameScripts = {
     },
     [18687417158] = {
         name = "Forsaken",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua", -- Corrected URL
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua" -- Corrected URL
     }
 }
 
@@ -132,22 +132,23 @@ StarterGui:SetCore("SendNotification", {
 task.wait(2)
 
 if gameData then
-    if userType == "Premium" then
-        StarterGui:SetCore("SendNotification", {
-            Title = "STREE HUB",
-            Text = "Loading Premium version for " .. gameName .. "...",
-            Icon = streeLogo,
-            Duration = 3
-        })
-        loadstring(game:HttpGet(gameData.premium))()
+    local scriptUrl = userType == "Premium" and gameData.premium or gameData.free
+    StarterGui:SetCore("SendNotification", {
+        Title = "STREE HUB",
+        Text = "Loading " .. userType .. " version for " .. gameName .. "...",
+        Icon = streeLogo,
+        Duration = 3
+    })
+    local scriptContent = game:HttpGet(scriptUrl)
+    if scriptContent then
+        loadstring(scriptContent)()
     else
         StarterGui:SetCore("SendNotification", {
             Title = "STREE HUB",
-            Text = "Loading Freemium version for " .. gameName .. "...",
+            Text = "Failed to load script for " .. gameName .. "!",
             Icon = streeLogo,
-            Duration = 3
+            Duration = 4
         })
-        loadstring(game:HttpGet(gameData.free))()
     end
 else
     StarterGui:SetCore("SendNotification", {
