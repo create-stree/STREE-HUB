@@ -1141,7 +1141,7 @@ Tab5:Button({
     end
 })
 
-local Section = Tab4:Section({
+local Section = Tab5:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1180,7 +1180,7 @@ local baitKeyMap = {
 
 local selectedBait = baitNames[1]  
 
-Tab4:Dropdown({  
+Tab5:Dropdown({  
     Title = "Select Bait",  
     Values = baitNames,  
     Value = selectedBait,  
@@ -1189,7 +1189,7 @@ Tab4:Dropdown({
     end  
 })  
 
-Tab4:Button({  
+Tab5:Button({  
     Title = "Buy Bait",  
     Callback = function()  
         local key = baitKeyMap[selectedBait]  
@@ -1206,7 +1206,7 @@ Tab4:Button({
     end  
 })
 
-local Section = Tab4:Section({
+local Section = Tab5:Section({
     Title = "Buy Weather Event",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1240,7 +1240,7 @@ local weatherKeyMap = {
 
 local selectedWeather = weatherNames[1]  
 
-Tab4:Dropdown({  
+Tab5:Dropdown({  
     Title = "Select Weather Event",  
     Values = weatherNames,  
     Value = selectedWeather,  
@@ -1249,7 +1249,7 @@ Tab4:Dropdown({
     end  
 })  
 
-Tab4:Button({  
+Tab5:Button({  
     Title = "Buy Weather Event",  
     Callback = function()  
         local key = weatherKeyMap[selectedWeather]  
