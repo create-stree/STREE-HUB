@@ -1671,8 +1671,6 @@ Tab7:Button({
     end
 })
 
-Window:SelectTab(7)
-
 local Section = Tab7:Section({ 
     Title = "Other Scripts",
     Icon = "file-code-2",
