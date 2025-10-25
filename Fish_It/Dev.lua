@@ -285,7 +285,6 @@ spawn(function()
 end)
 
 local player = game.Players.LocalPlayer
-local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local success, net = pcall(function()
     return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
