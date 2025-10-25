@@ -50,8 +50,8 @@ local gameScripts = {
     },
     [18687417158] = {
         name = "Forsaken",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua", -- Corrected URL
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua" -- Corrected URL
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua"
     }
 }
 
@@ -140,12 +140,22 @@ if gameData then
         Duration = 3
     })
     local scriptContent = game:HttpGet(scriptUrl)
-    if scriptContent then
-        loadstring(scriptContent)()
+    if scriptContent and scriptContent ~= "" then
+        local loadedFunction, errorMessage = loadstring(scriptContent)
+        if loadedFunction then
+            loadedFunction()
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "STREE HUB",
+                Text = "Error loading script: " .. (errorMessage or "Unknown"),
+                Icon = streeLogo,
+                Duration = 4
+            })
+        end
     else
         StarterGui:SetCore("SendNotification", {
             Title = "STREE HUB",
-            Text = "Failed to load script for " .. gameName .. "!",
+            Text = "Failed to load script for " .. gameName .. "! Check URL or connection.",
             Icon = streeLogo,
             Duration = 4
         })
