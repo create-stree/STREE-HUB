@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.4",
+    Title = "v0.0.0.5",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -378,6 +378,8 @@ Toggle = Tab3:Toggle({
     end
 })
 
+Window:SelectTab(1)
+
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
@@ -474,6 +476,8 @@ local Toggle = Tab3:Toggle({
         end)    
     end    
 })    
+
+Window:SelectTab(2)
     
 local Section = Tab3:Section({     
     Title = "Other",    
@@ -582,6 +586,8 @@ local Toggle = Tab3:Toggle({
         end    
     end    
 })
+
+Window:SelectTab(3)
 
 local Section = Tab3:Section({     
     Title = "Gameplay",    
@@ -1088,13 +1094,15 @@ local rods = {
     ["Chrome Rod"] = 7,
     ["Astral Rod"] = 5,
     ["Ares Rod"] = 126,
-    ["Angler Rod"] = 168
+    ["Angler Rod"] = 168,
+    ["Bamboo Rod"] = 258
 }
 
 local rodNames = {
     "Luck Rod (350 Coins)", "Carbon Rod (900 Coins)", "Grass Rod (1.5k Coins)", "Demascus Rod (3k Coins)",
     "Ice Rod (5k Coins)", "Lucky Rod (15k Coins)", "Midnight Rod (50k Coins)", "Steampunk Rod (215k Coins)",
-    "Chrome Rod (437k Coins)", "Astral Rod (1M Coins)", "Ares Rod (3M Coins)", "Angler Rod (8M Coins)"
+    "Chrome Rod (437k Coins)", "Astral Rod (1M Coins)", "Ares Rod (3M Coins)", "Angler Rod (8M Coins)",
+    "Bamboo Rod (12M Coins)"
 }
 
 local rodKeyMap = {
@@ -1110,6 +1118,7 @@ local rodKeyMap = {
     ["Astral Rod (1M Coins)"]="Astral Rod",
     ["Ares Rod (3M Coins)"]="Ares Rod",
     ["Angler Rod (8M Coins)"]="Angler Rod"
+    ["Bamboo Rod (12M Coins)"]="Bamboo Rod"
 }
 
 local selectedRod = rodNames[1]
@@ -1140,6 +1149,8 @@ Tab5:Button({
         end
     end
 })
+
+Window:SelectTab(4)
 
 local Section = Tab5:Section({
     Title = "Buy Baits",
@@ -1206,6 +1217,8 @@ Tab5:Button({
     end  
 })
 
+Window:SelectTab(5)
+
 local Section = Tab5:Section({
     Title = "Buy Weather Event",
     TextXAlignment = "Left",
@@ -1215,14 +1228,14 @@ local Section = Tab5:Section({
 local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
 
-local weatherEvents = {  
-    ["Windy"] = 10000,  
-    ["Cloudy"] = 20000,  
-    ["Stormy"] = 35000,  
-    ["Shining"] = 50000,  
-    ["Shark Hunt"] = 300000,  
-    ["Snow"] = 15000  
-}  
+local weathers = {
+    ["Wind"] = 1,
+    ["Cloudy"] = 2,
+    ["Snow"] = 3,
+    ["Storm"] = 4,
+    ["Shine"] = 5,
+    ["Shark Hunting"] = 6
+}
 
 local weatherNames = {  
     "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
@@ -1314,6 +1327,8 @@ Tab6:Button({
     end
 })
 
+Window:SelectTab(6)
+
 local Section = Tab6:Section({ 
     Title = "Fishing Spot",
     TextXAlignment = "Left",
@@ -1359,6 +1374,8 @@ Tab6:Button({
         end
     end
 })
+
+Window:SelectTab(7)
 
 local Section = Tab6:Section({
     Title = "Location NPC",
@@ -1411,6 +1428,8 @@ Tab6:Button({
         end
     end
 })
+
+Window:SelectTab(8)
 
 local Section = Tab6:Section({
     Title = "Event Teleporter",
@@ -1528,8 +1547,11 @@ local Toggle = Tab7:Toggle({
     end
 })
 
+Window:SelectTab(9)
+
 local Section = Tab7:Section({ 
     Title = "Server",
+    Icon = "server",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1575,8 +1597,11 @@ Tab7:Button({
     end
 })
 
+Window:SelectTab(9)
+
 local Section = Tab7:Section({ 
     Title = "Config",
+    Icon = "folder-open",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1666,8 +1691,11 @@ Tab7:Button({
     end
 })
 
+Window:SelectTab(10)
+
 local Section = Tab7:Section({ 
     Title = "Other Scripts",
+    Icon = "file-code-2",
     TextXAlignment = "Left",
     TextSize = 17,
 })
