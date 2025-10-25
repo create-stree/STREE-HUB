@@ -120,7 +120,7 @@ local Input = Tab2:Input({
     Title = "WalkSpeed",
     Desc = "Minimum 16 speed",
     Value = "16",
-    InputIcon = "bird",
+    InputIcon = false,
     Type = "Input",
     Placeholder = "Enter number...",
     Callback = function(input)
@@ -139,7 +139,7 @@ local Input = Tab2:Input({
     Title = "Jump Power",
     Desc = "Minimum 50 jump",
     Value = "50",
-    InputIcon = "bird",
+    InputIcon = false,
     Type = "Input",
     Placeholder = "Enter number...",
     Callback = function(input)
@@ -378,8 +378,6 @@ Toggle = Tab3:Toggle({
     end
 })
 
-Window:SelectTab(3)
-
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
@@ -477,8 +475,6 @@ local Toggle = Tab3:Toggle({
     end    
 })    
 
-Window:SelectTab(3)
-    
 local Section = Tab3:Section({     
     Title = "Other",    
     TextXAlignment = "Left",    
@@ -582,12 +578,10 @@ local Toggle = Tab3:Toggle({
                     ["Text"] = ("Radar: %*"):format(state and "Enabled" or "Disabled"),    
                     ["TextColor"] = state and {["R"] = 9,["G"] = 255,["B"] = 0} or {["R"] = 255,["G"] = 0,["B"] = 0}    
                 })    
-            end    
-        end    
-    end    
+            end
+        end
+    end   
 })
-
-Window:SelectTab(3)
 
 local Section = Tab3:Section({     
     Title = "Gameplay",    
@@ -1150,8 +1144,6 @@ Tab5:Button({
     end
 })
 
-Window:SelectTab(5)
-
 local Section = Tab5:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
@@ -1216,8 +1208,6 @@ Tab5:Button({
         end  
     end  
 })
-
-Window:SelectTab(5)
 
 local Section = Tab5:Section({
     Title = "Buy Weather Event",
@@ -1327,8 +1317,6 @@ Tab6:Button({
     end
 })
 
-Window:SelectTab(6)
-
 local Section = Tab6:Section({ 
     Title = "Fishing Spot",
     TextXAlignment = "Left",
@@ -1374,8 +1362,6 @@ Tab6:Button({
         end
     end
 })
-
-Window:SelectTab(6)
 
 local Section = Tab6:Section({
     Title = "Location NPC",
@@ -1428,8 +1414,6 @@ Tab6:Button({
         end
     end
 })
-
-Window:SelectTab(6)
 
 local Section = Tab6:Section({
     Title = "Event Teleporter",
@@ -1547,8 +1531,6 @@ local Toggle = Tab7:Toggle({
     end
 })
 
-Window:SelectTab(7)
-
 local Section = Tab7:Section({ 
     Title = "Server",
     Icon = "server",
@@ -1596,8 +1578,6 @@ Tab7:Button({
         end
     end
 })
-
-Window:SelectTab(7)
 
 local Section = Tab7:Section({ 
     Title = "Config",
