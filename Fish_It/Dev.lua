@@ -286,7 +286,9 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-local success, net = pcall(function() return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net end)
+local success, net = pcall(function()
+    return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+end)
 
 _G.AutoFishing = false
 _G.Delay = 0
@@ -300,11 +302,10 @@ Tab3:Toggle({
     Default = false,
     Callback = function(value)
         _G.AutoFishing = value
-        print("Auto Fishing: " .. tostring(value))
     end
 })
 
-local Input = Tab3:Input({
+Tab3:Input({
     Title = "Blast Delay",
     Desc = "Enter delay in seconds",
     Value = "",
@@ -312,20 +313,18 @@ local Input = Tab3:Input({
     Type = "Input",
     Placeholder = "Enter delay...",
     Callback = function(input)
-        local newDelay = tonumber(input)
-        if newDelay and newDelay >= 0 then
-            _G.Delay = newDelay
-            print("Delay diubah menjadi: " .. _G.Delay .. " detik")
-            _G.MaxSpeed = (newDelay == 0)
-        else
-            print("Input invalid, gunakan angka >= 0")
+        local num = tonumber(input)
+        if num and num >= 0 then
+            _G.Delay = num
+            _G.MaxSpeed = (num == 0)
         end
     end
 })
 
 local function InstantFish()
     local char = player.Character
-    if char and char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+    if not char then return end
+    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
         pcall(function()
             net["RE/EquipToolFromHotbar"]:FireServer(1)
             net["RF/ChargeFishingRod"]:InvokeServer(2)
@@ -336,21 +335,14 @@ local function InstantFish()
 end
 
 task.spawn(function()
-    while true do
+    while task.wait(_G.MaxSpeed and 0.001 or (_G.Delay > 0 and _G.Delay or 0.01)) do
         if _G.AutoFishing then
             InstantFish()
-            if not _G.MaxSpeed and _G.Delay > 0 then
-                task.wait(_G.Delay)
-            elseif _G.MaxSpeed then
-                task.wait(0.001)
-            end
-        else
-            task.wait(0.01)
         end
     end
 end)
 
-player.CharacterAdded:Connect(function(char)
+player.CharacterAdded:Connect(function()
     if _G.AutoFishing then
         InstantFish()
     end
