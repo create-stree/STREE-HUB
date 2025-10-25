@@ -52,7 +52,7 @@ local Tab1 = Window:Tab({
     Icon = "info",
 })
 
-local Section = Tab1:Section({
+Tab1:Section({
     Title = "Community Support",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -98,7 +98,7 @@ Tab1:Button({
     end
 })
 
-local Section = Tab1:Section({
+Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -116,7 +116,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 
 _G.CustomJumpPower = 50
 
-local Input = Tab2:Input({
+Tab2:Input({
     Title = "WalkSpeed",
     Desc = "Minimum 16 speed",
     Value = "16",
@@ -135,7 +135,7 @@ local Input = Tab2:Input({
     end
 })
 
-local Input = Tab2:Input({
+Tab2:Input({
     Title = "Jump Power",
     Desc = "Minimum 50 jump",
     Value = "50",
@@ -158,7 +158,7 @@ local Input = Tab2:Input({
     end
 })
 
-local Button = Tab2:Button({
+Tab2:Button({
     Title = "Reset Jump Power",
     Desc = "Return Jump Power to normal (50)",
     Callback = function()
@@ -189,7 +189,7 @@ Tab2:Button({
 
 local UserInputService = game:GetService("UserInputService")
 
-local Toggle = Tab2:Toggle({
+Tab2:Toggle({
     Title = "Infinite Jump",
     Desc = "activate to use infinite jump",
     Icon = false,
@@ -215,7 +215,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-local Toggle = Tab2:Toggle({
+Tab2:Toggle({
     Title = "Noclip",
     Desc = "Walk through walls",
     Icon = false,
@@ -244,7 +244,7 @@ local Tab3 = Window:Tab({
     Icon = "landmark",
 })
 
-local Section = Tab3:Section({
+Tab3:Section({
     Title = "Main",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -269,10 +269,7 @@ spawn(function()
             pcall(function()
                 local backpack = player:FindFirstChild("Backpack")
                 if backpack then
-                    local rod = backpack:FindFirstChild("Rod")
-                        or backpack:FindFirstChild("FishingRod")
-                        or backpack:FindFirstChild("OldRod")
-                        or backpack:FindFirstChild("BasicRod")
+                    local rod = backpack:FindFirstChild("Rod") or backpack:FindFirstChild("FishingRod") or backpack:FindFirstChild("OldRod") or backpack:FindFirstChild("BasicRod")
                     if rod and not player.Character:FindFirstChild(rod.Name) then
                         player.Character.Humanoid:EquipTool(rod)
                     end
@@ -340,7 +337,7 @@ local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0
 local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
 
 local autoHoldEnabled = false
-Toggle = Tab3:Toggle({
+Tab3:Toggle({
     Title = "Auto Fishing",
     Desc = "Automatic Fishing v2",
     Value = false,
@@ -398,7 +395,7 @@ Tab3:Toggle({
     end
 })
 
-local Input = Tab3:Input({
+Tab3:Input({
     Title = "Blast Delay",
     Desc = "Enter delay in seconds",
     Value = "0.001",
@@ -409,10 +406,10 @@ local Input = Tab3:Input({
         local newDelay = tonumber(input)
         if newDelay and newDelay >= 0 then
             _G.Delay = newDelay
-            print("Delay diubah menjadi: " .. _G.Delay .. " detik")
+            print("Delay changed to: " .. _G.Delay .. " seconds")
             _G.MaxSpeed = (newDelay == 0)
         else
-            print("Input invalid, gunakan angka >= 0")
+            print("Invalid input, use number >= 0")
         end
     end
 })
@@ -449,7 +446,7 @@ player.CharacterAdded:Connect(function()
     end
 end)
 
-local Toggle = Tab3:Toggle({    
+Tab3:Toggle({    
     Title = "Auto Sell",    
     Desc = "Automatic fish sales",    
     Icon = false,    
@@ -475,7 +472,7 @@ local Toggle = Tab3:Toggle({
     end    
 })    
 
-local Section = Tab3:Section({     
+Tab3:Section({     
     Title = "Other",    
     TextXAlignment = "Left",    
     TextSize = 17,    
@@ -495,7 +492,7 @@ local function startAutoFish()
     end)
 end
 
-Toggle = Tab3:Toggle({
+Tab3:Toggle({
     Title = "Auto Instant complete Fishing",
     Desc = "Instant Fishing For v2 (It is mandatory to turn it on if you want to use Auto Fishing V2)",
     Value = autoInstantFishEnabled,
@@ -518,7 +515,7 @@ Toggle = Tab3:Toggle({
     end
 })
     
-local Toggle = Tab3:Toggle({    
+Tab3:Toggle({    
     Title = "Instant Catch",    
     Desc = "Get fish straight away",    
     Icon = false,    
@@ -534,7 +531,7 @@ local Toggle = Tab3:Toggle({
     end    
 })    
     
-local Toggle = Tab3:Toggle({    
+Tab3:Toggle({    
     Title = "Radar",    
     Desc = "Toggle fishing radar",    
     Icon = false,    
@@ -583,7 +580,7 @@ local Toggle = Tab3:Toggle({
     end   
 })
 
-local Section = Tab3:Section({     
+Tab3:Section({     
     Title = "Gameplay",    
     TextXAlignment = "Left",    
     TextSize = 17,    
@@ -795,121 +792,7 @@ local function CreateBackground()
         while ScreenGui and _G.KaitunEnabled do
             for i = 0, 180, 2 do
                 rotationY = i
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
-                Saturn.Rotation = 0
+                Saturn.Rotation = rotationY
                 task.wait(0.02)
             end
             for i = 180, 0, -2 do
@@ -969,7 +852,7 @@ local Tab4 = Window:Tab({
     Icon = "star",
 })
 
-local Section = Tab4:Section({     
+Tab4:Section({     
     Title = "Auto Kaitun System",    
     TextXAlignment = "Left",    
     TextSize = 17,    
@@ -982,14 +865,13 @@ local function StartKaitun()
                 local player = game.Players.LocalPlayer
                 local character = player.Character or player.CharacterAdded:Wait()
                 local backpack = player:WaitForChild("Backpack", 5)
-                local RepStorage = game:GetService("ReplicatedStorage")
                 if backpack then
                     local rod = backpack:FindFirstChild("Rod") or backpack:FindFirstChild("FishingRod")
                     if rod and not character:FindFirstChild(rod.Name) then
                         character:WaitForChild("Humanoid"):EquipTool(rod)
                     end
                 end
-                local fishingPackage = RepStorage:FindFirstChild("Packages") and RepStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0")
+                local fishingPackage = ReplicatedStorage:FindFirstChild("Packages") and ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0")
                 if not fishingPackage then return end
                 local netFolder = fishingPackage:FindFirstChild("net")
                 if not netFolder then return end
@@ -1100,19 +982,19 @@ local rodNames = {
 }
 
 local rodKeyMap = {
-    ["Luck Rod (350 Coins)"]="Luck Rod",
-    ["Carbon Rod (900 Coins)"]="Carbon Rod",
-    ["Grass Rod (1.5k Coins)"]="Grass Rod",
-    ["Demascus Rod (3k Coins)"]="Demascus Rod",
-    ["Ice Rod (5k Coins)"]="Ice Rod",
-    ["Lucky Rod (15k Coins)"]="Lucky Rod",
-    ["Midnight Rod (50k Coins)"]="Midnight Rod",
-    ["Steampunk Rod (215k Coins)"]="Steampunk Rod",
-    ["Chrome Rod (437k Coins)"]="Chrome Rod",
-    ["Astral Rod (1M Coins)"]="Astral Rod",
-    ["Ares Rod (3M Coins)"]="Ares Rod",
-    ["Angler Rod (8M Coins)"]="Angler Rod"
-    ["Bamboo Rod (12M Coins)"]="Bamboo Rod"
+    ["Luck Rod (350 Coins)"] = "Luck Rod",
+    ["Carbon Rod (900 Coins)"] = "Carbon Rod",
+    ["Grass Rod (1.5k Coins)"] = "Grass Rod",
+    ["Demascus Rod (3k Coins)"] = "Demascus Rod",
+    ["Ice Rod (5k Coins)"] = "Ice Rod",
+    ["Lucky Rod (15k Coins)"] = "Lucky Rod",
+    ["Midnight Rod (50k Coins)"] = "Midnight Rod",
+    ["Steampunk Rod (215k Coins)"] = "Steampunk Rod",
+    ["Chrome Rod (437k Coins)"] = "Chrome Rod",
+    ["Astral Rod (1M Coins)"] = "Astral Rod",
+    ["Ares Rod (3M Coins)"] = "Ares Rod",
+    ["Angler Rod (8M Coins)"] = "Angler Rod",
+    ["Bamboo Rod (12M Coins)"] = "Bamboo Rod"
 }
 
 local selectedRod = rodNames[1]
@@ -1144,13 +1026,12 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({
+Tab5:Section({
     Title = "Buy Baits",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
 local baits = {  
@@ -1209,13 +1090,12 @@ Tab5:Button({
     end  
 })
 
-local Section = Tab5:Section({
+Tab5:Section({
     Title = "Buy Weather Event",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
 
 local weathers = {
@@ -1233,11 +1113,11 @@ local weatherNames = {
 }  
 
 local weatherKeyMap = {  
-    ["Windy (10k Coins)"] = "Windy",  
+    ["Windy (10k Coins)"] = "Wind",  
     ["Cloudy (20k Coins)"] = "Cloudy",  
-    ["Stormy (35k Coins)"] = "Stormy",  
-    ["Shining (50k Coins)"] = "Shining",  
-    ["Shark Hunt (300k Coins)"] = "Shark Hunt",  
+    ["Stormy (35k Coins)"] = "Storm",  
+    ["Shining (50k Coins)"] = "Shine",  
+    ["Shark Hunt (300k Coins)"] = "Shark Hunting",  
     ["Snow (15k Coins)"] = "Snow"  
 }  
 
@@ -1256,9 +1136,9 @@ Tab5:Button({
     Title = "Buy Weather Event",  
     Callback = function()  
         local key = weatherKeyMap[selectedWeather]  
-        if key and weatherEvents[key] then  
+        if key and weathers[key] then  
             local success, err = pcall(function()  
-                RFPurchaseWeatherEvent:InvokeServer(weatherEvents[key])  
+                RFPurchaseWeatherEvent:InvokeServer(weathers[key])  
             end)  
             if success then  
                 WindUI:Notify({Title = "Weather Purchase", Content = "Purchased " .. selectedWeather, Duration = 3})  
@@ -1274,7 +1154,7 @@ local Tab6 = Window:Tab({
     Icon = "map-pin",
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Island",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1293,7 +1173,7 @@ local IslandLocations = {
 
 local SelectedIsland = nil
 
-local IslandDropdown = Tab6:Dropdown({
+Tab6:Dropdown({
     Title = "Select Island",
     Values = (function()
         local keys = {}
@@ -1317,7 +1197,7 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Fishing Spot",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1339,7 +1219,7 @@ local FishingLocations = {
 
 local SelectedFishing = nil
 
-local FishingDropdown = Tab6:Dropdown({
+Tab6:Dropdown({
     Title = "Select Spot",
     Values = (function()
         local keys = {}
@@ -1363,7 +1243,7 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({
+Tab6:Section({
     Title = "Location NPC",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1391,7 +1271,7 @@ local NPC_Locations = {
 
 local SelectedNPC = nil
 
-local NPCDropdown = Tab6:Dropdown({
+Tab6:Dropdown({
     Title = "Select NPC",
     Values = (function()
         local keys = {}
@@ -1415,7 +1295,7 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({
+Tab6:Section({
     Title = "Event Teleporter",
     TextXAlignment = "Left",
     TextSize = 17,
@@ -1433,7 +1313,7 @@ local Event_Locations = {
 
 local ActiveEvent = nil
 
-local EventDropdown = Tab6:Dropdown({
+Tab6:Dropdown({
     Title = "Select Event",
     Values = (function()
         local keys = {}
@@ -1451,7 +1331,6 @@ local EventDropdown = Tab6:Dropdown({
 Tab6:Button({
     Title = "Teleport to Event",
     Callback = function()
-        local Player = game.Players.LocalPlayer
         local Char = Player.Character or Player.CharacterAdded:Wait()
         local HRP = Char:FindFirstChild("HumanoidRootPart")
         if not HRP then return end
@@ -1466,7 +1345,7 @@ local Tab7 = Window:Tab({
     Icon = "settings",
 })
 
-local Toggle = Tab7:Toggle({
+Tab7:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -1503,7 +1382,7 @@ local Toggle = Tab7:Toggle({
     end
 })
 
-local Toggle = Tab7:Toggle({
+Tab7:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -1531,7 +1410,7 @@ local Toggle = Tab7:Toggle({
     end
 })
 
-local Section = Tab7:Section({ 
+Tab7:Section({ 
     Title = "Server",
     Icon = "server",
     TextXAlignment = "Left",
@@ -1579,7 +1458,7 @@ Tab7:Button({
     end
 })
 
-local Section = Tab7:Section({ 
+Tab7:Section({ 
     Title = "Config",
     Icon = "folder-open",
     TextXAlignment = "Left",
@@ -1671,14 +1550,14 @@ Tab7:Button({
     end
 })
 
-local Section = Tab7:Section({ 
+Tab7:Section({ 
     Title = "Other Scripts",
     Icon = "file-code-2",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-local Button = Tab7:Button({
+Tab7:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -1687,7 +1566,7 @@ local Button = Tab7:Button({
     end
 })
 
-local Button = Tab7:Button({
+Tab7:Button({
     Title = "Simple Shader",
     Desc = "Shader",
     Locked = false,
@@ -1696,7 +1575,7 @@ local Button = Tab7:Button({
     end
 })
 
-local Button = Tab7:Button({
+Tab7:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
@@ -1704,9 +1583,3 @@ local Button = Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-Player.CharacterAdded:Connect(function(char)
-    local humanoid = char:WaitForChild("Humanoid")
-    humanoid.UseJumpPower = true
-    humanoid.JumpPower = _G.CustomJumpPower or 50
-end)
