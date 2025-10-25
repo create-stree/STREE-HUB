@@ -378,7 +378,7 @@ Toggle = Tab3:Toggle({
     end
 })
 
-Window:SelectTab(1)
+Window:SelectTab(3)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
@@ -477,7 +477,7 @@ local Toggle = Tab3:Toggle({
     end    
 })    
 
-Window:SelectTab(2)
+Window:SelectTab(3)
     
 local Section = Tab3:Section({     
     Title = "Other",    
@@ -1150,7 +1150,7 @@ Tab5:Button({
     end
 })
 
-Window:SelectTab(4)
+Window:SelectTab(5)
 
 local Section = Tab5:Section({
     Title = "Buy Baits",
@@ -1375,7 +1375,7 @@ Tab6:Button({
     end
 })
 
-Window:SelectTab(7)
+Window:SelectTab(6)
 
 local Section = Tab6:Section({
     Title = "Location NPC",
@@ -1429,7 +1429,7 @@ Tab6:Button({
     end
 })
 
-Window:SelectTab(8)
+Window:SelectTab(6)
 
 local Section = Tab6:Section({
     Title = "Event Teleporter",
@@ -1547,7 +1547,7 @@ local Toggle = Tab7:Toggle({
     end
 })
 
-Window:SelectTab(9)
+Window:SelectTab(7)
 
 local Section = Tab7:Section({ 
     Title = "Server",
@@ -1597,7 +1597,7 @@ Tab7:Button({
     end
 })
 
-Window:SelectTab(9)
+Window:SelectTab(7)
 
 local Section = Tab7:Section({ 
     Title = "Config",
@@ -1691,7 +1691,7 @@ Tab7:Button({
     end
 })
 
-Window:SelectTab(10)
+Window:SelectTab(7)
 
 local Section = Tab7:Section({ 
     Title = "Other Scripts",
