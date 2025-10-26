@@ -1006,7 +1006,6 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
 local weatherKeyMap = {
@@ -1018,16 +1017,18 @@ local weatherKeyMap = {
     ["Shark Hunt (300k Coins)"] = "Shark Hunt"
 }
 
+local selectedWeathers = {weatherNames[1]}
+
 local weatherDropdown = BuyRodTab:Dropdown({
     Title="Select Weather Event",
     Values=weatherNames,
-    Multi= true ,
-    Value= selectedWeathers,
-    Callback= function (values)
+    Multi=true,
+    Value=selectedWeathers,
+    Callback=function(values)
         selectedWeathers = values
         WindUI:Notify({
             Title="Weather Selected",
-            Content="Selected "..#values.." weather",
+            Content="Selected "..#values.." weather(s)",
             Duration=2
         })
     end
@@ -1047,7 +1048,7 @@ local function startAutoBuy()
                     end)
                     if success then
                         WindUI:Notify({
-                            Title="Auto Buy",
+                            Title="Buy",
                             Content="Purchased "..displayName,
                             Duration=1
                         })
@@ -1062,9 +1063,9 @@ local function startAutoBuy()
     end)
 end
 
-Tab4:Toggle({
+Tab5:Toggle({
     Title = "Buy Weather Event",
-    Desc = "Automatically purchase selected weather",
+    Desc = "Automatically purchase selected weather event",
     Value = false,
     Callback = function(state)
         autoBuyEnabled = state
