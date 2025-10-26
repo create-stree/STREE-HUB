@@ -1018,7 +1018,7 @@ local weatherKeyMap = {
 
 local selectedWeathers = {weatherNames[1]}
 
-local weatherDropdown = BuyRodTab:Dropdown({
+local weatherDropdown = Tab4:Dropdown({
     Title="Select Weather Event",
     Values=weatherNames,
     Multi=true,
@@ -1062,7 +1062,7 @@ local function startAutoBuy()
     end)
 end
 
-Tab5:Toggle({
+Tab4:Toggle({
     Title = "Buy Weather Event",
     Desc = "Automatically purchase selected weather event",
     Value = false,
