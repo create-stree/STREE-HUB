@@ -1000,7 +1000,7 @@ Tab5:Button({
 
 Tab5:Section({
     Title = "Buy Baits",
-    Icon = "browser-safari",
+    Icon = "compass",
     TextXAlignment = "Left",
     TextSize = 17,
 })
