@@ -1032,6 +1032,7 @@ Tab5:Section({
     TextSize = 17,
 })
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
 local baits = {
@@ -1042,7 +1043,7 @@ local baits = {
     ["Dark Mater Bait"] = 8,
     ["Corrupt Bait"] = 15,
     ["Aether Bait"] = 16,
-    ["Aether Bait"] = 20,
+    ["Floral Bait"] = 20,
 }
 
 local baitNames = {  
