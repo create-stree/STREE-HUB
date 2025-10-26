@@ -104,6 +104,15 @@ local Section = Tab1:Section({
     TextSize = 17,
 })
 
+Tab1:Keybind({
+    Title = "Close/Open ui",
+    Desc = "Keybind to Close/Open ui",
+    Value = "G",
+    Callback = function(v)
+        Window:SetToggleKey(Enum.KeyCode[v])
+    end
+})
+
 local Tab2 = Window:Tab({
     Title = "Players",
     Icon = "user",
