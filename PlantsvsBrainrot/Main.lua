@@ -96,6 +96,15 @@ Tab1:Button({
     end
 })
 
+Tab1:Keybind({
+    Title = "Close/Open UI",
+    Desc = "Keybind to Close/Open UI",
+    Value = "G",
+    Callback = function(v)
+        Window:SetToggleKey(Enum.KeyCode[v])
+    end
+})
+
 local Tab2 = Window:Tab({
     Title = "Main",
     Icon = "landmark"
