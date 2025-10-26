@@ -285,13 +285,15 @@ spawn(function()
 end)
 
 local player = game.Players.LocalPlayer
+local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-local success, net = pcall(function()
-    return RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-end)
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
-_G.AutoFishing = false
-_G.FishingDelay = 0.5
+local AutoFishing = {
+    Enabled = false,
+    Delay = 0,
+    MaxSpeed = true
+}
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
@@ -300,48 +302,67 @@ Tab3:Toggle({
     Type = false,
     Default = false,
     Callback = function(value)
-        _G.AutoFishing = value
+        AutoFishing.Enabled = value
+        print("Auto Fishing: " .. tostring(value))
     end
 })
 
-Tab3:Slider({
+Tab3:Input({
     Title = "Blast Delay",
-    Desc = "Enter delay in seconds",
-    Min = 0.01,
-    Max = 2,
-    Default = 0.5,
-    Callback = function(value)
-        _G.FishingDelay = value
+    Desc = "Enter delay in seconds (0 for max speed)",
+    Value = "0",
+    InputIcon = false,
+    Type = "Input",
+    Placeholder = "Enter delay...",
+    Callback = function(input)
+        local newDelay = tonumber(input)
+        if newDelay and newDelay >= 0 then
+            AutoFishing.Delay = newDelay
+            AutoFishing.MaxSpeed = (newDelay == 0)
+            print("Delay changed to: " .. AutoFishing.Delay .. " seconds")
+        else
+            print("Invalid input, use number >= 0")
+        end
     end
 })
 
 local function InstantFish()
-    local char = player.Character
-    if not char then return end
-    if not char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then return end
-
-    pcall(function()
-        net["RE/EquipToolFromHotbar"]:FireServer(1)
-        task.wait(0.01)
-        net["RF/ChargeFishingRod"]:InvokeServer(2)
-        task.wait(0.01)
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        task.wait(0.01)
-        net["RE/FishingCompleted"]:FireServer()
-    end)
+    if not AutoFishing.Enabled then return end
+    
+    if player and player.Character then
+        local success, errorMsg = pcall(function()
+            if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                net["RE/EquipToolFromHotbar"]:FireServer(1)
+            end
+            
+            net["RF/ChargeFishingRod"]:InvokeServer(2)
+            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+            net["RE/FishingCompleted"]:FireServer()
+        end)
+        
+        if not success then
+            print("Fishing error: " .. tostring(errorMsg))
+        end
+    end
 end
 
 task.spawn(function()
     while true do
-        task.wait(_G.FishingDelay)
-        if _G.AutoFishing then
+        if AutoFishing.Enabled then
             InstantFish()
+            if AutoFishing.MaxSpeed then
+                task.wait()
+            else
+                task.wait(AutoFishing.Delay)
+            end
+        else
+            task.wait(0.1)
         end
     end
 end)
 
 player.CharacterAdded:Connect(function()
-    if _G.AutoFishing then
+    if AutoFishing.Enabled then
         task.wait(1)
         InstantFish()
     end
