@@ -247,7 +247,7 @@ local Tab3 = Window:Tab({
 
 Tab3:Section({
     Title = "Main",
-    Icon = "house"
+    Icon = "house",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -585,7 +585,7 @@ Tab3:Toggle({
 
 Tab3:Section({     
     Title = "Gameplay",
-    Icon = "gamepad"
+    Icon = "gamepad",
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
