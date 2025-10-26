@@ -1129,28 +1129,26 @@ local baits = {
     ["Chroma Bait"] = 6,
     ["Dark Mater Bait"] = 8,
     ["Corrupt Bait"] = 15,
-    ["Aether Bait"] = 16
+    ["Aether Bait"] = 16,
+    ["Floral Bait"] = 20,
 }
 
-local baitNames = {
-    "TopWater Bait (100 Coins)",
-    "Lucky Bait (1k Coins)",
-    "Midnight Bait (3k Coins)",
-    "Chroma Bait (290k Coins)",
-    "Dark Mater Bait (630k Coins)",
-    "Corrupt Bait (1.15M Coins)",
-    "Aether Bait (3.7M Coins)"
-}
+local baitNames = {  
+    "Luck Bait (1k Coins)", "Midnight Bait (3k Coins)", "Nature Bait (83.5k Coins)",  
+    "Chroma Bait (290k Coins)", "Dark Matter Bait (630k Coins)", "Corrupt Bait (1.15M Coins)",  
+    "Aether Bait (3.7M Coins)", "Floral Bait (4M Coins)"  
+}  
 
-local baitKeyMap = {
-    ["TopWater Bait (100 Coins)"] = "TopWater Bait",
-    ["Lucky Bait (1k Coins)"] = "Lucky Bait",
-    ["Midnight Bait (3k Coins)"] = "Midnight Bait",
-    ["Chroma Bait (290k Coins)"] = "Chroma Bait",
-    ["Dark Mater Bait (630k Coins)"] = "Dark Mater Bait",
-    ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",
-    ["Aether Bait (3.7M Coins)"] = "Aether Bait"
-}
+local baitKeyMap = {  
+    ["Luck Bait (1k Coins)"] = "Luck Bait",  
+    ["Midnight Bait (3k Coins)"] = "Midnight Bait",  
+    ["Nature Bait (83.5k Coins)"] = "Nature Bait",  
+    ["Chroma Bait (290k Coins)"] = "Chroma Bait",  
+    ["Dark Matter Bait (630k Coins)"] = "Dark Matter Bait",  
+    ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",  
+    ["Aether Bait (3.7M Coins)"] = "Aether Bait",  
+    ["Floral Bait (4M Coins)"] = "Floral Bait"  
+} 
 
 local selectedBait = baitNames[1]  
 
