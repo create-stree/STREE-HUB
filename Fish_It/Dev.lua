@@ -293,6 +293,53 @@ spawn(function()
     end
 end)
 
+local Toggle = Tab3:Toggle({
+    Title = "Auto Fish",
+    Desc = "",
+    Icon = "fish",
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        _G.AutoFish = state
+        _G.InstantFishingActive = state
+
+        local function autoFish()
+            while _G.AutoFish do
+                if _G.InstantFishingActive then
+                    if player.Character then
+                        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+                            net["RE/EquipToolFromHotbar"]:FireServer(1)
+                        end
+                        net["RF/ChargeFishingRod"]:InvokeServer(2)
+                        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+                        net["RE/FishingCompleted"]:FireServer()
+                    end
+                else
+                    local args = { 1761449655.948901 }
+                    net["RF/ChargeFishingRod"]:InvokeServer(unpack(args))
+                    
+                    local args = { -1.233184814453125, 0.9869426591668392 }
+                    net["RF/RequestFishingMinigameStarted"]:InvokeServer(unpack(args))
+                    
+                    net["RE/FishingCompleted"]:FireServer()
+                    
+                    net["RE/CancelFishingInputs"]:FireServer()
+                    net["RE/CancelPrompt"]:FireServer()
+                end
+                wait(0)
+            end
+        end
+
+        if state then
+            spawn(function()
+                autoFish()
+            end)
+        else
+            _G.AutoFish = false
+        end
+    end
+})
+
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
