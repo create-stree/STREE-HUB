@@ -303,7 +303,7 @@ _G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
+    Desc = "Automatic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -347,56 +347,62 @@ task.spawn(function()
             InstantFish()
             if not _G.MaxSpeed and _G.Delay > 0 then
                 task.wait(_G.Delay)
-            elseif _G.MaxSpeed then
-                task.wait(0.001)
+            else
+                task.wait()
             end
         else
-            task.wait(0.01)
+            task.wait(0.1)
         end
     end
 end)
 
 player.CharacterAdded:Connect(function()
+    task.wait(1)
     if _G.AutoFishing then
         InstantFish()
     end
 end)
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
 local function stopAllAnimations()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
-            track:Stop(0)
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+                track:Stop(0)
+            end
         end
     end
 end
 
 local function toggleAnimation(state)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local animate = char:FindFirstChild("Animate")
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        local animate = char:FindFirstChild("Animate")
 
-    if state then
-        if animate then animate.Disabled = true end
-        stopAllAnimations()
-        local animator = humanoid:FindFirstChildOfClass("Animator")
-        if animator then
-            animator:Destroy()
-        end
-    else
-        if animate then animate.Disabled = false end
-        if humanoid and not humanoid:FindFirstChildOfClass("Animator") then
-            local newAnimator = Instance.new("Animator")
-            newAnimator.Parent = humanoid
+        if state then
+            if animate then 
+                animate.Disabled = true 
+            end
+            stopAllAnimations()
+            local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+            if animator then
+                animator:Destroy()
+            end
+        else
+            if animate then 
+                animate.Disabled = false 
+            end
+            if humanoid and not humanoid:FindFirstChildOfClass("Animator") then
+                local newAnimator = Instance.new("Animator")
+                newAnimator.Parent = humanoid
+            end
         end
     end
 end
 
-local Toggle = Tab3:Toggle({
+Tab3:Toggle({
     Title = "Disable Animations",
     Icon = false,
     Type = false,
@@ -405,6 +411,13 @@ local Toggle = Tab3:Toggle({
         toggleAnimation(state)
     end
 })
+
+player.CharacterAdded:Connect(function()
+    if animationToggle.Value then
+        task.wait(1)
+        toggleAnimation(true)
+    end
+end)
 
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
