@@ -1005,6 +1005,7 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
 local weatherKeyMap = {
