@@ -804,6 +804,85 @@ local function CreateBackground()
 
     SpaceSound = Instance.new("Sound")
     SpaceSound.SoundId = "rbxassetid://1846351427"
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local camera = Workspace.CurrentCamera
+
+local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
+local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
+
+_G.AutoFishingEnabled = false
+_G.AutoSellFish = true
+_G.FishingDelay = 0.01
+
+local ScreenGui, Background, Saturn, SpaceSound
+
+local function CreateBackground()
+    if ScreenGui then ScreenGui:Destroy() end
+    ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.Name = "STREE_FISHING_BACKGROUND"
+    ScreenGui.Parent = CoreGui
+
+    Background = Instance.new("Frame")
+    Background.BackgroundColor3 = Color3.new(0, 0, 0)
+    Background.BackgroundTransparency = 0.5
+    Background.Size = UDim2.new(1, 0, 1, 0)
+    Background.ZIndex = 0
+    Background.Parent = ScreenGui
+
+    for i = 1, 80 do
+        local star = Instance.new("Frame")
+        star.Size = UDim2.new(0, math.random(3, 5), 0, math.random(3, 5))
+        star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        star.BackgroundTransparency = 1
+        star.ZIndex = 0
+        star.Parent = Background
+
+        local circle = Instance.new("UICorner", star)
+        circle.CornerRadius = UDim.new(1, 0)
+
+        local glow = Instance.new("UIStroke", star)
+        glow.Thickness = 1
+        glow.Color = Color3.fromRGB(0, 255, 0)
+        glow.Transparency = math.random(40, 80) / 100
+
+        task.spawn(function()
+            local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+            TweenService:Create(glow, tweenInfo, {Transparency = math.random(0, 60) / 100}):Play()
+        end)
+    end
+
+    Saturn = Instance.new("ImageLabel")
+    Saturn.Image = "rbxassetid://122683047852451"
+    Saturn.BackgroundTransparency = 1
+    Saturn.Size = UDim2.new(0, 320, 0, 320)
+    Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
+    Saturn.ImageTransparency = 0.05
+    Saturn.ZIndex = 0
+    Saturn.Parent = Background
+
+    task.spawn(function()
+        while ScreenGui and _G.AutoFishingEnabled do
+            for i = 0, 180, 2 do
+                Saturn.Rotation = i
+                task.wait(0.02)
+            end
+            for i = 180, 0, -2 do
+                Saturn.Rotation = i
+                task.wait(0.02)
+            end
+        end
+    end)
+
+    SpaceSound = Instance.new("Sound")
+    SpaceSound.SoundId = "rbxassetid://1846351427"
     SpaceSound.Volume = 0.2
     SpaceSound.Looped = true
     SpaceSound.Parent = SoundService
@@ -824,92 +903,56 @@ local function RemoveBackground()
     end
 end
 
-task.spawn(function()
-    while task.wait(10) do
-        if not game:IsLoaded() then continue end
-        if not Player or not Player.Character then
-            pcall(function()
-                TeleportService:Teleport(game.PlaceId, Player)
-            end)
-        end
-    end
-end)
-
-for _, v in pairs(getconnections(Player.Idled)) do
-    v:Disable()
-end
-
-task.spawn(function()
-    while task.wait(60) do
-        VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    end
-end)
-
-local Tab4 = Window:Tab({
-    Title = "Exclusive",
-    Icon = "star",
-})
-
-Tab4:Section({     
-    Title = "Auto Kaitun System",    
-    TextXAlignment = "Left",    
-    TextSize = 17,    
-})
-
-local function StartKaitun()
+local function StartAutoFishing()
     task.spawn(function()
-        while _G.KaitunEnabled do
-            local success, err = pcall(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local backpack = player:WaitForChild("Backpack", 5)
-                if backpack then
-                    local rod = backpack:FindFirstChild("Rod") or backpack:FindFirstChild("FishingRod")
-                    if rod and not character:FindFirstChild(rod.Name) then
-                        character:WaitForChild("Humanoid"):EquipTool(rod)
-                    end
-                end
-                local fishingPackage = ReplicatedStorage:FindFirstChild("Packages") and ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0")
-                if not fishingPackage then return end
-                local netFolder = fishingPackage:FindFirstChild("net")
-                if not netFolder then return end
-                local chargeRemote = netFolder:FindFirstChild("RF/ChargeFishingRod")
-                local completeRemote = netFolder:FindFirstChild("RE/FishingCompleted")
-                if chargeRemote and completeRemote then
-                    if not character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                        chargeRemote:InvokeServer(2)
-                    end
-                    completeRemote:FireServer()
-                end
+        while _G.AutoFishingEnabled do
+            pcall(function()
+                REEquipToolFromHotbar:FireServer(1)
+                local clickX = 5
+                local clickY = camera.ViewportSize.Y - 5
+                VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
+                task.wait(_G.FishingDelay)
+                VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
+                REFishingCompleted:FireServer()
                 if _G.AutoSellFish then
-                    for _, v in pairs(RepStorage:GetDescendants()) do
+                    for _, v in pairs(ReplicatedStorage:GetDescendants()) do
                         if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
                             pcall(function() v:FireServer() end)
                         end
                     end
                 end
             end)
-            if not success then warn("[Kaitun Error]:", err) end
-            task.wait(_G.KaitunDelay)
+            task.wait(_G.FishingDelay)
+            RunService.Heartbeat:Wait()
         end
     end)
 end
 
+local Tab4 = Window:Tab({
+    Title = "Exclusive",
+    Icon = "star",
+})
+
+local Section = Tab4:Section({
+    Title = "Kaitun System",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+
 Tab4:Toggle({
     Title = "Enable Kaitun",
-    Desc = "Activate auto farming system",
+    Desc = "Automatic fishing system",
     Default = false,
     Callback = function(state)
-        _G.KaitunEnabled = state
+        _G.AutoFishingEnabled = state
         if state then
             CreateBackground()
-            WindUI:Notify({Title = "Kaitun Started", Content = "Auto farming activated!", Duration = 3})
-            StartKaitun()
+            WindUI:Notify({Title = "Auto Fishing", Content = "Activated!", Duration = 3})
+            StartAutoFishing()
         else
             RemoveBackground()
-            WindUI:Notify({Title = "Kaitun Stopped", Content = "Auto farming disabled.", Duration = 3})
+            WindUI:Notify({Title = "Auto Fishing", Content = "Stopped.", Duration = 3})
         end
     end
 })
@@ -929,15 +972,15 @@ Tab4:Toggle({
 })
 
 Tab4:Slider({
-    Title = "Kaitun Delay",
-    Desc = "Farming speed (seconds)",
-    Min = 0.5,
-    Max = 5,
-    Default = 1,
+    Title = "Fishing Delay",
+    Desc = "Adjust cast/reel timing (seconds)",
+    Min = 0.2,
+    Max = 2,
+    Default = 0.5,
     Callback = function(value)
-        _G.KaitunDelay = value
+        _G.FishingDelay = value
         WindUI:Notify({
-            Title = "Kaitun Delay",
+            Title = "Fishing Delay",
             Content = "Delay set to " .. tostring(value) .. "s",
             Duration = 2
         })
