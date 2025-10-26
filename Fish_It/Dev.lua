@@ -294,88 +294,117 @@ spawn(function()
 end)
 
 local player = game.Players.LocalPlayer
-local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
 local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
-local AutoFishing = {
-    Enabled = false,
-    Delay = 0,
-    MaxSpeed = true
-}
+_G.AutoFishing = false
+_G.Delay = 0
+_G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automatic Instant Fishing",
+    Desc = "Automic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
     Callback = function(value)
-        AutoFishing.Enabled = value
-        print("Auto Fishing: " .. tostring(value))
+        _G.AutoFishing = value
     end
 })
 
 Tab3:Input({
     Title = "Blast Delay",
-    Desc = "Enter delay in seconds (0 for max speed)",
-    Value = "0",
+    Desc = "Enter delay in seconds",
+    Value = "0.01",
     InputIcon = false,
     Type = "Input",
     Placeholder = "Enter delay...",
     Callback = function(input)
         local newDelay = tonumber(input)
         if newDelay and newDelay >= 0 then
-            AutoFishing.Delay = newDelay
-            AutoFishing.MaxSpeed = (newDelay == 0)
-            print("Delay changed to: " .. AutoFishing.Delay .. " seconds")
-        else
-            print("Invalid input, use number >= 0")
+            _G.Delay = newDelay
+            _G.MaxSpeed = (newDelay == 0)
         end
     end
 })
 
 local function InstantFish()
-    if not AutoFishing.Enabled then return end
-    
-    if player and player.Character then
-        local success, errorMsg = pcall(function()
-            if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                net["RE/EquipToolFromHotbar"]:FireServer(1)
-            end
-            
-            net["RF/ChargeFishingRod"]:InvokeServer(2)
-            net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-            net["RE/FishingCompleted"]:FireServer()
-        end)
-        
-        if not success then
-            print("Fishing error: " .. tostring(errorMsg))
+    if player.Character then
+        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+            net["RE/EquipToolFromHotbar"]:FireServer(1)
         end
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+        net["RE/FishingCompleted"]:FireServer()
+        net["RE/CancelFishingInputs"]:FireServer()
+        net["RE/CancelPrompt"]:FireServer()
     end
 end
 
 task.spawn(function()
     while true do
-        if AutoFishing.Enabled then
+        if _G.AutoFishing then
             InstantFish()
-            if AutoFishing.MaxSpeed then
-                task.wait()
-            else
-                task.wait(AutoFishing.Delay)
+            if not _G.MaxSpeed and _G.Delay > 0 then
+                task.wait(_G.Delay)
+            elseif _G.MaxSpeed then
+                task.wait(0.001)
             end
         else
-            task.wait(0.1)
+            task.wait(0.01)
         end
     end
 end)
 
 player.CharacterAdded:Connect(function()
-    if AutoFishing.Enabled then
-        task.wait(1)
+    if _G.AutoFishing then
         InstantFish()
     end
 end)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local function stopAllAnimations()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+        end
+    end
+end
+
+local function toggleAnimation(state)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local animate = char:FindFirstChild("Animate")
+
+    if state then
+        if animate then animate.Disabled = true end
+        stopAllAnimations()
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if animator then
+            animator:Destroy()
+        end
+    else
+        if animate then animate.Disabled = false end
+        if humanoid and not humanoid:FindFirstChildOfClass("Animator") then
+            local newAnimator = Instance.new("Animator")
+            newAnimator.Parent = humanoid
+        end
+    end
+end
+
+local Toggle = Tab3:Toggle({
+    Title = "Disable Animations",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        toggleAnimation(state)
+    end
+})
 
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
