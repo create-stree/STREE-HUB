@@ -1,4 +1,53 @@
-Tab3:Toggle({
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+end)
+
+if not success or not WindUI then
+    warn("⚠️ UI failed to loaded!")
+    return
+else
+    print("✓ UI loaded successfully!")
+end
+
+local Window = WindUI:CreateWindow({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://122683047852451",
+    Author = "KirsiaSC | Fish It",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(260, 290),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 170,
+    HasOutline = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            WindUI:SetTheme("Dark")
+        end,
+    },
+})
+
+Window:Tag({
+    Title = "Version",
+    Color = Color3.fromRGB(0, 255, 0),
+    Radius = 17,
+})
+
+Window:Tag({
+    Title = "Testing",
+    Color = Color3.fromRGB(0, 0, 0),
+    Radius = 17,
+})
+
+WindUI:Notify({
+    Title = "STREE HUB Loaded",
+    Content = "UI loaded successfully!",
+    Duration = 3,
+    Icon = "bell",
+})
+
+Tab1:Toggle({
     Title = "Auto Instant Fishing",
     Desc = "Automatic Instant Fishing",
     Icon = false,
