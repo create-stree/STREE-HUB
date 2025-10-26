@@ -459,13 +459,6 @@ Tab3:Toggle({
     end
 })
 
-player.CharacterAdded:Connect(function()
-    if animationToggle.Value then
-        task.wait(1)
-        toggleAnimation(true)
-    end
-end)
-
 local RunService = game:GetService("RunService")    
 local Workspace = game:GetService("Workspace")    
 local VirtualInputManager = game:GetService("VirtualInputManager")    
