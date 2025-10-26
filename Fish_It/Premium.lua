@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.4",
+    Title = "v0.0.0.5",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -54,6 +54,7 @@ local Tab1 = Window:Tab({
 
 Tab1:Section({
     Title = "Community Support",
+    Icon = "chevrons-left-right-ellipsis",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -102,6 +103,16 @@ Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17,
+})
+
+Tab1:Paragraph({
+    Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
+    Color = false,
+    Image = false,
+    ImageSize = 30,
+    Thumbnail = false,
+    ThumbnailSize = 80,
+    Locked = false,
 })
 
 local Tab2 = Window:Tab({
@@ -246,6 +257,7 @@ local Tab3 = Window:Tab({
 
 Tab3:Section({
     Title = "Main",
+    Icon = "house"
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -473,7 +485,8 @@ Tab3:Toggle({
 })    
 
 Tab3:Section({     
-    Title = "Other",    
+    Title = "Other",  
+    Icon = "ethernet-port",
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
@@ -581,7 +594,8 @@ Tab3:Toggle({
 })
 
 Tab3:Section({     
-    Title = "Gameplay",    
+    Title = "Gameplay",
+    Icon = "gamepad"
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
@@ -729,83 +743,6 @@ Tab3:Toggle({
 
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local TeleportService = game:GetService("TeleportService")
-local VirtualUser = game:GetService("VirtualUser")
-local SoundService = game:GetService("SoundService")
-local Player = Players.LocalPlayer
-
-_G.KaitunEnabled = false
-_G.KaitunDelay = 1
-_G.AutoSellFish = true
-
-local ScreenGui, Background, Saturn, SpaceSound
-
-local function CreateBackground()
-    if ScreenGui then ScreenGui:Destroy() end
-    ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.IgnoreGuiInset = true
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.Name = "STREE_KAITUN_BACKGROUND"
-    ScreenGui.Parent = CoreGui
-
-    Background = Instance.new("Frame")
-    Background.BackgroundColor3 = Color3.new(0, 0, 0)
-    Background.BackgroundTransparency = 0.5
-    Background.Size = UDim2.new(1, 0, 1, 0)
-    Background.ZIndex = 0
-    Background.Parent = ScreenGui
-
-    for i = 1, 80 do
-        local star = Instance.new("Frame")
-        star.Size = UDim2.new(0, math.random(3, 5), 0, math.random(3, 5))
-        star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        star.BackgroundTransparency = 1
-        star.ZIndex = 0
-        star.Parent = Background
-
-        local circle = Instance.new("UICorner", star)
-        circle.CornerRadius = UDim.new(1, 0)
-
-        local glow = Instance.new("UIStroke", star)
-        glow.Thickness = 1
-        glow.Color = Color3.fromRGB(0, 255, 0)
-        glow.Transparency = math.random(40, 80) / 100
-
-        task.spawn(function()
-            local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-            TweenService:Create(glow, tweenInfo, {Transparency = math.random(0, 60) / 100}):Play()
-        end)
-    end
-
-    Saturn = Instance.new("ImageLabel")
-    Saturn.Image = "rbxassetid://122683047852451"
-    Saturn.BackgroundTransparency = 1
-    Saturn.Size = UDim2.new(0, 320, 0, 320)
-    Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
-    Saturn.ImageTransparency = 0.05
-    Saturn.ZIndex = 0
-    Saturn.Parent = Background
-
-    local rotationY = 0
-    task.spawn(function()
-        while ScreenGui and _G.KaitunEnabled do
-            for i = 0, 180, 2 do
-                rotationY = i
-                Saturn.Rotation = rotationY
-                task.wait(0.02)
-            end
-            for i = 180, 0, -2 do
-                rotationY = i
-                task.wait(0.02)
-            end
-        end
-    end)
-
-    SpaceSound = Instance.new("Sound")
-    SpaceSound.SoundId = "rbxassetid://1846351427"
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Workspace = game:GetService("Workspace")
@@ -935,6 +872,7 @@ local Tab4 = Window:Tab({
 
 local Section = Tab4:Section({
     Title = "Kaitun System",
+    Icon = "antenna",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -994,6 +932,7 @@ local Tab5 = Window:Tab({
 
 Tab5:Section({ 
     Title = "Buy Rod",
+    Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1071,6 +1010,7 @@ Tab5:Button({
 
 Tab5:Section({
     Title = "Buy Baits",
+    Icon = "browser-safari",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1135,6 +1075,7 @@ Tab5:Button({
 
 Tab5:Section({
     Title = "Buy Weather Event",
+    Icon = "cloud-drizzle",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1199,6 +1140,7 @@ local Tab6 = Window:Tab({
 
 Tab6:Section({ 
     Title = "Island",
+    Icon = "tree-palm",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1242,6 +1184,7 @@ Tab6:Button({
 
 Tab6:Section({ 
     Title = "Fishing Spot",
+    Icon = "spotlight",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1288,6 +1231,7 @@ Tab6:Button({
 
 Tab6:Section({
     Title = "Location NPC",
+    Icon = "bot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1340,6 +1284,7 @@ Tab6:Button({
 
 Tab6:Section({
     Title = "Event Teleporter",
+    Icon = "calendar",
     TextXAlignment = "Left",
     TextSize = 17,
 })
