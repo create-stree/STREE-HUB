@@ -156,3 +156,52 @@ Toggle = Tab3:Toggle({
         end
     end
 })
+
+local Toggle = Tab3:Toggle({    
+    Title = "Radar",    
+    Desc = "Toggle fishing radar",    
+    Icon = false,    
+    Type = false,    
+    Default = false,    
+    Callback = function(state)    
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")    
+        local Lighting = game:GetService("Lighting")    
+    
+        local Replion = require(ReplicatedStorage.Packages.Replion)    
+        local Net = require(ReplicatedStorage.Packages.Net)    
+        local spr = require(ReplicatedStorage.Packages.spr)    
+        local Soundbook = require(ReplicatedStorage.Shared.Soundbook)    
+        local ClientTimeController = require(ReplicatedStorage.Controllers.ClientTimeController)    
+        local TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)    
+    
+        local RemoteRadar = Net:RemoteFunction("UpdateFishingRadar")    
+    
+        local Data = Replion.Client:GetReplion("Data")    
+        if Data then    
+            if RemoteRadar:InvokeServer(state) then    
+                Soundbook.Sounds.RadarToggle:Play().PlaybackSpeed = 1 + math.random() * 0.3    
+                local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")    
+                if effect then    
+                    spr.stop(effect)    
+                    local profile = ClientTimeController:_getLightingProfile()    
+                    local cc = (profile and profile.ColorCorrection) and profile.ColorCorrection or {}    
+                    if not cc.Brightness then cc.Brightness = 0.04 end    
+                    if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end    
+                    effect.TintColor = Color3.fromRGB(42, 226, 118)    
+                    effect.Brightness = 0.4    
+                    spr.target(effect, 1, 1, cc)    
+                end    
+                spr.stop(Lighting)    
+                Lighting.ExposureCompensation = 1    
+                spr.target(Lighting, 1, 2, {    
+                    ["ExposureCompensation"] = 0    
+                })    
+                TextNotificationController:DeliverNotification({    
+                    ["Type"] = "Text",    
+                    ["Text"] = ("Radar: %*"):format(state and "Enabled" or "Disabled"),    
+                    ["TextColor"] = state and {["R"] = 9,["G"] = 255,["B"] = 0} or {["R"] = 255,["G"] = 0,["B"] = 0}    
+                })    
+            end    
+        end    
+    end    
+})
