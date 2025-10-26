@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.2.2",
+    Title = "v0.0.2.3",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1006,58 +1006,85 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")  
-local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
-local weatherEvents = {  
-    ["Windy"] = 10000,  
-    ["Cloudy"] = 20000,  
-    ["Stormy"] = 35000,  
-    ["Shining"] = 50000,  
-    ["Shark Hunt"] = 300000,  
-    ["Snow"] = 15000  
-}  
+local weatherKeyMap = {
+    ["Wind (10k Coins)"] = "Wind",
+    ["Snow (15k Coins)"] = "Snow",
+    ["Cloudy (20k Coins)"] = "Cloudy",
+    ["Storm (35k Coins)"] = "Storm",
+    ["Radiant (50k Coins)"] = "Radiant",
+    ["Shark Hunt (300k Coins)"] = "Shark Hunt"
+}
 
-local weatherNames = {  
-    "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
-    "Shining (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
-}  
+local selectedWeathers = {weatherNames[1]}
 
-local weatherKeyMap = {  
-    ["Windy (10k Coins)"] = "Windy",  
-    ["Cloudy (20k Coins)"] = "Cloudy",  
-    ["Stormy (35k Coins)"] = "Stormy",  
-    ["Shining (50k Coins)"] = "Shining",  
-    ["Shark Hunt (300k Coins)"] = "Shark Hunt",  
-    ["Snow (15k Coins)"] = "Snow"  
-}  
+local weatherDropdown = BuyRodTab:Dropdown({
+    Title="Select Weather Event",
+    Values=weatherNames,
+    Multi= true ,
+    Value= selectedWeathers,
+    Callback= function (values)
+        selectedWeathers = values
+        WindUI:Notify({
+            Title="Weather Selected",
+            Content="Selected "..#values.." weather",
+            Duration=2
+        })
+    end
+})
 
-local selectedWeather = weatherNames[1]  
+local autoBuyEnabled = false
+local buyDelay = 0.5
 
-Tab4:Dropdown({  
-    Title = "Select Weather Event",  
-    Values = weatherNames,  
-    Value = selectedWeather,  
-    Callback = function(value)  
-        selectedWeather = value  
-    end  
-})  
+local function startAutoBuy()
+    task.spawn(function()
+        while autoBuyEnabled do
+            for _, displayName in ipairs(selectedWeathers) do
+                local key = weatherKeyMap[displayName]
+                if key and weathers[key] then
+                    local success, err = pcall(function()
+                        RFPurchaseWeatherEvent:InvokeServer(key)
+                    end)
+                    if success then
+                        WindUI:Notify({
+                            Title="Auto Buy",
+                            Content="Purchased "..displayName,
+                            Duration=1
+                        })
+                    else
+                        warn("Error buying weather:", err)
+                    end
+                    task.wait(buyDelay)
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end
 
-Tab4:Button({  
-    Title = "Buy Weather Event",  
-    Callback = function()  
-        local key = weatherKeyMap[selectedWeather]  
-        if key and weatherEvents[key] then  
-            local success, err = pcall(function()  
-                RFPurchaseWeatherEvent:InvokeServer(weatherEvents[key])  
-            end)  
-            if success then  
-                WindUI:Notify({Title = "Weather Purchase", Content = "Purchased " .. selectedWeather, Duration = 3})  
-            else  
-                WindUI:Notify({Title = "Weather Purchase Error", Content = tostring(err), Duration = 5})  
-            end  
-        end  
-    end  
+Tab4:Toggle({
+    Title = "Buy Weather Event",
+    Desc = "Automatically purchase selected weather",
+    Value = false,
+    Callback = function(state)
+        autoBuyEnabled = state
+        if state then
+            WindUI:Notify({
+                Title = "Auto Buy",
+                Content = "Enabled",
+                Duration = 2
+            })
+            startAutoBuy()
+        else
+            WindUI:Notify({
+                Title = "Auto Buy",
+                Content = "Disabled",
+                Duration = 2
+            })
+        end
+    end
 })
 
 local Tab5 = Window:Tab({
