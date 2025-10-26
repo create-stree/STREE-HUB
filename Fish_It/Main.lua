@@ -1005,7 +1005,6 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
 local weatherKeyMap = {
@@ -1017,7 +1016,7 @@ local weatherKeyMap = {
     ["Shark Hunt (300k Coins)"] = "Shark Hunt"
 }
 
-local selectedWeathers = weatherNames[3]
+local selectedWeathers = weatherNames[1]
 
 local weatherDropdown = Tab4:Dropdown({
     Title="Select Weather Event",
