@@ -1016,7 +1016,7 @@ local weatherKeyMap = {
     ["Shark Hunt (300k Coins)"] = "Shark Hunt"
 }
 
-local selectedWeathers = {weatherNames[1]}
+local selectedWeathers = weatherNames[1]
 
 local weatherDropdown = Tab4:Dropdown({
     Title="Select Weather Event",
@@ -1025,11 +1025,6 @@ local weatherDropdown = Tab4:Dropdown({
     Value=selectedWeathers,
     Callback=function(values)
         selectedWeathers = values
-        WindUI:Notify({
-            Title="Weather Selected",
-            Content="Selected "..#values.." weather(s)",
-            Duration=2
-        })
     end
 })
 
