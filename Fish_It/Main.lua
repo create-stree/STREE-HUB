@@ -1016,6 +1016,8 @@ local weatherKeyMap = {
     ["Shark Hunt (300k Coins)"] = "Shark Hunt"
 }
 
+local selectedWeathers = weatherNames[3]
+
 local weatherDropdown = Tab4:Dropdown({
     Title="Select Weather Event",
     Values=weatherNames,
