@@ -291,12 +291,11 @@ local success, net = pcall(function()
 end)
 
 _G.AutoFishing = false
-_G.Delay = 0
-_G.MaxSpeed = true
+_G.FishingDelay = 0.5
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
+    Desc = "Automatic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -305,19 +304,14 @@ Tab3:Toggle({
     end
 })
 
-Tab3:Input({
+Tab3:Slider({
     Title = "Blast Delay",
     Desc = "Enter delay in seconds",
-    Value = "",
-    InputIcon = false,
-    Type = "Input",
-    Placeholder = "Enter delay...",
-    Callback = function(input)
-        local num = tonumber(input)
-        if num and num >= 0 then
-            _G.Delay = num
-            _G.MaxSpeed = (num == 0)
-        end
+    Min = 0.01,
+    Max = 2,
+    Default = 0.5,
+    Callback = function(value)
+        _G.FishingDelay = value
     end
 })
 
@@ -338,7 +332,8 @@ local function InstantFish()
 end
 
 task.spawn(function()
-    while task.wait(_G.MaxSpeed and 0.01 or (_G.Delay > 0 and _G.Delay or 0.2)) do
+    while true do
+        task.wait(_G.FishingDelay)
         if _G.AutoFishing then
             InstantFish()
         end
