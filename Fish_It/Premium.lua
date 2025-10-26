@@ -107,12 +107,7 @@ Tab1:Section({
 
 Tab1:Paragraph({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
-    Color = false,
-    Image = false,
-    ImageSize = 30,
-    Thumbnail = false,
-    ThumbnailSize = 80,
-    Locked = false,
+    Transparent = true
 })
 
 local Tab2 = Window:Tab({
