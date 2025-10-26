@@ -941,19 +941,18 @@ local Section = Tab4:Section({
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
-local baits = {  
-    ["Luck Bait"] = 1000,  
-    ["Midnight Bait"] = 3000,  
-    ["Nature Bait"] = 83500,  
-    ["Chroma Bait"] = 290000,  
-    ["Dark Matter Bait"] = 630000,  
-    ["Corrupt Bait"] = 1150000,  
-    ["Aether Bait"] = 3700000,  
-    ["Floral Bait"] = 4000000  
-}  
+local baits = {
+    ["TopWater Bait"] = 10,
+    ["Lucky Bait"] = 2,
+    ["Midnight Bait"] = 3,
+    ["Chroma Bait"] = 6,
+    ["Dark Mater Bait"] = 8,
+    ["Corrupt Bait"] = 15,
+    ["Aether Bait"] = 16,
+    ["Floral Bait"] = 20,
+}
 
 local baitNames = {  
     "Luck Bait (1k Coins)", "Midnight Bait (3k Coins)", "Nature Bait (83.5k Coins)",  
