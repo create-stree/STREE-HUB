@@ -1,0 +1,70 @@
+local player = game.Players.LocalPlayer
+local RepStorage = game:GetService("ReplicatedStorage")
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+
+_G.AutoFishing = false
+_G.Delay = 0
+_G.MaxSpeed = true
+
+Tab3:Toggle({
+    Title = "Auto Instant Fishing",
+    Desc = "Automic Instant Fishing",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(value)
+        _G.AutoFishing = value
+        print("Auto Fishing: " .. tostring(value))
+    end
+})
+
+Tab3:Input({
+    Title = "Blast Delay",
+    Desc = "Enter delay in seconds",
+    Value = "0.01",
+    InputIcon = false,
+    Type = "Input",
+    Placeholder = "Enter delay...",
+    Callback = function(input)
+        local newDelay = tonumber(input)
+        if newDelay and newDelay >= 0 then
+            _G.Delay = newDelay
+            print("Delay changed to: " .. _G.Delay .. " seconds")
+            _G.MaxSpeed = (newDelay == 0)
+        else
+            print("Invalid input, use number >= 0")
+        end
+    end
+})
+
+local function InstantFish()
+    if player.Character then
+        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+            net["RE/EquipToolFromHotbar"]:FireServer(1)
+        end
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+        net["RE/FishingCompleted"]:FireServer()
+    end
+end
+
+task.spawn(function()
+    while true do
+        if _G.AutoFishing then
+            InstantFish()
+            if not _G.MaxSpeed and _G.Delay > 0 then
+                task.wait(_G.Delay)
+            elseif _G.MaxSpeed then
+                task.wait(0.001)
+            end
+        else
+            task.wait(0.01)
+        end
+    end
+end)
+
+player.CharacterAdded:Connect(function()
+    if _G.AutoFishing then
+        InstantFish()
+    end
+end)
