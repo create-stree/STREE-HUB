@@ -1032,12 +1032,12 @@ local weatherNames = {
 
 local selectedWeathers = weatherNames[1]
 
-local weatherDropdown = Tab4:Dropdown({
-    Title="Select Weather Event",
-    Values=weatherNames,
-    Multi=true,
-    Value=selectedWeathers,
-    Callback=function(values)
+Tab4:Dropdown({
+    Title = "Select Weather Event",
+    Values = weatherNames,
+    Multi = true,
+    Value = selectedWeathers,
+    Callback = function(values)
         selectedWeathers = values
     end
 })
