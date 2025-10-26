@@ -1032,7 +1032,6 @@ Tab5:Section({
     TextSize = 17,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
 local baits = {
