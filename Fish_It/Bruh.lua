@@ -47,7 +47,7 @@ WindUI:Notify({
     Icon = "bell",
 })
 
-Tab1:Toggle({
+local Toggle = Tab1:Toggle({
     Title = "Auto Instant Fishing",
     Desc = "Automatic Instant Fishing",
     Icon = false,
@@ -106,7 +106,7 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 
 local autoHoldEnabled = false
 
-Tab1:Toggle({
+local Toggle = Tab1:Toggle({
     Title = "Auto Fishing",
     Desc = "Automatic Fishing",
     Value = false,
@@ -158,7 +158,7 @@ local function startAutoFish()
     end)
 end
 
-Tab1:Toggle({
+local Toggle = Tab1:Toggle({
     Title = "Auto Instant complete Fishing",
     Desc = "Instant Fishing For v2 (It is mandatory to turn it on if you want to use Auto Fishing V2)",
     Value = autoInstantFishEnabled,
@@ -181,7 +181,7 @@ Tab1:Toggle({
     end
 })
 
-Tab1:Toggle({    
+local Toggle = Tab1:Toggle({    
     Title = "Radar",    
     Desc = "Toggle fishing radar",    
     Icon = false,    
