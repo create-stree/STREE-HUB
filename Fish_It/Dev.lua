@@ -271,6 +271,8 @@ Tab3:Toggle({
 })
 
 local player = game.Players.LocalPlayer
+local RepStorage = game:GetService("ReplicatedStorage")
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
 spawn(function()
     while task.wait(0.05) do
@@ -295,7 +297,6 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-local net = require(RepStorage.Packages._Index["sleitnick_net@0.2.0"]).net
 
 _G.AutoFishing = false
 _G.Delay = 0.01
