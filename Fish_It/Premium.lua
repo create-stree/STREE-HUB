@@ -291,8 +291,8 @@ spawn(function()
 end)
 
 Tab3:Toggle({
-    Title = "Auto Fishing",
-    Desc = "Automatic Auto Fishing v1",
+    Title = "Auto Instant Fishing (beta)",
+    Desc = "Automatic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -344,42 +344,39 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")    
 local camera = Workspace.CurrentCamera    
     
-local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]    
-local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
+local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
 
 local autoHoldEnabled = false
-Tab3:Toggle({
-    Title = "Auto Fishing",
-    Desc = "Automatic Fishing v2",
+
+Toggle = Tab3:Toggle({
+    Title = "Auto Legit",
+    Desc = "Automatic Legit Fishng",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
         if state then
             WindUI:Notify({
-                Title = "Auto Fishing V2",
-                Content = "Enabled",
+                Title = " Auto Legit",
+                Content = "Legit Enabled",
                 Duration = 3
             })
+
             task.spawn(function()
-                local holdDuration = 0.4
-                local loopDelay = 0.2
                 while autoHoldEnabled do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
-                        local clickX = 5
-                        local clickY = camera.ViewportSize.Y - 5
+                        local clickX = 10
+                        local clickY = camera.ViewportSize.Y - 10
                         VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-                        task.wait(holdDuration)
                         VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
                     end)
-                    task.wait(loopDelay)
                     RunService.Heartbeat:Wait()
                 end
             end)
         else
             WindUI:Notify({
-                Title = "Auto Fishing V2",
-                Content = "Disabled",
+                Title = "Auto Legit",
+                Content = "Legit Disabled",
                 Duration = 3
             })
         end
@@ -395,8 +392,8 @@ _G.Delay = 0
 _G.MaxSpeed = true
 
 Tab3:Toggle({
-    Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
+    Title = "Auto Instant Fishing (beta)",
+    Desc = "Automatic Instant Fishing",
     Icon = false,
     Type = false,
     Default = false,
@@ -481,67 +478,7 @@ Tab3:Toggle({
             end    
         end)    
     end    
-})    
-
-Tab3:Section({     
-    Title = "Other",  
-    Icon = "ethernet-port",
-    TextXAlignment = "Left",    
-    TextSize = 17,    
 })
-
-local autoInstantFishEnabled = true
-local delayTime = 0.1
-
-local function startAutoFish()
-    task.spawn(function()
-        while autoInstantFishEnabled do
-            pcall(function()
-                REFishingCompleted:FireServer()
-            end)
-            task.wait(delayTime)
-        end
-    end)
-end
-
-Tab3:Toggle({
-    Title = "Auto Instant complete Fishing",
-    Desc = "Instant Fishing For v2 (It is mandatory to turn it on if you want to use Auto Fishing V2)",
-    Value = autoInstantFishEnabled,
-    Callback = function(state)
-        autoInstantFishEnabled = state
-        if state then
-            WindUI:Notify({
-                Title = "Auto Instant Fish",
-                Content = "Enabled (Delay: " .. delayTime .. "s)",
-                Duration = 3
-            })
-            startAutoFish()
-        else
-            WindUI:Notify({
-                Title = "Auto Instant Fish",
-                Content = "Disabled",
-                Duration = 3
-            })
-        end
-    end
-})
-    
-Tab3:Toggle({    
-    Title = "Instant Catch",    
-    Desc = "Get fish straight away",    
-    Icon = false,    
-    Type = false,    
-    Default = false,    
-    Callback = function(state)    
-        _G.InstantCatch = state    
-        if state then    
-            print("✅ Instant Catch ON")    
-        else    
-            print("❌ Instant Catch OFF")    
-        end    
-    end    
-})    
     
 Tab3:Toggle({    
     Title = "Radar",    
@@ -711,7 +648,7 @@ Tab3:Toggle({
             Image.Position = UDim2.new(0.5, 0, 0.45, 0)
             Image.Size = UDim2.new(0, 180, 0, 180)
             Image.BackgroundTransparency = 1
-            Image.Image = "rbxassetid://123032091977400"
+            Image.Image = "rbxassetid://122683047852451"
 
             Text1.Parent = Frame
             Text1.AnchorPoint = Vector2.new(0.5, 0)
@@ -754,174 +691,175 @@ local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.
 
 _G.AutoFishingEnabled = false
 _G.AutoSellFish = true
-_G.FishingDelay = 0.01
+_G.FishingDelay = 0.5
 
 local ScreenGui, Background, Saturn, SpaceSound
 
 local function CreateBackground()
-    if ScreenGui then ScreenGui:Destroy() end
-    ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.IgnoreGuiInset = true
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.Name = "STREE_FISHING_BACKGROUND"
-    ScreenGui.Parent = CoreGui
+	if ScreenGui then ScreenGui:Destroy() end
+	ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.IgnoreGuiInset = true
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.Name = "STREE_FISHING_BACKGROUND"
+	ScreenGui.Parent = CoreGui
 
-    Background = Instance.new("Frame")
-    Background.BackgroundColor3 = Color3.new(0, 0, 0)
-    Background.BackgroundTransparency = 0.5
-    Background.Size = UDim2.new(1, 0, 1, 0)
-    Background.ZIndex = 0
-    Background.Parent = ScreenGui
+	Background = Instance.new("Frame")
+	Background.BackgroundColor3 = Color3.new(0, 0, 0)
+	Background.BackgroundTransparency = 0.5
+	Background.Size = UDim2.new(1, 0, 1, 0)
+	Background.ZIndex = 0
+	Background.Parent = ScreenGui
 
-    for i = 1, 80 do
-        local star = Instance.new("Frame")
-        star.Size = UDim2.new(0, math.random(3, 5), 0, math.random(3, 5))
-        star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        star.BackgroundTransparency = 1
-        star.ZIndex = 0
-        star.Parent = Background
+	for i = 1, 80 do
+		local star = Instance.new("Frame")
+		star.Size = UDim2.new(0, math.random(3, 5), 0, math.random(3, 5))
+		star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+		star.BackgroundTransparency = 1
+		star.ZIndex = 0
+		star.Parent = Background
 
-        local circle = Instance.new("UICorner", star)
-        circle.CornerRadius = UDim.new(1, 0)
+		local circle = Instance.new("UICorner", star)
+		circle.CornerRadius = UDim.new(1, 0)
 
-        local glow = Instance.new("UIStroke", star)
-        glow.Thickness = 1
-        glow.Color = Color3.fromRGB(0, 255, 0)
-        glow.Transparency = math.random(40, 80) / 100
+		local glow = Instance.new("UIStroke", star)
+		glow.Thickness = 1
+		glow.Color = Color3.fromRGB(0, 255, 0)
+		glow.Transparency = math.random(40, 80) / 100
 
-        task.spawn(function()
-            local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-            TweenService:Create(glow, tweenInfo, {Transparency = math.random(0, 60) / 100}):Play()
-        end)
-    end
+		task.spawn(function()
+			local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+			TweenService:Create(glow, tweenInfo, {Transparency = math.random(0, 60) / 100}):Play()
+		end)
+	end
 
-    Saturn = Instance.new("ImageLabel")
-    Saturn.Image = "rbxassetid://122683047852451"
-    Saturn.BackgroundTransparency = 1
-    Saturn.Size = UDim2.new(0, 320, 0, 320)
-    Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
-    Saturn.ImageTransparency = 0.05
-    Saturn.ZIndex = 0
-    Saturn.Parent = Background
+	Saturn = Instance.new("ImageLabel")
+	Saturn.Image = "rbxassetid://122683047852451"
+	Saturn.BackgroundTransparency = 1
+	Saturn.Size = UDim2.new(0, 320, 0, 320)
+	Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
+	Saturn.ImageTransparency = 0.05
+	Saturn.ZIndex = 0
+	Saturn.Parent = Background
 
-    task.spawn(function()
-        while ScreenGui and _G.AutoFishingEnabled do
-            for i = 0, 180, 2 do
-                Saturn.Rotation = i
-                task.wait(0.02)
-            end
-            for i = 180, 0, -2 do
-                Saturn.Rotation = i
-                task.wait(0.02)
-            end
-        end
-    end)
+	task.spawn(function()
+		while ScreenGui and _G.AutoFishingEnabled do
+			for i = 0, 180, 2 do
+				if not ScreenGui then break end
+				Saturn.Rotation = i
+				task.wait(0.02)
+			end
+			for i = 180, 0, -2 do
+				if not ScreenGui then break end
+				Saturn.Rotation = i
+				task.wait(0.02)
+			end
+		end
+	end)
 
-    SpaceSound = Instance.new("Sound")
-    SpaceSound.SoundId = "rbxassetid://1846351427"
-    SpaceSound.Volume = 0.2
-    SpaceSound.Looped = true
-    SpaceSound.Parent = SoundService
-    SpaceSound:Play()
+	SpaceSound = Instance.new("Sound")
+	SpaceSound.SoundId = "rbxassetid://1846351427"
+	SpaceSound.Volume = 0.2
+	SpaceSound.Looped = true
+	SpaceSound.Parent = SoundService
+	SpaceSound:Play()
 end
 
 local function RemoveBackground()
-    if SpaceSound then
-        SpaceSound:Stop()
-        SpaceSound:Destroy()
-        SpaceSound = nil
-    end
-    if ScreenGui then
-        TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-        task.wait(1)
-        ScreenGui:Destroy()
-        ScreenGui = nil
-    end
+	if SpaceSound then
+		SpaceSound:Stop()
+		SpaceSound:Destroy()
+		SpaceSound = nil
+	end
+	if ScreenGui then
+		TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+		task.wait(1)
+		ScreenGui:Destroy()
+		ScreenGui = nil
+	end
 end
 
 local function StartAutoFishing()
-    task.spawn(function()
-        while _G.AutoFishingEnabled do
-            pcall(function()
-                REEquipToolFromHotbar:FireServer(1)
-                local clickX = 5
-                local clickY = camera.ViewportSize.Y - 5
-                VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-                task.wait(_G.FishingDelay)
-                VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-                REFishingCompleted:FireServer()
-                if _G.AutoSellFish then
-                    for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-                        if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
-                            pcall(function() v:FireServer() end)
-                        end
-                    end
-                end
-            end)
-            task.wait(_G.FishingDelay)
-            RunService.Heartbeat:Wait()
-        end
-    end)
+	task.spawn(function()
+		while _G.AutoFishingEnabled do
+			pcall(function()
+				REEquipToolFromHotbar:FireServer(1)
+				local clickX = 5
+				local clickY = camera.ViewportSize.Y - 5
+				VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
+				task.wait(_G.FishingDelay)
+				VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
+				REFishingCompleted:FireServer()
+				if _G.AutoSellFish then
+					for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+						if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
+							pcall(function() v:FireServer() end)
+						end
+					end
+				end
+			end)
+			task.wait(_G.FishingDelay)
+			RunService.Heartbeat:Wait()
+		end
+	end)
 end
 
 local Tab4 = Window:Tab({
-    Title = "Exclusive",
-    Icon = "star",
+	Title = "Exclusive",
+	Icon = "star"
 })
 
 local Section = Tab4:Section({
-    Title = "Kaitun System",
-    Icon = "antenna",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-
-Tab4:Toggle({
-    Title = "Enable Kaitun",
-    Desc = "Automatic fishing system",
-    Default = false,
-    Callback = function(state)
-        _G.AutoFishingEnabled = state
-        if state then
-            CreateBackground()
-            WindUI:Notify({Title = "Auto Fishing", Content = "Activated!", Duration = 3})
-            StartAutoFishing()
-        else
-            RemoveBackground()
-            WindUI:Notify({Title = "Auto Fishing", Content = "Stopped.", Duration = 3})
-        end
-    end
+	Title = "Kaitun System",
+	Icon = "antenna",
+	TextXAlignment = "Left",
+	TextSize = 17
 })
 
 Tab4:Toggle({
-    Title = "Auto Sell Fish",
-    Desc = "Automatically sell caught fish",
-    Default = true,
-    Callback = function(state)
-        _G.AutoSellFish = state
-        WindUI:Notify({
-            Title = "Auto Sell",
-            Content = state and "Enabled" or "Disabled",
-            Duration = 2
-        })
-    end
+	Title = "Enable Kaitun",
+	Desc = "Automatic fishing system",
+	Default = false,
+	Callback = function(state)
+		_G.AutoFishingEnabled = state
+		if state then
+			CreateBackground()
+			WindUI:Notify({Title = "Auto Fishing", Content = "Activated!", Duration = 3})
+			StartAutoFishing()
+		else
+			RemoveBackground()
+			WindUI:Notify({Title = "Auto Fishing", Content = "Stopped.", Duration = 3})
+		end
+	end
+})
+
+Tab4:Toggle({
+	Title = "Auto Sell Fish",
+	Desc = "Automatically sell caught fish",
+	Default = true,
+	Callback = function(state)
+		_G.AutoSellFish = state
+		WindUI:Notify({
+			Title = "Auto Sell",
+			Content = state and "Enabled" or "Disabled",
+			Duration = 2
+		})
+	end
 })
 
 Tab4:Slider({
-    Title = "Fishing Delay",
-    Desc = "Adjust cast/reel timing (seconds)",
-    Min = 0.2,
-    Max = 2,
-    Default = 0.5,
-    Callback = function(value)
-        _G.FishingDelay = value
-        WindUI:Notify({
-            Title = "Fishing Delay",
-            Content = "Delay set to " .. tostring(value) .. "s",
-            Duration = 2
-        })
-    end
+	Title = "Fishing Delay",
+	Desc = "Adjust cast/reel timing (seconds)",
+	Min = 0.2,
+	Max = 2,
+	Default = 0.5,
+	Callback = function(value)
+		_G.FishingDelay = value
+		WindUI:Notify({
+			Title = "Fishing Delay",
+			Content = "Delay set to " .. tostring(value) .. "s",
+			Duration = 2
+		})
+	end
 })
 
 local Tab5 = Window:Tab({
