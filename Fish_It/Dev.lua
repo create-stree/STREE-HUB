@@ -297,7 +297,7 @@ end)
 
 local plr = game:FindService("Players").LocalPlayer
 local rs  = game:FindService("ReplicatedStorage")
-local net = require(rs.Packages._Index["sleitnick_net@0.2.0"]).net
+local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
 local s = {
     af   = false,
