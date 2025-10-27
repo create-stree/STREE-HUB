@@ -1,70 +1,113 @@
-local player = game.Players.LocalPlayer
-local RepStorage = game:GetService("ReplicatedStorage")
-local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-
 _G.AutoFishing = false
-_G.Delay = 0
-_G.MaxSpeed = true
+_G.AutoSell = false
+_G.AutoBuyBait = false
+_G.AutoEquipRod = false
+-
+local function simulateClick()
 
-Tab3:Toggle({
-    Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
-    Icon = false,
-    Type = false,
+    mouse1click() 
+
+end
+
+local Tab = Window:MakeTab({
+    Name = "Auto Farm",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+Tab:Toggle({
+    Name = "Auto Fishing (Humanized)",
     Default = false,
     Callback = function(value)
         _G.AutoFishing = value
-        print("Auto Fishing: " .. tostring(value))
     end
 })
 
-Tab3:Input({
-    Title = "Blast Delay",
-    Desc = "Enter delay in seconds",
-    Value = "0.01",
-    InputIcon = false,
-    Type = "Input",
-    Placeholder = "Enter delay...",
-    Callback = function(input)
-        local newDelay = tonumber(input)
-        if newDelay and newDelay >= 0 then
-            _G.Delay = newDelay
-            print("Delay changed to: " .. _G.Delay .. " seconds")
-            _G.MaxSpeed = (newDelay == 0)
-        else
-            print("Invalid input, use number >= 0")
-        end
+Tab:Slider({
+    Name = "Min Wait (seconds)",
+    Default = 3,
+    Min = 3,
+    Max = 10,
+    Callback = function(value)
+        _G.MinDelay = value
     end
 })
 
-local function InstantFish()
-    if player.Character then
-        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-        end
-        net["RF/ChargeFishingRod"]:InvokeServer(2)
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        net["RE/FishingCompleted"]:FireServer()
+Tab:Slider({
+    Name = "Max Wait (seconds)",
+    Default = 8,
+    Min = 5,
+    Max = 15,
+    Callback = function(value)
+        _G.MaxDelay = value
     end
-end
+})
 
-task.spawn(function()
-    while true do
+Tab:Toggle({
+    Name = "Auto Sell Fish",
+    Default = false,
+    Callback = function(value)
+        _G.AutoSell = value
+    end
+})
+
+local RepStorage = game:GetService("ReplicatedStorage")
+local NetIndex = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+
+spawn(function()
+    while task.wait(0.1) do
         if _G.AutoFishing then
-            InstantFish()
-            if not _G.MaxSpeed and _G.Delay > 0 then
-                task.wait(_G.Delay)
-            elseif _G.MaxSpeed then
-                task.wait(0.001)
-            end
-        else
-            task.wait(0.01)
+            pcall(function()
+                simulateClick()              
+                
+                local waitTime = math.random(_G.MinDelay or 3, _G.MaxDelay or 8)
+                print("Tunggu gigitan: " .. waitTime .. " detik.")
+                task.wait(waitTime)               
+                local clicksNeeded = math.random(8, 20) 
+                local totalReelTime = math.random(10, 20) / 100 
+                local delayBetweenClicks = totalReelTime / clicksNeeded
+                
+                for i = 1, clicksNeeded do
+                    simulateClick()
+                    
+                    task.wait(delayBetweenClicks * math.random(9, 11) / 10) 
+                end
+                
+                print("Pancingan selesai. Menunggu 1 detik untuk siklus berikutnya.")
+            end)
+            
+           
+            task.wait(math.random(15, 35) / 10) 
         end
     end
 end)
 
-player.CharacterAdded:Connect(function()
-    if _G.AutoFishing then
-        InstantFish()
+spawn(function()
+    while task.wait(math.random(60, 120)) do 
+        if _G.AutoSell then
+            pcall(function()
+                NetIndex["RE/SellAllFish"]:FireServer()
+            end)
+        end
+    end
+end)
+
+spawn(function()
+    while task.wait(math.random(180, 300)) do 
+        if _G.AutoBuyBait then
+            pcall(function()
+                NetIndex["RE/BuyBait"]:FireServer("BasicBait", 50)
+            end)
+        end
+    end
+end)
+
+spawn(function()
+    while task.wait(30) do
+        if _G.AutoEquipRod then
+            pcall(function()
+                NetIndex["RE/EquipToolFromHotbar"]:FireServer(1)
+            end)
+        end
     end
 end)
