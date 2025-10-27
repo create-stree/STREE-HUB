@@ -295,91 +295,66 @@ spawn(function()
     end
 end)
 
-local player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+local plr = game:FindService("Players").LocalPlayer
+local rs  = game:FindService("ReplicatedStorage")
+local net = require(rs.Packages._Index["sleitnick_net@0.2.0"]).net
 
-_G.AutoFishing = false
-_G.Delay = 0.01
-_G.MaxSpeed = false
-_G.DisableAnimations = false
+local s = {
+    af   = false,
+    del  = 0.01,
+    max  = false,
+    da   = false,
+    busy = false
+}
 
-local net = ReplicatedStorage:WaitForChild("RE")
-
-local function stopFishingAnimations()
-    local character = player.Character
-    if not character then return end
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-    for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
-        if track.Animation and track.Animation:IsA("Animation") then
-            local id = track.Animation.AnimationId
-            if id:match("cast") or id:match("pull") or id:match("fish") then
-                track:Stop(0)
+local function stop()
+    local c = plr.Character
+    if not c then return end
+    local h = c:FindFirstChildOfClass("Humanoid")
+    if h then
+        for _,t in ipairs(h:GetPlayingAnimationTracks()) do
+            local id = t.Animation and t.Animation.AnimationId or ""
+            if id:find("cast") or id:find("pull") or id:find("fish") then
+                t:Stop()
             end
         end
     end
 end
 
-local function toggleFishingAnimation(state)
-    _G.DisableAnimations = state
-    if state then
-        stopFishingAnimations()
+local function fish()
+    local c = plr.Character
+    if not c then return false end
+    if not c:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
+        task.wait(.1)
     end
-end
-
-local fishingLoopRunning = false
-local function InstantFish()
-    local character = player.Character
-    if not character then return false end
-
-    if not character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-        net:WaitForChild("EquipToolFromHotbar"):FireServer(1)
-        task.wait(0.2)
-    end
-
-    if _G.DisableAnimations then
-        stopFishingAnimations()
-    end
-
+    if s.da then stop() end
     return pcall(function()
-        net:WaitForChild("ChargeFishingRod"):InvokeServer(2)
-        task.wait(0.05)
-        net:WaitForChild("RequestFishingMinigameStarted"):InvokeServer(1, 1)
-        task.wait(0.05)
-        net:WaitForChild("FishingCompleted"):FireServer(true)
-        net:WaitForChild("CancelFishingInputs"):FireServer()
-        net:WaitForChild("CancelPrompt"):FireServer()
-        return true
+        net["RF/ChargeFishingRod"]:InvokeServer(2)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
+        net["RE/FishingCompleted"]:FireServer()
+        net["RE/CancelFishingInputs"]:FireServer()
+        net["RE/CancelPrompt"]:FireServer()
     end)
 end
 
-local function InstantFishLoop()
-    if fishingLoopRunning then return end
-    fishingLoopRunning = true
-    while _G.AutoFishing do
-        local success, result = InstantFish()
-        if not success then
-            warn("Fishing failed: ", result)
-            task.wait(0.5)
-        else
-            task.wait(_G.MaxSpeed and 0 or _G.Delay)
-        end
+local function loop()
+    if s.busy then return end
+    s.busy = true
+    while s.af do
+        local ok = fish()
+        task.wait(ok and (s.max and 0 or s.del) or .5)
     end
-    fishingLoopRunning = false
+    s.busy = false
 end
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
     Desc = "Automatic Instant Fishing",
-    Icon = false,
-    Type = false,
     Default = false,
-    Callback = function(value)
-        _G.AutoFishing = value
-        if value then
-            task.spawn(InstantFishLoop)
-        end
+    Callback = function(v)
+        s.af = v
+        if v then task.spawn(loop) end
     end
 })
 
@@ -387,43 +362,32 @@ Tab3:Input({
     Title = "Blast Delay",
     Desc = "Enter delay in seconds",
     Value = "0.01",
-    InputIcon = false,
-    Type = "Input",
     Placeholder = "Enter delay...",
-    Callback = function(value)
-        local delay = tonumber(value)
-        if delay and delay >= 0 then
-            _G.Delay = delay
-            _G.MaxSpeed = (delay == 0)
+    Callback = function(v)
+        local n = tonumber(v)
+        if n and n >= 0 then
+            s.del = n
+            s.max = n == 0
         end
     end
 })
 
 Tab3:Toggle({
     Title = "Disable Fishing Animations",
-    Icon = false,
-    Type = false,
     Default = false,
-    Callback = function(state)
-        toggleFishingAnimation(state)
+    Callback = function(v)
+        s.da = v
+        if v then stop() end
     end
 })
 
-player.CharacterAdded:Connect(function()
-    if _G.AutoFishing then
-        task.wait(2)
-        task.spawn(InstantFishLoop)
-    end
-    if _G.DisableAnimations then
-        task.wait(1)
-        toggleFishingAnimation(true)
-    end
+plr.CharacterAdded:Connect(function()
+    if s.af then task.wait(2); loop() end
+    if s.da then task.wait(1); stop() end
 end)
 
-RunService.Heartbeat:Connect(function()
-    if _G.DisableAnimations and player.Character then
-        stopFishingAnimations()
-    end
+game:FindService("RunService").Heartbeat:Connect(function()
+    if s.da and plr.Character then stop() end
 end)
 
 local RunService = game:GetService("RunService")    
