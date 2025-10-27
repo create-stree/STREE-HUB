@@ -297,7 +297,7 @@ end)
 
 local player = game.Players.LocalPlayer
 local RepStorage = game:GetService("ReplicatedStorage")
-local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+local net = RepStorage:WaitForChild("Packages")._Index["sleitnick_net@0.2.0"].net
 
 _G.AutoFishing = false
 _G.Delay = 0.01
@@ -327,28 +327,40 @@ local function toggleFishingAnimation(s)
 end
 
 local fishingLoopRunning = false
+
 local function InstantFish()
     local c = player.Character
     if not c then return false end
+
     if not c:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
         net["RE/EquipToolFromHotbar"]:FireServer(1)
-        task.wait(0.25)
+        task.wait(0.3)
     end
+
     if _G.DisableAnimations then
         stopFishingAnimations()
     end
+
     local ok = pcall(function()
         net["RF/ChargeFishingRod"]:InvokeServer(2)
-        task.wait(0.05)
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        task.wait(0.05)
-        net["RF/FishingMinigameEnded"]:InvokeServer("Perfect")
-        task.wait(0.05)
+        task.wait(0.1)
+        net["RF/StartFishingMinigame"]:InvokeServer({
+            Power = 1,
+            RodId = 1,
+            Direction = Vector3.new(0, -1, 0)
+        })
+        task.wait(0.2)
+        net["RF/FishingMinigameEnded"]:InvokeServer({
+            Result = "Perfect",
+            Bonus = 1,
+            Combo = true
+        })
+        task.wait(0.15)
         net["RE/FishingCompleted"]:FireServer()
-        task.wait(0.05)
-        net["RE/CancelFishingInputs"]:FireServer()
-        net["RE/CancelPrompt"]:FireServer()
+        task.wait(0.1)
+        net["RE/CollectFish"]:FireServer()
     end)
+
     return ok
 end
 
@@ -368,7 +380,7 @@ end
 
 Tab3:Toggle({
     Title = "Auto Instant Fishing",
-    Desc = "Automatic Instant Fishing",
+    Desc = "Automatic Perfect Catch + Auto Collect",
     Icon = false,
     Type = false,
     Default = false,
