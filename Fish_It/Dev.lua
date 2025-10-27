@@ -375,14 +375,14 @@ local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0
 local autoHoldEnabled = false
 
 Toggle = Tab3:Toggle({
-    Title = "Legit",
+    Title = "Auto Legit",
     Desc = "Automatic Legit Fishng",
     Value = false,
     Callback = function(state)
         autoHoldEnabled = state
         if state then
             WindUI:Notify({
-                Title = " AutoLegit",
+                Title = " Auto Legit",
                 Content = "🚀 Extreme Speed Enabled",
                 Duration = 3
             })
@@ -391,8 +391,8 @@ Toggle = Tab3:Toggle({
                 while autoHoldEnabled do
                     pcall(function()
                         REEquipToolFromHotbar:FireServer(1)
-                        local clickX = 5
-                        local clickY = camera.ViewportSize.Y - 5
+                        local clickX = 10
+                        local clickY = camera.ViewportSize.Y - 10
                         VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
                         VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
                     end)
