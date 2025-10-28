@@ -1051,8 +1051,7 @@ Tab5:Dropdown({
     Values = rodNames,  
     Value = selectedRod,  
     Callback = function(value)  
-        selectedRod = value  
-        WindUI:Notify({Title="Rod Selected", Content=value, Duration=3})  
+        selectedRod = value
     end  
 })  
 
