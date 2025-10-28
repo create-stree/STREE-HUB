@@ -305,27 +305,23 @@ _G.MaxSpeed = true
 
 Tab3:Toggle({
     Title = "Auto Perfect Fishing",
-    Desc = "Auto Instant Fishing + Perfect Catch",
-    Icon = false,
-    Type = false,
+    Desc = "Instant + Perfect Catch (LOOP)",
     Default = false,
-    Callback = function(value)
-        _G.AutoFishing = value
+    Callback = function(v)
+        _G.AutoFishing = v
     end
 })
 
 Tab3:Input({
     Title = "Blast Delay",
-    Desc = "Enter delay in seconds",
-    Value = "0.01",
-    InputIcon = false,
-    Type = "Input",
-    Placeholder = "Enter delay...",
-    Callback = function(input)
-        local newDelay = tonumber(input)
-        if newDelay and newDelay >= 0 then
-            _G.Delay = newDelay
-            _G.MaxSpeed = (newDelay == 0)
+    Desc = "0 = Max Speed",
+    Value = "0",
+    Placeholder = "0.01...",
+    Callback = function(v)
+        local d = tonumber(v)
+        if d and d >= 0 then
+            _G.Delay = d
+            _G.MaxSpeed = (d == 0)
         end
     end
 })
@@ -333,8 +329,8 @@ Tab3:Input({
 local function PerfectFish()
     if not player.Character then return end
 
-    local viewModel = player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
-    if viewModel then
+    local vm = player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
+    if vm then
         net["RE/EquipToolFromHotbar"]:FireServer(1)
     end
 
@@ -348,16 +344,12 @@ local function PerfectFish()
 end
 
 task.spawn(function()
-    while true do
+    while task.wait() do
         if _G.AutoFishing then
             PerfectFish()
-            if not _G.MaxSpeed and _G.Delay > 0 then
-                task.wait(_G.Delay)
-            elseif _G.MaxSpeed then
-                task.wait(0.001)
-            end
+            task.wait(_G.MaxSpeed and 0.001 or (_G.Delay > 0 and _G.Delay or 0.01))
         else
-            task.wait(0.01)
+            task.wait(0.1)
         end
     end
 end)
