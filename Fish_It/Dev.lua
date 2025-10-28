@@ -611,7 +611,7 @@ local function NotifyQuestProgress()
                     local remaining = math.max(goal - progress, 0)
                     local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
                     local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                    local questName = quest.Name -- Gunakan nama asli quest dari data
+                    local questName = quest.DeepSea
 
                     game.StarterGui:SetCore("SendNotification", {
                         Title = questName .. " Quest",
