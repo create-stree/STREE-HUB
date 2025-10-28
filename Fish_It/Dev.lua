@@ -304,8 +304,8 @@ _G.Delay = 0
 _G.MaxSpeed = true
 
 Tab3:Toggle({
-    Title = "Auto Instant Fishing",
-    Desc = "Automic Instant Fishing",
+    Title = "Auto Perfect Fishing",
+    Desc = "Auto Instant Fishing + Perfect Catch",
     Icon = false,
     Type = false,
     Default = false,
@@ -330,23 +330,27 @@ Tab3:Input({
     end
 })
 
-local function InstantFish()
-    if player.Character then
-        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-        end
-        net["RF/ChargeFishingRod"]:InvokeServer(2)
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        net["RE/FishingCompleted"]:FireServer()
-        net["RE/CancelFishingInputs"]:FireServer()
-        net["RE/CancelPrompt"]:FireServer()
+local function PerfectFish()
+    if not player.Character then return end
+
+    local viewModel = player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
+    if viewModel then
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
     end
+
+    net["RF/ChargeFishingRod"]:InvokeServer(2)
+    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
+    net["RE/FishingCompleted"]:FireServer("Perfect")
+    net["RE/ReplicateCutscene"]:FireServer()
+    net["RE/ReplicateTextEffect"]:FireServer("PERFECT!")
+    net["RE/CancelFishingInputs"]:FireServer()
+    net["RE/CancelPrompt"]:FireServer()
 end
 
 task.spawn(function()
     while true do
         if _G.AutoFishing then
-            InstantFish()
+            PerfectFish()
             if not _G.MaxSpeed and _G.Delay > 0 then
                 task.wait(_G.Delay)
             elseif _G.MaxSpeed then
@@ -359,8 +363,9 @@ task.spawn(function()
 end)
 
 player.CharacterAdded:Connect(function()
+    task.wait(1)
     if _G.AutoFishing then
-        InstantFish()
+        PerfectFish()
     end
 end)
 
