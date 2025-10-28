@@ -16,33 +16,31 @@ Icon = "anchor",
 })
 
 ---------------------------------- Remotes ------------------------------------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
-
-local RF_Charge = Net:WaitForChild("RF/ChargeFishingRod")
-local RF_Lempar = Net:WaitForChild("RF/RequestFishingMinigameStarted")
-local RE_Catch = Net:WaitForChild("RE/FishingCompleted")
-local RF_Cancel = Net:WaitForChild("RF/CancelFishingInputs")
-
-local function charge()
-pcall(function() RF_Charge:InvokeServer(1760263259.772593) end)
-end
-
 local function lempar()
-pcall(function()
-RF_Lempar:InvokeServer(-1, 0.2, tick())
-RF_Charge:InvokeServer(1760263259.772593)
-end)
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.233184814453125, 0.9966885368402592, 1761532005.497536)
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer()
 end
-
 local function catch()
-pcall(function() RE_Catch:FireServer() end)
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 end
 
-local function cancel()
-pcall(function() RF_Cancel:InvokeServer() end)
+local function instant()
+    while _G.AutoFarm do
+        task.wait(0)
+        for i = 1, 10 do
+            charge()
+            task.wait(0)
+            lempar()
+            task.wait(0)
+        end
+        task.wait(delayfishing)
+        for i = 1, 10 do
+            catch()
+            task.wait(0)
+        end
+        task.wait(0)
+    end
 end
-
 ---------------------------------- AutoFarm Logic -----------------------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local Players = game:GetService("Players")
