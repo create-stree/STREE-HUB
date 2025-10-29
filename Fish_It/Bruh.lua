@@ -10,7 +10,7 @@ local Window = WindUI:CreateWindow({
     Author = "Nigga", -- optional
 })
 
-local Tab = Window:Tab({
+local Tab1 = Window:Tab({
 Title = "Main",
 Icon = "anchor",
 })
@@ -61,7 +61,7 @@ RE_BaitSpawned.OnClientEvent:Connect(function(_, baitName, position)
 end)
 
 ---------------------------------- UI ----------------------------------------
-Tab:Slider({
+Tab1:Slider({
     Title = "Delay Completed",
     Step = 0.01,
     Value = { Min = 0, Max = 10, Default = completed_delay },
@@ -70,7 +70,7 @@ Tab:Slider({
     end,
 })
 
-Tab:Toggle({
+Tab1:Toggle({
     Title = "Auto Instant Fishing",
     Value = false,
     Callback = function(state)
