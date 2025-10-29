@@ -27,18 +27,17 @@ local net = ReplicatedStorage:WaitForChild("Packages")
 
 ---------------------------------- Remote References --------------------------
 local RF_RequestStart = net:WaitForChild("RF/RequestFishingMinigameStarted")
-local RF_ChargeRod = net:WaitForChild("RF/ChargeFishingRod")
+local RF_ChargeRod = net:WaitForChild("RF/ChargeRod") -- Tidak digunakan
 local RE_FishingCompleted = net:WaitForChild("RE/FishingCompleted")
 local RE_BaitSpawned = net:WaitForChild("RE/BaitSpawned")
 
 ---------------------------------- Variables ----------------------------------
 _G.Instant = _G.Instant or false
-_G.completed_delay = _G.completed_delay or 0.01
 
 ---------------------------------- Core Functions -----------------------------
 local function startFishing()
     pcall(function()
-        RF_ChargeRod:InvokeServer(2)
+        -- HANYA invoke start tanpa charge rod → hindari animasi angin
         RF_RequestStart:InvokeServer(-1.25, 0.2)
     end)
 end
@@ -53,25 +52,23 @@ end
 RE_BaitSpawned.OnClientEvent:Connect(function(_, baitName, position)
     if not _G.Instant then return end
 
-    task.spawn(function()
-        startFishing()
-        task.wait(_G.completed_delay)
-        completeFishing()
-    end)
+    -- Langsung jalankan tanpa task.wait()
+    startFishing()
+    completeFishing()
 end)
 
 ---------------------------------- UI ----------------------------------------
 Tab1:Slider({
-    Title = "Delay Completed",
+    Title = "Delay Completed (Tidak Digunakan)",
     Step = 0.01,
-    Value = { Min = 0, Max = 10, Default = _G.completed_delay },
+    Value = { Min = 0, Max = 1, Default = 0 },
     Callback = function(value)
-        _G.completed_delay = value
+        -- Tidak digunakan lagi, tapi tetap ada untuk UI
     end,
 })
 
 Tab1:Toggle({
-    Title = "Auto Instant Fishing",
+    Title = "Auto Instant Fishing (No Delay, No Wind)",
     Value = false,
     Callback = function(state)
         _G.Instant = state
