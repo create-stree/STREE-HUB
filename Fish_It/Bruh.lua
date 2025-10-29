@@ -70,7 +70,7 @@ Tab:Slider({
     end,
 })
 
-Tab3:Toggle({
+Tab:Toggle({
     Title = "Auto Instant Fishing",
     Value = false,
     Callback = function(state)
