@@ -33,7 +33,7 @@ local RE_BaitSpawned = net:WaitForChild("RE/BaitSpawned")
 
 ---------------------------------- Variables ----------------------------------
 _G.Instant = _G.Instant or false
-local completed_delay = completed_delay or 0.01
+_G.completed_delay = _G.completed_delay or 0.01
 
 ---------------------------------- Core Functions -----------------------------
 local function startFishing()
@@ -55,7 +55,7 @@ RE_BaitSpawned.OnClientEvent:Connect(function(_, baitName, position)
 
     task.spawn(function()
         startFishing()
-        task.wait(completed_delay)
+        task.wait(_G.completed_delay)
         completeFishing()
     end)
 end)
@@ -64,9 +64,9 @@ end)
 Tab1:Slider({
     Title = "Delay Completed",
     Step = 0.01,
-    Value = { Min = 0, Max = 10, Default = completed_delay },
+    Value = { Min = 0, Max = 10, Default = _G.completed_delay },
     Callback = function(value)
-        completed_delay = value
+        _G.completed_delay = value
     end,
 })
 
