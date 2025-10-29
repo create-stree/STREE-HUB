@@ -15,85 +15,65 @@ Title = "Main",
 Icon = "anchor",
 })
 
----------------------------------- Remotes ------------------------------------
-local function lempar()
-    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.233184814453125, 0.9966885368402592, 1761532005.497536)
-    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer()
-end
-local function catch()
-    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-end
-
-local function instant()
-    while _G.AutoFarm do
-        task.wait(0)
-        for i = 1, 10 do
-            charge()
-            task.wait(0)
-            lempar()
-            task.wait(0)
-        end
-        task.wait(delayfishing)
-        for i = 1, 10 do
-            catch()
-            task.wait(0)
-        end
-        task.wait(0)
-    end
-end
----------------------------------- AutoFarm Logic -----------------------------
+---------------------------------- Services -----------------------------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    local REBaitSpawned = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/BaitSpawned"]
-    REBaitSpawned.OnClientEvent:Connect(function(playerWhoSpawned, baitName, position)
-        if _G.Instant then
-            wait(0)        
-            pcall(function()
-                ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.25, 0.2)
-            end)
-            task.wait(completed_delay)
-            pcall(function()
-                ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer(1)
-            end)
-        end
-    end)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+local net = ReplicatedStorage:WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
+
+---------------------------------- Remote References --------------------------
+local RF_RequestStart = net:WaitForChild("RF/RequestFishingMinigameStarted")
+local RF_ChargeRod = net:WaitForChild("RF/ChargeFishingRod")
+local RE_FishingCompleted = net:WaitForChild("RE/FishingCompleted")
+local RE_BaitSpawned = net:WaitForChild("RE/BaitSpawned")
+
+---------------------------------- Variables ----------------------------------
+_G.Instant = _G.Instant or false
+local completed_delay = completed_delay or 0.01
+
+---------------------------------- Core Functions -----------------------------
+local function startFishing()
+    pcall(function()
+        RF_ChargeRod:InvokeServer(2)
+        RF_RequestStart:InvokeServer(-1.25, 0.2)
+    end)
+end
+
+local function completeFishing()
+    pcall(function()
+        RE_FishingCompleted:FireServer(1)
+    end)
+end
+
+---------------------------------- Auto Instant Logic -------------------------
+RE_BaitSpawned.OnClientEvent:Connect(function(_, baitName, position)
+    if not _G.Instant then return end
+
+    task.spawn(function()
+        startFishing()
+        task.wait(completed_delay)
+        completeFishing()
+    end)
+end)
 
 ---------------------------------- UI ----------------------------------------
-
 Tab:Slider({
-Title = "Delay Completed",
-Step = 0.01,
-Value = { Min = 0, Max = 10, Default = completed_delay },
-Callback = function(value)
-completed_delay = value
-end,
+    Title = "Delay Completed",
+    Step = 0.01,
+    Value = { Min = 0, Max = 10, Default = completed_delay },
+    Callback = function(value)
+        completed_delay = value
+    end,
 })
 
-Tab:Slider({
-Title = "Delay Cancel",
-Step = 0.01,
-Value = { Min = 0, Max = 10, Default = cancel_delay },
-Callback = function(value)
-cancel_delay = value
-end,
+Tab3:Toggle({
+    Title = "Auto Instant Fishing",
+    Value = false,
+    Callback = function(state)
+        _G.Instant = state
+    end,
 })
-
-Tab:Toggle({
-Title = "AutoFarm",
-Value = false,
-Callback = function(state)
-_G.Instant = state
-end,
-})
-
-local Button = Tab:Button({
-    Title = "Completed",
-    Desc = "Test Button",
-    Locked = false,
-    Callback = function()
-        catch()
-    end
-})  
