@@ -262,7 +262,7 @@ Tab3:Section({
 })
 
 local AutoRod = Tab3:Toggle({
-    Title = "Auto Rod",
+    Title = "Auto Equip Rod",
     Desc = false,
     Icon = false,
     Type = "Toggle",
@@ -295,8 +295,8 @@ local Dropdown = Tab3:Dropdown({
     end
 })
 
-local AutoFarm = Tab3:Toggle({
-    Title = "Auto Farm",
+Tab3:Toggle({
+    Title = "Auto Fishing",
     Desc = false,
     Icon = false,
     Type = "Toggle",
@@ -306,7 +306,7 @@ local AutoFarm = Tab3:Toggle({
         if Value then
             if CurrentOption == "Instant" then
                 WindUI:Notify({
-                    Title = "AutoFarm",
+                    Title = "Auto Instant Fishing",
                     Content = "Instant Mode ON",
                     Duration = 3
                 })
@@ -315,7 +315,7 @@ local AutoFarm = Tab3:Toggle({
                 end)
             elseif CurrentOption == "Legit" then
                 WindUI:Notify({
-                    Title = "AutoFarm",
+                    Title = "Auto Legit Fishing",
                     Content = "Legit Mode ON",
                     Duration = 3
                 })
@@ -328,7 +328,7 @@ local AutoFarm = Tab3:Toggle({
             end
         else
             WindUI:Notify({
-                Title = "AutoFarm",
+                Title = "Auto Fishing",
                 Content = "AutoFarm OFF",
                 Duration = 3
             })
@@ -338,7 +338,7 @@ local AutoFarm = Tab3:Toggle({
     end
 })
 
-local DelayFishing = Tab3:Slider({
+Tab3:Slider({
     Title = "Delay",
     Desc = false,
     Step = 0.01,
