@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.5",
+    Title = "v0.0.0.6",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -251,235 +251,182 @@ Tab2:Toggle({
 
 local Tab3 = Window:Tab({
     Title = "Main",
-    Icon = "landmark",
+    Icon = "landmark"
 })
 
 Tab3:Section({
     Title = "Main",
-    Icon = "house",
+	Icon = "house",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+local AutoRod = Tab3:Toggle({
+    Title = "Auto Rod",
+    Desc = false,
+    Icon = false,
+    Type = "Toggle",
+    Value = false,
+    Callback = function(Value) 
+        _G.AutoRod = Value
+        if Value then
+            rod()
+        else return end
+    end
+})
+
+local CurrentOption = "Instant"
+
+local Dropdown = Tab3:Dropdown({
+    Title = "Mode",
+    Desc = false,
+    Values = { "Instant", "Legit" },
+    Value = "Instant",
+    Multi = false,
+    AllowNone = false,
+    Callback = function(Option)
+        CurrentOption = Option
+        WindUI:Notify({
+            Title = "Mode Selected",
+            Content = "Mode: " .. Option,
+            Duration = 3,
+            Icon = "check"
+        })
+    end
+})
+
+local AutoFarm = Tab3:Toggle({
+    Title = "Auto Farm",
+    Desc = false,
+    Icon = false,
+    Type = "Toggle",
+    Value = false,
+    Callback = function(Value)
+        _G.AutoFarm = Value
+        if Value then
+            if CurrentOption == "Instant" then
+                WindUI:Notify({
+                    Title = "AutoFarm",
+                    Content = "Instant Mode ON",
+                    Duration = 3
+                })
+                task.spawn(function()
+                    _G.Instant = Value
+                end)
+            elseif CurrentOption == "Legit" then
+                WindUI:Notify({
+                    Title = "AutoFarm",
+                    Content = "Legit Mode ON",
+                    Duration = 3
+                })
+                task.spawn(function()
+                    while _G.AutoFarm and CurrentOption == "Legit" do
+                        autoon()
+                        task.wait(1)
+                    end
+                end)
+            end
+        else
+            WindUI:Notify({
+                Title = "AutoFarm",
+                Content = "AutoFarm OFF",
+                Duration = 3
+            })
+            autooff()
+            cancel()
+        end
+    end
+})
+
+local DelayFishing = Tab3:Slider({
+    Title = "Delay",
+    Desc = false,
+    Step = 0.01,
+    Value = {
+        Min = 0,
+        Max = 5,
+        Default = 1,
+    },
+    Callback = function(Value)
+        delayfishing = Value
+    end
+})
+
+Tab3:Toggle({
+    Title = "Super Instant Fishing",
+    Value = _G.Instantt,
+    Callback = function(value)
+        _G.Instant = value    
+    end
+})
+
+Tab3:Toggle({
+    Title = "Blantant",
+    Desc = false,
+    Icon = false,
+    Type = "Toggle",
+    Value = false,
+    Callback = function(Value) 
+        _G.AutoFarm = Value
+        _G.Blantant = Value
+        if Value then
+            while _G.Blantant do
+                task.wait(blantantdelay)
+                icancel()
+            end
+        else return end
+    end
+})
+
+Tab3:Slider({
+    Title = "Blantant Delay",
+    Desc = false,
+    Step = 0.01,
+    Value = {
+        Min = 0,
+        Max = 10,
+        Default = 1,
+    },
+    Callback = function(Value)
+        blantantdelay = Value
+    end
+})
+
+Tab3:Section({
+    Title = "Sell",
+    Icon = "hand-coins",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
 Tab3:Toggle({
-    Title = "Auto Equip Rod",
-    Desc = "Selalu equip pancing otomatis",
+    Title = "Auto Sell",
+    Desc = false,
     Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(value)
-        _G.AutoEquipRod = value
-    end
-})
-
-local player = game.Players.LocalPlayer
-
-spawn(function()
-    while task.wait(1) do
-        if _G.AutoEquipRod then
-            pcall(function()
-                local backpack = player:FindFirstChild("Backpack")
-                if backpack then
-                    local rod = backpack:FindFirstChild("Rod") or backpack:FindFirstChild("FishingRod") or backpack:FindFirstChild("OldRod") or backpack:FindFirstChild("BasicRod")
-                    if rod and not player.Character:FindFirstChild(rod.Name) then
-                        player.Character.Humanoid:EquipTool(rod)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-Tab3:Toggle({
-    Title = "Auto Instant Fishing (beta)",
-    Desc = "Automatic Instant Fishing",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(value)
-        _G.AutoFishing = value
-    end
-})
-
-local RepStorage = game:GetService("ReplicatedStorage")
-
-spawn(function()
-    while wait() do
-        if _G.AutoFishing then
-            repeat
-                pcall(function()
-                    local char = player.Character or player.CharacterAdded:Wait()
-                    if char:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
-                    end
-                    local cosmeticFolder = workspace:FindFirstChild("CosmeticFolder")
-                    if cosmeticFolder and not cosmeticFolder:FindFirstChild(tostring(player.UserId)) then
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer(2)
-                        wait(0.5)
-                        RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(1,1)
-                    end
-                end)
-                wait(0.2)
-            until not _G.AutoFishing
-        end
-    end
-end)
-
-spawn(function()
-    while wait() do
-        if _G.AutoFishing then
-            repeat
-                pcall(function()
-                    RepStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
-                end)
-                wait(0.2)
-            until not _G.AutoFishing
-        end
-    end
-end)
-
-local RunService = game:GetService("RunService")    
-local Workspace = game:GetService("Workspace")    
-local VirtualInputManager = game:GetService("VirtualInputManager")    
-local ReplicatedStorage = game:GetService("ReplicatedStorage")    
-local camera = Workspace.CurrentCamera    
-    
-local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
-
-local autoHoldEnabled = false
-
-Toggle = Tab3:Toggle({
-    Title = "Auto Legit",
-    Desc = "Automatic Legit Fishng",
+    Type = "Toggle",
     Value = false,
-    Callback = function(state)
-        autoHoldEnabled = state
-        if state then
-            WindUI:Notify({
-                Title = " Auto Legit",
-                Content = "Legit Enabled",
-                Duration = 3
-            })
-
-            task.spawn(function()
-                while autoHoldEnabled do
-                    pcall(function()
-                        REEquipToolFromHotbar:FireServer(1)
-                        local clickX = 10
-                        local clickY = camera.ViewportSize.Y - 10
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-                    end)
-                    RunService.Heartbeat:Wait()
-                end
-            end)
-        else
-            WindUI:Notify({
-                Title = "Auto Legit",
-                Content = "Legit Disabled",
-                Duration = 3
-            })
+    Callback = function(Value) 
+        AutoSellAnjay = Value
+        if Value then
+            autosell()
         end
     end
 })
 
-local player = game.Players.LocalPlayer
-local RepStorage = game:GetService("ReplicatedStorage")
-local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-
-_G.AutoFishing = false
-_G.Delay = 0
-_G.MaxSpeed = true
-
-Tab3:Toggle({
-    Title = "Auto Instant Fishing (beta)",
-    Desc = "Automatic Instant Fishing",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(value)
-        _G.AutoFishing = value
-        print("Auto Fishing: " .. tostring(value))
+Tab3:Slider({
+    Title = "Sell Delay",
+    Desc = false,
+    Step = 1,
+    Value = {
+        Min = 1,
+        Max = 120,
+        Default = 30,
+    },
+    Callback = function(Value)
+        selldelay = Value
     end
 })
 
-Tab3:Input({
-    Title = "Blast Delay",
-    Desc = "Enter delay in seconds",
-    Value = "0.01",
-    InputIcon = false,
-    Type = "Input",
-    Placeholder = "Enter delay...",
-    Callback = function(input)
-        local newDelay = tonumber(input)
-        if newDelay and newDelay >= 0 then
-            _G.Delay = newDelay
-            print("Delay changed to: " .. _G.Delay .. " seconds")
-            _G.MaxSpeed = (newDelay == 0)
-        else
-            print("Invalid input, use number >= 0")
-        end
-    end
-})
-
-local function InstantFish()
-    if player.Character then
-        if player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!") then
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-        end
-        net["RF/ChargeFishingRod"]:InvokeServer(2)
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-        net["RE/FishingCompleted"]:FireServer()
-    end
-end
-
-task.spawn(function()
-    while true do
-        if _G.AutoFishing then
-            InstantFish()
-            if not _G.MaxSpeed and _G.Delay > 0 then
-                task.wait(_G.Delay)
-            elseif _G.MaxSpeed then
-                task.wait(0.001)
-            end
-        else
-            task.wait(0.01)
-        end
-    end
-end)
-
-player.CharacterAdded:Connect(function()
-    if _G.AutoFishing then
-        InstantFish()
-    end
-end)
-
-Tab3:Toggle({    
-    Title = "Auto Sell",    
-    Desc = "Automatic fish sales",    
-    Icon = false,    
-    Type = false,    
-    Default = false,    
-    Callback = function(state)    
-        _G.AutoSell = state    
-        task.spawn(function()    
-            while _G.AutoSell do    
-                task.wait(0.5)    
-                local rs = game:GetService("ReplicatedStorage")    
-                for _, v in pairs(rs:GetDescendants()) do    
-                    if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then    
-                        v:FireServer()    
-                    elseif v:IsA("RemoteFunction") and v.Name:lower():find("sell") then    
-                        pcall(function()    
-                            v:InvokeServer()    
-                        end)    
-                    end    
-                end    
-            end    
-        end)    
-    end    
-})
-    
 Tab3:Toggle({    
     Title = "Radar",    
     Desc = "Toggle fishing radar",    
@@ -1083,19 +1030,30 @@ Tab6:Section({
 })
 
 local IslandLocations = {
-    ["Ancient Junggle"] = Vector3.new(1252,7,-153),
+    ["Admin Event"] = Vector3.new(-1981, -442, 7428),
+    ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+    ["Crater Island"] = Vector3.new(997, 1, 5012),
+    ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
+    ["Enchant Room 2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
+    ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
+    ["Halloween"] = Vector3.new(2106, 81, 3295),
+    ["Kohana Volcano"] = Vector3.new(-545.302429, 17.1266193, 118.870537),
     ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
+    ["Sacred Temple"] = Vector3.new(1498, -23, -644),
+    ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
+    ["Underground Cellar"] = Vector3.new(2135, -93, -701),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
 }
 
 local SelectedIsland = nil
 
-Tab6:Dropdown({
+local IslandDropdown = Tab6:Dropdown({
     Title = "Select Island",
     Values = (function()
         local keys = {}
