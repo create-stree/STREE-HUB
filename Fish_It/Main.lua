@@ -448,14 +448,14 @@ Tab3:Toggle({
     end
 })
 
+Tab3:Divider()
+
 Tab3:Section({
     Title = "Auto Sell",
     Icon = "coins",
     TextXAlignment = "Left",
     TextSize = 17
 })
-
-Tab3:Divider()
 
 Tab3:Toggle({
     Title = "Auto Sell",
@@ -474,6 +474,8 @@ Tab3:Toggle({
 })
 
 Tab3:Slider({ Title = "Sell Delay", Step = 1, Value = { Min = 1, Max = 120, Default = 30 }, Callback = function(v) _G.SellDelay = v end })
+
+Tab3:Divider()
 
 Tab3:Section({
     Title = "Radar",
@@ -522,6 +524,8 @@ Tab3:Toggle({
         end
     end
 })
+
+Tab3:Divider()
 
 Tab3:Section({     
     Title = "Enchant",
@@ -583,6 +587,8 @@ Tab3:Section({
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
+
+Tab3:Divider()
 
 _G.AutoGhostfin = false
 _G.TeleportEnabled = true
@@ -704,6 +710,8 @@ Tab3:Section({
     TextXAlignment = "Left",
     TextSize = 17,    
 })
+
+Tab3:Divider()
 
 Tab3:Toggle({
     Title = "FPS Boost",
@@ -994,7 +1002,7 @@ Tab4:Button({
 })
 
 Tab4:Section({ 
-    Title = "Buy Rod",
+    Title = "Buy Weathers",
     Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
