@@ -52,8 +52,9 @@ local Tab1 = Window:Tab({
     Icon = "info",
 })
 
-local Section = Tab1:Section({
+Tab1:Section({
     Title = "Community Support",
+    Icon = "chevrons-left-right-ellipsis",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -514,10 +515,11 @@ Tab3:Toggle({
     end
 })
 
-local Section = Tab3:Section({     
-    Title = "Enchant",    
-    TextXAlignment = "Left",    
-    TextSize = 17,    
+Tab3:Section({     
+    Title = "Enchant",
+    Icon = "flask-conical",
+    TextXAlignment = "Left",
+    TextSize = 17,
 })
 
 local Toggle = Tab3:Toggle({
@@ -567,8 +569,9 @@ local Toggle = Tab3:Toggle({
     end
 })
 
-local Section = Tab3:Section({     
-    Title = "Quest [Beta]",    
+Tab3:Section({     
+    Title = "Quest [Beta]",
+    Icon = "scroll-text",
     TextXAlignment = "Left",    
     TextSize = 17,    
 })
@@ -687,9 +690,10 @@ Tab3:Button({
     Callback = NotifyQuestProgress
 })
 
-local Section = Tab3:Section({     
-    Title = "Gameplay",    
-    TextXAlignment = "Left",    
+Tab3:Section({     
+    Title = "Gameplay",
+    Icon = "gamepad",
+    TextXAlignment = "Left",
     TextSize = 17,    
 })
 
@@ -839,11 +843,12 @@ local Tab4 = Window:Tab({
     Icon = "badge-dollar-sign",
 })
 
-Tab4:Section({   
-    Title = "Buy Rod",  
-    TextXAlignment = "Left",  
-    TextSize = 17,  
-})  
+Tab4:Section({ 
+    Title = "Buy Rod",
+    Icon = "shrimp",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]  
@@ -915,8 +920,9 @@ Tab4:Button({
     end  
 })
 
-local Section = Tab4:Section({
+Tab4:Section({
     Title = "Buy Baits",
+    Icon = "compass",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -938,7 +944,7 @@ local baitNames = {
     "Luck Bait (1k Coins)", "Midnight Bait (3k Coins)", "Nature Bait (83.5k Coins)",  
     "Chroma Bait (290k Coins)", "Dark Matter Bait (630k Coins)", "Corrupt Bait (1.15M Coins)",  
     "Aether Bait (3.7M Coins)", "Floral Bait (4M Coins)"  
-}  
+}
 
 local baitKeyMap = {  
     ["Luck Bait (1k Coins)"] = "Luck Bait",  
@@ -949,7 +955,7 @@ local baitKeyMap = {
     ["Corrupt Bait (1.15M Coins)"] = "Corrupt Bait",  
     ["Aether Bait (3.7M Coins)"] = "Aether Bait",  
     ["Floral Bait (4M Coins)"] = "Floral Bait"  
-}  
+}
 
 local selectedBait = baitNames[1]  
 
@@ -979,8 +985,9 @@ Tab4:Button({
     end  
 })
 
-local Section = Tab4:Section({
-    Title = "Buy Weather Event",
+Tab4:Section({ 
+    Title = "Buy Rod",
+    Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1070,20 +1077,32 @@ local Tab5 = Window:Tab({
     Icon = "map-pin",
 })
 
-local Section = Tab5:Section({ 
+Tab5:Section({ 
     Title = "Island",
+    Icon = "tree-palm",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
 local IslandLocations = {
-    ["Ancient Junggle"] = Vector3.new(1252,7,-153),
+    ["Admin Event"] = Vector3.new(-1981, -442, 7428),
+    ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+    ["Crater Island"] = Vector3.new(997, 1, 5012),
+    ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
+    ["Enchant Room 2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
+    ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
+    ["Halloween"] = Vector3.new(2106, 81, 3295),
+    ["Kohana Volcano"] = Vector3.new(-545.302429, 17.1266193, 118.870537),
     ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
+    ["Sacred Temple"] = Vector3.new(1498, -23, -644),
+    ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
+    ["Underground Cellar"] = Vector3.new(2135, -93, -701),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
 }
 
@@ -1113,8 +1132,9 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({ 
+Tab5:Section({ 
     Title = "Fishing Spot",
+    Icon = "spotlight",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1135,7 +1155,7 @@ local FishingLocations = {
 
 local SelectedFishing = nil
 
-local FishingDropdown = Tab5:Dropdown({
+Tab5:Dropdown({
     Title = "Select Spot",
     Values = (function()
         local keys = {}
@@ -1159,8 +1179,9 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({
+Tab5:Section({
     Title = "Location NPC",
+    Icon = "bot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1211,8 +1232,9 @@ Tab5:Button({
     end
 })
 
-local Section = Tab5:Section({
+Tab6:Section({
     Title = "Event Teleporter",
+    Icon = "calendar",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1327,8 +1349,9 @@ local Toggle = Tab6:Toggle({
     end
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Server",
+    Icon = "server",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1374,8 +1397,9 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Config",
+    Icon = "folder-open",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1465,8 +1489,9 @@ Tab6:Button({
     end
 })
 
-local Section = Tab6:Section({ 
+Tab6:Section({ 
     Title = "Other Scripts",
+    Icon = "file-code-2",
     TextXAlignment = "Left",
     TextSize = 17,
 })
