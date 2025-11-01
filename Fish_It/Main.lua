@@ -448,14 +448,14 @@ Tab3:Toggle({
     end
 })
 
-Tab3:Divider()
-
 Tab3:Section({
     Title = "Auto Sell",
     Icon = "coins",
     TextXAlignment = "Left",
     TextSize = 17
 })
+
+Tab3:Divider()
 
 Tab3:Toggle({
     Title = "Auto Sell",
@@ -475,14 +475,14 @@ Tab3:Toggle({
 
 Tab3:Slider({ Title = "Sell Delay", Step = 1, Value = { Min = 1, Max = 120, Default = 30 }, Callback = function(v) _G.SellDelay = v end })
 
-Tab3:Divider()
-
 Tab3:Section({
     Title = "Radar",
     Icon = "radar",
     TextXAlignment = "Left",
     TextSize = 17
 })
+
+Tab3:Divider()
 
 Tab3:Toggle({
     Title = "Radar",
@@ -525,14 +525,14 @@ Tab3:Toggle({
     end
 })
 
-Tab3:Divider()
-
 Tab3:Section({     
     Title = "Enchant",
     Icon = "flask-conical",
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab3:Divider()
 
 local Toggle = Tab3:Toggle({
     Title = "Auto Enchant",
@@ -866,6 +866,8 @@ Tab4:Section({
     TextSize = 17,
 })
 
+Tab4:Divider()
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")  
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]  
 
@@ -943,6 +945,8 @@ Tab4:Section({
     TextSize = 17,
 })
 
+Tab4:Divider()
+
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
 local baits = {
@@ -1001,13 +1005,16 @@ Tab4:Button({
     end  
 })
 
-Tab4:Section({ 
+local Tab4Section = Tab4:Section({ 
     Title = "Buy Weathers",
     Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
+Tab4:Divider()
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
 local weatherKeyMap = {
@@ -1024,13 +1031,12 @@ local weatherNames = {
     "Storm (35k Coins)", "Radiant (50k Coins)", "Shark Hunt (300k Coins)"
 }
 
-local selectedWeathers = weatherNames[1]
+local selectedWeathers = {}
 
 Tab4:Dropdown({
     Title = "Select Weather Event",
     Values = weatherNames,
     Multi = true,
-    Value = selectedWeathers,
     Callback = function(values)
         selectedWeathers = values
     end
@@ -1044,15 +1050,15 @@ local function startAutoBuy()
         while autoBuyEnabled do
             for _, displayName in ipairs(selectedWeathers) do
                 local key = weatherKeyMap[displayName]
-                if key and weathers[key] then
+                if key then
                     local success, err = pcall(function()
                         RFPurchaseWeatherEvent:InvokeServer(key)
                     end)
                     if success then
                         WindUI:Notify({
-                            Title="Buy",
-                            Content="Purchased "..displayName,
-                            Duration=1
+                            Title = "Buy",
+                            Content = "Purchased " .. displayName,
+                            Duration = 1
                         })
                     else
                         warn("Error buying weather:", err)
@@ -1099,6 +1105,8 @@ Tab5:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab5:Divider()
 
 local IslandLocations = {
     ["Admin Event"] = Vector3.new(-1981, -442, 7428),
@@ -1155,6 +1163,8 @@ Tab5:Section({
     TextSize = 17,
 })
 
+Tab5:Divider()
+
 local FishingLocations = {
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Konoha"] = Vector3.new(-603, 3, 719),
@@ -1201,6 +1211,8 @@ Tab5:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab5:Divider()
 
 local NPC_Locations = {
     ["Alex"] = Vector3.new(43,17,2876),
@@ -1254,6 +1266,8 @@ Tab6:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab5:Divider()
 
 local Event_Locations = {
     ["Black Hole"] = Vector3.new(883, -1.4, 2542),
@@ -1372,6 +1386,8 @@ Tab6:Section({
     TextSize = 17,
 })
 
+Tab6:Divider()
+
 Tab6:Button({
     Title = "Rejoin Server",
     Desc = "Reconnect to current server",
@@ -1419,6 +1435,8 @@ Tab6:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab6:Divider()
 
 local ConfigFolder = "STREE_HUB/Configs"
 if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
@@ -1511,6 +1529,8 @@ Tab6:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab6:Divider()
 
 local Button = Tab6:Button({
     Title = "FLY",
