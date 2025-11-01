@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.7",
+    Title = "v0.0.0.8",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -254,11 +254,7 @@ _G.AutoEquipRod = false
 _G.AutoSell = false
 _G.Radar = false
 _G.Instant = false
-_G.Blantant = false
-_G.DelayFishing = _G.DelayFishing or 1
 _G.SellDelay = _G.SellDelay or 30
-_G.BlantantDelay = _G.BlantantDelay or 1
-_G.LemparDelay = _G.LemparDelay or 1
 _G.CallMinDelay = _G.CallMinDelay or 0.12
 _G.CallBackoff = _G.CallBackoff or 1.5
 
@@ -368,10 +364,10 @@ local function perform_instant_cycle()
     charge()
     task.wait(0)
     lempar()
-    task.wait(_G.LemparDelay or 1)
+    task.wait(1)
     if _G.Instant then
         local loops = 5
-        local fast = _G.SuperInstant and 0 or 0.02
+        local fast = 0
         for i = 1, loops do
             if not _G.Instant then break end
             catch()
@@ -379,20 +375,6 @@ local function perform_instant_cycle()
         end
     else
         catch()
-    end
-end
-
-local function icancel()
-    charge()
-    task.wait(0)
-    lempar()
-    task.wait(_G.LemparDelay or 1)
-    catch()
-    local bd = tonumber(_G.BlantantDelay) or 1
-    local waited = 0
-    while waited < bd and _G.Blantant do
-        task.wait(0.05)
-        waited = waited + 0.05
     end
 end
 
@@ -404,7 +386,6 @@ Tab3:Toggle({ Title = "Auto Equip Rod", Value = false, Callback = function(v) _G
 
 local CurrentOption = "Instant"
 local autoFishingThread = nil
-local blantantThread = nil
 local autosellThread = nil
 
 Tab3:Dropdown({
@@ -430,12 +411,7 @@ Tab3:Toggle({
                 autoFishingThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Instant" do
                         perform_instant_cycle()
-                        local d = tonumber(_G.DelayFishing) or 1
-                        local waited = 0
-                        while waited < d and _G.AutoFishing and CurrentOption == "Instant" do
-                            task.wait(0.05)
-                            waited = waited + 0.05
-                        end
+                        task.wait(1)
                     end
                 end)
             else
@@ -457,32 +433,6 @@ Tab3:Toggle({
         end
     end
 })
-
-Tab3:Slider({ Title = "Fishing Delay", Step = 0.01, Value = { Min = 0, Max = 5, Default = 1 }, Callback = function(v) _G.DelayFishing = v end })
-
-Tab3:Toggle({ Title = "Super Instant Fishing", Value = false, Callback = function(v) _G.SuperInstant = v end })
-
-Tab3:Toggle({
-    Title = "Blantant",
-    Value = false,
-    Callback = function(v)
-        _G.Blantant = v
-        if v then
-            if blantantThread then blantantThread = nil end
-            blantantThread = task.spawn(function()
-                while _G.Blantant do
-                    icancel()
-                end
-            end)
-        else
-            _G.Blantant = false
-            if blantantThread then task.cancel(blantantThread) end
-            blantantThread = nil
-        end
-    end
-})
-
-Tab3:Slider({ Title = "Blantant Delay", Step = 0.01, Value = { Min = 0, Max = 10, Default = 1 }, Callback = function(v) _G.BlantantDelay = v end })
 
 Tab3:Section({ Title = "Auto Sell", Icon = "coins", TextXAlignment = "Left", TextSize = 17 })
 
@@ -546,11 +496,11 @@ Tab3:Toggle({
         end
     end
 })
- 
+
 Tab3:Section({     
     Title = "Gameplay",
     Icon = "gamepad",
-    TextXAlignment = "Left",    
+    TextXAlignment = "Left",
     TextSize = 17,    
 })
 
