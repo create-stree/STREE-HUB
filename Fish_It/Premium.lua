@@ -334,7 +334,7 @@ local function icancel()
     charge()
     task.wait(0)
     lempar()
-    task.wait(0)
+    task.wait(1)
     cancel()
     task.wait(_G.BlantantDelay or 1)
 end
@@ -348,7 +348,7 @@ Tab3:Section({
     Title = "Fishing",
     Icon = "anchor",
     TextXAlignment = "Left",
-    TextSize = 17,
+    TextSize = 17
 })
 
 Tab3:Toggle({
@@ -447,7 +447,7 @@ Tab3:Section({
     Title = "Auto Sell",
     Icon = "coins",
     TextXAlignment = "Left",
-    TextSize = 17,
+    TextSize = 17
 })
 
 Tab3:Toggle({
@@ -472,7 +472,7 @@ Tab3:Section({
     Title = "Radar",
     Icon = "radar",
     TextXAlignment = "Left",
-    TextSize = 17,
+    TextSize = 17
 })
 
 Tab3:Toggle({
@@ -515,7 +515,7 @@ Tab3:Toggle({
         end
     end
 })
-
+ 
 Tab3:Section({     
     Title = "Gameplay",
     Icon = "gamepad",
