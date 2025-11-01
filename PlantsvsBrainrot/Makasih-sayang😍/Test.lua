@@ -4,29 +4,41 @@ end)
 if not success or not WindUI then
     warn("⚠️ UI failed to load!")
     return
-else
-    print("✓ WindUI loaded successfully!")
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local Backpack = LocalPlayer:WaitForChild("Backpack")
 
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local NetPkg = nil
+pcall(function()
+    NetPkg = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0").net
+end)
 
-local AutoEquipBat = false
-local AutoFarm = false
-local AutoSell = false
-local AutoSellDelay = 1
-local AutoEquipBestBrainrot = false
-local AutoEquipBestDelay = 1
-local AutoBuyGear = false
-local AutoBuyItem = false
-local AutoSellItem = false
-local AutoSellItemDelay = 1
+local function FireWeaponAttack(payload)
+    if NetPkg and NetPkg:FindFirstChild("AttacksServer") and NetPkg.AttacksServer:FindFirstChild("WeaponAttack") then
+        NetPkg.AttacksServer.WeaponAttack:FireServer(payload)
+    elseif ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("AttacksServer") and ReplicatedStorage.Remotes.AttacksServer:FindFirstChild("WeaponAttack") then
+        ReplicatedStorage.Remotes.AttacksServer.WeaponAttack:FireServer(payload)
+    end
+end
+
+local function FireSimpleRemote(name, ...)
+    if NetPkg and NetPkg:FindFirstChild(name) then
+        NetPkg[name]:FireServer(...)
+    elseif ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild(name) then
+        ReplicatedStorage.Remotes[name]:FireServer(...)
+    end
+end
+
+_G.AutoEquipBat = false
+_G.AutoFarm = false
+_G.AutoEquipBest = false
+_G.Delay = 1
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
@@ -48,14 +60,14 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.1",
+    Title = "Version",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
     Title = "Dev",
-    Color = Color3.fromRGB(138, 43, 226),
+    Color = Color3.fromRGB(0, 0, 0),
     Radius = 17,
 })
 
@@ -71,118 +83,112 @@ local Main = Window:Tab({ Title = "Main", Icon = "crown" })
 local Shop = Window:Tab({ Title = "Shop", Icon = "shopping-cart" })
 local Settings = Window:Tab({ Title = "Settings", Icon = "settings" })
 
-Info:Button({
-    Title = "Copy Link",
-    Desc = "Copy Key Link",
-    Callback = function()
-        setclipboard("https://streehub.vercel.app/key")
+Window:SelectTab(2)
+
+Info:Section({ Title = "Info" })
+Shop:Section({ Title = "Shop" })
+Settings:Section({ Title = "Settings" })
+
+local BrainrotsCache = {}
+local function UpdateBrainrotsCache()
+    local ok, folder = pcall(function()
+        return workspace:WaitForChild("ScriptedMap"):WaitForChild("Brainrots")
+    end)
+    if not ok or not folder then return end
+    BrainrotsCache = {}
+    for _, b in ipairs(folder:GetChildren()) do
+        if b:FindFirstChild("BrainrotHitbox") then
+            table.insert(BrainrotsCache, b)
+        end
     end
-})
+end
+
+local function GetNearestBrainrot()
+    local nearest = nil
+    local minDist = math.huge
+    for _, b in ipairs(BrainrotsCache) do
+        local hitbox = b:FindFirstChild("BrainrotHitbox")
+        if hitbox and hitbox.Position then
+            local dist = (HumanoidRootPart.Position - hitbox.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                nearest = b
+            end
+        end
+    end
+    return nearest
+end
+
+local function EquipBatNow()
+    local tool = Backpack:FindFirstChild("Basic Bat") or Character:FindFirstChild("Basic Bat")
+    if tool then
+        tool.Parent = Character
+    end
+end
 
 Main:Toggle({
     Title = "Auto Equip Bat",
     Default = false,
     Callback = function(v)
-        AutoEquipBat = v
-        task.spawn(function()
-            while AutoEquipBat do
-                local bat = LocalPlayer.Backpack:FindFirstChild("Basic Bat")
-                if bat then
-                    bat.Parent = Character
+        _G.AutoEquipBat = v
+        if v then
+            task.spawn(function()
+                while _G.AutoEquipBat do
+                    EquipBatNow()
+                    task.wait(_G.Delay)
                 end
-                task.wait(1)
-            end
-        end)
+            end)
+        end
     end
 })
 
 Main:Toggle({
-    Title = "Auto Farm",
+    Title = "Auto Farm (Attack)",
     Default = false,
     Callback = function(v)
-        AutoFarm = v
-        task.spawn(function()
-            while AutoFarm do
-                Remotes.EquipBestBrainrots:FireServer()
-                task.wait(0.25)
-            end
-        end)
+        _G.AutoFarm = v
+        if v then
+            task.spawn(function()
+                while _G.AutoFarm do
+                    UpdateBrainrotsCache()
+                    local target = GetNearestBrainrot()
+                    if target and target:FindFirstChild("BrainrotHitbox") then
+                        local hb = target.BrainrotHitbox
+                        pcall(function()
+                            FireWeaponAttack({ { target = hb } })
+                        end)
+                    end
+                    task.wait(_G.Delay)
+                end
+            end)
+        end
     end
 })
 
 Main:Toggle({
-    Title = "Auto Sell",
+    Title = "Auto Equip Best Brainrot",
     Default = false,
     Callback = function(v)
-        AutoSell = v
-        task.spawn(function()
-            while AutoSell do
-                local args = { [1] = true }
-                Remotes.ItemSell:FireServer(unpack(args))
-                task.wait(AutoSellDelay)
-            end
-        end)
+        _G.AutoEquipBest = v
+        if v then
+            task.spawn(function()
+                while _G.AutoEquipBest do
+                    pcall(function()
+                        FireSimpleRemote("EquipBestBrainrots")
+                    end)
+                    task.wait(_G.Delay)
+                end
+            end)
+        end
     end
 })
 
 Main:Slider({
-    Title = "Auto Sell Delay",
+    Title = "Delay (seconds)",
     Min = 1,
     Max = 60,
     Default = 1,
     Callback = function(v)
-        AutoSellDelay = v
-    end
-})
-
-Shop:Toggle({
-    Title = "Auto EquipBestBrainrot",
-    Default = false,
-    Callback = function(v)
-        AutoEquipBestBrainrot = v
-        task.spawn(function()
-            while AutoEquipBestBrainrot do
-                Remotes.EquipBestBrainrots:FireServer()
-                task.wait(AutoEquipBestDelay)
-            end
-        end)
-    end
-})
-
-Shop:Slider({
-    Title = "EquipBest Delay",
-    Min = 1,
-    Max = 60,
-    Default = 1,
-    Callback = function(v)
-        AutoEquipBestDelay = v
-    end
-})
-
-Shop:Toggle({
-    Title = "Auto Buy Gear",
-    Default = false,
-    Callback = function(v)
-        AutoBuyGear = v
-        task.spawn(function()
-            while AutoBuyGear do
-                Remotes.BuyGear:FireServer()
-                task.wait(1)
-            end
-        end)
-    end
-})
-
-Shop:Toggle({
-    Title = "Auto Buy Item",
-    Default = false,
-    Callback = function(v)
-        AutoBuyItem = v
-        task.spawn(function()
-            while AutoBuyItem do
-                Remotes.BuyItem:FireServer()
-                task.wait(1)
-            end
-        end)
+        _G.Delay = v
     end
 })
