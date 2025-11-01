@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.2.3",
+    Title = "v0.0.2.4",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1260,7 +1260,7 @@ Tab5:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Event Teleporter",
     Icon = "calendar",
     TextXAlignment = "Left",
