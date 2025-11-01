@@ -331,14 +331,6 @@ local function catch()
     end)
 end
 
-local function cancel()
-    safeCall("CancelFishingInputs", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
-    end)
-end
-
 local function charge()
     safeCall("ChargeFishingRod", function()
         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
@@ -386,7 +378,7 @@ local function perform_instant_cycle()
             task.wait(fast)
         end
     else
-        cancel()
+        catch()
     end
 end
 
@@ -395,7 +387,7 @@ local function icancel()
     task.wait(0)
     lempar()
     task.wait(_G.LemparDelay or 1)
-    cancel()
+    catch()
     local bd = tonumber(_G.BlantantDelay) or 1
     local waited = 0
     while waited < bd and _G.Blantant do
@@ -432,6 +424,7 @@ Tab3:Toggle({
         _G.AutoFishing = v
         if v then
             if CurrentOption == "Instant" then
+                _G.Instant = true
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Instant Mode ON", Duration = 3 })
                 if autoFishingThread then autoFishingThread = nil end
                 autoFishingThread = task.spawn(function()
@@ -451,11 +444,7 @@ Tab3:Toggle({
                 autoFishingThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Legit" do
                         autoon()
-                        local waited = 0
-                        while waited < 1 and _G.AutoFishing and CurrentOption == "Legit" do
-                            task.wait(0.05)
-                            waited = waited + 0.05
-                        end
+                        task.wait(1)
                     end
                 end)
             end
@@ -463,6 +452,7 @@ Tab3:Toggle({
             WindUI:Notify({ Title = "Auto Fishing", Content = "OFF", Duration = 3 })
             autooff()
             _G.Instant = false
+            if autoFishingThread then task.cancel(autoFishingThread) end
             autoFishingThread = nil
         end
     end
@@ -486,6 +476,7 @@ Tab3:Toggle({
             end)
         else
             _G.Blantant = false
+            if blantantThread then task.cancel(blantantThread) end
             blantantThread = nil
         end
     end
@@ -501,10 +492,11 @@ Tab3:Toggle({
     Callback = function(v)
         _G.AutoSell = v
         if v then
-            if autosellThread then autosellThread = nil end
+            if autosellThread then task.cancel(autosellThread) end
             autosellThread = task.spawn(autosell)
         else
             _G.AutoSell = false
+            if autosellThread then task.cancel(autosellThread) end
             autosellThread = nil
         end
     end
