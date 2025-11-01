@@ -255,6 +255,10 @@ _G.AutoSell = false
 _G.Radar = false
 _G.Instant = false
 _G.Blantant = false
+_G.DelayFishing = _G.DelayFishing or 1
+_G.SellDelay = _G.SellDelay or 30
+_G.BlantantDelay = _G.BlantantDelay or 1
+_G.LemparDelay = _G.LemparDelay or 1
 
 local function rod()
     game:GetService("ReplicatedStorage"):WaitForChild("Packages")
@@ -320,13 +324,20 @@ local function autosell()
     end
 end
 
-local function instant()
+local function instant_action()
     if _G.Instant then
         task.wait(_G.DelayFishing or 1)
         for i = 1, 5 do
             catch()
             task.wait(0)
         end
+    else
+        charge()
+        task.wait(0)
+        lempar()
+        task.wait(_G.LemparDelay or 1)
+        cancel()
+        task.wait(_G.DelayFishing or 1)
     end
 end
 
@@ -334,7 +345,7 @@ local function icancel()
     charge()
     task.wait(0)
     lempar()
-    task.wait(1)
+    task.wait(_G.LemparDelay or 1)
     cancel()
     task.wait(_G.BlantantDelay or 1)
 end
@@ -363,6 +374,10 @@ Tab3:Toggle({
 })
 
 local CurrentOption = "Instant"
+local instantThread = nil
+local legitThread = nil
+local blantantThread = nil
+local autosellThread = nil
 
 Tab3:Dropdown({
     Title = "Mode",
@@ -387,10 +402,16 @@ Tab3:Toggle({
         if v then
             if CurrentOption == "Instant" then
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Instant Mode ON", Duration = 3 })
-                task.spawn(function() _G.Instant = v end)
+                if instantThread then instantThread = nil end
+                instantThread = task.spawn(function()
+                    while _G.AutoFishing and CurrentOption == "Instant" do
+                        instant_action()
+                    end
+                end)
             elseif CurrentOption == "Legit" then
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Legit Mode ON", Duration = 3 })
-                task.spawn(function()
+                if legitThread then legitThread = nil end
+                legitThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Legit" do
                         autoon()
                         task.wait(1)
@@ -400,6 +421,9 @@ Tab3:Toggle({
         else
             WindUI:Notify({ Title = "Auto Fishing", Content = "OFF", Duration = 3 })
             autooff()
+            _G.Instant = false
+            instantThread = nil
+            legitThread = nil
         end
     end
 })
@@ -427,9 +451,15 @@ Tab3:Toggle({
     Callback = function(v)
         _G.Blantant = v
         if v then
-            while _G.Blantant do
-                icancel()
-            end
+            if blantantThread then blantantThread = nil end
+            blantantThread = task.spawn(function()
+                while _G.Blantant do
+                    icancel()
+                end
+            end)
+        else
+            _G.Blantant = false
+            blantantThread = nil
         end
     end
 })
@@ -455,7 +485,13 @@ Tab3:Toggle({
     Value = false,
     Callback = function(v)
         _G.AutoSell = v
-        if v then task.spawn(autosell) end
+        if v then
+            if autosellThread then autosellThread = nil end
+            autosellThread = task.spawn(autosell)
+        else
+            _G.AutoSell = false
+            autosellThread = nil
+        end
     end
 })
 
@@ -495,7 +531,7 @@ Tab3:Toggle({
                 local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
                 if effect then
                     spr.stop(effect)
-                    local profile = ClientTimeController:_getLightingProfile()
+                    local profile = ClientTimeController:_getLighting_profile and ClientTimeController:_getLighting_profile() or ClientTimeController:_getLightingProfile and ClientTimeController:_getLightingProfile()
                     local cc = (profile and profile(profile.ColorCorrection)) and profile.ColorCorrection or {}
                     if not cc.Brightness then cc.Brightness = 0.04 end
                     if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end
