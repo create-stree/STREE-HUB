@@ -59,6 +59,8 @@ Tab1:Section({
     TextSize = 17,
 })
 
+Tab1:Divider()
+
 Tab1:Button({
     Title = "Discord",
     Desc = "click to copy link",
@@ -167,6 +169,8 @@ local Input = Tab2:Input({
         end
     end
 })
+
+Tab2:Divider()
 
 local Button = Tab2:Button({
     Title = "Reset Jump Power",
@@ -390,6 +394,8 @@ Tab3:Section({
     TextSize = 17 
 })
 
+Tab3:Divider()
+
 Tab3:Toggle({ Title = "Auto Equip Rod", Value = false, Callback = function(v) _G.AutoEquipRod = v if v then rod() end end })
 
 local CurrentOption = "Instant"
@@ -448,6 +454,8 @@ Tab3:Section({
     TextXAlignment = "Left",
     TextSize = 17
 })
+
+Tab3:Divider()
 
 Tab3:Toggle({
     Title = "Auto Sell",
