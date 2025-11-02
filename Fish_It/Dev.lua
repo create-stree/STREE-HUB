@@ -254,8 +254,8 @@ _G.AutoSell=false
 _G.Radar=false
 _G.Instant=false
 _G.SellDelay=_G.SellDelay or 30
-_G.InstantDelay=_G.InstantDelay or 0.15
-_G.CallMinDelay=_G.CallMinDelay or 0.08
+_G.InstantDelay=_G.InstantDelay or 0.35
+_G.CallMinDelay=_G.CallMinDelay or 0.18
 _G.CallBackoff=_G.CallBackoff or 1.5
 
 local lastCall={}
@@ -279,12 +279,13 @@ local net=RS.Packages._Index["sleitnick_net@0.2.0"].net
 local function rod()safeCall("rod",function()net["RE/EquipToolFromHotbar"]:FireServer(1)end)end
 local function sell()safeCall("sell",function()net["RF/SellAllItems"]:InvokeServer()end)end
 local function radar()safeCall("radar",function()net["RF/UpdateFishingRadar"]:InvokeServer(true)end)end
-local function autoon()safeCall("autoon",function()net["RF/UpdateFishingState"]:InvokeServer(true)end)end
-local function autooff()safeCall("autooff",function()net["RF/UpdateFishingState"]:InvokeServer(false)end)end
+local function autoon()safeCall("autoon",function()net["RF/UpdateAutoFishingState"]:InvokeServer(true)end)end
+local function autooff()safeCall("autooff",function()net["RF/UpdateAutoFishingState"]:InvokeServer(false)end)end
 local function catch()safeCall("catch",function()net["RE/FishingCompleted"]:FireServer()end)end
 local function charge()safeCall("charge",function()net["RF/ChargeFishingRod"]:InvokeServer()end)end
 local function lempar()
  safeCall("lempar",function()net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233,0.996,1761532005.497)end)
+ safeCall("charge2",function()net["RF/ChargeFishingRod"]:InvokeServer()end)
 end
 
 local function autosell()
@@ -301,7 +302,6 @@ local function instant_cycle()
  lempar()
  task.wait(_G.InstantDelay)
  catch()
- task.wait(_G.InstantDelay)
 end
 
 local Tab3=Window:Tab{Title="Main",Icon="landmark"}
@@ -321,7 +321,7 @@ Tab3:Toggle{
   if v then
    if mode=="Instant" then _G.Instant=true WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()end end)
+    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.35)end end)
    else WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
     if fishThread then fishThread=nil end
     fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
@@ -334,7 +334,7 @@ Tab3:Toggle{
 Tab3:Slider{
  Title="Instant Fishing Delay",
  Step=0.01,
- Value={Min=0.01,Max=1,Default=0.15},
+ Value={Min=0.2,Max=1,Default=0.35},
  Callback=function(v)_G.InstantDelay=v WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}end
 }
 
