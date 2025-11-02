@@ -1,76 +1,146 @@
 --[[
 	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
 ]]
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/ui-libraries/main/venus/source.lua", true))()
+-- Load UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2zu/OPEN-SOURCE-UI-ROBLOX/refs/heads/main/X2ZU%20UI%20ROBLOX%20OPEN%20SOURCE/DummyUi-leak-by-x2zu/fetching-main/Tools/Framework.luau"))()
 
-local main = library:Load({Name = "Venus Library", Theme = "Dark", SizeX = 440, SizeY = 480, ColorOverrides = {}})
-local aimbot = main:Tab("Aimbot")
-local section = aimbot:Section({Name = "Section", column = 1})
+-- Create Main Window
+local Window = Library:Window({
+    Title = "x2zu [ Stellar ]",
+    Desc = "x2zu on top",
+    Icon = 105059922903197,
+    Theme = "Dark",
+    Config = {
+        Keybind = Enum.KeyCode.LeftControl,
+        Size = UDim2.new(0, 500, 0, 400)
+    },
+    CloseUIButton = {
+        Enabled = true,
+        Text = "x2zu"
+    }
+})
 
--- object:Hide()
--- object:Show()
+-- Sidebar Vertical Separator
+local SidebarLine = Instance.new("Frame")
+SidebarLine.Size = UDim2.new(0, 1, 1, 0)
+SidebarLine.Position = UDim2.new(0, 140, 0, 0) -- adjust if needed
+SidebarLine.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SidebarLine.BorderSizePixel = 0
+SidebarLine.ZIndex = 5
+SidebarLine.Name = "SidebarLine"
+SidebarLine.Parent = game:GetService("CoreGui") -- Or Window.Gui if accessible
 
-local label = section:Label("Label")
+-- Tab
+local Tab = Window:Tab({Title = "Main", Icon = "star"}) do
+    -- Section
+    Tab:Section({Title = "All UI Components"})
 
-local button = section:Button({Name = "Button", Callback = function()
-   print("Button pressed")
-end})
+    -- Toggle
+    Tab:Toggle({
+        Title = "Enable Feature",
+        Desc = "Toggle to enable or disable the feature",
+        Value = false,
+        Callback = function(v)
+            print("Toggle:", v)
+        end
+    })
 
-local toggle = section:Toggle({Name = "Toggle", Flag = "Toggle", callback = function(bool)
-   print(bool)
-end})
+    -- Button
+    Tab:Button({
+        Title = "Run Action",
+        Desc = "Click to perform something",
+        Callback = function()
+            print("Button clicked!")
+            Window:Notify({
+                Title = "Button",
+                Desc = "Action performed successfully.",
+                Time = 3
+            })
+        end
+    })
 
--- toggle:Toggle(bool)
+    -- Textbox
+    Tab:Textbox({
+        Title = "Input Text",
+        Desc = "Type something here",
+        Placeholder = "Enter value",
+        Value = "",
+        ClearTextOnFocus = false,
+        Callback = function(text)
+            print("Textbox value:", text)
+        end
+    })
 
-local box = section:Box({Name = "Box", Flag = "Box", Callback = function(box)
-   print(box)
-end})
+    -- Slider
+    Tab:Slider({
+        Title = "Set Speed",
+        Min = 0,
+        Max = 100,
+        Rounding = 0,
+        Value = 25,
+        Callback = function(val)
+            print("Slider:", val)
+        end
+    })
 
--- box:Set(str)
+    -- Dropdown
+    Tab:Dropdown({
+        Title = "Choose Option",
+        List = {"Option 1", "Option 2", "Option 3"},
+        Value = "Option 1",
+        Callback = function(choice)
+            print("Selected:", choice)
+        end
+    })
 
-local slider = section:Slider({Name = "Slider", Min = 10, Max = 100, Default = 20, Flag = "Slider", Callback = function(slider)
-   print(slider)
-end})
+    -- Code Display
+    local CodeBlock = Tab:Code({
+        Title = "Example Code",
+        Code = "-- This is a code preview\nprint('Hello world')"
+    })
 
--- slider:Set(num)
+    -- Simulate update
+    task.delay(5, function()
+        CodeBlock:SetCode("-- Updated!\nprint('New content loaded')")
+    end)
+end
 
-local dropdown = section:Dropdown({Default = "Option1", Content = {"Option1", "Option2"}, MultiChoice = true, Flag = "Dropdown", Callback = function(opt)
-   print(opt)
-end})
+-- Line Separator
+Window:Line()
 
--- dropdown:Refresh(tbl)
--- dropdown:Set(option)
--- dropdown:Add(option)
--- dropdown:Remove(option)
-
-local keybind = section:Keybind({Name = "Keybind", Default = Enum.KeyCode.A,  Flag = "Keybind", Callback = function(key)
-   print("keybind pressed")
-end})
-
--- keybind:Set(key)
-
-local toggleKeybind = section:ToggleKeybind({Name = "Toggle Keybind", Default = Enum.KeyCode.A,  KeybindFlag = "ToggleKeybind", ToggleFlag = "ToggleKeybindToggle", ToggleCallback = function(bool)
-   print(bool)
-end,
-KeybindCallback = function(key)
-   print("Toggle Keybind")
-end})
-
--- toggleKeybind:Set(key)
--- toggleKeybind:Toggle(bool)
-
-local colorPicker = section:ColorPicker({name = "Color Picker", Default = Color3.fromRGB(255, 0, 255),  Flag = "Color Picker", Callback = function(color)
-   print(color.r * 255, color.g * 255, color.b * 255)
-end})
-
--- colorPicker:SetHex(hex)
--- colorPicker:SetRGB(rgb Color3)
-
-local colorPickerToggle = section:ToggleColorPicker({Name = "Color Picker Toggle", Default = Color3.fromRGB(100, 10, 10), ToggleFlag = "ToggleColorPickerToggle", ColorPickerFlag = "ToggleColorPicker", ToggleCallback = function(bool)
-   print(bool)
-end,
-ColorPickerCallback = function(color)
-   print(color)
-end})
-
-print(library.Flags["ToggleColorPicker"])
+-- Another Tab Example
+local Extra = Window:Tab({Title = "Extra", Icon = "tag"}) do
+    Extra:Section({Title = "About"})
+    Extra:Button({
+        Title = "Show Message",
+        Desc = "Display a popup",
+        Callback = function()
+            Window:Notify({
+                Title = "Fluent UI",
+                Desc = "Everything works fine!",
+                Time = 3
+            })
+        end
+    })
+end
+Window:Line()
+local Extra = Window:Tab({Title = "Settings", Icon = "wrench"}) do
+    Extra:Section({Title = "Config"})
+    Extra:Button({
+        Title = "Show Message",
+        Desc = "Display a popup",
+        Callback = function()
+            Window:Notify({
+                Title = "Fluent UI",
+                Desc = "Everything works fine!",
+                Time = 3
+            })
+        end
+    })
+end
+-- Final Notification
+Window:Notify({
+    Title = "x2zu",
+    Desc = "All components loaded successfully! Credits leak: @x2zu",
+    Time = 4
+})
