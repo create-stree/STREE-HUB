@@ -254,8 +254,8 @@ _G.AutoSell=false
 _G.Radar=false
 _G.Instant=false
 _G.SellDelay=_G.SellDelay or 30
-_G.InstantDelay=_G.InstantDelay or 0.1
-_G.CallMinDelay=_G.CallMinDelay or 0.05
+_G.InstantDelay=_G.InstantDelay or 0.35
+_G.CallMinDelay=_G.CallMinDelay or 0.18
 _G.CallBackoff=_G.CallBackoff or 1.5
 
 local lastCall={}
@@ -321,12 +321,12 @@ Tab3:Toggle{
   if v then
    if mode=="Instant" then _G.Instant=true WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.25)end end)
+    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.35)end end)
    else WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
     if fishThread then fishThread=nil end
     fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
    end
-  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fish  if fishThread then task.cancel(fishThread)end fishThread=nil
+  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fishThread then task.cancel(fishThread)end fishThread=nil
   end
  end
 }
@@ -334,7 +334,7 @@ Tab3:Toggle{
 Tab3:Slider{
  Title="Instant Fishing Delay",
  Step=0.01,
- Value={Min=0.05,Max=0.5,Default=0.1},
+ Value={Min=0.2,Max=1,Default=0.35},
  Callback=function(v)_G.InstantDelay=v WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}end
 }
 
