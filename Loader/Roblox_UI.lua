@@ -167,6 +167,7 @@ end
 local function buildMainUI()
     if parentGui:FindFirstChild("STREE_HUB_UI") then
         parentGui.STREE_HUB_UI:Destroy()
+    end
 
     local ui = Instance.new("ScreenGui", parentGui)
     ui.Name = "STREE_HUB_UI"
@@ -665,22 +666,22 @@ function buildKeyUI()
     end)
 
     submitBtn.MouseButton1Click:Connect(function()
-        local key = input.Text
-        if isKeyValid(key) then
-            status.TextColor3 = Color3.fromRGB(0,255,0)
-            status.Text = "Key Valid!"
-            task.wait(0.45)
-            keyGui:Destroy()
-            buildMainUI()
-        else
-            status.TextColor3 = Color3.fromRGB(255,0,0)
-            status.Text = "Key Invalid!"
-            TweenService:Create(input, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 3, true), {Position = input.Position + UDim2.new(0,3,0,0)}):Play()
-        end
-    end)
-
-    MakeDraggable(frame, titleBar)
-end
+    local key = input.Text
+    if isKeyValid(key) then
+        status.TextColor3 = Color3.fromRGB(0,255,0)
+        status.Text = "Key Valid!"
+        task.wait(0.45)
+        keyGui:Destroy()
+        buildMainUI()
+    else
+        status.TextColor3 = Color3.fromRGB(255,0,0)
+        status.Text = "Key Invalid!"
+        local shake = TweenService:Create(input, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, 3, true), {
+            Position = input.Position + UDim2.new(0,6,0,0)
+        })
+        shake:Play()
+    end
+end)
 
 -- START
 buildKeyUI()
