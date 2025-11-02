@@ -1,241 +1,76 @@
---// Services
-local UserInputService = game:GetService("UserInputService");
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/ui-libraries/main/venus/source.lua", true))()
 
---// Library
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/lates-lib/main/Main.lua"))()
-local Window = Library:CreateWindow({
-	Title = "???",
-	Theme = "Dark",
-	
-	Size = UDim2.fromOffset(570, 370),
-	Transparency = 0.2,
-	Blurring = true,
-	MinimizeKeybind = Enum.KeyCode.LeftAlt,
-})
+local main = library:Load({Name = "Venus Library", Theme = "Dark", SizeX = 440, SizeY = 480, ColorOverrides = {}})
+local aimbot = main:Tab("Aimbot")
+local section = aimbot:Section({Name = "Section", column = 1})
 
-local Themes = {
-	Light = {
-		--// Frames:
-		Primary = Color3.fromRGB(232, 232, 232),
-		Secondary = Color3.fromRGB(255, 255, 255),
-		Component = Color3.fromRGB(245, 245, 245),
-		Interactables = Color3.fromRGB(235, 235, 235),
+-- object:Hide()
+-- object:Show()
 
-		--// Text:
-		Tab = Color3.fromRGB(50, 50, 50),
-		Title = Color3.fromRGB(0, 0, 0),
-		Description = Color3.fromRGB(100, 100, 100),
+local label = section:Label("Label")
 
-		--// Outlines:
-		Shadow = Color3.fromRGB(255, 255, 255),
-		Outline = Color3.fromRGB(210, 210, 210),
+local button = section:Button({Name = "Button", Callback = function()
+   print("Button pressed")
+end})
 
-		--// Image:
-		Icon = Color3.fromRGB(100, 100, 100),
-	},
-	
-	Dark = {
-		--// Frames:
-		Primary = Color3.fromRGB(30, 30, 30),
-		Secondary = Color3.fromRGB(35, 35, 35),
-		Component = Color3.fromRGB(40, 40, 40),
-		Interactables = Color3.fromRGB(45, 45, 45),
+local toggle = section:Toggle({Name = "Toggle", Flag = "Toggle", callback = function(bool)
+   print(bool)
+end})
 
-		--// Text:
-		Tab = Color3.fromRGB(200, 200, 200),
-		Title = Color3.fromRGB(240,240,240),
-		Description = Color3.fromRGB(200,200,200),
+-- toggle:Toggle(bool)
 
-		--// Outlines:
-		Shadow = Color3.fromRGB(0, 0, 0),
-		Outline = Color3.fromRGB(40, 40, 40),
+local box = section:Box({Name = "Box", Flag = "Box", Callback = function(box)
+   print(box)
+end})
 
-		--// Image:
-		Icon = Color3.fromRGB(220, 220, 220),
-	},
-	
-	Void = {
-		--// Frames:
-		Primary = Color3.fromRGB(15, 15, 15),
-		Secondary = Color3.fromRGB(20, 20, 20),
-		Component = Color3.fromRGB(25, 25, 25),
-		Interactables = Color3.fromRGB(30, 30, 30),
+-- box:Set(str)
 
-		--// Text:
-		Tab = Color3.fromRGB(200, 200, 200),
-		Title = Color3.fromRGB(240,240,240),
-		Description = Color3.fromRGB(200,200,200),
+local slider = section:Slider({Name = "Slider", Min = 10, Max = 100, Default = 20, Flag = "Slider", Callback = function(slider)
+   print(slider)
+end})
 
-		--// Outlines:
-		Shadow = Color3.fromRGB(0, 0, 0),
-		Outline = Color3.fromRGB(40, 40, 40),
+-- slider:Set(num)
 
-		--// Image:
-		Icon = Color3.fromRGB(220, 220, 220),
-	},
+local dropdown = section:Dropdown({Default = "Option1", Content = {"Option1", "Option2"}, MultiChoice = true, Flag = "Dropdown", Callback = function(opt)
+   print(opt)
+end})
 
-}
+-- dropdown:Refresh(tbl)
+-- dropdown:Set(option)
+-- dropdown:Add(option)
+-- dropdown:Remove(option)
 
---// Set the default theme
-Window:SetTheme(Themes.Dark)
+local keybind = section:Keybind({Name = "Keybind", Default = Enum.KeyCode.A,  Flag = "Keybind", Callback = function(key)
+   print("keybind pressed")
+end})
 
---// Sections
-Window:AddTabSection({
-	Name = "Main",
-	Order = 1,
-})
+-- keybind:Set(key)
 
-Window:AddTabSection({
-	Name = "Settings",
-	Order = 2,
-})
+local toggleKeybind = section:ToggleKeybind({Name = "Toggle Keybind", Default = Enum.KeyCode.A,  KeybindFlag = "ToggleKeybind", ToggleFlag = "ToggleKeybindToggle", ToggleCallback = function(bool)
+   print(bool)
+end,
+KeybindCallback = function(key)
+   print("Toggle Keybind")
+end})
 
---// Tab [MAIN]
+-- toggleKeybind:Set(key)
+-- toggleKeybind:Toggle(bool)
 
-local Main = Window:AddTab({
-	Title = "Components",
-	Section = "Main",
-	Icon = "rbxassetid://11963373994"
-})
+local colorPicker = section:ColorPicker({name = "Color Picker", Default = Color3.fromRGB(255, 0, 255),  Flag = "Color Picker", Callback = function(color)
+   print(color.r * 255, color.g * 255, color.b * 255)
+end})
 
-Window:AddSection({ Name = "Non Interactable", Tab = Main }) 
+-- colorPicker:SetHex(hex)
+-- colorPicker:SetRGB(rgb Color3)
 
+local colorPickerToggle = section:ToggleColorPicker({Name = "Color Picker Toggle", Default = Color3.fromRGB(100, 10, 10), ToggleFlag = "ToggleColorPickerToggle", ColorPickerFlag = "ToggleColorPicker", ToggleCallback = function(bool)
+   print(bool)
+end,
+ColorPickerCallback = function(color)
+   print(color)
+end})
 
-Window:AddParagraph({
-	Title = "Paragraph",
-	Description = "Insert any important text here.",
-	Tab = Main
-}) 
-
-Window:AddSection({ Name = "Interactable", Tab = Main }) 
-
-Window:AddButton({
-	Title = "Button",
-	Description = "I wonder what this does",
-	Tab = Main,
-	Callback = function() 
-		Window:Notify({
-			Title = "hi",
-			Description = "i'm a notification", 
-			Duration = 5
-		})
-	end,
-}) 
-
-Window:AddSlider({
-	Title = "Slider",
-	Description = "Sliding",
-	Tab = Main,
-	MaxValue = 100,
-	Callback = function(Amount) 
-		warn(Amount);
-	end,
-}) 
-
-Window:AddToggle({
-	Title = "Toggle",
-	Description = "Switching",
-	Tab = Main,
-	Callback = function(Boolean) 
-		warn(Boolean);
-	end,
-}) 
-
-Window:AddInput({
-	Title = "Input",
-	Description = "Typing",
-	Tab = Main,
-	Callback = function(Text) 
-		warn(Text);
-	end,
-}) 
-
-
-Window:AddDropdown({
-	Title = "Dropdown",
-	Description = "Selecting",
-	Tab = Main,
-	Options = {
-		["An Option"] = "hi",
-		["And another"] = "hi",
-		["Another"] = "hi",
-	},
-	Callback = function(Number) 
-		warn(Number);
-	end,
-}) 
-
-Window:AddKeybind({
-	Title = "Keybind",
-	Description = "Binding",
-	Tab = Main,
-	Callback = function(Key) 
-		warn("Key Set")
-	end,
-}) 
-
---// Tab [SETTINGS]
-local Keybind = nil
-local Settings = Window:AddTab({
-	Title = "Settings",
-	Section = "Settings",
-	Icon = "rbxassetid://11293977610",
-})
-
-Window:AddKeybind({
-	Title = "Minimize Keybind",
-	Description = "Set the keybind for Minimizing",
-	Tab = Settings,
-	Callback = function(Key) 
-		Window:SetSetting("Keybind", Key)
-	end,
-}) 
-
-Window:AddDropdown({
-	Title = "Set Theme",
-	Description = "Set the theme of the library!",
-	Tab = Settings,
-	Options = {
-		["Light Mode"] = "Light",
-		["Dark Mode"] = "Dark",
-		["Extra Dark"] = "Void",
-	},
-	Callback = function(Theme) 
-		Window:SetTheme(Themes[Theme])
-	end,
-}) 
-
-Window:AddToggle({
-	Title = "UI Blur",
-	Description = "If enabled, must have your Roblox graphics set to 8+ for it to work",
-	Default = true,
-	Tab = Settings,
-	Callback = function(Boolean) 
-		Window:SetSetting("Blur", Boolean)
-	end,
-}) 
-
-
-Window:AddSlider({
-	Title = "UI Transparency",
-	Description = "Set the transparency of the UI",
-	Tab = Settings,
-	AllowDecimals = true,
-	MaxValue = 1,
-	Callback = function(Amount) 
-		Window:SetSetting("Transparency", Amount)
-	end,
-}) 
-
-Window:Notify({
-	Title = "Hello World!",
-	Description = "Press Left Alt to Minimize and Open the tab!", 
-	Duration = 10
-})
-
---// Keybind Example
-UserInputService.InputBegan:Connect(function(Key) 
-	if Key == Keybind then
-		warn("You have pressed the minimize keybind!");
-	end
-end)
+print(library.Flags["ToggleColorPicker"])
