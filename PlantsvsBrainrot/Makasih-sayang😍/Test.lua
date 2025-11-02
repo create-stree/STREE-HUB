@@ -1,9 +1,11 @@
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
+
 if not success or not WindUI then
     warn("⚠️ UI failed to load!")
     return
+    print("✓ UI loaded successfully!")
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
