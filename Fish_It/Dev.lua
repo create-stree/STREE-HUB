@@ -248,231 +248,133 @@ local Toggle = Tab2:Toggle({
     end
 })
 
-local Tab3 = Window:Tab({
-    Title = "Main",
-    Icon = "landmark",
-})
+_G.AutoFishing=false
+_G.AutoEquipRod=false
+_G.AutoSell=false
+_G.Radar=false
+_G.Instant=false
+_G.SellDelay=_G.SellDelay or 30
+_G.CallMinDelay=_G.CallMinDelay or 0.05
+_G.CallBackoff=_G.CallBackoff or 1.5
 
-local Section = Tab3:Section({
-    Title = "Main",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab3:Toggle({
-    Title = "Auto Equip Rod",
-    Desc = "Automatically equips fishing rod",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(value)
-        _G.AutoEquipRod = value
-    end
-})
-
-local player = game.Players.LocalPlayer
-local RepStorage = game:GetService("ReplicatedStorage")
-local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-
-spawn(function()
-    while task.wait(0.05) do
-        if _G.AutoEquipRod then
-            pcall(function()
-                local char = player.Character
-                local humanoid = char and char:FindFirstChild("Humanoid")
-                local backpack = player:FindFirstChild("Backpack")
-                if humanoid and backpack then
-                    local rod = backpack:FindFirstChild("Rod")
-                        or backpack:FindFirstChild("FishingRod")
-                        or backpack:FindFirstChild("OldRod")
-                        or backpack:FindFirstChild("BasicRod")
-                    if rod and not char:FindFirstChild(rod.Name) then
-                        humanoid:EquipTool(rod)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-local player = game.Players.LocalPlayer
-local RepStorage = game:GetService("ReplicatedStorage")
-local net = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
-
-_G.AutoFishing = false
-_G.Delay = 0
-_G.MaxSpeed = true
-
-Tab3:Toggle({
-    Title = "Auto Instant Fishing",
-    Desc = "Instant Catch + Minigame Bypass",
-    Default = false,
-    Callback = function(v)
-        _G.AutoFishing = v
-    end
-})
-
-Tab3:Input({
-    Title = "Blast Delay",
-    Desc = "0 = Max Speed",
-    Value = "0",
-    Placeholder = "0.01...",
-    Callback = function(v)
-        local d = tonumber(v)
-        if d and d >= 0 then
-            _G.Delay = d
-            _G.MaxSpeed = (d == 0)
-        end
-    end
-})
-
-local function InstantFish()
-    if not player.Character then return end
-    local vm = player.Character:FindFirstChild("!!!FISHING_VIEW_MODEL!!!")
-    if vm then
-        net["RE/EquipToolFromHotbar"]:FireServer(1)
-    end
-    net["RF/ChargeFishingRod"]:InvokeServer(2)
-    net["RF/RequestFishingMinigameStarted"]:InvokeServer(1, 1)
-    net["RE/FishingCompleted"]:FireServer("FishCaught", "Ghostfin")
-    net["RE/ReplicateCutscene"]:FireServer()
+local lastCall={}
+local function safeCall(k,f)
+ local n=os.clock()
+ local d=_G.CallMinDelay
+ local b=_G.CallBackoff
+ if lastCall[k] and n-lastCall[k]<d then task.wait(d-(n-lastCall[k])) end
+ local o,r=pcall(f)
+ lastCall[k]=os.clock()
+ if not o then
+  local m=tostring(r):lower()
+  task.wait(m:find("429")or m:find("too many requests")and b or 0.2)
+ end
+ return o,r
 end
 
-task.spawn(function()
-    while task.wait() do
-        if _G.AutoFishing then
-            InstantFish()
-            task.wait(_G.MaxSpeed and 0.001 or (_G.Delay > 0 and _G.Delay or 0.01))
-        else
-            task.wait(0.1)
-        end
-    end
-end)
+local RS=game:GetService("ReplicatedStorage")
+local net=RS.Packages._Index["sleitnick_net@0.2.0"].net
 
-player.CharacterAdded:Connect(function()
-    task.wait(1)
-    if _G.AutoFishing then InstantFish() end
-end)
+local function rod()safeCall("rod",function()net["RE/EquipToolFromHotbar"]:FireServer(1)end)end
+local function sell()safeCall("sell",function()net["RF/SellAllItems"]:InvokeServer()end)end
+local function radar()safeCall("radar",function()net["RF/UpdateFishingRadar"]:InvokeServer(true)end)end
+local function autoon()safeCall("autoon",function()net["RF/UpdateAutoFishingState"]:InvokeServer(true)end)end
+local function autooff()safeCall("autooff",function()net["RF/UpdateAutoFishingState"]:InvokeServer(false)end)end
+local function catch()safeCall("catch",function()net["RE/FishingCompleted"]:FireServer()end)end
+local function charge()safeCall("charge",function()net["RF/ChargeFishingRod"]:InvokeServer()end)end
+local function lempar()
+ safeCall("lempar",function()net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233,0.996,1761532005.497)end)
+ safeCall("charge2",function()net["RF/ChargeFishingRod"]:InvokeServer()end)
+end
 
-local RunService = game:GetService("RunService")    
-local Workspace = game:GetService("Workspace")    
-local VirtualInputManager = game:GetService("VirtualInputManager")    
-local ReplicatedStorage = game:GetService("ReplicatedStorage")    
-local camera = Workspace.CurrentCamera    
-    
-local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
+local function autosell()
+ while _G.AutoSell do
+  sell()
+  local d=tonumber(_G.SellDelay)or 30
+  local w=0
+  while w<d and _G.AutoSell do task.wait(0.25) w=w+0.25 end
+ end
+end
 
-local autoHoldEnabled = false
+local function instant_cycle()
+ charge()
+ lempar()
+ task.wait(0.15)
+ for i=1,8 do
+  if not _G.Instant then break end
+  catch()
+  task.wait(0.01)
+ end
+end
 
-Toggle = Tab3:Toggle({
-    Title = "Auto Legit",
-    Desc = "Automatic Legit Fishng",
-    Value = false,
-    Callback = function(state)
-        autoHoldEnabled = state
-        if state then
-            WindUI:Notify({
-                Title = " Auto Legit",
-                Content = "🚀 Extreme Speed Enabled",
-                Duration = 3
-            })
+local Tab3=Window:Tab{Title="Main",Icon="landmark"}
+Tab3:Section{Title="Fishing",Icon="anchor",TextXAlignment="Left",TextSize=17}
+Tab3:Divider()
+Tab3:Toggle{Title="Auto Equip Rod",Value=false,Callback=function(v)_G.AutoEquipRod=v if v then rod()end end}
 
-            task.spawn(function()
-                while autoHoldEnabled do
-                    pcall(function()
-                        REEquipToolFromHotbar:FireServer(1)
-                        local clickX = 10
-                        local clickY = camera.ViewportSize.Y - 10
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-                        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-                    end)
-                    RunService.Heartbeat:Wait()
-                end
-            end)
-        else
-            WindUI:Notify({
-                Title = "Auto Legit",
-                Content = "❌ Disabled",
-                Duration = 3
-            })
-        end
-    end
-})
+local mode="Instant"
+local fishThread,sellThread
 
-local Toggle = Tab3:Toggle({    
-    Title = "Auto Sell",    
-    Desc = "Automatic fish sales",    
-    Icon = false,    
-    Type = false,    
-    Default = false,    
-    Callback = function(state)    
-        _G.AutoSell = state    
-        task.spawn(function()    
-            while _G.AutoSell do    
-                task.wait(0.5)    
-                local rs = game:GetService("ReplicatedStorage")    
-                for _, v in pairs(rs:GetDescendants()) do    
-                    if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then    
-                        v:FireServer()    
-                    elseif v:IsA("RemoteFunction") and v.Name:lower():find("sell") then    
-                        pcall(function()    
-                            v:InvokeServer()    
-                        end)    
-                    end    
-                end    
-            end    
-        end)    
-    end    
-})    
+Tab3:Dropdown{Title="Mode",Values={"Instant","Legit"},Value="Instant",Callback=function(v)mode=v WindUI:Notify{Title="Mode",Content="Mode: "..v,Duration=3}end}
 
-local Toggle = Tab3:Toggle({    
-    Title = "Radar",    
-    Desc = "Toggle fishing radar",    
-    Icon = false,    
-    Type = false,    
-    Default = false,    
-    Callback = function(state)    
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")    
-        local Lighting = game:GetService("Lighting")    
-    
-        local Replion = require(ReplicatedStorage.Packages.Replion)    
-        local Net = require(ReplicatedStorage.Packages.Net)    
-        local spr = require(ReplicatedStorage.Packages.spr)    
-        local Soundbook = require(ReplicatedStorage.Shared.Soundbook)    
-        local ClientTimeController = require(ReplicatedStorage.Controllers.ClientTimeController)    
-        local TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)    
-    
-        local RemoteRadar = Net:RemoteFunction("UpdateFishingRadar")    
-    
-        local Data = Replion.Client:GetReplion("Data")    
-        if Data then    
-            if RemoteRadar:InvokeServer(state) then    
-                Soundbook.Sounds.RadarToggle:Play().PlaybackSpeed = 1 + math.random() * 0.3    
-                local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")    
-                if effect then    
-                    spr.stop(effect)    
-                    local profile = ClientTimeController:_getLightingProfile()    
-                    local cc = (profile and profile.ColorCorrection) and profile.ColorCorrection or {}    
-                    if not cc.Brightness then cc.Brightness = 0.04 end    
-                    if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end    
-                    effect.TintColor = Color3.fromRGB(42, 226, 118)    
-                    effect.Brightness = 0.4    
-                    spr.target(effect, 1, 1, cc)    
-                end    
-                spr.stop(Lighting)    
-                Lighting.ExposureCompensation = 1    
-                spr.target(Lighting, 1, 2, {    
-                    ["ExposureCompensation"] = 0    
-                })    
-                TextNotificationController:DeliverNotification({    
-                    ["Type"] = "Text",    
-                    ["Text"] = ("Radar: %*"):format(state and "Enabled" or "Disabled"),    
-                    ["TextColor"] = state and {["R"] = 9,["G"] = 255,["B"] = 0} or {["R"] = 255,["G"] = 0,["B"] = 0}    
-                })    
-            end    
-        end    
-    end    
-})
+Tab3:Toggle{
+ Title="Auto Fishing",Value=false,
+ Callback=function(v)
+  _G.AutoFishing=v
+  if v then
+   if mode=="Instant" then _G.Instant=true WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
+    if fishThread then fishThread=nil end
+    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.3)end end)
+   else WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
+    if fishThread then fishThread=nil end
+    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
+   end
+  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fishThread then task.cancel(fishThread)end fishThread=nil
+  end
+ end
+}
+
+Tab3:Section{Title="Auto Sell",Icon="coins",TextXAlignment="Left",TextSize=17}
+Tab3:Divider()
+Tab3:Toggle{
+ Title="Auto Sell",Value=false,
+ Callback=function(v)
+  _G.AutoSell=v
+  if v then if sellThread then task.cancel(sellThread)end sellThread=task.spawn(autosell)
+  else _G.AutoSell=false if sellThread then task.cancel(sellThread)end sellThread=nil
+  end
+ end
+}
+Tab3:Slider{Title="Sell Delay",Step=1,Value={Min=1,Max=120,Default=30},Callback=function(v)_G.SellDelay=v end}
+
+Tab3:Section{Title="Radar",Icon="radar",TextXAlignment="Left",TextSize=17}
+Tab3:Divider()
+Tab3:Toggle{
+ Title="Radar",Value=false,
+ Callback=function(s)
+  local L=game:GetService("Lighting")
+  local R=require(RS.Packages.Replion).Client:GetReplion("Data")
+  local N=require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
+  if R and N:InvokeServer(s)then
+   require(RS.Shared.Soundbook).Sounds.RadarToggle:Play().PlaybackSpeed=1+math.random()*0.3
+   local e=L:FindFirstChildWhichIsA("ColorCorrectionEffect")
+   if e then
+    require(RS.Packages.spr).stop(e)
+    local p=require(RS.Controllers.ClientTimeController)
+    local c=(p._getLightingProfile and p:_getLightingProfile()or p._getLighting_profile and p:_getLighting_profile()or{}).ColorCorrection or{}
+    c.Brightness=c.Brightness or 0.04 c.TintColor=c.TintColor or Color3.fromRGB(255,255,255)
+    e.TintColor=Color3.fromRGB(42,226,118)e.Brightness=0.4
+    require(RS.Packages.spr).target(e,1,1,c)
+   end
+   require(RS.Packages.spr).stop(L)L.ExposureCompensation=1
+   require(RS.Packages.spr).target(L,1,2,{ExposureCompensation=0})
+   require(RS.Controllers.TextNotificationController):DeliverNotification{
+    Type="Text",Text=("Radar: %*"):format(s and"Enabled"or"Disabled"),
+    TextColor=s and{R=9,G=255,B=0}or{R=255,G=0,B=0}
+   }
+  end
+ end
+}
 
 local Section = Tab3:Section({     
     Title = "Enchant",    
