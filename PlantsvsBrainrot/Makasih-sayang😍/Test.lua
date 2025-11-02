@@ -5,12 +5,10 @@ end)
 if not success or not WindUI then
     warn("⚠️ UI failed to load!")
     return
-    print("✓ UI loaded successfully!")
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
