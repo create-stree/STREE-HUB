@@ -301,11 +301,7 @@ local function instant_cycle()
  charge()
  lempar()
  task.wait(_G.InstantDelay)
- for i=1,8 do
-  if not _G.Instant then break end
-  catch()
-  task.wait(0.01)
- end
+ catch()
 end
 
 local Tab3=Window:Tab{Title="Main",Icon="landmark"}
@@ -330,7 +326,7 @@ Tab3:Toggle{
     if fishThread then fishThread=nil end
     fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
    end
-  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fishThread then task.cancel(fishThread)end fishThread=nil
+  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fish  if fishThread then task.cancel(fishThread)end fishThread=nil
   end
  end
 }
