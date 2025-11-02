@@ -18,7 +18,8 @@ local premiumKeys = {
     "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuN",
     "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsM",
     "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
-    "developer_access"
+    "developer_access",
+    "team_access"
 }
 
 local function isPremiumKey(key)
