@@ -5,19 +5,34 @@ end)
 if not success or not WindUI then
     warn("⚠️ UI failed to load!")
     return
+else
+    print("✓ UI loaded successfully!")
 end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local Backpack = LocalPlayer:WaitForChild("Backpack")
 
-local NetPkg = nil
+local NetPkg
 pcall(function()
-    NetPkg = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0").net
+    local packages = ReplicatedStorage:WaitForChild("Packages", 5)
+    if packages and packages:FindFirstChild("_Index") then
+        for _, v in pairs(packages._Index:GetChildren()) do
+            if v:FindFirstChild("net") then
+                NetPkg = v.net
+                break
+            end
+        end
+    end
 end)
+
+if not NetPkg and ReplicatedStorage:FindFirstChild("Remotes") then
+    NetPkg = ReplicatedStorage.Remotes
+end
 
 local function FireWeaponAttack(payload)
     if NetPkg and NetPkg:FindFirstChild("AttacksServer") and NetPkg.AttacksServer:FindFirstChild("WeaponAttack") then
