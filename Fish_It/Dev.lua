@@ -254,6 +254,7 @@ _G.AutoSell=false
 _G.Radar=false
 _G.Instant=false
 _G.SellDelay=_G.SellDelay or 30
+_G.InstantDelay=_G.InstantDelay or 0.1
 _G.CallMinDelay=_G.CallMinDelay or 0.05
 _G.CallBackoff=_G.CallBackoff or 1.5
 
@@ -299,7 +300,7 @@ end
 local function instant_cycle()
  charge()
  lempar()
- task.wait(0.15)
+ task.wait(_G.InstantDelay)
  for i=1,8 do
   if not _G.Instant then break end
   catch()
@@ -324,7 +325,7 @@ Tab3:Toggle{
   if v then
    if mode=="Instant" then _G.Instant=true WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.3)end end)
+    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.25)end end)
    else WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
     if fishThread then fishThread=nil end
     fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
@@ -332,6 +333,13 @@ Tab3:Toggle{
   else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fishThread then task.cancel(fishThread)end fishThread=nil
   end
  end
+}
+
+Tab3:Slider{
+ Title="Instant Fishing Delay",
+ Step=0.01,
+ Value={Min=0.05,Max=0.5,Default=0.1},
+ Callback=function(v)_G.InstantDelay=v WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}end
 }
 
 Tab3:Section{Title="Auto Sell",Icon="coins",TextXAlignment="Left",TextSize=17}
