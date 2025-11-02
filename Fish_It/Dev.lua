@@ -334,7 +334,7 @@ Tab3:Toggle{
 Tab3:Slider{
  Title="Instant Fishing Delay",
  Step=0.01,
- Value={Min=0.05,Max=0.5,Default=0.15},
+ Value={Min=0.01,Max=1,Default=0.15},
  Callback=function(v)_G.InstantDelay=v WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}end
 }
 
