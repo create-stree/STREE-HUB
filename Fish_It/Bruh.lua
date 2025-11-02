@@ -1,4 +1,3 @@
-if not Window then return end
 _G.AutoFishing = false
 _G.AutoEquipRod = false
 _G.Instant = false
