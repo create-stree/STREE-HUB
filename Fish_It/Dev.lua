@@ -380,6 +380,50 @@ Tab3:Toggle{
  end
 }
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local function stopAllAnimations()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+        end
+    end
+end
+
+local function toggleAnimation(state)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local animate = char:FindFirstChild("Animate")
+
+    if state then
+        if animate then animate.Disabled = true end
+        stopAllAnimations()
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if animator then
+            animator:Destroy()
+        end
+    else
+        if animate then animate.Disabled = false end
+        if humanoid and not humanoid:FindFirstChildOfClass("Animator") then
+            local newAnimator = Instance.new("Animator")
+            newAnimator.Parent = humanoid
+        end
+    end
+end
+
+local Toggle = Tab2:Toggle({
+    Title = "Disable Animations",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        toggleAnimation(state)
+    end
+})
+
 local Section = Tab3:Section({     
     Title = "Enchant",    
     TextXAlignment = "Left",    
