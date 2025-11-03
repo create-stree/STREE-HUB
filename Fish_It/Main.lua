@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.2.4",
+    Title = "v0.0.2.5",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -126,47 +126,36 @@ local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
-_G.CustomJumpPower = 50
+local PlayerTab = Window:Tab({
+    Title = "Player",
+    Icon = "user"
+})
 
-local Input = Tab2:Input({
-    Title = "WalkSpeed",
-    Desc = "Minimum 16 speed",
-    Value = "16",
-    InputIcon = "bird",
-    Type = "Input",
-    Placeholder = "Enter number...",
-    Callback = function(input)
-        local speed = tonumber(input)
-        if speed and speed >= 16 then
-            Humanoid.WalkSpeed = speed
-            print("WalkSpeed set to: " .. speed)
-        else
-            Humanoid.WalkSpeed = 16
-            print("⚠️ Invalid input, set to default (16)")
-        end
+local Speed = PlayerTab:Slider({
+    Title = "Speed",
+    Desc = false,
+    Step = 1,
+    Value = {
+        Min = 18,
+        Max = 100,
+        Default = 18,
+    },
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").WalkSpeed = Value
     end
 })
 
-local Input = Tab2:Input({
-    Title = "Jump Power",
-    Desc = "Minimum 50 jump",
-    Value = "50",
-    InputIcon = "bird",
-    Type = "Input",
-    Placeholder = "Enter number...",
-    Callback = function(input)
-        local value = tonumber(input)
-        if value and value >= 50 then
-            _G.CustomJumpPower = value
-            local humanoid = game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.UseJumpPower = true
-                humanoid.JumpPower = value
-            end
-            print("Jump Power set to: " .. value)
-        else
-            warn("⚠️ Must be number and minimum 50!")
-        end
+local Jump = PlayerTab:Slider({
+    Title = "Jump",
+    Desc = false,
+    Step = 1,
+    Value = {
+        Min = 50,
+        Max = 500,
+        Default = 50,
+    },
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").JumpPower = Value
     end
 })
 
@@ -536,7 +525,7 @@ Tab3:Divider()
 
 local Toggle = Tab3:Toggle({
     Title = "Auto Enchant",
-    Desc = "Gacha to get good enchants",
+    Desc = "Gacha to get good enchants (No Work For Now)",
     Icon = false,
     Type = false,
     Default = false,
