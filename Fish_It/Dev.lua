@@ -414,7 +414,7 @@ local function toggleAnimation(state)
     end
 end
 
-local Toggle = Tab2:Toggle({
+local Toggle = Tab3:Toggle({
     Title = "Disable Animations",
     Icon = false,
     Type = false,
