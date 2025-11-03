@@ -21,7 +21,7 @@ local Window = WindUI:CreateWindow({
     HasOutline = true,
     User = {
         Enabled = true,
-        Anonymous = false,
+        Anonymous = true,
         Callback = function()
             WindUI:SetTheme("Dark")
         end,
