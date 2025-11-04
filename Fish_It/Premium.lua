@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.1",
+    Title = "v0.0.1.2",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -382,37 +382,34 @@ Tab3:Slider{
 	end
 }
 
-Tab3:Section({     
-    Title = "Favorit",
-    Icon = "heart-plus",
-    TextXAlignment = "Left",
-    TextSize = 17,    
-})
-
-Tab3:Divider()
-
 Tab3:Toggle{
     Title = "Favorite Item",
     Value = false,
     Description = "Toggle favorite status for current item",
     Callback = function(state)
+        local args = {
+            [1] = "b2e65468-7545-47bb-9e74-63176c569e6f"
+        }
         local remote = game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RE/FavoriteItem")
         if remote then
-            remote:FireServer(state)
+            remote:FireServer(unpack(args))
         end
     end
 }
 
 Tab3:Button{
     Title = "Favorite All Items", 
-    Description = "Mark all items as favorites",
+    Description = "Mark all items as favorites using specific item ID",
     Callback = function()
+        local args = {
+            [1] = "b2e65468-7545-47bb-9e74-63176c569e6f"
+        }
         local remote = game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RE/FavoriteItem")
         if remote then
-            remote:FireServer(true)
+            remote:FireServer(unpack(args))
             require(game:GetService("ReplicatedStorage").Controllers.TextNotificationController):DeliverNotification{
                 Type = "Text",
-                Text = "All items favorited!",
+                Text = "Item favorited!",
                 TextColor = {R = 0, G = 255, B = 0}
             }
         end
