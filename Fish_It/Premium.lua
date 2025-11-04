@@ -99,11 +99,15 @@ Tab1:Button({
     end
 })
 
+Tab1:Divider()
+
 Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab1:Divider()
 
 Tab1:Keybind({
     Title = "Close/Open UI",
@@ -151,6 +155,8 @@ Tab2:Slider({
         game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").JumpPower = Value
     end
 })
+
+Tab2:Divider()
 
 Tab2:Button({
     Title = "Reset Jump Power",
@@ -371,6 +377,8 @@ Tab3:Section({
     TextXAlignment = "Left",
     TextSize = 17,    
 })
+
+Tab3:Divider()
 
 Tab3:Toggle({
     Title = "FPS Boost",
@@ -710,6 +718,8 @@ Tab5:Section({
     TextSize = 17,
 })
 
+Tab5:Divider()
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]
 
@@ -788,6 +798,8 @@ Tab5:Section({
     TextSize = 17,
 })
 
+Tab5:Divider()
+
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
 local baits = {
@@ -853,14 +865,16 @@ Tab5:Section({
     TextSize = 17,
 })
 
+Tab5:Divider()
+
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
 
 local weathers = {
     ["Wind"] = 1,
-    ["Cloudy"] = 2,
-    ["Snow"] = 3,
-    ["Storm"] = 4,
-    ["Radiant"] = 5,
+    ["Cloudy"] = 1,
+    ["Snow"] = 1,
+    ["Storm"] = 1,
+    ["Radiant"] = 1,
     ["Shark Hunt"] = 1
 }
 
@@ -918,6 +932,8 @@ Tab6:Section({
     TextSize = 17,
 })
 
+Tab6:Divider()
+
 local IslandLocations = {
     ["Admin Event"] = Vector3.new(-1981, -442, 7428),
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
@@ -973,6 +989,8 @@ Tab6:Section({
     TextSize = 17,
 })
 
+Tab6:Divider()
+
 local FishingLocations = {
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Konoha"] = Vector3.new(-603, 3, 719),
@@ -1019,6 +1037,8 @@ Tab6:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab6:Divider()
 
 local NPC_Locations = {
     ["Alex"] = Vector3.new(43,17,2876),
@@ -1072,6 +1092,8 @@ Tab6:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab6:Divider()
 
 local Event_Locations = {
     ["Black Hole"] = Vector3.new(883, -1.4, 2542),
@@ -1189,6 +1211,8 @@ Tab7:Section({
     TextSize = 17,
 })
 
+Tab7:Divider()
+
 Tab7:Button({
     Title = "Rejoin Server",
     Desc = "Reconnect to current server",
@@ -1236,6 +1260,8 @@ Tab7:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab7:Divider()
 
 local ConfigFolder = "STREE_HUB/Configs"
 if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
@@ -1328,6 +1354,8 @@ Tab7:Section({
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab7:Divider()
 
 Tab7:Button({
     Title = "FLY",
