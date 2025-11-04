@@ -114,22 +114,17 @@ Tab1:Keybind({
     end
 })
 
-local Tab2 = Window:Tab({
-    Title = "Players",
-    Icon = "user",
-})
-
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
-local PlayerTab = Window:Tab({
-    Title = "Player",
-    Icon = "user"
+local Tab2 = Window:Tab({
+    Title = "Players",
+    Icon = "user",
 })
 
-local Speed = PlayerTab:Slider({
+Tab2:Slider({
     Title = "Speed",
     Desc = false,
     Step = 1,
@@ -143,7 +138,7 @@ local Speed = PlayerTab:Slider({
     end
 })
 
-local Jump = PlayerTab:Slider({
+Tab2:Slider({
     Title = "Jump",
     Desc = false,
     Step = 1,
@@ -865,13 +860,13 @@ local weathers = {
     ["Cloudy"] = 2,
     ["Snow"] = 3,
     ["Storm"] = 4,
-    ["Shine"] = 5,
-    ["Shark Hunting"] = 6
+    ["Radiant"] = 5,
+    ["Shark Hunt"] = 1
 }
 
 local weatherNames = {  
     "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
-    "Shining (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
+    "Radiant (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
 }  
 
 local weatherKeyMap = {  
