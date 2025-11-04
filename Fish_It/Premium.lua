@@ -273,7 +273,6 @@ local net=RS.Packages._Index["sleitnick_net@0.2.0"].net
 
 local function rod()safeCall("rod",function()net["RE/EquipToolFromHotbar"]:FireServer(1)end)end
 local function sell()safeCall("sell",function()net["RF/SellAllItems"]:InvokeServer()end)end
-local function radar()safeCall("radar",function()net["RF/UpdateFishingRadar"]:InvokeServer(true)end)end
 local function autoon()safeCall("autoon",function()net["RF/UpdateAutoFishingState"]:InvokeServer(true)end)end
 local function autooff()safeCall("autooff",function()net["RF/UpdateAutoFishingState"]:InvokeServer(false)end)end
 local function catch()safeCall("catch",function()net["RE/FishingCompleted"]:FireServer()end)end
@@ -314,14 +313,32 @@ Tab3:Toggle{
  Callback=function(v)
   _G.AutoFishing=v
   if v then
-   if mode=="Instant" then _G.Instant=true WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
+   if mode=="Instant" then
+    _G.Instant=true
+    WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.35)end end)
-   else WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
+    fishThread=task.spawn(function()
+     while _G.AutoFishing and mode=="Instant" do
+      instant_cycle()
+      task.wait(0.35)
+     end
+    end)
+   else
+    WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
+    fishThread=task.spawn(function()
+     while _G.AutoFishing and mode=="Legit" do
+      autoon()
+      task.wait(1)
+     end
+    end)
    end
-  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fishThread then task.cancel(fishThread)end fishThread=nil
+  else
+   WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3}
+   autooff()
+   _G.Instant=false
+   if fishThread then task.cancel(fishThread)end
+   fishThread=nil
   end
  end
 }
@@ -334,46 +351,115 @@ Tab3:Slider{
 }
 
 Tab3:Section{Title="Auto Sell",Icon="coins",TextXAlignment="Left",TextSize=17}
+
 Tab3:Divider()
+
 Tab3:Toggle{
  Title="Auto Sell",Value=false,
  Callback=function(v)
   _G.AutoSell=v
-  if v then if sellThread then task.cancel(sellThread)end sellThread=task.spawn(autosell)
-  else _G.AutoSell=false if sellThread then task.cancel(sellThread)end sellThread=nil
+  if v then
+   if sellThread then task.cancel(sellThread)end
+   sellThread=task.spawn(autosell)
+  else
+   _G.AutoSell=false
+   if sellThread then task.cancel(sellThread)end
+   sellThread=nil
   end
  end
 }
-Tab3:Slider{Title="Sell Delay",Step=1,Value={Min=1,Max=120,Default=30},Callback=function(v)_G.SellDelay=v end}
 
-Tab3:Section{Title="Radar",Icon="radar",TextXAlignment="Left",TextSize=17}
-Tab3:Divider()
-Tab3:Toggle{
- Title="Radar",Value=false,
- Callback=function(s)
-  local L=game:GetService("Lighting")
-  local R=require(RS.Packages.Replion).Client:GetReplion("Data")
-  local N=require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
-  if R and N:InvokeServer(s)then
-   require(RS.Shared.Soundbook).Sounds.RadarToggle:Play().PlaybackSpeed=1+math.random()*0.3
-   local e=L:FindFirstChildWhichIsA("ColorCorrectionEffect")
-   if e then
-    require(RS.Packages.spr).stop(e)
-    local p=require(RS.Controllers.ClientTimeController)
-    local c=(p._getLightingProfile and p:_getLightingProfile()or p._getLighting_profile and p:_getLighting_profile()or{}).ColorCorrection or{}
-    c.Brightness=c.Brightness or 0.04 c.TintColor=c.TintColor or Color3.fromRGB(255,255,255)
-    e.TintColor=Color3.fromRGB(42,226,118)e.Brightness=0.4
-    require(RS.Packages.spr).target(e,1,1,c)
-   end
-   require(RS.Packages.spr).stop(L)L.ExposureCompensation=1
-   require(RS.Packages.spr).target(L,1,2,{ExposureCompensation=0})
-   require(RS.Controllers.TextNotificationController):DeliverNotification{
-    Type="Text",Text=("Radar: %*"):format(s and"Enabled"or"Disabled"),
-    TextColor=s and{R=9,G=255,B=0}or{R=255,G=0,B=0}
-   }
-  end
- end
+Tab3:Slider{
+	Title="Sell Delay",
+	Step= 1,
+	Value={
+		Min= 1,
+		Max= 120,
+		Default= 30
+	},
+	Callback=function(v)
+		_G.SellDelay=v
+	end
 }
+
+Tab3:Section({     
+    Title = "Item",
+    Icon = "grid-2x2-check",
+    TextXAlignment = "Left",
+    TextSize = 17,    
+})
+
+Tab3:Toggle{
+    Title = "Radar",
+    Value = false,
+    Callback = function(state)
+        local RS = game:GetService("ReplicatedStorage")
+        local Lighting = game:GetService("Lighting")
+        local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
+        local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
+        
+        if Replion and NetFunction:InvokeServer(state) then
+            local sound = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
+            sound.PlaybackSpeed = 1 + math.random() * 0.3
+            
+            local colorEffect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
+            if colorEffect then
+                require(RS.Packages.spr).stop(colorEffect)
+                local timeController = require(RS.Controllers.ClientTimeController)
+                local lightingProfile = (timeController._getLightingProfile and timeController:_getLightingProfile() or timeController._getLighting_profile and timeController:_getLighting_profile() or {})
+                local colorCorrection = lightingProfile.ColorCorrection or {}
+                
+                colorCorrection.Brightness = colorCorrection.Brightness or 0.04
+                colorCorrection.TintColor = colorCorrection.TintColor or Color3.fromRGB(255, 255, 255)
+                
+                if state then
+                    colorEffect.TintColor = Color3.fromRGB(42, 226, 118)
+                    colorEffect.Brightness = 0.4
+                    require(RS.Controllers.TextNotificationController):DeliverNotification{
+                        Type = "Text",
+                        Text = "Radar: Enabled",
+                        TextColor = {R = 9, G = 255, B = 0}
+                    }
+                else
+                    colorEffect.TintColor = Color3.fromRGB(255, 0, 0)
+                    colorEffect.Brightness = 0.2
+                    require(RS.Controllers.TextNotificationController):DeliverNotification{
+                        Type = "Text",
+                        Text = "Radar: Disabled", 
+                        TextColor = {R = 255, G = 0, B = 0}
+                    }
+                end
+                
+                require(RS.Packages.spr).target(colorEffect, 1, 1, colorCorrection)
+            end
+            
+            require(RS.Packages.spr).stop(Lighting)
+            Lighting.ExposureCompensation = 1
+            require(RS.Packages.spr).target(Lighting, 1, 2, {ExposureCompensation = 0})
+        end
+    end
+}
+
+Tab3:Toggle({
+    Title = "Diving Gear",
+    Desc = "Oxygen Tank",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.DivingGear = state
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local RemoteFolder = ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+        if _G.DivingGear then
+            local args = {
+                [1] = 105
+            }
+            RemoteFolder:FindFirstChild("RF/EquipOxygenTank"):InvokeServer(unpack(args))
+        else
+            RemoteFolder:FindFirstChild("RF/UnequipOxygenTank"):InvokeServer()
+        end
+    end
+})
 
 Tab3:Section({     
     Title = "Gameplay",
