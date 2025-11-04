@@ -844,6 +844,8 @@ Tab4:Slider({
 	end
 })
 
+
+
 local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
@@ -1008,17 +1010,17 @@ Tab5:Divider()
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
 
 local weathers = {
-    ["Wind"] = 1,
-    ["Cloudy"] = 1,
-    ["Snow"] = 1,
-    ["Storm"] = 1,
-    ["Radiant"] = 1,
-    ["Shark Hunt"] = 1
+    ["Wind"] = "Wind",
+    ["Cloudy"] = "Cloudy",
+    ["Snow"] = "Snow",
+    ["Storm"] = "Storm",
+    ["Shine"] = "Shine",
+    ["Shark Hunt"] = "Shark Hunt"
 }
 
 local weatherNames = {  
     "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
-    "Radiant (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
+    "Shining (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
 }  
 
 local weatherKeyMap = {  
