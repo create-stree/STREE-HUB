@@ -382,6 +382,15 @@ Tab3:Slider{
 	end
 }
 
+Tab3:Section({     
+    Title = "Favorite",
+    Icon = "heart-plus",
+    TextXAlignment = "Left",
+    TextSize = 17,    
+})
+
+Tab3:Divider()
+
 Tab3:Toggle{
     Title = "Favorite Item",
     Value = false,
