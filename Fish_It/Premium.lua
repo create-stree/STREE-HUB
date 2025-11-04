@@ -382,48 +382,49 @@ Tab3:Slider{
 	end
 }
 
-Tab3:Section({     
-    Title = "Favorite",
-    Icon = "heart-plus",
-    TextXAlignment = "Left",
-    TextSize = 17,    
-})
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
-Tab3:Divider()
+local function stopAllAnimations()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+        end
+    end
+end
 
-Tab3:Toggle{
-    Title = "Favorite Item",
+local function toggleAnimation(state)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local animate = char:FindFirstChild("Animate")
+
+    if state then
+        if animate then animate.Disabled = true end
+        stopAllAnimations()
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if animator then
+            animator:Destroy()
+        end
+    else
+        if animate then animate.Disabled = false end
+        if humanoid and not humanoid:FindFirstChildOfClass("Animator") then
+            local newAnimator = Instance.new("Animator")
+            newAnimator.Parent = humanoid
+        end
+    end
+end
+
+Tab3:Toggle({
+    Title = "Disable Animations",
+    Icon = false,
+    Type = false,
     Value = false,
-    Description = "Toggle favorite status for current item",
     Callback = function(state)
-        local args = {
-            [1] = "b2e65468-7545-47bb-9e74-63176c569e6f"
-        }
-        local remote = game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RE/FavoriteItem")
-        if remote then
-            remote:FireServer(unpack(args))
-        end
+        toggleAnimation(state)
     end
-}
-
-Tab3:Button{
-    Title = "Favorite All Items", 
-    Description = "Mark all items as favorites using specific item ID",
-    Callback = function()
-        local args = {
-            [1] = "b2e65468-7545-47bb-9e74-63176c569e6f"
-        }
-        local remote = game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RE/FavoriteItem")
-        if remote then
-            remote:FireServer(unpack(args))
-            require(game:GetService("ReplicatedStorage").Controllers.TextNotificationController):DeliverNotification{
-                Type = "Text",
-                Text = "Item favorited!",
-                TextColor = {R = 0, G = 255, B = 0}
-            }
-        end
-    end
-}
+})
 
 Tab3:Section({     
     Title = "Item",
