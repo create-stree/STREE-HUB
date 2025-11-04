@@ -59,6 +59,8 @@ Tab1:Section({
     TextSize = 17,
 })
 
+Tab1:Divider()
+
 Tab1:Button({
     Title = "Discord",
     Desc = "click to copy link",
@@ -186,6 +188,8 @@ Tab2:Button({
         print("WalkSpeed reset to default (18)")
     end
 })
+
+Tab2:Divider()
 
 local UserInputService = game:GetService("UserInputService")
 
@@ -658,6 +662,8 @@ local Section = Tab4:Section({
 	TextXAlignment = "Left",
 	TextSize = 17
 })
+
+Tab4:Divider()
 
 Tab4:Toggle({
 	Title = "Enable Kaitun",
