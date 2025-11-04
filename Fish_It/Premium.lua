@@ -383,11 +383,50 @@ Tab3:Slider{
 }
 
 Tab3:Section({     
+    Title = "Favorit",
+    Icon = "heart-plus",
+    TextXAlignment = "Left",
+    TextSize = 17,    
+})
+
+Tab3:Divider()
+
+Tab3:Toggle{
+    Title = "Favorite Item",
+    Value = false,
+    Description = "Toggle favorite status for current item",
+    Callback = function(state)
+        local remote = game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RE/FavoriteItem")
+        if remote then
+            remote:FireServer(state)
+        end
+    end
+}
+
+Tab3:Button{
+    Title = "Favorite All Items", 
+    Description = "Mark all items as favorites",
+    Callback = function()
+        local remote = game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RE/FavoriteItem")
+        if remote then
+            remote:FireServer(true)
+            require(game:GetService("ReplicatedStorage").Controllers.TextNotificationController):DeliverNotification{
+                Type = "Text",
+                Text = "All items favorited!",
+                TextColor = {R = 0, G = 255, B = 0}
+            }
+        end
+    end
+}
+
+Tab3:Section({     
     Title = "Item",
     Icon = "grid-2x2-check",
     TextXAlignment = "Left",
     TextSize = 17,    
 })
+
+Tab3:Divider()
 
 Tab3:Toggle{
     Title = "Radar",
