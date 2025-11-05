@@ -102,7 +102,7 @@ local function buildMainUI()
     headerLogo.BackgroundTransparency = 1  
   
     local title = Instance.new("TextLabel", titleBar)  
-    title.Text = "STREE HUB | Grow A Garden | v0.00.03"  
+    title.Text = "STREE HUB | Fish It | Version Developer"  
     title.Size = UDim2.new(1, -120, 1, 0)  
     title.Position = UDim2.new(0,40,0,0)  
     title.TextSize = 22  
@@ -491,7 +491,7 @@ local function buildMainUI()
     end
   
     local lastTabY = 0  
-    local firstTabCallback -- simpan callback Home untuk auto-open  
+    local firstTabCallback
     local function createTab(name, callback)  
         local btn = Instance.new("TextButton", tabMenu)  
         btn.Size = UDim2.new(1,-12,0,32)  
