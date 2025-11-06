@@ -605,7 +605,24 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         if state then
-            game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/ClaimHalloweenReward"):InvokeServer()
+            local characters = {
+                "Talon", "Kenny", "OutOfOrderFoxy", "Terror", "RequestingBlox",
+                "Mac", "Wildes", "Jixxio", "Relukt", "Tapiobaa", "phrof"
+            }
+            
+            for _, character in ipairs(characters) do
+                local args = {
+                    [1] = character,
+                    [2] = "TrickOrTreatHouse"
+                }
+                game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent"):InvokeServer(unpack(args))
+            end
+            
+            local alienArgs = {
+                [1] = "Alien Merchant",
+                [2] = "TrickOrTreat"
+            }
+            game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent"):InvokeServer(unpack(alienArgs))
         end
     end
 })
