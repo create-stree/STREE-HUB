@@ -597,6 +597,19 @@ Tab3:Button({
     Callback = NotifyQuestProgress
 })
 
+Tab3:Toggle({
+    Title = "Halloween Auto Claim",
+    Desc = "Direct claim without going to place",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        if state then
+            game:GetService("ReplicatedStorage").Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/ClaimHalloweenReward"):InvokeServer()
+        end
+    end
+})
+
 local Section = Tab3:Section({     
     Title = "Gameplay",    
     TextXAlignment = "Left",    
