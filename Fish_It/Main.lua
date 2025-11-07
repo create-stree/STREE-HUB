@@ -116,22 +116,17 @@ Tab1:Keybind({
     end
 })
 
-local Tab2 = Window:Tab({
-    Title = "Players",
-    Icon = "user"
-})
-
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
-local PlayerTab = Window:Tab({
-    Title = "Player",
+local Tab2 = Window:Tab({
+    Title = "Players",
     Icon = "user"
 })
 
-local Speed = PlayerTab:Slider({
+Tab2:Slider({
     Title = "Speed",
     Desc = false,
     Step = 1,
@@ -145,7 +140,7 @@ local Speed = PlayerTab:Slider({
     end
 })
 
-local Jump = PlayerTab:Slider({
+Tab2:Slider({
     Title = "Jump",
     Desc = false,
     Step = 1,
