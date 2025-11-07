@@ -185,6 +185,8 @@ Tab2:Button({
     end
 })
 
+Tab2:Divider()
+
 local UserInputService = game:GetService("UserInputService")
 
 local Toggle = Tab2:Toggle({
