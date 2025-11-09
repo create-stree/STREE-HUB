@@ -278,14 +278,23 @@ local net=RS.Packages._Index["sleitnick_net@0.2.0"].net
 
 local function rod()safeCall("rod",function()net["RE/EquipToolFromHotbar"]:FireServer(1)end)end
 local function sell()safeCall("sell",function()net["RF/SellAllItems"]:InvokeServer()end)end
-local function radar()safeCall("radar",function()net["RF/UpdateFishingRadar"]:InvokeServer(true)end)end
 local function autoon()safeCall("autoon",function()net["RF/UpdateAutoFishingState"]:InvokeServer(true)end)end
 local function autooff()safeCall("autooff",function()net["RF/UpdateAutoFishingState"]:InvokeServer(false)end)end
 local function catch()safeCall("catch",function()net["RE/FishingCompleted"]:FireServer()end)end
-local function charge()safeCall("charge",function()net["RF/ChargeFishingRod"]:InvokeServer()end)end
+
+local function charge()
+ safeCall("charge",function()
+  net["RF/ChargeFishingRod"]:InvokeServer(1762631511.436375)
+ end)
+end
+
 local function lempar()
- safeCall("lempar",function()net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233,0.996,1761532005.497)end)
- safeCall("charge2",function()net["RF/ChargeFishingRod"]:InvokeServer()end)
+ safeCall("lempar1",function()
+  net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.25,1,1762631536.607406)
+ end)
+ safeCall("lempar2",function()
+  net["RF/ChargeFishingRod"]:InvokeServer(1762631511.436375)
+ end)
 end
 
 local function autosell()
@@ -307,26 +316,61 @@ end
 local Tab3=Window:Tab{Title="Main",Icon="landmark"}
 Tab3:Section{Title="Fishing",Icon="anchor",TextXAlignment="Left",TextSize=17}
 Tab3:Divider()
-Tab3:Toggle{Title="Auto Equip Rod",Value=false,Callback=function(v)_G.AutoEquipRod=v if v then rod()end end}
+
+Tab3:Toggle{
+ Title="Auto Equip Rod",
+ Value=false,
+ Callback=function(v)
+  _G.AutoEquipRod=v
+  if v then rod()end
+ end
+}
 
 local mode="Instant"
 local fishThread,sellThread
 
-Tab3:Dropdown{Title="Mode",Values={"Instant","Legit"},Value="Instant",Callback=function(v)mode=v WindUI:Notify{Title="Mode",Content="Mode: "..v,Duration=3}end}
+Tab3:Dropdown{
+ Title="Mode",
+ Values={"Instant","Legit"},
+ Value="Instant",
+ Callback=function(v)
+  mode=v
+  WindUI:Notify{Title="Mode",Content="Mode: "..v,Duration=3}
+ end
+}
 
 Tab3:Toggle{
- Title="Auto Fishing",Value=false,
+ Title="Auto Fishing",
+ Value=false,
  Callback=function(v)
   _G.AutoFishing=v
   if v then
-   if mode=="Instant" then _G.Instant=true WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
+   if mode=="Instant" then
+    _G.Instant=true
+    WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Instant" do instant_cycle()task.wait(0.35)end end)
-   else WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
+    fishThread=task.spawn(function()
+     while _G.AutoFishing and mode=="Instant" do
+      instant_cycle()
+      task.wait(0.35)
+     end
+    end)
+   else
+    WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
     if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()while _G.AutoFishing and mode=="Legit" do autoon()task.wait(1)end end)
+    fishThread=task.spawn(function()
+     while _G.AutoFishing and mode=="Legit" do
+      autoon()
+      task.wait(1)
+     end
+    end)
    end
-  else WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3} autooff()_G.Instant=false if fishThread then task.cancel(fishThread)end fishThread=nil
+  else
+   WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3}
+   autooff()
+   _G.Instant=false
+   if fishThread then task.cancel(fishThread)end
+   fishThread=nil
   end
  end
 }
@@ -335,7 +379,10 @@ Tab3:Slider{
  Title="Instant Fishing Delay",
  Step=0.01,
  Value={Min=0.2,Max=1,Default=0.35},
- Callback=function(v)_G.InstantDelay=v WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}end
+ Callback=function(v)
+  _G.InstantDelay=v
+  WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}
+ end
 }
 
 Tab3:Section{Title="Auto Sell",Icon="coins",TextXAlignment="Left",TextSize=17}
@@ -349,6 +396,7 @@ Tab3:Toggle{
   end
  end
 }
+
 Tab3:Slider{Title="Sell Delay",Step=1,Value={Min=1,Max=120,Default=30},Callback=function(v)_G.SellDelay=v end}
 
 Tab3:Section{Title="Radar",Icon="radar",TextXAlignment="Left",TextSize=17}
