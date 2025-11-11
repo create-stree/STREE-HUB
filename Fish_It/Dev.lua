@@ -525,177 +525,107 @@ local Toggle = Tab3:Toggle({
     end
 })
 
-local Section = Tab3:Section({     
-    Title = "Quest [Beta]",    
-    TextXAlignment = "Left",    
-    TextSize = 17,    
+_G.AutoNotifyQuest = false
+
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local players = game:GetService("Players")
+local player = players.LocalPlayer
+
+local QuestList = require(replicatedStorage.Shared.Quests.QuestList)
+local QuestUtility = require(replicatedStorage.Shared.Quests.QuestUtility)
+local Replion = require(replicatedStorage.Packages.Replion)
+
+local repl = nil
+task.spawn(function()
+    repl = Replion.Client:WaitReplion("Data")
+end)
+
+local function GetDeepSea()
+    if not repl then return nil end
+    return repl:Get(QuestList.DeepSea.ReplionPath)
+end
+
+_G.CheckQuestProgress = function()
+    local data = GetDeepSea()
+    if not data then
+        WindUI:Notify({
+            Title = "Deep Sea Quest",
+            Content = "Quest tidak ditemukan",
+            Duration = 4,
+            Icon = "alert-triangle"
+        })
+        return
+    end
+
+    if not data.Available or not data.Available.Forever then
+        WindUI:Notify({
+            Title = "Deep Sea Quest",
+            Content = "Tidak ada quest Forever",
+            Duration = 4,
+            Icon = "alert-circle"
+        })
+        return
+    end
+
+    local quests = data.Available.Forever.Quests
+    local total = #quests
+    local done = 0
+    local list = ""
+
+    for i, q in ipairs(quests) do
+        local info = QuestUtility:GetQuestData("DeepSea", "Forever", q.QuestId)
+        if info then
+            local maxVal = QuestUtility.GetQuestValue(repl, info)
+            local progress = math.clamp(q.Progress / maxVal, 0, 1)
+            local percent = math.floor(progress * 100)
+
+            if percent >= 100 then
+                done = done + 1
+            end
+
+            list = list..info.DisplayName.." - "..percent.."%\n"
+        end
+    end
+
+    local totalPercent = math.floor((done / total) * 100)
+
+    WindUI:Notify({
+        Title = "Deep Sea Progress",
+        Content = "Total: "..totalPercent.."%\n\n"..list,
+        Duration = 7,
+        Icon = "check-circle"
+    })
+end
+
+task.spawn(function()
+    while task.wait(5) do
+        if _G.AutoNotifyQuest then
+            _G.CheckQuestProgress()
+        end
+    end
+end)
+
+Tab3:Section({
+    Title = "Deep Sea Quest",
+    Icon = "scroll-text",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
-local player = game.Players.LocalPlayer
-local QuestUI, BarFill, PercentLabel = nil, nil, nil
-local QuestUpdaterRunning = false
-
-local function CreateQuestProgressUI()
-    if QuestUI then return end
-
-    QuestUI = Instance.new("Frame")
-    QuestUI.Size = UDim2.new(0, 260, 0, 55)
-    QuestUI.Position = UDim2.new(0.5, -130, 0.85, 0)
-    QuestUI.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    QuestUI.BorderSizePixel = 0
-    QuestUI.Parent = game.CoreGui
-
-    local Stroke = Instance.new("UIStroke", QuestUI)
-    Stroke.Color = Color3.fromRGB(0, 255, 120)
-    Stroke.Thickness = 2
-
-    local Corner = Instance.new("UICorner", QuestUI)
-    Corner.CornerRadius = UDim.new(0, 8)
-
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -10, 0, 18)
-    Title.Position = UDim2.new(0, 5, 0, 3)
-    Title.BackgroundTransparency = 1
-    Title.Text = "Quest Progress"
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 14
-    Title.TextColor3 = Color3.fromRGB(0, 255, 120)
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Parent = QuestUI
-
-    local BarBG = Instance.new("Frame")
-    BarBG.Size = UDim2.new(1, -10, 0, 15)
-    BarBG.Position = UDim2.new(0, 5, 0, 25)
-    BarBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    BarBG.BorderSizePixel = 0
-    BarBG.Parent = QuestUI
-
-    local BarCorner = Instance.new("UICorner", BarBG)
-    BarCorner.CornerRadius = UDim.new(0, 6)
-
-    BarFill = Instance.new("Frame")
-    BarFill.Size = UDim2.new(0, 0, 1, 0)
-    BarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
-    BarFill.BorderSizePixel = 0
-    BarFill.Parent = BarBG
-
-    local BarFillCorner = Instance.new("UICorner", BarFill)
-    BarFillCorner.CornerRadius = UDim.new(0, 6)
-
-    PercentLabel = Instance.new("TextLabel")
-    PercentLabel.BackgroundTransparency = 1
-    PercentLabel.Size = UDim2.new(1, 0, 0, 15)
-    PercentLabel.Position = UDim2.new(0, 0, 0, 42)
-    PercentLabel.Text = "0% (0/0)"
-    PercentLabel.Font = Enum.Font.GothamSemibold
-    PercentLabel.TextSize = 13
-    PercentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    PercentLabel.Parent = QuestUI
-end
-
-local function RemoveQuestProgressUI()
-    if QuestUI then
-        QuestUI:Destroy()
-        QuestUI = nil
-        BarFill = nil
-        PercentLabel = nil
-    end
-end
-
-local function StartQuestUpdater()
-    if QuestUpdaterRunning then return end
-    QuestUpdaterRunning = true
-
-    task.spawn(function()
-        while QuestUpdaterRunning do
-            task.wait(0.2)
-
-            if not QuestUI then continue end
-
-            local quests = player:FindFirstChild("QuestProgress")
-            if quests then
-                local q = quests:FindFirstChild("Ghostfin")
-                if q and q:FindFirstChild("Goal") then
-                    local progress = q.Value
-                    local goal = q.Goal.Value
-                    local percent = math.clamp(progress / goal, 0, 1)
-
-                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
-                    PercentLabel.Text = string.format(
-                        "%d%% (%d/%d)",
-                        percent * 100,
-                        progress,
-                        goal
-                    )
-                end
-            end
-        end
-    end)
-end
-
-local function StopQuestUpdater()
-    QuestUpdaterRunning = false
-end
-
 Tab3:Toggle({
-    Title = "Show Quest Progress",
-    Desc = "Menampilkan progress bar 0% - 100%",
+    Title = "Auto Notify Quest",
+    Desc = "Cek progres otomatis",
     Default = false,
     Callback = function(v)
-        if v then
-            CreateQuestProgressUI()
-            StartQuestUpdater()
-
-            WindUI:Notify({
-                Title = "Quest Progress",
-                Content = "Progress bar diaktifkan!",
-                Duration = 2,
-                Icon = "bar-chart-2"
-            })
-        else
-            StopQuestUpdater()
-            RemoveQuestProgressUI()
-
-            WindUI:Notify({
-                Title = "Quest Progress",
-                Content = "Progress bar dinonaktifkan.",
-                Duration = 2,
-                Icon = "x"
-            })
-        end
+        _G.AutoNotifyQuest = v
     end
 })
 
 Tab3:Button({
-    Title = "Refresh Progress",
-    Desc = "Update progress secara manual",
+    Title = "Check Quest Progress",
+    Desc = "Tampilkan progres quest",
     Callback = function()
-        if QuestUI then
-            local quests = player:FindFirstChild("QuestProgress")
-            if quests then
-                local q = quests:FindFirstChild("Ghostfin")
-                if q and q:FindFirstChild("Goal") then
-                    local progress = q.Value
-                    local goal = q.Goal.Value
-                    local percent = math.clamp(progress / goal, 0, 1)
-
-                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
-                    PercentLabel.Text = string.format(
-                        "%d%% (%d/%d)",
-                        percent * 100,
-                        progress,
-                        goal
-                    )
-                end
-            end
-        end
-
-        WindUI:Notify({
-            Title = "Quest Progress",
-            Content = "Progress berhasil di-refresh!",
-            Duration = 2,
-            Icon = "refresh-cw"
-        })
+        _G.CheckQuestProgress()
     end
 })
 
