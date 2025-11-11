@@ -653,15 +653,17 @@ task.spawn(function()
     end
 end)
 
-local Section = Tab3:Section({
-        Title="Quest",
-        Icon="scroll-text",
-        TextXAlignment="Left",
-        TextSize=17
+Tab3:Section({
+    Title="Quest",
+    Icon="scroll-text",
+    TextXAlignment="Left",
+    TextSize=17
 })
 
+Tab3:Divider()
+
 Tab3:Toggle({
-    Title="Auto Notify EJ",
+    Title="Auto Notify Element Junggle",
     Desc="Check Progres Automatic Element Junggle",
     Default=false,
     Callback=function(v)
