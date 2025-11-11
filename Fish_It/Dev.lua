@@ -531,118 +531,172 @@ local Section = Tab3:Section({
     TextSize = 17,    
 })
 
-_G.AutoGhostfin = false
-_G.TeleportEnabled = true
-
 local player = game.Players.LocalPlayer
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+local QuestUI, BarFill, PercentLabel = nil, nil, nil
+local QuestUpdaterRunning = false
 
-local function getHumanoid()
-    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+local function CreateQuestProgressUI()
+    if QuestUI then return end
+
+    QuestUI = Instance.new("Frame")
+    QuestUI.Size = UDim2.new(0, 260, 0, 55)
+    QuestUI.Position = UDim2.new(0.5, -130, 0.85, 0)
+    QuestUI.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    QuestUI.BorderSizePixel = 0
+    QuestUI.Parent = game.CoreGui
+
+    local Stroke = Instance.new("UIStroke", QuestUI)
+    Stroke.Color = Color3.fromRGB(0, 255, 120)
+    Stroke.Thickness = 2
+
+    local Corner = Instance.new("UICorner", QuestUI)
+    Corner.CornerRadius = UDim.new(0, 8)
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, -10, 0, 18)
+    Title.Position = UDim2.new(0, 5, 0, 3)
+    Title.BackgroundTransparency = 1
+    Title.Text = "Quest Progress"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 14
+    Title.TextColor3 = Color3.fromRGB(0, 255, 120)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = QuestUI
+
+    local BarBG = Instance.new("Frame")
+    BarBG.Size = UDim2.new(1, -10, 0, 15)
+    BarBG.Position = UDim2.new(0, 5, 0, 25)
+    BarBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    BarBG.BorderSizePixel = 0
+    BarBG.Parent = QuestUI
+
+    local BarCorner = Instance.new("UICorner", BarBG)
+    BarCorner.CornerRadius = UDim.new(0, 6)
+
+    BarFill = Instance.new("Frame")
+    BarFill.Size = UDim2.new(0, 0, 1, 0)
+    BarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+    BarFill.BorderSizePixel = 0
+    BarFill.Parent = BarBG
+
+    local BarFillCorner = Instance.new("UICorner", BarFill)
+    BarFillCorner.CornerRadius = UDim.new(0, 6)
+
+    PercentLabel = Instance.new("TextLabel")
+    PercentLabel.BackgroundTransparency = 1
+    PercentLabel.Size = UDim2.new(1, 0, 0, 15)
+    PercentLabel.Position = UDim2.new(0, 0, 0, 42)
+    PercentLabel.Text = "0% (0/0)"
+    PercentLabel.Font = Enum.Font.GothamSemibold
+    PercentLabel.TextSize = 13
+    PercentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PercentLabel.Parent = QuestUI
 end
 
-local function teleportTo(target)
-    if humanoidRootPart and _G.TeleportEnabled then
-        local humanoid = getHumanoid()
-        if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Dead and humanoid:GetState() ~= Enum.HumanoidStateType.Flying then
-            humanoidRootPart.CFrame = CFrame.new(target) + Vector3.new(0, 5, 0)
-            task.wait(0.5)
-        end
+local function RemoveQuestProgressUI()
+    if QuestUI then
+        QuestUI:Destroy()
+        QuestUI = nil
+        BarFill = nil
+        PercentLabel = nil
     end
 end
 
-spawn(function()
-    while task.wait(0.5) do
-        local humanoid = getHumanoid()
-        if _G.AutoGhostfin then
-            local success, errorMsg = pcall(function()
-                if humanoid then
-                    humanoid.WalkSpeed = 0
-                    humanoid.JumpPower = 0
-                    replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
-                    local quests = player:FindFirstChild("QuestProgress")
-                    if quests and quests:FindFirstChild("Ghostfin") then
-                        local progress = quests.Ghostfin.Value
-                        local goal = quests.Ghostfin.Goal.Value
-                        local remaining = math.max(goal - progress, 0)
-                        local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                        teleportTo(target)
-                    end
-                end
-            end)
-            if not success then
-                warn("Error in Auto Ghostfin loop: " .. tostring(errorMsg))
-            end
-        else
-            if humanoid then
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
-            end
-        end
-    end
-end)
+local function StartQuestUpdater()
+    if QuestUpdaterRunning then return end
+    QuestUpdaterRunning = true
 
-local function NotifyQuestProgress()
-    local success, errorMsg = pcall(function()
-        local quests = player:FindFirstChild("QuestProgress")
-        if quests then
-            for _, quest in pairs(quests:GetChildren()) do
-                if quest:IsA("IntValue") and quest:FindFirstChild("Goal") then
-                    local progress = quest.Value
-                    local goal = quest.Goal.Value
-                    local remaining = math.max(goal - progress, 0)
-                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                    local questName = quest.DeepSea
+    task.spawn(function()
+        while QuestUpdaterRunning do
+            task.wait(0.2)
 
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = questName .. " Quest",
-                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                        Duration = 4
-                    })
-                    return
+            if not QuestUI then continue end
+
+            local quests = player:FindFirstChild("QuestProgress")
+            if quests then
+                local q = quests:FindFirstChild("Ghostfin")
+                if q and q:FindFirstChild("Goal") then
+                    local progress = q.Value
+                    local goal = q.Goal.Value
+                    local percent = math.clamp(progress / goal, 0, 1)
+
+                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
+                    PercentLabel.Text = string.format(
+                        "%d%% (%d/%d)",
+                        percent * 100,
+                        progress,
+                        goal
+                    )
                 end
             end
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Quest Status",
-                Text = "No active quest with progress data found. Available quests: " .. table.concat((function() local names = {}; for _, v in pairs(quests:GetChildren()) do table.insert(names, v.Name) end return names end)(), ", "),
-                Duration = 5
-            })
-        else
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Quest Status",
-                Text = "Quest not started or data not found",
-                Duration = 3
-            })
         end
     end)
-    if not success then
-        warn("Error in NotifyQuestProgress: " .. tostring(errorMsg))
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Failed to check quest progress",
-            Duration = 3
-        })
-    end
+end
+
+local function StopQuestUpdater()
+    QuestUpdaterRunning = false
 end
 
 Tab3:Toggle({
-    Title = "Auto Ghostfin Quest",
-    Desc = "Enable Ghostfin quest automation with teleport (avatar will stay still)",
+    Title = "Show Quest Progress",
+    Desc = "Menampilkan progress bar 0% - 100%",
     Default = false,
-    Callback = function(value)
-        _G.AutoGhostfin = value
-        if value then
-            NotifyQuestProgress()
+    Callback = function(v)
+        if v then
+            CreateQuestProgressUI()
+            StartQuestUpdater()
+
+            WindUI:Notify({
+                Title = "Quest Progress",
+                Content = "Progress bar diaktifkan!",
+                Duration = 2,
+                Icon = "bar-chart-2"
+            })
+        else
+            StopQuestUpdater()
+            RemoveQuestProgressUI()
+
+            WindUI:Notify({
+                Title = "Quest Progress",
+                Content = "Progress bar dinonaktifkan.",
+                Duration = 2,
+                Icon = "x"
+            })
         end
     end
 })
 
 Tab3:Button({
-    Title = "Check Quest Progress",
-    Desc = "Show remaining fish and location for active quest",
-    Callback = NotifyQuestProgress
+    Title = "Refresh Progress",
+    Desc = "Update progress secara manual",
+    Callback = function()
+        if QuestUI then
+            local quests = player:FindFirstChild("QuestProgress")
+            if quests then
+                local q = quests:FindFirstChild("Ghostfin")
+                if q and q:FindFirstChild("Goal") then
+                    local progress = q.Value
+                    local goal = q.Goal.Value
+                    local percent = math.clamp(progress / goal, 0, 1)
+
+                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
+                    PercentLabel.Text = string.format(
+                        "%d%% (%d/%d)",
+                        percent * 100,
+                        progress,
+                        goal
+                    )
+                end
+            end
+        end
+
+        WindUI:Notify({
+            Title = "Quest Progress",
+            Content = "Progress berhasil di-refresh!",
+            Duration = 2,
+            Icon = "refresh-cw"
+        })
+    end
 })
 
 Tab3:Toggle({
