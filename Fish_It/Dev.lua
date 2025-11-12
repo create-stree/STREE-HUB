@@ -698,6 +698,24 @@ local Section = Tab3:Section({
 })
 
 Tab3:Toggle({
+    Title = "Disable Notification",
+    Value = false,
+    Callback = function(state)
+        _G.DisableNotification = state
+        if _G.DisableNotification then
+            hookfunction(require(game:GetService("CorePackages").Workspace.Packages.RobloxTranslator).FormatByKeyForLocale, function(...)
+                return ""
+            end)
+        else
+            local v_u_7 = require(game:GetService("CorePackages").Workspace.Packages.RobloxTranslator)
+            hookfunction(v_u_7.FormatByKeyForLocale, function(self, key, locale)
+                return self:_original or key
+            end)
+        end
+    end
+})
+
+Tab3:Toggle({
     Title = "FPS Boost",
     Desc = "Optimizes performance for smooth gameplay",
     Icon = false,
