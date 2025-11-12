@@ -47,6 +47,78 @@ WindUI:Notify({
     Icon = "bell",
 })
 
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+if CoreGui:FindFirstChild("STREE_HUB_LOGO") then
+    CoreGui["STREE_HUB_LOGO"]:Destroy()
+end
+
+local mainUI = CoreGui:WaitForChild("streeUI")
+local mainFrame = mainUI:WaitForChild("MainFrame")
+
+local logoGui = Instance.new("ScreenGui")
+logoGui.Name = "STREE_HUB_LOGO"
+logoGui.IgnoreGuiInset = true
+logoGui.ResetOnSpawn = false
+logoGui.Parent = CoreGui
+
+local logoButton = Instance.new("ImageButton")
+logoButton.Name = "LogoButton"
+logoButton.Size = UDim2.new(0, 60, 0, 60)
+logoButton.Position = UDim2.new(0, 20, 0, 120)
+logoButton.BackgroundTransparency = 1
+logoButton.Image = "rbxassetid://123032091977400"
+logoButton.Parent = logoGui
+
+logoButton.MouseEnter:Connect(function()
+    TweenService:Create(logoButton, TweenInfo.new(0.2), {Size = UDim2.new(0, 68, 0, 68)}):Play()
+end)
+logoButton.MouseLeave:Connect(function()
+    TweenService:Create(logoButton, TweenInfo.new(0.2), {Size = UDim2.new(0, 60, 0, 60)}):Play()
+end)
+
+local isOpen = true
+logoButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    TweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = isOpen and UDim2.new(0, mainFrame.Size.X.Offset, 0, mainFrame.Size.Y.Offset) or UDim2.new(0, 0, 0, 0),
+        Transparency = isOpen and 0 or 1
+    }):Play()
+    mainFrame.Visible = isOpen
+end)
+
+local dragging = false
+local dragInput, mousePos, framePos
+
+logoButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = logoButton.Position
+    end
+end)
+
+logoButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - mousePos
+        logoButton.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
 local Tab1 = Window:Tab({
     Title = "Info",
     Icon = "info",
