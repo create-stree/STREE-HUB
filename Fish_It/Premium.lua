@@ -55,7 +55,7 @@ if CoreGui:FindFirstChild("STREE_HUB_LOGO") then
     CoreGui["STREE_HUB_LOGO"]:Destroy()
 end
 
-local mainUI = CoreGui:WaitForChild("streeUI")
+local mainUI = CoreGui:WaitForChild("windUI")
 local mainFrame = mainUI:WaitForChild("MainFrame")
 
 local logoGui = Instance.new("ScreenGui")
