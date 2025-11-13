@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.2.6",
+    Title = "v0.0.2.7",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -461,52 +461,83 @@ Tab3:Toggle({
 
 Tab3:Slider({ Title = "Sell Delay", Step = 1, Value = { Min = 1, Max = 120, Default = 30 }, Callback = function(v) _G.SellDelay = v end })
 
-Tab3:Section({
-    Title = "Radar",
-    Icon = "radar",
+Tab3:Section({     
+    Title = "Item",
+    Icon = "grid-2x2-check",
     TextXAlignment = "Left",
-    TextSize = 17
+    TextSize = 17,    
 })
 
 Tab3:Divider()
 
-Tab3:Toggle({
+Tab3:Toggle{
     Title = "Radar",
     Value = false,
     Callback = function(state)
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local RS = game:GetService("ReplicatedStorage")
         local Lighting = game:GetService("Lighting")
-        local Replion = require(ReplicatedStorage.Packages.Replion)
-        local Net = require(ReplicatedStorage.Packages.Net)
-        local spr = require(ReplicatedStorage.Packages.spr)
-        local Soundbook = require(ReplicatedStorage.Shared.Soundbook)
-        local ClientTimeController = require(ReplicatedStorage.Controllers.ClientTimeController)
-        local TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)
-        local RemoteRadar = Net:RemoteFunction("UpdateFishingRadar")
-        local Data = Replion.Client:GetReplion("Data")
-        if Data then
-            if RemoteRadar:InvokeServer(state) then
-                Soundbook.Sounds.RadarToggle:Play().PlaybackSpeed = 1 + math.random() * 0.3
-                local effect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
-                if effect then
-                    spr.stop(effect)
-                    local profile = ClientTimeController._getLightingProfile and ClientTimeController:_getLightingProfile() or ClientTimeController._getLighting_profile and ClientTimeController:_getLighting_profile()
-                    local cc = (profile and profile(profile.ColorCorrection)) and profile.ColorCorrection or {}
-                    if not cc.Brightness then cc.Brightness = 0.04 end
-                    if not cc.TintColor then cc.TintColor = Color3.fromRGB(255, 255, 255) end
-                    effect.TintColor = Color3.fromRGB(42, 226, 118)
-                    effect.Brightness = 0.4
-                    spr.target(effect, 1, 1, cc)
+        local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
+        local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
+        
+        if Replion and NetFunction:InvokeServer(state) then
+            local sound = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
+            sound.PlaybackSpeed = 1 + math.random() * 0.3
+            
+            local colorEffect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
+            if colorEffect then
+                require(RS.Packages.spr).stop(colorEffect)
+                local timeController = require(RS.Controllers.ClientTimeController)
+                local lightingProfile = (timeController._getLightingProfile and timeController:_getLightingProfile() or timeController._getLighting_profile and timeController:_getLighting_profile() or {})
+                local colorCorrection = lightingProfile.ColorCorrection or {}
+                
+                colorCorrection.Brightness = colorCorrection.Brightness or 0.04
+                colorCorrection.TintColor = colorCorrection.TintColor or Color3.fromRGB(255, 255, 255)
+                
+                if state then
+                    colorEffect.TintColor = Color3.fromRGB(42, 226, 118)
+                    colorEffect.Brightness = 0.4
+                    require(RS.Controllers.TextNotificationController):DeliverNotification{
+                        Type = "Text",
+                        Text = "Radar: Enabled",
+                        TextColor = {R = 9, G = 255, B = 0}
+                    }
+                else
+                    colorEffect.TintColor = Color3.fromRGB(255, 0, 0)
+                    colorEffect.Brightness = 0.2
+                    require(RS.Controllers.TextNotificationController):DeliverNotification{
+                        Type = "Text",
+                        Text = "Radar: Disabled", 
+                        TextColor = {R = 255, G = 0, B = 0}
+                    }
                 end
-                spr.stop(Lighting)
-                Lighting.ExposureCompensation = 1
-                spr.target(Lighting, 1, 2, { ["ExposureCompensation"] = 0 })
-                TextNotificationController:DeliverNotification({
-                    ["Type"] = "Text",
-                    ["Text"] = ("Radar: %*"):format(state and "Enabled" or "Disabled"),
-                    ["TextColor"] = state and {["R"]=9,["G"]=255,["B"]=0} or {["R"]=255,["G"]=0,["B"]=0}
-                })
+                
+                require(RS.Packages.spr).target(colorEffect, 1, 1, colorCorrection)
             end
+            
+            require(RS.Packages.spr).stop(Lighting)
+            Lighting.ExposureCompensation = 1
+            require(RS.Packages.spr).target(Lighting, 1, 2, {ExposureCompensation = 0})
+        end
+    end
+}
+
+Tab3:Toggle({
+    Title = "Diving Gear",
+    Desc = "Oxygen Tank",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.DivingGear = state
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local RemoteFolder = ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+        if _G.DivingGear then
+            local args = {
+                [1] = 105
+            }
+            RemoteFolder:FindFirstChild("RF/EquipOxygenTank"):InvokeServer(unpack(args))
+        else
+            RemoteFolder:FindFirstChild("RF/UnequipOxygenTank"):InvokeServer()
         end
     end
 })
