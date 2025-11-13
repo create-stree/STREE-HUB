@@ -102,7 +102,7 @@ Tab1:Keybind({
 
 local Tab2 = Window:Tab({
     Title = "Main",
-    Icon = "gamepad-2",
+    Icon = "landmark",
 })
 
 local Tab3 = Window:Tab({
