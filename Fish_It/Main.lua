@@ -567,127 +567,142 @@ local Toggle = Tab3:Toggle({
     end
 })
 
-Tab3:Section({     
-    Title = "Quest [Beta]",
-    Icon = "scroll-text",
-    TextXAlignment = "Left",    
-    TextSize = 17,    
+_G.AutoNotifyEJ = false
+_G.AutoNotifyQuest = false
+
+local rs = game:GetService("ReplicatedStorage")
+local players = game:GetService("Players")
+local player = players.LocalPlayer
+
+local QuestList = require(rs.Shared.Quests.QuestList)
+local QuestUtility = require(rs.Shared.Quests.QuestUtility)
+local Replion = require(rs.Packages.Replion)
+
+local repl = nil
+task.spawn(function()
+    repl = Replion.Client:WaitReplion("Data")
+end)
+
+local function GetEJ()
+    if not repl then return nil end
+    return repl:Get(QuestList.ElementJungle.ReplionPath)
+end
+
+local function GetDeepSea()
+    if not repl then return nil end
+    return repl:Get(QuestList.DeepSea.ReplionPath)
+end
+
+_G.CheckEJ = function()
+    local data = GetEJ()
+    if not data or not data.Available or not data.Available.Forever then
+        WindUI:Notify({Title="Element Jungle",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
+        return
+    end
+    
+    local quests = data.Available.Forever.Quests
+    local total = #quests
+    local done = 0
+    local list = ""
+
+    for _,q in ipairs(quests) do
+        local info = QuestUtility:GetQuestData("ElementJungle","Forever",q.QuestId)
+        if info then
+            local maxVal = QuestUtility.GetQuestValue(repl,info)
+            local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
+            if percent>=100 then done+=1 end
+            list = list..info.DisplayName.." - "..percent.."%\n"
+        end
+    end
+
+    local totalPercent = math.floor((done/total)*100)
+    WindUI:Notify({
+        Title="Element Jungle Progress",
+        Content="Total: "..totalPercent.."%\n\n"..list,
+        Duration=7,
+        Icon="leaf"
+    })
+end
+
+_G.CheckQuestProgress = function()
+    local data = GetDeepSea()
+    if not data or not data.Available or not data.Available.Forever then
+        WindUI:Notify({Title="Deep Sea Quest",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
+        return
+    end
+
+    local quests = data.Available.Forever.Quests
+    local total = #quests
+    local done = 0
+    local list = ""
+
+    for _,q in ipairs(quests) do
+        local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
+        if info then
+            local maxVal = QuestUtility.GetQuestValue(repl,info)
+            local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
+            if percent>=100 then done+=1 end
+            list = list..info.DisplayName.." - "..percent.."%\n"
+        end
+    end
+
+    local totalPercent = math.floor((done/total)*100)
+    WindUI:Notify({
+        Title="Deep Sea Progress",
+        Content="Total: "..totalPercent.."%\n\n"..list,
+        Duration=7,
+        Icon="check-circle"
+    })
+end
+
+task.spawn(function()
+    while task.wait(5) do
+        if _G.AutoNotifyEJ then _G.CheckEJ() end
+        if _G.AutoNotifyQuest then _G.CheckQuestProgress() end
+    end
+end)
+
+Tab3:Section({
+    Title="Quest",
+    Icon="scroll-text",
+    TextXAlignment="Left",
+    TextSize=17
 })
 
 Tab3:Divider()
 
-_G.AutoGhostfin = false
-_G.TeleportEnabled = true
-
-local player = game.Players.LocalPlayer
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-
-local function getHumanoid()
-    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-end
-
-local function teleportTo(target)
-    if humanoidRootPart and _G.TeleportEnabled then
-        local humanoid = getHumanoid()
-        if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Dead and humanoid:GetState() ~= Enum.HumanoidStateType.Flying then
-            humanoidRootPart.CFrame = CFrame.new(target) + Vector3.new(0, 5, 0)
-            task.wait(0.5)
-        end
+Tab3:Toggle({
+    Title="Auto Notify Element Junggle",
+    Desc="Check Progres Automatic Element Junggle",
+    Default=false,
+    Callback=function(v)
+        _G.AutoNotifyEJ = v
     end
-end
-
-spawn(function()
-    while task.wait(0.5) do
-        local humanoid = getHumanoid()
-        if _G.AutoGhostfin then
-            local success, errorMsg = pcall(function()
-                if humanoid then
-                    humanoid.WalkSpeed = 0
-                    humanoid.JumpPower = 0
-                    replicatedStorage.Remotes.StartQuest:FireServer("Ghostfin")
-                    local quests = player:FindFirstChild("QuestProgress")
-                    if quests and quests:FindFirstChild("Ghostfin") then
-                        local progress = quests.Ghostfin.Value
-                        local goal = quests.Ghostfin.Goal.Value
-                        local remaining = math.max(goal - progress, 0)
-                        local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                        teleportTo(target)
-                    end
-                end
-            end)
-            if not success then
-                warn("Error in Auto Ghostfin loop: " .. tostring(errorMsg))
-            end
-        else
-            if humanoid then
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
-            end
-        end
-    end
-end)
-
-local function NotifyQuestProgress()
-    local success, errorMsg = pcall(function()
-        local quests = player:FindFirstChild("QuestProgress")
-        if quests then
-            for _, quest in pairs(quests:GetChildren()) do
-                if quest:IsA("IntValue") and quest:FindFirstChild("Goal") then
-                    local progress = quest.Value
-                    local goal = quest.Goal.Value
-                    local remaining = math.max(goal - progress, 0)
-                    local target = remaining > (goal / 2) and Vector3.new(-3593, -280, -1590) or Vector3.new(-3738, -136, -890)
-                    local locationName = remaining > (goal / 2) and "Place 1" or "Place 2"
-                    local questName = quest.Name
-
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = questName .. " Quest",
-                        Text = string.format("Fish remaining: %d\nLocation: %s (%s)", remaining, locationName, tostring(target)),
-                        Duration = 4
-                    })
-                    return
-                end
-            end
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Quest Status",
-                Text = "No active quest with progress data found. Available quests: " .. table.concat((function() local names = {}; for _, v in pairs(quests:GetChildren()) do table.insert(names, v.Name) end return names end)(), ", "),
-                Duration = 5
-            })
-        else
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Quest Status",
-                Text = "Quest not started or data not found",
-                Duration = 3
-            })
-        end
-    end)
-    if not success then
-        warn("Error in NotifyQuestProgress: " .. tostring(errorMsg))
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Failed to check quest progress",
-            Duration = 3
-        })
-    end
-end
+})
 
 Tab3:Toggle({
-    Title = "Auto Ghostfin Quest",
-    Desc = "Enable Ghostfin quest automation with teleport (avatar will stay still)",
-    Default = false,
-    Callback = function(value)
-        _G.AutoGhostfin = value
-        if value then
-            NotifyQuestProgress()
-        end
+    Title="Auto Notify Quest",
+    Desc="Check Progress Automatic Deep Sea",
+    Default=false,
+    Callback=function(v)
+        _G.AutoNotifyQuest = v
     end
 })
 
 Tab3:Button({
-    Title = "Check Quest Progress",
-    Desc = "Show remaining fish and location for active quest",
-    Callback = NotifyQuestProgress
+    Title="Element Jungle Quest",
+    Desc="Check Progres Progres Element Junggle",
+    Callback=function()
+        _G.CheckEJ()
+    end
+})
+
+Tab3:Button({
+    Title="Deep Sea Quest",
+    Desc="Check Progres Deep Sea",
+    Callback=function()
+        _G.CheckQuestProgress()
+    end
 })
 
 Tab3:Section({     
