@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.5",
+    Title = "v0.0.1.6",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -243,85 +243,34 @@ Tab2:Toggle({
     end
 })
 
-local Players = game:GetService("Players")
-local StarterGui = game:GetService("StarterGui")
-local player = Players.LocalPlayer
-local isFrozen = false
-local lastPos = nil
+local player = game:GetService("Players").LocalPlayer
+local freezeConnection
+local originalCFrame
 
-local function notify(msg, color)
-    pcall(function()
-        StarterGui:SetCore("ChatMakeSystemMessage", {
-            Text = "[FREEZE] " .. msg,
-            Color = color or Color3.fromRGB(150, 255, 150),
-            Font = Enum.Font.SourceSansBold,
-            FontSize = Enum.FontSize.Size24
-        })
-    end)
-end
-
-local function freezeCharacter(char)
-    if not char then return end
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not humanoid or not root then return end
-    lastPos = root.CFrame
-    humanoid.WalkSpeed = 0
-    humanoid.JumpPower = 0
-    humanoid.AutoRotate = false
-    humanoid.PlatformStand = true
-    for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
-        pcall(function() track:Stop(0) end)
-    end
-    local animator = humanoid:FindFirstChildOfClass("Animator")
-    if animator then
-        pcall(function() animator:Destroy() end)
-    end
-    root.Anchored = true
-end
-
-local function unfreezeCharacter(char)
-    if not char then return end
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if humanoid then
-        humanoid.WalkSpeed = 16
-        humanoid.JumpPower = 50
-        humanoid.AutoRotate = true
-        humanoid.PlatformStand = false
-        if not humanoid:FindFirstChildOfClass("Animator") then
-            local newAnimator = Instance.new("Animator")
-            newAnimator.Parent = humanoid
-        end
-    end
-    if root then
-        root.Anchored = false
-        if lastPos then
-            root.CFrame = lastPos
-        end
-    end
-end
-
-local function toggleFreeze(state)
-    isFrozen = state
-    local char = player.Character or player.CharacterAdded:Wait()
-    if state then
-        freezeCharacter(char)
-        notify("Freeze character", Color3.fromRGB(100, 200, 255))
-    else
-        unfreezeCharacter(char)
-        notify("Character released", Color3.fromRGB(255, 150, 150))
-    end
-end
-
-local Toggle = Tab2:Toggle({
+Tab2:Toggle({
     Title = "Freeze Character",
-    Desc = "freeze your character",
-    Icon = false,
-    Type = false,
-    Value = false,
+    Default = false,
     Callback = function(state)
-        toggleFreeze(state)
+        _G.FreezeCharacter = state
+        if state then
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local root = character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    originalCFrame = root.CFrame
+                    freezeConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                        if _G.FreezeCharacter and root then
+                            root.CFrame = originalCFrame
+                        end
+                    end)
+                end
+            end
+        else
+            if freezeConnection then
+                freezeConnection:Disconnect()
+                freezeConnection = nil
+            end
+        end
     end
 })
 
@@ -457,6 +406,16 @@ Tab3:Toggle({
             if fishThread then task.cancel(fishThread) end
             fishThread = nil
         end
+    end
+})
+
+Tab3:Slider({
+    Title = "Instant Fishing Delay",
+    Step = 0.01,
+    Value = {Min = 0.2, Max = 1, Default = 0.35},
+    Callback = function(v)
+        _G.InstantDelay = v
+        WindUI:Notify({Title = "Delay", Content = "Instant Delay: " .. v .. "s", Duration = 2})
     end
 })
 
