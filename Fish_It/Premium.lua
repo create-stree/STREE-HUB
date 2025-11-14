@@ -250,243 +250,270 @@ local isFrozen = false
 local lastPos = nil
 
 local function notify(msg, color)
-	pcall(function()
-		StarterGui:SetCore("ChatMakeSystemMessage", {
-			Text = "[FREEZE] " .. msg,
-			Color = color or Color3.fromRGB(150,255,150),
-			Font = Enum.Font.SourceSansBold,
-			FontSize = Enum.FontSize.Size24
-		})
-	end)
+    pcall(function()
+        StarterGui:SetCore("ChatMakeSystemMessage", {
+            Text = "[FREEZE] " .. msg,
+            Color = color or Color3.fromRGB(150, 255, 150),
+            Font = Enum.Font.SourceSansBold,
+            FontSize = Enum.FontSize.Size24
+        })
+    end)
 end
 
 local function freezeCharacter(char)
-	if not char then return end
-	local humanoid = char:FindFirstChildOfClass("Humanoid")
-	local root = char:FindFirstChild("HumanoidRootPart")
-	if not humanoid or not root then return end
-
-	lastPos = root.CFrame
-
-	humanoid.WalkSpeed = 0
-	humanoid.JumpPower = 0
-	humanoid.AutoRotate = false
-	humanoid.PlatformStand = true
-
-	for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
-		pcall(function() track:Stop(0) end)
-	end
-	local animator = humanoid:FindFirstChildOfClass("Animator")
-	if animator then
-		pcall(function() animator:Destroy() end)
-	end
-
-	root.Anchored = true
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not root then return end
+    lastPos = root.CFrame
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.AutoRotate = false
+    humanoid.PlatformStand = true
+    for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+        pcall(function() track:Stop(0) end)
+    end
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if animator then
+        pcall(function() animator:Destroy() end)
+    end
+    root.Anchored = true
 end
 
 local function unfreezeCharacter(char)
-	if not char then return end
-	local humanoid = char:FindFirstChildOfClass("Humanoid")
-	local root = char:FindFirstChild("HumanoidRootPart")
-	if humanoid then
-		humanoid.WalkSpeed = 16
-		humanoid.JumpPower = 50
-		humanoid.AutoRotate = true
-		humanoid.PlatformStand = false
-		if not humanoid:FindFirstChildOfClass("Animator") then
-			local newAnimator = Instance.new("Animator")
-			newAnimator.Parent = humanoid
-		end
-	end
-
-	if root then
-		root.Anchored = false
-		if lastPos then
-			root.CFrame = lastPos
-		end
-	end
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if humanoid then
+        humanoid.WalkSpeed = 16
+        humanoid.JumpPower = 50
+        humanoid.AutoRotate = true
+        humanoid.PlatformStand = false
+        if not humanoid:FindFirstChildOfClass("Animator") then
+            local newAnimator = Instance.new("Animator")
+            newAnimator.Parent = humanoid
+        end
+    end
+    if root then
+        root.Anchored = false
+        if lastPos then
+            root.CFrame = lastPos
+        end
+    end
 end
 
 local function toggleFreeze(state)
-	isFrozen = state
-	local char = player.Character or player.CharacterAdded:Wait()
-
-	if state then
-		freezeCharacter(char)
-		notify("Freeze character", Color3.fromRGB(100,200,255))
-	else
-		unfreezeCharacter(char)
-		notify("Character released", Color3.fromRGB(255,150,150))
-	end
+    isFrozen = state
+    local char = player.Character or player.CharacterAdded:Wait()
+    if state then
+        freezeCharacter(char)
+        notify("Freeze character", Color3.fromRGB(100, 200, 255))
+    else
+        unfreezeCharacter(char)
+        notify("Character released", Color3.fromRGB(255, 150, 150))
+    end
 end
 
 local Toggle = Tab2:Toggle({
-	Title = "Freeze Character",
-	Desc = "freeze your character",
-	Icon = false,
-	Type = false,
-	Value = false,
-	Callback = function(state)
-		toggleFreeze(state)
-	end
+    Title = "Freeze Character",
+    Desc = "freeze your character",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        toggleFreeze(state)
+    end
 })
 
 player.CharacterAdded:Connect(function(char)
-	if isFrozen then
-		task.wait(0.5)
-		freezeCharacter(char)
-	end
+    if isFrozen then
+        task.wait(0.5)
+        freezeCharacter(char)
+    end
 end)
 
-_G.AutoFishing=false
-_G.AutoEquipRod=false
-_G.AutoSell=false
-_G.Radar=false
-_G.Instant=false
-_G.SellDelay=_G.SellDelay or 30
-_G.InstantDelay=_G.InstantDelay or 0.35
-_G.CallMinDelay=_G.CallMinDelay or 0.18
-_G.CallBackoff=_G.CallBackoff or 1.5
+_G.AutoFishing = false
+_G.AutoEquipRod = false
+_G.AutoSell = false
+_G.Radar = false
+_G.Instant = false
+_G.SellDelay = _G.SellDelay or 30
+_G.InstantDelay = _G.InstantDelay or 0.35
+_G.CallMinDelay = _G.CallMinDelay or 0.18
+_G.CallBackoff = _G.CallBackoff or 1.5
 
-local lastCall={}
-local function safeCall(k,f)
- local n=os.clock()
- local d=_G.CallMinDelay
- local b=_G.CallBackoff
- if lastCall[k] and n-lastCall[k]<d then task.wait(d-(n-lastCall[k])) end
- local o,r=pcall(f)
- lastCall[k]=os.clock()
- if not o then
-  local m=tostring(r):lower()
-  task.wait(m:find("429")or m:find("too many requests")and b or 0.2)
- end
- return o,r
+local lastCall = {}
+local function safeCall(k, f)
+    local n = os.clock()
+    local d = _G.CallMinDelay
+    local b = _G.CallBackoff
+    if lastCall[k] and n - lastCall[k] < d then task.wait(d - (n - lastCall[k])) end
+    local o, r = pcall(f)
+    lastCall[k] = os.clock()
+    if not o then
+        local m = tostring(r):lower()
+        task.wait(m:find("429") or m:find("too many requests") and b or 0.2)
+    end
+    return o, r
 end
 
-local RS=game:GetService("ReplicatedStorage")
-local net=RS.Packages._Index["sleitnick_net@0.2.0"].net
+local RS = game:GetService("ReplicatedStorage")
+local net = RS.Packages._Index["sleitnick_net@0.2.0"].net
 
-local function rod()safeCall("rod",function()net["RE/EquipToolFromHotbar"]:FireServer(1)end)end
-local function sell()safeCall("sell",function()net["RF/SellAllItems"]:InvokeServer()end)end
-local function autoon()safeCall("autoon",function()net["RF/UpdateAutoFishingState"]:InvokeServer(true)end)end
-local function autooff()safeCall("autooff",function()net["RF/UpdateAutoFishingState"]:InvokeServer(false)end)end
-local function catch()safeCall("catch",function()net["RE/FishingCompleted"]:FireServer()end)end
-local function charge()safeCall("charge",function()net["RF/ChargeFishingRod"]:InvokeServer()end)end
+local function rod() safeCall("rod", function() net["RE/EquipToolFromHotbar"]:FireServer(1) end) end
+local function sell() safeCall("sell", function() net["RF/SellAllItems"]:InvokeServer() end) end
+local function autoon() safeCall("autoon", function() net["RF/UpdateAutoFishingState"]:InvokeServer(true) end) end
+local function autooff() safeCall("autooff", function() net["RF/UpdateAutoFishingState"]:InvokeServer(false) end) end
+local function catch() safeCall("catch", function() net["RE/FishingCompleted"]:FireServer() end) end
+local function charge() safeCall("charge", function() net["RF/ChargeFishingRod"]:InvokeServer() end) end
 local function lempar()
- safeCall("lempar",function()net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233,0.996,1761532005.497)end)
- safeCall("charge2",function()net["RF/ChargeFishingRod"]:InvokeServer()end)
+    safeCall("lempar", function() net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, 1761532005.497) end)
+    safeCall("charge2", function() net["RF/ChargeFishingRod"]:InvokeServer() end)
 end
 
 local function autosell()
- while _G.AutoSell do
-  sell()
-  local d=tonumber(_G.SellDelay)or 30
-  local w=0
-  while w<d and _G.AutoSell do task.wait(0.25) w=w+0.25 end
- end
+    while _G.AutoSell do
+        sell()
+        local d = tonumber(_G.SellDelay) or 30
+        local w = 0
+        while w < d and _G.AutoSell do task.wait(0.25) w = w + 0.25 end
+    end
 end
 
 local function instant_cycle()
- charge()
- lempar()
- task.wait(_G.InstantDelay)
- catch()
+    charge()
+    lempar()
+    task.wait(_G.InstantDelay)
+    catch()
 end
 
-local Tab3=Window:Tab{Title="Main",Icon="landmark"}
-Tab3:Section{Title="Fishing",Icon="anchor",TextXAlignment="Left",TextSize=17}
-Tab3:Divider()
-Tab3:Toggle{Title="Auto Equip Rod",Value=false,Callback=function(v)_G.AutoEquipRod=v if v then rod()end end}
+local Tab3 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark"
+})
 
-local mode="Instant"
-local fishThread,sellThread
-
-Tab3:Dropdown{Title="Mode",Values={"Instant","Legit"},Value="Instant",Callback=function(v)mode=v WindUI:Notify{Title="Mode",Content="Mode: "..v,Duration=3}end}
-
-Tab3:Toggle{
- Title="Auto Fishing",Value=false,
- Callback=function(v)
-  _G.AutoFishing=v
-  if v then
-   if mode=="Instant" then
-    _G.Instant=true
-    WindUI:Notify{Title="Auto Fishing",Content="Instant ON",Duration=3}
-    if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()
-     while _G.AutoFishing and mode=="Instant" do
-      instant_cycle()
-      task.wait(0.35)
-     end
-    end)
-   else
-    WindUI:Notify{Title="Auto Fishing",Content="Legit ON",Duration=3}
-    if fishThread then fishThread=nil end
-    fishThread=task.spawn(function()
-     while _G.AutoFishing and mode=="Legit" do
-      autoon()
-      task.wait(1)
-     end
-    end)
-   end
-  else
-   WindUI:Notify{Title="Auto Fishing",Content="OFF",Duration=3}
-   autooff()
-   _G.Instant=false
-   if fishThread then task.cancel(fishThread)end
-   fishThread=nil
-  end
- end
-}
-
-Tab3:Slider{
- Title="Instant Fishing Delay",
- Step=0.01,
- Value={Min=0.2,Max=1,Default=0.35},
- Callback=function(v)_G.InstantDelay=v WindUI:Notify{Title="Delay",Content="Instant Delay: "..v.."s",Duration=2}end
-}
-
-Tab3:Section{Title="Auto Sell",Icon="coins",TextXAlignment="Left",TextSize=17}
-
-Tab3:Divider()
-
-Tab3:Toggle{
- Title="Auto Sell",Value=false,
- Callback=function(v)
-  _G.AutoSell=v
-  if v then
-   if sellThread then task.cancel(sellThread)end
-   sellThread=task.spawn(autosell)
-  else
-   _G.AutoSell=false
-   if sellThread then task.cancel(sellThread)end
-   sellThread=nil
-  end
- end
-}
-
-Tab3:Slider{
-	Title="Sell Delay",
-	Step= 1,
-	Value={
-		Min= 1,
-		Max= 120,
-		Default= 30
-	},
-	Callback=function(v)
-		_G.SellDelay=v
-	end
-}
-
-Tab3:Section({     
-    Title = "Item",
-    Icon = "grid-2x2-check",
+Tab3:Section({
+    Title = "Fishing",
+    Icon = "anchor",
     TextXAlignment = "Left",
-    TextSize = 17,    
+    TextSize = 17
 })
 
 Tab3:Divider()
 
-Tab3:Toggle{
+Tab3:Toggle({
+    Title = "Auto Equip Rod",
+    Value = false,
+    Callback = function(v)
+        _G.AutoEquipRod = v
+        if v then rod() end
+    end
+})
+
+local mode = "Instant"
+local fishThread
+local sellThread
+
+Tab3:Dropdown({
+    Title = "Mode",
+    Values = {"Instant", "Legit"},
+    Value = "Instant",
+    Callback = function(v)
+        mode = v
+        WindUI:Notify({Title = "Mode", Content = "Mode: " .. v, Duration = 3})
+    end
+})
+
+Tab3:Toggle({
+    Title = "Auto Fishing",
+    Value = false,
+    Callback = function(v)
+        _G.AutoFishing = v
+        if v then
+            if mode == "Instant" then
+                _G.Instant = true
+                WindUI:Notify({Title = "Auto Fishing", Content = "Instant ON", Duration = 3})
+                if fishThread then fishThread = nil end
+                fishThread = task.spawn(function()
+                    while _G.AutoFishing and mode == "Instant" do
+                        instant_cycle()
+                        task.wait(0.35)
+                    end
+                end)
+            else
+                WindUI:Notify({Title = "Auto Fishing", Content = "Legit ON", Duration = 3})
+                if fishThread then fishThread = nil end
+                fishThread = task.spawn(function()
+                    while _G.AutoFishing and mode == "Legit" do
+                        autoon()
+                        task.wait(1)
+                    end
+                end)
+            end
+        else
+            WindUI:Notify({Title = "Auto Fishing", Content = "OFF", Duration = 3})
+            autooff()
+            _G.Instant = false
+            if fishThread then task.cancel(fishThread) end
+            fishThread = nil
+        end
+    end
+})
+
+Tab3:Slider({
+    Title = "Instant Fishing Delay",
+    Step = 0.01,
+    Value = {Min = 0.2, Max = 1, Default = 0.35},
+    Callback = function(v)
+        _G.InstantDelay = v
+        WindUI:Notify({Title = "Delay", Content = "Instant Delay: " .. v .. "s", Duration = 2})
+    end
+})
+
+Tab3:Section({
+    Title = "Auto Sell",
+    Icon = "coins",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Divider()
+
+Tab3:Toggle({
+    Title = "Auto Sell",
+    Value = false,
+    Callback = function(v)
+        _G.AutoSell = v
+        if v then
+            if sellThread then task.cancel(sellThread) end
+            sellThread = task.spawn(autosell)
+        else
+            _G.AutoSell = false
+            if sellThread then task.cancel(sellThread) end
+            sellThread = nil
+        end
+    end
+})
+
+Tab3:Slider({
+    Title = "Sell Delay",
+    Step = 1,
+    Value = {Min = 1, Max = 120, Default = 30},
+    Callback = function(v)
+        _G.SellDelay = v
+    end
+})
+
+Tab3:Section({
+    Title = "Item",
+    Icon = "grid-2x2-check",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Divider()
+
+Tab3:Toggle({
     Title = "Radar",
     Value = false,
     Callback = function(state)
@@ -494,48 +521,42 @@ Tab3:Toggle{
         local Lighting = game:GetService("Lighting")
         local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
         local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
-        
         if Replion and NetFunction:InvokeServer(state) then
             local sound = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
             sound.PlaybackSpeed = 1 + math.random() * 0.3
-            
             local colorEffect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
             if colorEffect then
                 require(RS.Packages.spr).stop(colorEffect)
                 local timeController = require(RS.Controllers.ClientTimeController)
-                local lightingProfile = (timeController._getLightingProfile and timeController:_getLightingProfile() or timeController._getLighting_profile and timeController:_getLighting_profile() or {})
-                local colorCorrection = lightingProfile.ColorCorrection or {}
-                
-                colorCorrection.Brightness = colorCorrection.Brightness or 0.04
-                colorCorrection.TintColor = colorCorrection.TintColor or Color3.fromRGB(255, 255, 255)
-                
+                local profile = timeController._getLightingProfile and timeController:_getLightingProfile() or {}
+                local correction = profile.ColorCorrection or {}
+                correction.Brightness = correction.Brightness or 0.04
+                correction.TintColor = correction.TintColor or Color3.fromRGB(255, 255, 255)
                 if state then
                     colorEffect.TintColor = Color3.fromRGB(42, 226, 118)
                     colorEffect.Brightness = 0.4
-                    require(RS.Controllers.TextNotificationController):DeliverNotification{
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
                         Type = "Text",
                         Text = "Radar: Enabled",
                         TextColor = {R = 9, G = 255, B = 0}
-                    }
+                    })
                 else
                     colorEffect.TintColor = Color3.fromRGB(255, 0, 0)
                     colorEffect.Brightness = 0.2
-                    require(RS.Controllers.TextNotificationController):DeliverNotification{
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
                         Type = "Text",
-                        Text = "Radar: Disabled", 
+                        Text = "Radar: Disabled",
                         TextColor = {R = 255, G = 0, B = 0}
-                    }
+                    })
                 end
-                
-                require(RS.Packages.spr).target(colorEffect, 1, 1, colorCorrection)
+                require(RS.Packages.spr).target(colorEffect, 1, 1, correction)
             end
-            
             require(RS.Packages.spr).stop(Lighting)
             Lighting.ExposureCompensation = 1
             require(RS.Packages.spr).target(Lighting, 1, 2, {ExposureCompensation = 0})
         end
     end
-}
+})
 
 Tab3:Toggle({
     Title = "Diving Gear",
@@ -545,15 +566,12 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.DivingGear = state
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local RemoteFolder = ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
-        if _G.DivingGear then
-            local args = {
-                [1] = 105
-            }
-            RemoteFolder:FindFirstChild("RF/EquipOxygenTank"):InvokeServer(unpack(args))
+        local RS = game:GetService("ReplicatedStorage")
+        local RemoteFolder = RS.Packages._Index["sleitnick_net@0.2.0"].net
+        if state then
+            RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(105)
         else
-            RemoteFolder:FindFirstChild("RF/UnequipOxygenTank"):InvokeServer()
+            RemoteFolder["RF/UnequipOxygenTank"]:InvokeServer()
         end
     end
 })
