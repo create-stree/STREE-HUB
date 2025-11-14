@@ -419,16 +419,6 @@ Tab3:Slider({
     end
 })
 
-Tab3:Slider({
-    Title = "Instant Fishing Delay",
-    Step = 0.01,
-    Value = {Min = 0.2, Max = 1, Default = 0.35},
-    Callback = function(v)
-        _G.InstantDelay = v
-        WindUI:Notify({Title = "Delay", Content = "Instant Delay: " .. v .. "s", Duration = 2})
-    end
-})
-
 Tab3:Section({
     Title = "Auto Sell",
     Icon = "coins",
