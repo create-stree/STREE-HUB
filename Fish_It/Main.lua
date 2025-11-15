@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.2.7",
+    Title = "v0.0.2.8",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -238,6 +238,44 @@ local Toggle = Tab2:Toggle({
         end)
     end
 })
+
+local player = game:GetService("Players").LocalPlayer
+local freezeConnection
+local originalCFrame
+
+Tab2:Toggle({
+    Title = "Freeze Character",
+    Default = false,
+    Callback = function(state)
+        _G.FreezeCharacter = state
+        if state then
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local root = character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    originalCFrame = root.CFrame
+                    freezeConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                        if _G.FreezeCharacter and root then
+                            root.CFrame = originalCFrame
+                        end
+                    end)
+                end
+            end
+        else
+            if freezeConnection then
+                freezeConnection:Disconnect()
+                freezeConnection = nil
+            end
+        end
+    end
+})
+
+player.CharacterAdded:Connect(function(char)
+    if isFrozen then
+        task.wait(0.5)
+        freezeCharacter(char)
+    end
+end)
 
 _G.AutoFishing = false
 _G.AutoEquipRod = false
