@@ -525,18 +525,56 @@ local Toggle = Tab3:Toggle({
     end
 })
 
+
+Tab3:Section({
+    Title="Quest Ghostfin",
+    Icon="fish",
+    TextXAlignment="Left",
+    TextSize=17
+})
+
+Tab3:Section({
+    Title="Quest Element",
+    Icon="leaf",
+    TextXAlignment="Left",
+    TextSize=17
+})
+
+ParagraphDeepSea = Tab3:Paragraph({
+    Title = "Deep Sea Progress",
+    Desc = "Menunggu data quest...",
+})
+
+ParagraphEJ = Tab3:Paragraph({
+    Title = "Element Jungle Progress",
+    Desc = "Menunggu data quest...",
+})
+
+Tab3:Toggle({
+    Title = "Auto Update Ghostfin",
+    Default = false,
+    Callback = function(v)
+        _G.AutoNotifyQuest = v
+    end
+})
+
+Tab3:Toggle({
+    Title = "Auto Update Element Jungle",
+    Default = false,
+    Callback = function(v)
+        _G.AutoNotifyEJ = v
+    end
+})
+
 _G.AutoNotifyEJ = false
 _G.AutoNotifyQuest = false
 
 local rs = game:GetService("ReplicatedStorage")
-local players = game:GetService("Players")
-local player = players.LocalPlayer
-
 local QuestList = require(rs.Shared.Quests.QuestList)
 local QuestUtility = require(rs.Shared.Quests.QuestUtility)
 local Replion = require(rs.Packages.Replion)
-
 local repl = nil
+
 task.spawn(function()
     repl = Replion.Client:WaitReplion("Data")
 end)
@@ -552,65 +590,57 @@ local function GetDeepSea()
 end
 
 _G.CheckEJ = function()
+    if not ParagraphEJ then return end
     local data = GetEJ()
     if not data or not data.Available or not data.Available.Forever then
-        WindUI:Notify({Title="Element Jungle",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
+        ParagraphEJ:SetDesc("Quest tidak ditemukan!")
         return
     end
-    
     local quests = data.Available.Forever.Quests
     local total = #quests
     local done = 0
     local list = ""
-
-    for _,q in ipairs(quests) do
+    for _, q in ipairs(quests) do
         local info = QuestUtility:GetQuestData("ElementJungle","Forever",q.QuestId)
         if info then
             local maxVal = QuestUtility.GetQuestValue(repl,info)
             local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
-            if percent>=100 then done+=1 end
-            list = list..info.DisplayName.." - "..percent.."%\n"
+            if percent >= 100 then done += 1 end
+            list = list .. info.DisplayName .. " - " .. percent .. "%\n"
         end
     end
-
     local totalPercent = math.floor((done/total)*100)
-    WindUI:Notify({
-        Title="Element Jungle Progress",
-        Content="Total: "..totalPercent.."%\n\n"..list,
-        Duration=7,
-        Icon="leaf"
-    })
+    ParagraphEJ:SetDesc(
+        "Total Progress: " .. totalPercent .. "%" ..
+        "\n-----------------------\n" .. list
+    )
 end
 
 _G.CheckQuestProgress = function()
+    if not ParagraphDeepSea then return end
     local data = GetDeepSea()
     if not data or not data.Available or not data.Available.Forever then
-        WindUI:Notify({Title="Deep Sea Quest",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
+        ParagraphDeepSea:SetDesc("Quest tidak ditemukan!")
         return
     end
-
     local quests = data.Available.Forever.Quests
     local total = #quests
     local done = 0
     local list = ""
-
-    for _,q in ipairs(quests) do
+    for _, q in ipairs(quests) do
         local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
         if info then
-            local maxVal = QuestUtility.GetQuestValue(repl,info)
+            local maxVal = QuestUtility:GetQuestValue(repl,info)
             local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
-            if percent>=100 then done+=1 end
-            list = list..info.DisplayName.." - "..percent.."%\n"
+            if percent >= 100 then done += 1 end
+            list = list .. info.DisplayName .. " - " .. percent .. "%\n"
         end
     end
-
     local totalPercent = math.floor((done/total)*100)
-    WindUI:Notify({
-        Title="Deep Sea Progress",
-        Content="Total: "..totalPercent.."%\n\n"..list,
-        Duration=7,
-        Icon="check-circle"
-    })
+    ParagraphDeepSea:SetDesc(
+        "Total Progress: " .. totalPercent .. "%" ..
+        "\n-----------------------\n" .. list
+    )
 end
 
 task.spawn(function()
@@ -619,47 +649,6 @@ task.spawn(function()
         if _G.AutoNotifyQuest then _G.CheckQuestProgress() end
     end
 end)
-
-local Section = Tab3:Section({
-        Title="Quest",
-        Icon="leaf",
-        TextXAlignment="Left",
-        TextSize=17
-})
-
-Tab3:Toggle({
-    Title="Auto Notify EJ",
-    Desc="Cek progres otomatis Element Junggle",
-    Default=false,
-    Callback=function(v)
-        _G.AutoNotifyEJ = v
-    end
-})
-
-Tab3:Button({
-    Title="Element Jungle Quest",
-    Desc="progres progres EJ",
-    Callback=function()
-        _G.CheckEJ()
-    end
-})
-
-Tab3:Toggle({
-    Title="Auto Notify Quest",
-    Desc="Cek progress otomatis Deep Sea",
-    Default=false,
-    Callback=function(v)
-        _G.AutoNotifyQuest = v
-    end
-})
-
-Tab3:Button({
-    Title="Deep Sea Quest",
-    Desc="progres Deep Sea",
-    Callback=function()
-        _G.CheckQuestProgress()
-    end
-})
 
 Tab3:Toggle({
     Title = "Halloween Auto Claim",
