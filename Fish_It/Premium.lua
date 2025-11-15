@@ -1154,66 +1154,93 @@ Tab5:Button({
     end  
 })
 
-Tab5:Section({
-    Title = "Buy Weather Event",
-    Icon = "cloud-drizzle",
+Tab5:Section({ 
+    Title = "Buy Weathers",
+    Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
 Tab5:Divider()
 
-local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]  
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
-local weathers = {
-    ["Wind"] = "Wind",
-    ["Cloudy"] = "Cloudy",
-    ["Snow"] = "Snow",
-    ["Storm"] = "Storm",
-    ["Shine"] = "Shine",
-    ["Shark Hunt"] = "Shark Hunt"
+local weatherKeyMap = {
+    ["Wind (10k Coins)"] = "Wind",
+    ["Snow (15k Coins)"] = "Snow",
+    ["Cloudy (20k Coins)"] = "Cloudy",
+    ["Storm (35k Coins)"] = "Storm",
+    ["Radiant (50k Coins)"] = "Radiant",
+    ["Shark Hunt (300k Coins)"] = "Shark Hunt"
 }
 
 local weatherNames = {  
-    "Windy (10k Coins)", "Cloudy (20k Coins)", "Stormy (35k Coins)", 
-    "Shining (50k Coins)", "Shark Hunt (300k Coins)", "Snow (15k Coins)"  
-}  
+    "Wind (10k Coins)", "Snow (15k Coins)", "Cloudy (20k Coins)",  
+    "Storm (35k Coins)", "Radiant (50k Coins)", "Shark Hunt (300k Coins)"
+}
 
-local weatherKeyMap = {  
-    ["Windy (10k Coins)"] = "Wind",  
-    ["Cloudy (20k Coins)"] = "Cloudy",  
-    ["Stormy (35k Coins)"] = "Storm",  
-    ["Shining (50k Coins)"] = "Shine",  
-    ["Shark Hunt (300k Coins)"] = "Shark Hunting",  
-    ["Snow (15k Coins)"] = "Snow"  
-}  
+local selectedWeathers = {}
 
-local selectedWeather = weatherNames[1]  
+Tab5:Dropdown({
+    Title = "Select Weather Event",
+    Values = weatherNames,
+    Multi = true,
+    Callback = function(values)
+        selectedWeathers = values
+    end
+})
 
-Tab5:Dropdown({  
-    Title = "Select Weather Event",  
-    Values = weatherNames,  
-    Value = selectedWeather,  
-    Callback = function(value)  
-        selectedWeather = value  
-    end  
-})  
+local autoBuyEnabled = false
+local buyDelay = 0.5
 
-Tab5:Button({  
-    Title = "Buy Weather Event",  
-    Callback = function()  
-        local key = weatherKeyMap[selectedWeather]  
-        if key and weathers[key] then  
-            local success, err = pcall(function()  
-                RFPurchaseWeatherEvent:InvokeServer(weathers[key])  
-            end)  
-            if success then  
-                WindUI:Notify({Title = "Weather Purchase", Content = "Purchased " .. selectedWeather, Duration = 3})  
-            else  
-                WindUI:Notify({Title = "Weather Purchase Error", Content = tostring(err), Duration = 5})  
-            end  
-        end  
-    end  
+local function startAutoBuy()
+    task.spawn(function()
+        while autoBuyEnabled do
+            for _, displayName in ipairs(selectedWeathers) do
+                local key = weatherKeyMap[displayName]
+                if key then
+                    local success, err = pcall(function()
+                        RFPurchaseWeatherEvent:InvokeServer(key)
+                    end)
+                    if success then
+                        WindUI:Notify({
+                            Title = "Buy",
+                            Content = "Purchased " .. displayName,
+                            Duration = 1
+                        })
+                    else
+                        warn("Error buying weather:", err)
+                    end
+                    task.wait(buyDelay)
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end
+
+Tab5:Toggle({
+    Title = "Buy Weather Event",
+    Desc = "Automatically purchase selected weather event",
+    Value = false,
+    Callback = function(state)
+        autoBuyEnabled = state
+        if state then
+            WindUI:Notify({
+                Title = "Auto Buy",
+                Content = "Enabled",
+                Duration = 2
+            })
+            startAutoBuy()
+        else
+            WindUI:Notify({
+                Title = "Auto Buy",
+                Content = "Disabled",
+                Duration = 2
+            })
+        end
+    end
 })
 
 local Tab6 = Window:Tab({
@@ -1391,43 +1418,180 @@ Tab6:Section({
 
 Tab6:Divider()
 
-local Event_Locations = {
-    ["Black Hole"] = Vector3.new(883, -1.4, 2542),
-    ["Ghost Shark Hunt"] = Vector3.new(489.559, -1.35, 25.406),
-    ["Megalodon Hunt"] = Vector3.new(-1076.3, -1.4, 1676.2),
-    ["Meteor Rain"] = Vector3.new(383, -1.4, 2452),
-    ["Shark Hunt"] = Vector3.new(1.65, -1.35, 2095.725),
-    ["Storm Hunt"] = Vector3.new(1735.85, -1.4, -208.425),
-    ["Worm Hunt"] = Vector3.new(1591.55, -1.4, -105.925),
+local Workspace = game:GetService("Workspace")
+local StarterGui = game:GetService("StarterGui")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+	character = c
+	hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+local megCheckRadius = 150
+
+local autoEventTPEnabled = false
+local selectedEvents = {}
+local createdEventPlatform = nil
+
+local eventData = {
+	["Worm Hunt"] = {
+		TargetName = "Model",
+		Locations = {
+			Vector3.new(2190.85, -1.4, 97.575), 
+			Vector3.new(-2450.679, -1.4, 139.731), 
+			Vector3.new(-267.479, -1.4, 5188.531),
+			Vector3.new(-327, -1.4, 2422)
+		},
+		PlatformY = 107,
+		Priority = 1,
+		Icon = "fish"
+	},
+	["Megalodon Hunt"] = {
+		TargetName = "Megalodon Hunt",
+		Locations = {
+			Vector3.new(-1076.3, -1.4, 1676.2),
+			Vector3.new(-1191.8, -1.4, 3597.3),
+			Vector3.new(412.7, -1.4, 4134.4),
+		},
+		PlatformY = 107,
+		Priority = 2,
+		Icon = "anchor"
+	},
+	["Ghost Shark Hunt"] = {
+		TargetName = "Ghost Shark Hunt",
+		Locations = {
+			Vector3.new(489.559, -1.35, 25.406), 
+			Vector3.new(-1358.216, -1.35, 4100.556), 
+			Vector3.new(627.859, -1.35, 3798.081)
+		},
+		PlatformY = 107,
+		Priority = 3,
+		Icon = "fish"
+	},
+	["Shark Hunt"] = {
+		TargetName = "Shark Hunt",
+		Locations = {
+			Vector3.new(1.65, -1.35, 2095.725),
+			Vector3.new(1369.95, -1.35, 930.125),
+			Vector3.new(-1585.5, -1.35, 1242.875),
+			Vector3.new(-1896.8, -1.35, 2634.375)
+		},
+		PlatformY = 107,
+		Priority = 4,
+		Icon = "fish"
+	},
 }
 
-local ActiveEvent = nil
+local eventNames = {}
+for name in pairs(eventData) do
+	table.insert(eventNames, name)
+end
+
+local function destroyEventPlatform()
+	if createdEventPlatform and createdEventPlatform.Parent then
+		createdEventPlatform:Destroy()
+		createdEventPlatform = nil
+	end
+end
+
+local function createAndTeleportToPlatform(targetPos, y)
+	destroyEventPlatform()
+
+	local platform = Instance.new("Part")
+	platform.Size = Vector3.new(5, 1, 5)
+	platform.Position = Vector3.new(targetPos.X, y, targetPos.Z)
+	platform.Anchored = true
+	platform.Transparency = 1
+	platform.CanCollide = true
+	platform.Name = "EventPlatform"
+	platform.Parent = Workspace
+	createdEventPlatform = platform
+
+	hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
+end
+
+local function runMultiEventTP()
+	while autoEventTPEnabled do
+		local sorted = {}
+		for _, e in ipairs(selectedEvents) do
+			if eventData[e] then
+				table.insert(sorted, eventData[e])
+			end
+		end
+		table.sort(sorted, function(a, b) return a.Priority < b.Priority end)
+
+		for _, config in ipairs(sorted) do
+			local foundTarget, foundPos = nil, nil
+
+			if config.TargetName == "Model" then
+				local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
+				if menuRings then
+					for _, props in ipairs(menuRings:GetChildren()) do
+						if props.Name == "Props" then
+							local model = props:FindFirstChild("Model")
+							if model and model.PrimaryPart then
+								for _, loc in ipairs(config.Locations) do
+									if (model.PrimaryPart.Position - loc).Magnitude <= megCheckRadius then
+										foundTarget = model
+										foundPos = model.PrimaryPart.Position
+										break
+									end
+								end
+							end
+						end
+						if foundTarget then break end
+					end
+				end
+			else
+				for _, loc in ipairs(config.Locations) do
+					for _, d in ipairs(Workspace:GetDescendants()) do
+						if d.Name == config.TargetName then
+							local pos = d:IsA("BasePart") and d.Position or (d.PrimaryPart and d.PrimaryPart.Position)
+							if pos and (pos - loc).Magnitude <= megCheckRadius then
+								foundTarget = d
+								foundPos = pos
+								break
+							end
+						end
+					end
+					if foundTarget then break end
+				end
+			end
+
+			if foundTarget and foundPos then
+				createAndTeleportToPlatform(foundPos, config.PlatformY)
+			end
+		end
+		task.wait(0.05)
+	end
+	destroyEventPlatform()
+end
 
 Tab6:Dropdown({
-    Title = "Select Event",
-    Values = (function()
-        local keys = {}
-        for name in pairs(Event_Locations) do
-            table.insert(keys, name)
-        end
-        table.sort(keys)
-        return keys
-    end)(),
-    Callback = function(Value)
-        ActiveEvent = Value
-    end
+	Title = "Select Events",
+	Values = eventNames,
+	Multi = true,
+	AllowNone = true,
+	Callback = function(values)
+		selectedEvents = values
+		print("[EventTP] Selected Events:", table.concat(values, ", "))
+	end
 })
 
-Tab6:Button({
-    Title = "Teleport to Event",
-    Callback = function()
-        local Char = Player.Character or Player.CharacterAdded:Wait()
-        local HRP = Char:FindFirstChild("HumanoidRootPart")
-        if not HRP then return end
-        if ActiveEvent and Event_Locations[ActiveEvent] then
-            HRP.CFrame = CFrame.new(Event_Locations[ActiveEvent])
-        end
-    end
+Tab6:Toggle({
+	Title = "Auto Event",
+	Icon = false,
+	Type = false,
+	Value = false,
+	Callback = function(state)
+		autoEventTPEnabled = state
+		if state then
+			task.spawn(runMultiEventTP)
+		else
+		end
+	end
 })
 
 local Tab7 = Window:Tab({
