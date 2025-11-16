@@ -285,6 +285,8 @@ _G.Instant = false
 _G.SellDelay = _G.SellDelay or 30
 _G.CallMinDelay = _G.CallMinDelay or 0.12
 _G.CallBackoff = _G.CallBackoff or 1.5
+_G.CatchDelay = _G.CatchDelay or 1
+_G.ReelDelay = _G.ReelDelay or 0.2
 
 local lastCall = {}
 local function safeCall(key, fn)
@@ -309,70 +311,76 @@ end
 
 local function rod()
     safeCall("EquipToolFromHotbar", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
     end)
 end
 
 local function sell()
     safeCall("SellAllItems", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/SellAllItems"):InvokeServer()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/SellAllItems"]:InvokeServer()
     end)
 end
 
 local function radar()
     safeCall("UpdateFishingRadar_true", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/UpdateFishingRadar"):InvokeServer(true)
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/UpdateFishingRadar"]:InvokeServer(true)
     end)
 end
 
 local function autoon()
     safeCall("UpdateAutoFishingState_true", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(true)
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/UpdateAutoFishingState"]:InvokeServer(true)
     end)
 end
 
 local function autooff()
     safeCall("UpdateAutoFishingState_false", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(false)
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/UpdateAutoFishingState"]:InvokeServer(false)
     end)
+end
+
+local function reel()
+    safeCall("Reel", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/Reel"]:FireServer()
+    end)
+end
+
+local function reel_legit()
+    local pg = game:GetService("Players").LocalPlayer.PlayerGui
+    local ui = pg:FindFirstChild("FishingMinigame")
+    if not ui then return end
+    local bar = ui:FindFirstChild("Bar")
+    if not bar then return end
+    local mk = bar:FindFirstChild("Marker")
+    if not mk then return end
+    while mk and _G.AutoFishing and CurrentOption == "Legit" do
+        local x = mk.Position.X.Scale
+        if x > 0.38 and x < 0.62 then
+            task.wait(_G.ReelDelay)
+            reel()
+        end
+        task.wait()
+    end
 end
 
 local function catch()
     safeCall("FishingCompleted", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
     end)
 end
 
 local function charge()
     safeCall("ChargeFishingRod", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer()
     end)
 end
 
 local function lempar()
     safeCall("RequestFishingMinigameStarted", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.233, 0.996, 1761532005.497)
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, 1761532005.497)
     end)
     safeCall("ChargeFishingRod_after_lempar", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer()
     end)
 end
 
@@ -394,12 +402,10 @@ local function perform_instant_cycle()
     lempar()
     task.wait(1)
     if _G.Instant then
-        local loops = 5
-        local fast = 0
-        for i = 1, loops do
+        for i = 1, 5 do
             if not _G.Instant then break end
             catch()
-            task.wait(fast)
+            task.wait(0)
         end
     else
         catch()
@@ -415,12 +421,19 @@ Tab3:Section({
     Title = "Fishing",
     Icon = "anchor",
     TextXAlignment = "Left",
-    TextSize = 17 
+    TextSize = 17
 })
 
 Tab3:Divider()
 
-Tab3:Toggle({ Title = "Auto Equip Rod", Value = false, Callback = function(v) _G.AutoEquipRod = v if v then rod() end end })
+Tab3:Toggle({
+    Title = "Auto Equip Rod",
+    Value = false,
+    Callback = function(v)
+        _G.AutoEquipRod = v
+        if v then rod() end
+    end
+})
 
 local CurrentOption = "Instant"
 local autoFishingThread = nil
@@ -445,7 +458,6 @@ Tab3:Toggle({
             if CurrentOption == "Instant" then
                 _G.Instant = true
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Instant Mode ON", Duration = 3 })
-                if autoFishingThread then autoFishingThread = nil end
                 autoFishingThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Instant" do
                         perform_instant_cycle()
@@ -454,11 +466,12 @@ Tab3:Toggle({
                 end)
             else
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Legit Mode ON", Duration = 3 })
-                if autoFishingThread then autoFishingThread = nil end
                 autoFishingThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Legit" do
-                        autoon()
-                        task.wait(1)
+                        lempar()
+                        reel_legit()
+                        catch()
+                        task.wait(_G.CatchDelay)
                     end
                 end)
             end
@@ -469,6 +482,24 @@ Tab3:Toggle({
             if autoFishingThread then task.cancel(autoFishingThread) end
             autoFishingThread = nil
         end
+    end
+})
+
+Tab3:Slider({
+    Title = "Reel Delay",
+    Step = 0.01,
+    Value = { Min = 0, Max = 1, Default = 0.2 },
+    Callback = function(v)
+        _G.ReelDelay = v
+    end
+})
+
+Tab3:Slider({
+    Title = "Catch Delay",
+    Step = 0.1,
+    Value = { Min = 0.01, Max = 10, Default = 1 },
+    Callback = function(v)
+        _G.CatchDelay = v
     end
 })
 
@@ -487,7 +518,6 @@ Tab3:Toggle({
     Callback = function(v)
         _G.AutoSell = v
         if v then
-            if autosellThread then task.cancel(autosellThread) end
             autosellThread = task.spawn(autosell)
         else
             _G.AutoSell = false
@@ -497,7 +527,14 @@ Tab3:Toggle({
     end
 })
 
-Tab3:Slider({ Title = "Sell Delay", Step = 1, Value = { Min = 1, Max = 120, Default = 30 }, Callback = function(v) _G.SellDelay = v end })
+Tab3:Slider({
+    Title = "Sell Delay",
+    Step = 1,
+    Value = { Min = 1, Max = 120, Default = 30 },
+    Callback = function(v)
+        _G.SellDelay = v
+    end
+})
 
 Tab3:Section({     
     Title = "Item",
