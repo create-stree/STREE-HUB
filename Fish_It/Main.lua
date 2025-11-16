@@ -311,7 +311,7 @@ local function rod()
     safeCall("EquipToolFromHotbar", function()
         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
         :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :,WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
+        :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
     end)
 end
 
@@ -347,7 +347,34 @@ local function autooff()
     end)
 end
 
+local function playReelAnimation()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://507770677"
+    local track = hum:LoadAnimation(anim)
+    track:Play()
+    
+    task.delay(0.8, function()
+        if track.IsPlaying then track:Stop() end
+        anim:Destroy()
+    end)
+
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://9114397510"
+    sound.Volume = 0.7
+    sound.Parent = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
+    sound:Play()
+    sound.Ended:Connect(function() sound:Destroy() end)
+end
+
 local function catch()
+    if CurrentOption == "Legit" then
+        playReelAnimation()
+    end
     safeCall("FishingCompleted", function()
         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
         :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
@@ -420,15 +447,7 @@ Tab3:Section({
 
 Tab3:Divider()
 
-Tab3:Toggle({ 
-        Title = "Auto Equip Rod", 
-        Value = false, 
-        Callback = function(v) 
-            _G.AutoEquipRod = v 
-            if v then rod() 
-        end 
-    end 
-})
+Tab3:Toggle({ Title = "Auto Equip Rod", Value = false, Callback = function(v) _G.AutoEquipRod = v if v then rod() end end })
 
 local CurrentOption = "Instant"
 local autoFishingThread = nil
@@ -506,6 +525,54 @@ Tab3:Toggle({
 })
 
 Tab3:Slider({ Title = "Sell Delay", Step = 1, Value = { Min = 1, Max = 120, Default = 30 }, Callback = function(v) _G.SellDelay = v end })
+
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
+local REEL_ACTION_NAME = "AutoReel_LegitMode"
+
+local function handleReel(actionName, inputState, inputObject)
+    if inputState == Enum.UserInputState.Begin then
+        if _G.AutoFishing and CurrentOption == "Legit" then
+            playReelAnimation()
+            catch()
+            return Enum.ContextActionResult.Sink
+        end
+    end
+    return Enum.ContextActionResult.Pass
+end
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if _G.AutoFishing and CurrentOption == "Legit" then
+            if not ContextActionService:IsBound(REEL_ACTION_NAME) then
+                ContextActionService:BindActionAtPriority(
+                    REEL_ACTION_NAME,
+                    handleReel,
+                    false,
+                    Enum.ContextActionPriority.Low.Value,
+                    Enum.UserInputType.MouseButton1
+                )
+            end
+        else
+            if ContextActionService:IsBound(REEL_ACTION_NAME) then
+                ContextActionService:UnbindAction(REEL_ACTION_NAME)
+            end
+        end
+    end
+end)
+
+Tab3:Toggle({
+    Title = "Auto Reel",
+    Value = true,
+    Desc = "Klik kiri untuk reel saat mode Legit (tidak ganggu UI)",
+    Callback = function(v)
+        WindUI:Notify({
+            Title = "Auto Reel",
+            Content = v and "AKTIF saat mode Legit" or "Tetap aktif otomatis",
+            Duration = 3
+        })
+    end
+})
 
 Tab3:Section({     
     Title = "Item",
