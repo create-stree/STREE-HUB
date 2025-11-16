@@ -277,6 +277,9 @@ player.CharacterAdded:Connect(function(char)
     end
 end)
 
+
+
+
 _G.AutoFishing = false
 _G.AutoEquipRod = false
 _G.AutoSell = false
