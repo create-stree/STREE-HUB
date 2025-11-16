@@ -285,7 +285,6 @@ _G.Instant = false
 _G.SellDelay = _G.SellDelay or 30
 _G.CallMinDelay = _G.CallMinDelay or 0.12
 _G.CallBackoff = _G.CallBackoff or 1.5
-_G.CatchDelay = _G.CatchDelay or 1
 _G.ReelDelay = _G.ReelDelay or 0.2
 
 local lastCall = {}
@@ -318,12 +317,6 @@ end
 local function sell()
     safeCall("SellAllItems", function()
         game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/SellAllItems"]:InvokeServer()
-    end)
-end
-
-local function radar()
-    safeCall("UpdateFishingRadar_true", function()
-        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/UpdateFishingRadar"]:InvokeServer(true)
     end)
 end
 
@@ -471,7 +464,7 @@ Tab3:Toggle({
                         lempar()
                         reel_legit()
                         catch()
-                        task.wait(_G.CatchDelay)
+                        task.wait(0)
                     end
                 end)
             end
@@ -491,15 +484,6 @@ Tab3:Slider({
     Value = { Min = 0, Max = 1, Default = 0.2 },
     Callback = function(v)
         _G.ReelDelay = v
-    end
-})
-
-Tab3:Slider({
-    Title = "Catch Delay",
-    Step = 0.1,
-    Value = { Min = 0.01, Max = 10, Default = 1 },
-    Callback = function(v)
-        _G.CatchDelay = v
     end
 })
 
