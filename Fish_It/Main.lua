@@ -1243,6 +1243,7 @@ Tab5:Section({
 Tab5:Divider()
 
 local FishingLocations = {
+    ["Ancient Ruin"] = Vector3.new(6033.74267578125, -585.9241943359375, 4620.7236328125),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Konoha"] = Vector3.new(-603, 3, 719),
     ["Levers 1"] = Vector3.new(1475,4,-847),
