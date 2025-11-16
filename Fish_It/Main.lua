@@ -282,20 +282,27 @@ _G.AutoEquipRod = false
 _G.AutoSell = false
 _G.Radar = false
 _G.Instant = false
+
 _G.SellDelay = _G.SellDelay or 30
 _G.CallMinDelay = _G.CallMinDelay or 0.12
 _G.CallBackoff = _G.CallBackoff or 1.5
 
+local CurrentOption = "Instant"
+local AutoReelEnabled = true
 local lastCall = {}
+
 local function safeCall(key, fn)
     local now = os.clock()
     local minDelay = _G.CallMinDelay or 0.12
     local backoff = _G.CallBackoff or 1.5
+    
     if lastCall[key] and now - lastCall[key] < minDelay then
         task.wait(minDelay - (now - lastCall[key]))
     end
+
     local ok, res = pcall(fn)
     lastCall[key] = os.clock()
+
     if not ok then
         local msg = tostring(res):lower()
         if msg:find("429") or msg:find("too many requests") then
@@ -304,50 +311,50 @@ local function safeCall(key, fn)
             task.wait(0.2)
         end
     end
+
     return ok, res
 end
 
 local function rod()
     safeCall("EquipToolFromHotbar", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RE/EquipToolFromHotbar"]:FireServer(1)
     end)
 end
 
 local function sell()
     safeCall("SellAllItems", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/SellAllItems"):InvokeServer()
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/SellAllItems"]:InvokeServer()
     end)
 end
 
 local function radar()
     safeCall("UpdateFishingRadar_true", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/UpdateFishingRadar"):InvokeServer(true)
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/UpdateFishingRadar"]:InvokeServer(true)
     end)
 end
 
 local function autoon()
     safeCall("UpdateAutoFishingState_true", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(true)
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/UpdateAutoFishingState"]:InvokeServer(true)
     end)
 end
 
 local function autooff()
     safeCall("UpdateAutoFishingState_false", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(false)
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/UpdateAutoFishingState"]:InvokeServer(false)
     end)
 end
 
+local lastAnim = 0
 local function playReelAnimation()
+    if os.clock() - lastAnim < 0.5 then return end
+    lastAnim = os.clock()
+
     local player = game.Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
     local hum = char:FindFirstChildOfClass("Humanoid")
@@ -375,31 +382,29 @@ local function catch()
     if CurrentOption == "Legit" then
         playReelAnimation()
     end
+
     safeCall("FishingCompleted", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RE/FishingCompleted"]:FireServer()
     end)
 end
 
 local function charge()
     safeCall("ChargeFishingRod", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer()
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/ChargeFishingRod"]:InvokeServer()
     end)
 end
 
 local function lempar()
     safeCall("RequestFishingMinigameStarted", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.233, 0.996, 1761532005.497)
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/RequestFishingMinigameStarted"]:InvokeServer(0, 1, tick())
     end)
+
     safeCall("ChargeFishingRod_after_lempar", function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-        :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-        :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer()
+        game.ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+        ["RF/ChargeFishingRod"]:InvokeServer()
     end)
 end
 
@@ -407,10 +412,9 @@ local function autosell()
     while _G.AutoSell do
         sell()
         local delay = tonumber(_G.SellDelay) or 30
-        local waited = 0
-        while waited < delay and _G.AutoSell do
+        for i = 1, delay * 4 do
+            if not _G.AutoSell then break end
             task.wait(0.25)
-            waited = waited + 0.25
         end
     end
 end
@@ -421,12 +425,10 @@ local function perform_instant_cycle()
     lempar()
     task.wait(1)
     if _G.Instant then
-        local loops = 5
-        local fast = 0
-        for i = 1, loops do
+        for i = 1, 5 do
             if not _G.Instant then break end
             catch()
-            task.wait(fast)
+            task.wait(0)
         end
     else
         catch()
@@ -442,14 +444,20 @@ Tab3:Section({
     Title = "Fishing",
     Icon = "anchor",
     TextXAlignment = "Left",
-    TextSize = 17 
+    TextSize = 17
 })
 
 Tab3:Divider()
 
-Tab3:Toggle({ Title = "Auto Equip Rod", Value = false, Callback = function(v) _G.AutoEquipRod = v if v then rod() end end })
+Tab3:Toggle({
+    Title = "Auto Equip Rod",
+    Value = false,
+    Callback = function(v)
+        _G.AutoEquipRod = v
+        if v then rod() end
+    end
+})
 
-local CurrentOption = "Instant"
 local autoFishingThread = nil
 local autosellThread = nil
 
@@ -468,20 +476,27 @@ Tab3:Toggle({
     Value = false,
     Callback = function(v)
         _G.AutoFishing = v
+
         if v then
+            if autoFishingThread then
+                task.cancel(autoFishingThread)
+                autoFishingThread = nil
+            end
+
             if CurrentOption == "Instant" then
                 _G.Instant = true
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Instant Mode ON", Duration = 3 })
-                if autoFishingThread then autoFishingThread = nil end
+
                 autoFishingThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Instant" do
                         perform_instant_cycle()
                         task.wait(1)
                     end
                 end)
+
             else
                 WindUI:Notify({ Title = "Auto Fishing", Content = "Legit Mode ON", Duration = 3 })
-                if autoFishingThread then autoFishingThread = nil end
+
                 autoFishingThread = task.spawn(function()
                     while _G.AutoFishing and CurrentOption == "Legit" do
                         autoon()
@@ -489,12 +504,16 @@ Tab3:Toggle({
                     end
                 end)
             end
+
         else
             WindUI:Notify({ Title = "Auto Fishing", Content = "OFF", Duration = 3 })
             autooff()
             _G.Instant = false
-            if autoFishingThread then task.cancel(autoFishingThread) end
-            autoFishingThread = nil
+
+            if autoFishingThread then
+                task.cancel(autoFishingThread)
+                autoFishingThread = nil
+            end
         end
     end
 })
@@ -517,20 +536,30 @@ Tab3:Toggle({
             if autosellThread then task.cancel(autosellThread) end
             autosellThread = task.spawn(autosell)
         else
-            _G.AutoSell = false
             if autosellThread then task.cancel(autosellThread) end
             autosellThread = nil
         end
     end
 })
 
-Tab3:Slider({ Title = "Sell Delay", Step = 1, Value = { Min = 1, Max = 120, Default = 30 }, Callback = function(v) _G.SellDelay = v end })
+Tab3:Slider({
+    Title = "Sell Delay",
+    Step = 1,
+    Min = 1,
+    Max = 120,
+    Value = 30,
+    Callback = function(v)
+        _G.SellDelay = v
+    end
+})
 
 local UserInputService = game:GetService("UserInputService")
 local ContextActionService = game:GetService("ContextActionService")
 local REEL_ACTION_NAME = "AutoReel_LegitMode"
 
-local function handleReel(actionName, inputState, inputObject)
+local function handleReel(actionName, inputState)
+    if not AutoReelEnabled then return Enum.ContextActionResult.Pass end
+    
     if inputState == Enum.UserInputState.Begin then
         if _G.AutoFishing and CurrentOption == "Legit" then
             playReelAnimation()
@@ -538,12 +567,13 @@ local function handleReel(actionName, inputState, inputObject)
             return Enum.ContextActionResult.Sink
         end
     end
+
     return Enum.ContextActionResult.Pass
 end
 
 task.spawn(function()
     while task.wait(0.5) do
-        if _G.AutoFishing and CurrentOption == "Legit" then
+        if _G.AutoFishing and CurrentOption == "Legit" and AutoReelEnabled then
             if not ContextActionService:IsBound(REEL_ACTION_NAME) then
                 ContextActionService:BindActionAtPriority(
                     REEL_ACTION_NAME,
@@ -562,13 +592,14 @@ task.spawn(function()
 end)
 
 Tab3:Toggle({
-    Title = "Auto Reel",
+    Title = "Auto Reel (Click to Reel)",
     Value = true,
-    Desc = "Klik kiri untuk reel saat mode Legit (tidak ganggu UI)",
+    Desc = "Klik kiri untuk reel saat mode Legit",
     Callback = function(v)
+        AutoReelEnabled = v
         WindUI:Notify({
             Title = "Auto Reel",
-            Content = v and "AKTIF saat mode Legit" or "Tetap aktif otomatis",
+            Content = v and "Aktif" or "Dimatikan",
             Duration = 3
         })
     end
