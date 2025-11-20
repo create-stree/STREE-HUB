@@ -129,8 +129,22 @@ function module:Create(parent, config)
 	padding.PaddingRight = UDim.new(0, 5)
 	
 	local options = config.Options or {}
+	local isMulti = config.Multi or false
 	local isOpen = false
-	local selectedOption = config.Default
+	
+	-- Handle different value types for single vs multi
+	local selectedOption
+	local selectedOptions = {}
+	
+	if isMulti then
+		selectedOptions = config.Default or {}
+		selectedOption = nil
+		dropdownText.Text = #selectedOptions > 0 and table.concat(selectedOptions, ", ") or "Select..."
+	else
+		selectedOption = config.Default or nil
+		selectedOptions = {}
+		dropdownText.Text = selectedOption or "Select..."
+	end
 	
 	local function updateListSize()
 		local contentSize = listLayout.AbsoluteContentSize
@@ -138,9 +152,22 @@ function module:Create(parent, config)
 		dropdownList.CanvasSize = UDim2.new(0, 0, 0, contentSize.Y)
 	end
 	
+	local function updateDisplayText()
+		if isMulti then
+			if #selectedOptions > 0 then
+				dropdownText.Text = #selectedOptions == 1 and selectedOptions[1] or #selectedOptions .. " selected"
+			else
+				dropdownText.Text = "Select..."
+			end
+		else
+			dropdownText.Text = selectedOption or "Select..."
+		end
+	end
+	
 	local function createOption(optionText)
 		local optionButton = Instance.new("TextButton")
 		local optionLabel = Instance.new("TextLabel")
+		local checkIcon = Instance.new("ImageLabel")
 		
 		optionButton.Name = "OptionButton"
 		optionButton.Size = UDim2.new(1, 0, 0, 25)
@@ -160,9 +187,20 @@ function module:Create(parent, config)
 		optionCorner.CornerRadius = UDim.new(0, 3)
 		optionCorner.Parent = optionButton
 		
+		-- Check icon for multi-select
+		checkIcon.Name = "CheckIcon"
+		checkIcon.Size = UDim2.new(0, 12, 0, 12)
+		checkIcon.Position = UDim2.new(0, 5, 0.5, -6)
+		checkIcon.BackgroundTransparency = 1
+		checkIcon.Image = "rbxassetid://10709791562"
+		checkIcon.ImageColor3 = Color3.new(0, 1, 0)
+		checkIcon.Visible = false
+		checkIcon.ZIndex = 4
+		checkIcon.Parent = optionButton
+		
 		optionLabel.Name = "OptionLabel"
-		optionLabel.Size = UDim2.new(1, -10, 1, 0)
-		optionLabel.Position = UDim2.new(0, 5, 0, 0)
+		optionLabel.Size = UDim2.new(1, isMulti and -25 or -10, 1, 0)
+		optionLabel.Position = UDim2.new(0, isMulti and 22 : 5, 0, 0)
 		optionLabel.BackgroundTransparency = 1
 		optionLabel.Text = optionText
 		optionLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -172,31 +210,78 @@ function module:Create(parent, config)
 		optionLabel.ZIndex = 4
 		optionLabel.Parent = optionButton
 		
+		local function updateOptionAppearance()
+			if isMulti then
+				local isSelected = table.find(selectedOptions, optionText)
+				checkIcon.Visible = isSelected ~= nil
+				if isSelected then
+					optionLabel.TextColor3 = Color3.new(0, 1, 0)
+					optionButton.BackgroundColor3 = Color3.new(0.2, 0.3, 0.2)
+				else
+					optionLabel.TextColor3 = Color3.new(1, 1, 1)
+					optionButton.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+				end
+			else
+				local isSelected = (selectedOption == optionText)
+				if isSelected then
+					optionLabel.TextColor3 = Color3.new(0, 1, 0)
+					optionButton.BackgroundColor3 = Color3.new(0.2, 0.3, 0.2)
+				else
+					optionLabel.TextColor3 = Color3.new(1, 1, 1)
+					optionButton.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+				end
+			end
+		end
+		
 		optionButton.MouseEnter:Connect(function()
-			TweenService:Create(optionButton, TweenInfo.new(0.2), {
-				BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-			}):Play()
+			if not (isMulti and table.find(selectedOptions, optionText)) and not (not isMulti and selectedOption == optionText) then
+				TweenService:Create(optionButton, TweenInfo.new(0.2), {
+					BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+				}):Play()
+			end
 		end)
 		
 		optionButton.MouseLeave:Connect(function()
-			TweenService:Create(optionButton, TweenInfo.new(0.2), {
-				BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
-			}):Play()
+			if not (isMulti and table.find(selectedOptions, optionText)) and not (not isMulti and selectedOption == optionText) then
+				TweenService:Create(optionButton, TweenInfo.new(0.2), {
+					BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+				}):Play()
+			end
 		end)
 		
 		optionButton.MouseButton1Click:Connect(function()
-			selectedOption = optionText
-			dropdownText.Text = optionText
-			isOpen = false
-			dropdownList.Visible = false
-			TweenService:Create(dropdownIcon, TweenInfo.new(0.2), {
-				Rotation = 0
-			}):Play()
-			
-			if config.Callback then
-				config.Callback(optionText)
+			if isMulti then
+				-- Multi-select logic
+				local existingIndex = table.find(selectedOptions, optionText)
+				if existingIndex then
+					table.remove(selectedOptions, existingIndex)
+				else
+					table.insert(selectedOptions, optionText)
+				end
+				updateDisplayText()
+				updateOptionAppearance()
+				
+				if config.Callback then
+					config.Callback(selectedOptions)
+				end
+			else
+				-- Single-select logic
+				selectedOption = optionText
+				isOpen = false
+				dropdownList.Visible = false
+				updateDisplayText()
+				updateOptionAppearance()
+				TweenService:Create(dropdownIcon, TweenInfo.new(0.2), {
+					Rotation = 0
+				}):Play()
+				
+				if config.Callback then
+					config.Callback(optionText)
+				end
 			end
 		end)
+		
+		updateOptionAppearance()
 	end
 	
 	-- Create options
@@ -245,12 +330,51 @@ function module:Create(parent, config)
 	
 	local dropdownObject = {
 		Frame = dropdownFrame,
-		Value = selectedOption,
+		Value = isMulti and selectedOptions or selectedOption,
+		IsMulti = isMulti,
 		
 		SetValue = function(self, value)
-			if table.find(options, value) then
-				selectedOption = value
-				dropdownText.Text = value
+			if isMulti then
+				if type(value) == "table" then
+					selectedOptions = {}
+					for _, option in ipairs(value) do
+						if table.find(options, option) then
+							table.insert(selectedOptions, option)
+						end
+					end
+				end
+			else
+				if table.find(options, value) then
+					selectedOption = value
+				end
+			end
+			updateDisplayText()
+			
+			-- Update all option appearances
+			for _, child in ipairs(dropdownList:GetChildren()) do
+				if child:IsA("TextButton") and child:FindFirstChild("OptionLabel") then
+					local optionText = child.OptionLabel.Text
+					if isMulti then
+						local isSelected = table.find(selectedOptions, optionText)
+						child.CheckIcon.Visible = isSelected ~= nil
+						if isSelected then
+							child.OptionLabel.TextColor3 = Color3.new(0, 1, 0)
+							child.BackgroundColor3 = Color3.new(0.2, 0.3, 0.2)
+						else
+							child.OptionLabel.TextColor3 = Color3.new(1, 1, 1)
+							child.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+						end
+					else
+						local isSelected = (selectedOption == optionText)
+						if isSelected then
+							child.OptionLabel.TextColor3 = Color3.new(0, 1, 0)
+							child.BackgroundColor3 = Color3.new(0.2, 0.3, 0.2)
+						else
+							child.OptionLabel.TextColor3 = Color3.new(1, 1, 1)
+							child.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+						end
+					end
+				end
 			end
 		end,
 		
@@ -277,6 +401,26 @@ function module:Create(parent, config)
 		
 		SetDescription = function(self, text)
 			descLabel.Text = text
+		end,
+		
+		ClearSelection = function(self)
+			if isMulti then
+				selectedOptions = {}
+			else
+				selectedOption = nil
+			end
+			updateDisplayText()
+			
+			-- Reset all option appearances
+			for _, child in ipairs(dropdownList:GetChildren()) do
+				if child:IsA("TextButton") then
+					child.OptionLabel.TextColor3 = Color3.new(1, 1, 1)
+					child.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+					if child:FindFirstChild("CheckIcon") then
+						child.CheckIcon.Visible = false
+					end
+				end
+			end
 		end,
 		
 		Destroy = function(self)
