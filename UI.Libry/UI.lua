@@ -605,4 +605,76 @@ function UI_Libry:ShowMainUI()
         Title = "Triggerbot",
         Description = "Auto-shoot when target is in sight",
         Default = false,
-        Callback = fun
+        Callback = function(value)
+            print("Triggerbot:", value)
+        end
+    })
+
+    local fovSlider = Slider:Create(combatTab.Content, {
+        Title = "Aimbot FOV",
+        Min = 1,
+        Max = 360,
+        Default = 90,
+        Rounding = 0,
+        Callback = function(value)
+            print("FOV:", value)
+        end
+    })
+
+    -- Settings Tab
+    local settingsLabel = Label:Create(settingsTab.Content, {
+        Title = "UI Settings",
+        Description = "Customize your experience",
+        Compact = false
+    })
+
+    local themeDropdown = Dropdown:Create(settingsTab.Content, {
+        Title = "Theme",
+        Description = "Choose UI color theme",
+        Options = {"Green", "Blue", "Red", "Purple", "Cyan"},
+        Default = "Green",
+        Callback = function(value)
+            print("Theme:", value)
+        end
+    })
+
+    local uiKeybind = Keybind:Create(settingsTab.Content, {
+        Title = "UI Toggle",
+        Description = "Key to show/hide interface",
+        Default = "RightShift",
+        Callback = function(key)
+            print("UI Keybind:", key)
+        end,
+        PressCallback = function()
+            window.MainFrame.Visible = not window.MainFrame.Visible
+        end
+    })
+
+    local usernameTextbox = Textbox:Create(settingsTab.Content, {
+        Title = "Username",
+        Description = "Enter your username",
+        Placeholder = "PlayerName",
+        Default = game.Players.LocalPlayer.Name,
+        Callback = function(value)
+            print("Username:", value)
+        end
+    })
+
+    local saveButton = Button:Create(settingsTab.Content, {
+        Title = "Save Configuration",
+        Description = "Save current settings",
+        Callback = function()
+            print("Settings saved!")
+        end
+    })
+
+    return window
+end
+
+-- ====== AUTO INITIALIZE ======
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+    UI_Libry:ShowKeySystem()
+end)
+
+return UI_Libry
