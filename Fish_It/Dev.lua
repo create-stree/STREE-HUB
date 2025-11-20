@@ -614,60 +614,6 @@ Tab3:Toggle({
     end
 })
 
-_G.AutoEnchantRod = false
-_G.EnchantDelay = 1.2
-_G.SelectedEnchant = "Reel I"
-
-local RS = game:GetService("ReplicatedStorage")
-local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
-
-local RE = {
-    Enchant = Net:FindFirstChild("RE/EnchantItem"),
-    Confirm = Net:FindFirstChild("RE/ConfirmEnchant")
-}
-
-local RF = {
-    Request = Net:FindFirstChild("RF/GetEnchantOptions")
-}
-
-task.spawn(function()
-    while task.wait() do
-        if _G.AutoEnchantRod then
-            local rod = 1
-            local options = RF.Request:Invoke(rod)
-            if options and options.Current then
-                if options.Current.Name == _G.SelectedEnchant then
-                    _G.AutoEnchantRod = false
-                else
-                    RE.Enchant:Fire(rod)
-                    task.wait(_G.EnchantDelay)
-                    RE.Confirm:Fire(rod)
-                end
-            end
-        end
-    end
-end)
-
-Tab3:Toggle({
-    Title = "Auto Enchant Rod",
-    Icon = false,
-    Type = false,
-    Value = false,
-    Callback = function(state)
-        _G.AutoEnchantRod = state
-    end
-})
-
-Tab:Dropdown({
-    Title = "Choose Enchant",
-    Description = "Pick target enchant",
-    Value = "Reel I",
-    List = {"Reel I", "Perfect", "Rapid"},
-    Callback = function(v)
-        _G.SelectedEnchant = v
-    end
-})
-
 _G.AutoNotifyEJ = false
 _G.AutoNotifyQuest = false
 
