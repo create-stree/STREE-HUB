@@ -370,7 +370,6 @@ Tab3:Dropdown({
     end
 })
 
-Tab3:Toggle{
 Tab3:Toggle({
     Title = "Auto Fishing",
     Value = false,
