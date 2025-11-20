@@ -1027,6 +1027,100 @@ Tab4:Slider({
     end
 })
 
+_G.AutoFishing = false
+_G.CancelDelay = 1.8
+_G.CompletedDelay = 1.6
+
+local RS = game:GetService("ReplicatedStorage")
+local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+
+local RE = {
+    Equip = Net:FindFirstChild("RE/EquipToolFromHotbar"),
+    Completed = Net:FindFirstChild("RE/FishingCompleted")
+}
+
+local RF = {
+    Cancel = Net:FindFirstChild("RF/CancelFishingInputs"),
+    Charge = Net:FindFirstChild("RF/ChargeFishingRod"),
+    Request = Net:FindFirstChild("RF/RequestFishingMinigameStarted")
+}
+
+local function EquipRod()
+    pcall(function()
+        RE.Equip:FireServer(1)
+    end)
+end
+
+local function ChargeRod()
+    pcall(function()
+        RF.Charge:InvokeServer(math.huge)
+    end)
+end
+
+local function RequestGame()
+    pcall(function()
+        RF.Request:InvokeServer(-139.63, 0.996)
+    end)
+end
+
+local function Completed(minDelay)
+    pcall(function()
+        task.wait(minDelay or _G.CompletedDelay)
+        RE.Completed:FireServer()
+    end)
+end
+
+local function CancelFishing(minDelay)
+    pcall(function()
+        task.wait(minDelay or _G.CancelDelay)
+        RF.Cancel:InvokeServer()
+    end)
+end
+
+task.spawn(function()
+    while task.wait() do
+        if _G.AutoFishing then
+            EquipRod()
+            task.wait(0.1)
+            ChargeRod()
+            task.wait(0.2)
+            RequestGame()
+            Completed()
+            CancelFishing()
+        end
+    end
+end)
+
+Tab4:Input({
+    Title = "Cancel Delay",
+    Placeholder = "1.8",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num then
+            _G.CancelDelay = num
+        end
+    end
+})
+
+Tab4:Input({
+    Title = "Completed Delay",
+    Placeholder = "1.6",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num then
+            _G.CompletedDelay = num
+        end
+    end
+})
+
+Tab4:Toggle({
+    Title = "Blantant Fishing",
+    Default = false,
+    Callback = function(v)
+        _G.AutoFishing = v
+    end
+})
+
 local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
