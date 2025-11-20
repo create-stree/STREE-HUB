@@ -1,348 +1,123 @@
--- UI.Libry - Main Library
--- GitHub: https://github.com/STREE-HUB/UI.Libry
-
-local UI_Libry = {}
-
--- Services
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
--- Configuration
-UI_Libry.Config = {
-    Colors = {
-        Black = Color3.fromRGB(10, 10, 10),
-        DarkGray = Color3.fromRGB(20, 20, 20),
-        Gray = Color3.fromRGB(40, 40, 40),
-        NeonGreen = Color3.fromRGB(0, 255, 0),
-        BrightGreen = Color3.fromRGB(0, 200, 0),
-        White = Color3.fromRGB(255, 255, 255),
-        Red = Color3.fromRGB(255, 80, 80),
-        DiscordBlue = Color3.fromRGB(88, 101, 242),
-        Orange = Color3.fromRGB(255, 165, 0)
-    },
-    Fonts = {
-        Title = Enum.Font.GothamBold,
-        Header = Enum.Font.GothamBold,
-        Body = Enum.Font.Gotham,
-        Label = Enum.Font.Gotham
-    }
-}
-
--- Valid Keys for Key System
-UI_Libry.ValidKeys = {
-    "STREEHUB-INDONESIA-9GHTQ7ZP4M",
-    "STREE-KeySystem-82ghtQRSM", 
-    "StreeCommunity-7g81ht7NO22",
-    "STREE-PREMIUM-ACCESS-KEY",
-    "STREEHUB-VIP-MEMBER"
-}
-
--- ====== UTILITY FUNCTIONS ======
-function UI_Libry:CreateElement(className, properties)
-    local element = Instance.new(className)
-    for property, value in pairs(properties) do
-        element[property] = value
-    end
-    return element
-end
-
-function UI_Libry:RoundedCorner(parent, radius)
-    local corner = self:CreateElement("UICorner", {
-        Parent = parent,
-        CornerRadius = UDim.new(0, radius or 8)
+-- ====== IMPROVED KEY SYSTEM UI ======
+function UI_Libry:ShowKeySystem()
+    local window = self:CreateWindow({
+        Title = "STREE HUB - PREMIUM ACCESS",
+        Size = UDim2.new(0, 500, 0, 600)
     })
-    return corner
-end
-
-function UI_Libry:NeonStroke(parent, thickness, transparency)
-    local stroke = self:CreateElement("UIStroke", {
-        Parent = parent,
-        Color = self.Config.Colors.NeonGreen,
-        Thickness = thickness or 2,
-        Transparency = transparency or 0.3
-    })
-    return stroke
-end
-
-function UI_Libry:MakeDraggable(frame, dragHandle)
-    dragHandle = dragHandle or frame
-    local dragging, dragInput, dragStart, startPos
-
-    local function update(input)
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
-    end
-
-    dragHandle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    dragHandle.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
-end
-
-function UI_Libry:SetupButtonHover(button, normalColor, hoverColor)
-    button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {
-            BackgroundColor3 = hoverColor
-        }):Play()
-    end)
     
-    button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {
-            BackgroundColor3 = normalColor
-        }):Play()
-    end)
-end
-
--- ====== KEY SYSTEM ======
-function UI_Libry:IsKeyValid(keyInput)
-    local key = keyInput:gsub("%s+", ""):upper()
-    for _, validKey in ipairs(self.ValidKeys) do
-        if key == validKey then
-            return true
-        end
-    end
-    return false
-end
-
--- ====== MAIN WINDOW ======
-function UI_Libry:CreateWindow(config)
-    local parentGui = game:GetService("CoreGui") or Players.LocalPlayer:WaitForChild("PlayerGui")
+    local mainTab = window:CreateTab("Verification")
     
-    if parentGui:FindFirstChild("UI_Libry_Window") then
-        parentGui.UI_Libry_Window:Destroy()
-    end
-
-    local gui = self:CreateElement("ScreenGui", {
-        Parent = parentGui,
-        Name = "UI_Libry_Window",
-        IgnoreGuiInset = true,
-        ResetOnSpawn = false
-    })
-
-    local mainFrame = self:CreateElement("Frame", {
-        Parent = gui,
-        Size = config.Size or UDim2.new(0, 500, 0, 400),
-        Position = UDim2.new(0.5, -250, 0.5, -200),
-        BackgroundColor3 = self.Config.Colors.Black,
-        BorderSizePixel = 0
-    })
-    self:RoundedCorner(mainFrame, 12)
-    self:NeonStroke(mainFrame, 3, 0.2)
-
-    -- Title Bar
-    local titleBar = self:CreateElement("Frame", {
-        Parent = mainFrame,
-        Size = UDim2.new(1, -20, 0, 40),
+    -- Header Section
+    local headerFrame = self:CreateElement("Frame", {
+        Parent = mainTab.Content,
+        Size = UDim2.new(1, -20, 0, 80),
         Position = UDim2.new(0, 10, 0, 10),
-        BackgroundTransparency = 1
+        BackgroundColor3 = self.Config.Colors.DarkGray,
+        BackgroundTransparency = 0.1
     })
+    self:RoundedCorner(headerFrame, 10)
+    self:NeonStroke(headerFrame, 2, 0.3)
 
-    local titleLabel = self:CreateElement("TextLabel", {
-        Parent = titleBar,
-        Size = UDim2.new(1, -80, 1, 0),
+    local logo = self:CreateElement("TextLabel", {
+        Parent = headerFrame,
+        Size = UDim2.new(0, 50, 0, 50),
+        Position = UDim2.new(0, 15, 0, 15),
         BackgroundTransparency = 1,
-        Text = config.Title or "UI Libry",
+        Text = "🔑",
         TextColor3 = self.Config.Colors.NeonGreen,
-        TextSize = 18,
-        Font = self.Config.Fonts.Title,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-
-    local closeButton = self:CreateElement("TextButton", {
-        Parent = titleBar,
-        Size = UDim2.new(0, 30, 0, 30),
-        Position = UDim2.new(1, -30, 0, 5),
-        BackgroundTransparency = 1,
-        Text = "×",
-        TextColor3 = self.Config.Colors.Red,
-        TextSize = 20,
+        TextSize = 30,
         Font = Enum.Font.GothamBold
     })
 
-    -- Tab Buttons Container
-    local tabButtonsContainer = self:CreateElement("Frame", {
-        Parent = mainFrame,
-        Size = UDim2.new(0, 120, 1, -60),
-        Position = UDim2.new(0, 0, 0, 50),
-        BackgroundTransparency = 1
+    local title = self:CreateElement("TextLabel", {
+        Parent = headerFrame,
+        Size = UDim2.new(1, -80, 0, 30),
+        Position = UDim2.new(0, 80, 0, 15),
+        BackgroundTransparency = 1,
+        Text = "PREMIUM ACCESS REQUIRED",
+        TextColor3 = self.Config.Colors.NeonGreen,
+        TextSize = 18,
+        Font = self.Config.Fonts.Header,
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    local tabButtonsLayout = self:CreateElement("UIListLayout", {
-        Parent = tabButtonsContainer,
-        Padding = UDim.new(0, 5),
-        HorizontalAlignment = Enum.HorizontalAlignment.Center
+    local subtitle = self:CreateElement("TextLabel", {
+        Parent = headerFrame,
+        Size = UDim2.new(1, -80, 0, 20),
+        Position = UDim2.new(0, 80, 0, 40),
+        BackgroundTransparency = 1,
+        Text = "Enter your license key to continue",
+        TextColor3 = self.Config.Colors.White,
+        TextSize = 12,
+        Font = self.Config.Fonts.Body,
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    -- Content Frame
-    local contentFrame = self:CreateElement("Frame", {
-        Parent = mainFrame,
-        Size = UDim2.new(1, -120, 1, -60),
-        Position = UDim2.new(0, 120, 0, 50),
-        BackgroundColor3 = self.Config.Colors.DarkGray,
-        BackgroundTransparency = 0.1,
-        ClipsDescendants = true
-    })
-    self:RoundedCorner(contentFrame, 8)
-    self:NeonStroke(contentFrame, 1, 0.5)
-
-    self:MakeDraggable(mainFrame, titleBar)
-
-    local window = {
-        GUI = gui,
-        MainFrame = mainFrame,
-        TitleBar = titleBar,
-        CloseButton = closeButton,
-        TabButtons = tabButtonsContainer,
-        ContentFrame = contentFrame,
-        Tabs = {},
-        CurrentTab = nil
-    }
-
-    closeButton.MouseButton1Click:Connect(function()
-        gui:Destroy()
-    end)
-
-    function window:CreateTab(name)
-        local tabButton = self:CreateElement("TextButton", {
-            Parent = self.TabButtons,
-            Size = UDim2.new(0.9, 0, 0, 40),
-            BackgroundColor3 = UI_Libry.Config.Colors.DarkGray,
-            Text = name,
-            TextColor3 = UI_Libry.Config.Colors.NeonGreen,
-            TextSize = 14,
-            Font = UI_Libry.Config.Fonts.Header,
-            BorderSizePixel = 0
-        })
-        UI_Libry:RoundedCorner(tabButton, 6)
-        UI_Libry:NeonStroke(tabButton, 1, 0.5)
-
-        local tabContent = self:CreateElement("ScrollingFrame", {
-            Parent = self.ContentFrame,
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            ScrollBarThickness = 4,
-            ScrollBarImageColor3 = UI_Libry.Config.Colors.NeonGreen,
-            CanvasSize = UDim2.new(0, 0, 0, 0),
-            Visible = false
-        })
-
-        local contentLayout = self:CreateElement("UIListLayout", {
-            Parent = tabContent,
-            Padding = UDim.new(0, 10),
-            HorizontalAlignment = Enum.HorizontalAlignment.Center
-        })
-
-        contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            tabContent.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
-        end)
-
-        local tab = {
-            Name = name,
-            Button = tabButton,
-            Content = tabContent,
-            Frame = tabContent
-        }
-
-        UI_Libry:SetupButtonHover(tabButton, UI_Libry.Config.Colors.DarkGray, UI_Libry.Config.Colors.Gray)
-
-        tabButton.MouseButton1Click:Connect(function()
-            -- Hide all tabs
-            for _, otherTab in pairs(self.Tabs) do
-                otherTab.Content.Visible = false
-                otherTab.Button.BackgroundColor3 = UI_Libry.Config.Colors.DarkGray
-            end
-            
-            -- Show selected tab
-            tabContent.Visible = true
-            tabButton.BackgroundColor3 = UI_Libry.Config.Colors.Gray
-            self.CurrentTab = tab
-        end)
-
-        table.insert(self.Tabs, tab)
-
-        -- Auto-select first tab
-        if #self.Tabs == 1 then
-            tabButton.MouseButton1Click:Wait()
-        end
-
-        return tab
-    end
-
-    function window:Destroy()
-        self.GUI:Destroy()
-    end
-
-    return window
-end
-
--- ====== KEY SYSTEM UI ======
-function UI_Libry:ShowKeySystem()
-    local window = self:CreateWindow({
-        Title = "STREE HUB - KEY SYSTEM",
-        Size = UDim2.new(0, 400, 0, 350)
-    })
-    
-    local mainTab = window:CreateTab("Key Verification")
-    
-    local statusLabel = self:CreateElement("TextLabel", {
+    -- Key Input Section
+    local inputFrame = self:CreateElement("Frame", {
         Parent = mainTab.Content,
+        Size = UDim2.new(1, -20, 0, 120),
+        Position = UDim2.new(0, 10, 0, 100),
+        BackgroundColor3 = self.Config.Colors.DarkGray,
+        BackgroundTransparency = 0.1
+    })
+    self:RoundedCorner(inputFrame, 10)
+    self:NeonStroke(inputFrame, 2, 0.3)
+
+    local keyLabel = self:CreateElement("TextLabel", {
+        Parent = inputFrame,
         Size = UDim2.new(1, -20, 0, 25),
         Position = UDim2.new(0, 10, 0, 10),
         BackgroundTransparency = 1,
-        Text = "Status: Enter your key and click SUBMIT",
-        TextColor3 = Color3.fromRGB(255, 165, 0),
+        Text = "LICENSE KEY",
+        TextColor3 = self.Config.Colors.NeonGreen,
         TextSize = 14,
-        Font = self.Config.Fonts.Body,
+        Font = self.Config.Fonts.Header,
         TextXAlignment = Enum.TextXAlignment.Left
     })
 
     local keyInput = self:CreateElement("TextBox", {
-        Parent = mainTab.Content,
-        Size = UDim2.new(1, -20, 0, 40),
-        Position = UDim2.new(0, 10, 0, 45),
-        BackgroundColor3 = self.Config.Colors.DarkGray,
+        Parent = inputFrame,
+        Size = UDim2.new(1, -20, 0, 45),
+        Position = UDim2.new(0, 10, 0, 35),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
         TextColor3 = self.Config.Colors.White,
-        PlaceholderText = "Enter your key here...",
-        PlaceholderColor3 = Color3.fromRGB(150, 150, 150),
-        TextSize = 14,
+        PlaceholderText = "Enter your license key here...",
+        PlaceholderColor3 = Color3.fromRGB(100, 100, 100),
+        TextSize = 16,
         Font = self.Config.Fonts.Body,
-        ClearTextOnFocus = false
+        ClearTextOnFocus = false,
+        Text = ""
     })
     self:RoundedCorner(keyInput, 8)
     self:NeonStroke(keyInput, 2, 0.5)
 
-    local submitButton = self:CreateElement("TextButton", {
+    local statusLabel = self:CreateElement("TextLabel", {
+        Parent = inputFrame,
+        Size = UDim2.new(1, -20, 0, 20),
+        Position = UDim2.new(0, 10, 0, 85),
+        BackgroundTransparency = 1,
+        Text = "Status: Waiting for input...",
+        TextColor3 = Color3.fromRGB(255, 165, 0),
+        TextSize = 12,
+        Font = self.Config.Fonts.Body,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+
+    -- Buttons Section
+    local buttonsFrame = self:CreateElement("Frame", {
         Parent = mainTab.Content,
-        Size = UDim2.new(1, -20, 0, 40),
-        Position = UDim2.new(0, 10, 0, 95),
+        Size = UDim2.new(1, -20, 0, 50),
+        Position = UDim2.new(0, 10, 0, 230),
+        BackgroundTransparency = 1
+    })
+
+    local submitButton = self:CreateElement("TextButton", {
+        Parent = buttonsFrame,
+        Size = UDim2.new(0.48, 0, 1, 0),
+        Position = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = self.Config.Colors.BrightGreen,
-        Text = "SUBMIT KEY",
+        Text = "VERIFY KEY",
         TextColor3 = self.Config.Colors.White,
         TextSize = 14,
         Font = self.Config.Fonts.Header,
@@ -352,9 +127,9 @@ function UI_Libry:ShowKeySystem()
     self:NeonStroke(submitButton, 2, 0.5)
 
     local getKeyButton = self:CreateElement("TextButton", {
-        Parent = mainTab.Content,
-        Size = UDim2.new(1, -20, 0, 40),
-        Position = UDim2.new(0, 10, 0, 145),
+        Parent = buttonsFrame,
+        Size = UDim2.new(0.48, 0, 1, 0),
+        Position = UDim2.new(0.52, 0, 0, 0),
         BackgroundColor3 = self.Config.Colors.DarkGray,
         Text = "GET KEY",
         TextColor3 = self.Config.Colors.NeonGreen,
@@ -365,51 +140,120 @@ function UI_Libry:ShowKeySystem()
     self:RoundedCorner(getKeyButton, 8)
     self:NeonStroke(getKeyButton, 2, 0.5)
 
-    local discordButton = self:CreateElement("TextButton", {
+    -- Features Section (Like in your screenshot)
+    local featuresFrame = self:CreateElement("Frame", {
+        Parent = mainTab.Content,
+        Size = UDim2.new(1, -20, 0, 200),
+        Position = UDim2.new(0, 10, 0, 290),
+        BackgroundColor3 = self.Config.Colors.DarkGray,
+        BackgroundTransparency = 0.1
+    })
+    self:RoundedCorner(featuresFrame, 10)
+    self:NeonStroke(featuresFrame, 2, 0.3)
+
+    local featuresTitle = self:CreateElement("TextLabel", {
+        Parent = featuresFrame,
+        Size = UDim2.new(1, -20, 0, 30),
+        Position = UDim2.new(0, 10, 0, 10),
+        BackgroundTransparency = 1,
+        Text = "PREMIUM FEATURES",
+        TextColor3 = self.Config.Colors.NeonGreen,
+        TextSize = 16,
+        Font = self.Config.Fonts.Header,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+
+    -- Features List
+    local features = {
+        "🎯 Advanced Aimbot System",
+        "⚡ Auto-Farm & Grinding",
+        "🛡️ Anti-Ban Protection", 
+        "🔧 Custom Script Injector",
+        "🎮 ESP & Visual Enhancements",
+        "📊 Real-time Statistics",
+        "🔄 Auto-Update System",
+        "💬 Premium Support"
+    }
+
+    for i, feature in ipairs(features) do
+        local featureLabel = self:CreateElement("TextLabel", {
+            Parent = featuresFrame,
+            Size = UDim2.new(0.45, -5, 0, 20),
+            Position = UDim2.new((i-1)%2 * 0.5, 10, 0, 45 + math.floor((i-1)/2) * 25),
+            BackgroundTransparency = 1,
+            Text = feature,
+            TextColor3 = self.Config.Colors.White,
+            TextSize = 12,
+            Font = self.Config.Fonts.Body,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
+    end
+
+    -- Footer
+    local footerFrame = self:CreateElement("Frame", {
         Parent = mainTab.Content,
         Size = UDim2.new(1, -20, 0, 40),
-        Position = UDim2.new(0, 10, 0, 195),
+        Position = UDim2.new(0, 10, 0, 500),
+        BackgroundTransparency = 1
+    })
+
+    local discordButton = self:CreateElement("TextButton", {
+        Parent = footerFrame,
+        Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = self.Config.Colors.DiscordBlue,
-        Text = "DISCORD SERVER",
+        Text = "💬 JOIN OUR DISCORD FOR SUPPORT",
         TextColor3 = self.Config.Colors.White,
-        TextSize = 14,
+        TextSize = 12,
         Font = self.Config.Fonts.Header,
         BorderSizePixel = 0
     })
-    self:RoundedCorner(discordButton, 8)
+    self:RoundedCorner(discordButton, 6)
 
+    -- Button Functionality
     local function SubmitKey()
         local key = keyInput.Text:gsub("%s+", ""):upper()
         
         if key == "" then
-            statusLabel.Text = "Status: Please enter a key before submitting"
+            statusLabel.Text = "Status: Please enter a license key"
             statusLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
             return
         end
         
+        -- Show loading state
+        statusLabel.Text = "Status: Verifying key..."
+        statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        submitButton.Text = "VERIFYING..."
+        
+        -- Simulate verification process
+        task.wait(1)
+        
         if self:IsKeyValid(key) then
-            statusLabel.Text = "Status: ✅ Key Accepted! Loading..."
+            statusLabel.Text = "Status: ✅ Key Verified! Loading premium features..."
             statusLabel.TextColor3 = self.Config.Colors.NeonGreen
             
             TweenService:Create(submitButton, TweenInfo.new(0.5), {
                 BackgroundColor3 = self.Config.Colors.NeonGreen
             }):Play()
             
+            submitButton.Text = "SUCCESS!"
+            
             task.wait(1.5)
             window:Destroy()
             self:ShowMainUI()
         else
-            statusLabel.Text = "Status: ❌ Invalid Key - Please try again"
+            statusLabel.Text = "Status: ❌ Invalid license key"
             statusLabel.TextColor3 = self.Config.Colors.Red
             
             TweenService:Create(submitButton, TweenInfo.new(0.3), {
                 BackgroundColor3 = self.Config.Colors.Red
             }):Play()
+            submitButton.Text = "INVALID KEY"
             
-            task.wait(0.8)
+            task.wait(1)
             TweenService:Create(submitButton, TweenInfo.new(0.3), {
                 BackgroundColor3 = self.Config.Colors.BrightGreen
             }):Play()
+            submitButton.Text = "VERIFY KEY"
         end
     end
 
@@ -430,11 +274,13 @@ function UI_Libry:ShowKeySystem()
         if setclipboard then
             setclipboard("https://discord.gg/streehub")
         end
-        discordButton.Text = "DISCORD COPIED!"
-        task.wait(1)
-        discordButton.Text = "DISCORD SERVER"
+        local originalText = discordButton.Text
+        discordButton.Text = "✅ DISCORD LINK COPIED!"
+        task.wait(1.5)
+        discordButton.Text = originalText
     end)
 
+    -- Button hover effects
     self:SetupButtonHover(submitButton, self.Config.Colors.BrightGreen, self.Config.Colors.NeonGreen)
     self:SetupButtonHover(getKeyButton, self.Config.Colors.DarkGray, self.Config.Colors.Gray)
     self:SetupButtonHover(discordButton, self.Config.Colors.DiscordBlue, Color3.fromRGB(114, 137, 218))
@@ -444,89 +290,100 @@ end
 
 function UI_Libry:ShowKeyLinksUI()
     local window = self:CreateWindow({
-        Title = "GET YOUR KEY",
-        Size = UDim2.new(0, 450, 0, 400)
+        Title = "GET PREMIUM ACCESS",
+        Size = UDim2.new(0, 500, 0, 500)
     })
     
     local linksTab = window:CreateTab("Key Links")
     
-    local instructionLabel = self:CreateElement("TextLabel", {
+    local header = self:CreateElement("TextLabel", {
         Parent = linksTab.Content,
-        Size = UDim2.new(1, -20, 0, 40),
+        Size = UDim2.new(1, -20, 0, 60),
         Position = UDim2.new(0, 10, 0, 10),
         BackgroundTransparency = 1,
-        Text = "Complete any link below to get your key:",
-        TextColor3 = self.Config.Colors.White,
-        TextSize = 14,
+        Text = "Complete any link below to get your premium key",
+        TextColor3 = self.Config.Colors.NeonGreen,
+        TextSize = 16,
         Font = self.Config.Fonts.Header,
+        TextWrapped = true,
         TextXAlignment = Enum.TextXAlignment.Center
     })
 
     local keyLinks = {
-        {"Rekonise", "https://rkns.link/2vbo0"},
-        {"Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi"},
-        {"Lootlabs", "https://lootdest.org/s?VooVvLbJ"},
-        {"Work.Ink", "https://link-hub.net/1365203/NqhrZrvoQhoi"}
+        {"🌟 Rekonise", "https://rkns.link/2vbo0", "Complete short verification"},
+        {"🔗 Linkvertise", "https://link-hub.net/1365203/NqhrZrvoQhoi", "Watch advertisement"},
+        {"🎁 Lootlabs", "https://lootdest.org/s?VooVvLbJ", "Complete survey"},
+        {"⚡ Work.Ink", "https://link-hub.net/1365203/NqhrZrvoQhoi", "Quick verification"}
     }
 
     for i, linkData in ipairs(keyLinks) do
-        local name, url = linkData[1], linkData[2]
+        local name, url, description = linkData[1], linkData[2], linkData[3]
         
-        local linkButton = self:CreateElement("TextButton", {
+        local linkCard = self:CreateElement("TextButton", {
             Parent = linksTab.Content,
-            Size = UDim2.new(1, -20, 0, 50),
-            Position = UDim2.new(0, 10, 0, 60 + (i-1)*60),
+            Size = UDim2.new(1, -20, 0, 70),
+            Position = UDim2.new(0, 10, 0, 80 + (i-1)*80),
             BackgroundColor3 = self.Config.Colors.DarkGray,
             Text = "",
             BorderSizePixel = 0
         })
-        self:RoundedCorner(linkButton, 8)
-        self:NeonStroke(linkButton, 2, 0.5)
+        self:RoundedCorner(linkCard, 10)
+        self:NeonStroke(linkCard, 2, 0.5)
+
+        local linkIcon = self:CreateElement("TextLabel", {
+            Parent = linkCard,
+            Size = UDim2.new(0, 40, 0, 40),
+            Position = UDim2.new(0, 15, 0, 15),
+            BackgroundTransparency = 1,
+            Text = "🔗",
+            TextColor3 = self.Config.Colors.NeonGreen,
+            TextSize = 20,
+            Font = Enum.Font.GothamBold
+        })
 
         local linkTitle = self:CreateElement("TextLabel", {
-            Parent = linkButton,
-            Size = UDim2.new(1, -20, 0.6, 0),
-            Position = UDim2.new(0, 10, 0, 5),
+            Parent = linkCard,
+            Size = UDim2.new(1, -80, 0, 25),
+            Position = UDim2.new(0, 65, 0, 15),
             BackgroundTransparency = 1,
-            Text = "🔗 " .. name,
-            TextColor3 = Color3.fromRGB(0, 255, 150),
+            Text = name,
+            TextColor3 = self.Config.Colors.White,
             TextSize = 14,
             Font = self.Config.Fonts.Header,
             TextXAlignment = Enum.TextXAlignment.Left
         })
 
         local linkDesc = self:CreateElement("TextLabel", {
-            Parent = linkButton,
-            Size = UDim2.new(1, -20, 0.4, 0),
-            Position = UDim2.new(0, 10, 0.6, 0),
+            Parent = linkCard,
+            Size = UDim2.new(1, -80, 0, 20),
+            Position = UDim2.new(0, 65, 0, 35),
             BackgroundTransparency = 1,
-            Text = "Click to copy link",
+            Text = description,
             TextColor3 = Color3.fromRGB(150, 150, 150),
             TextSize = 11,
             Font = self.Config.Fonts.Body,
             TextXAlignment = Enum.TextXAlignment.Left
         })
 
-        self:SetupButtonHover(linkButton, self.Config.Colors.DarkGray, self.Config.Colors.Gray)
+        self:SetupButtonHover(linkCard, self.Config.Colors.DarkGray, self.Config.Colors.Gray)
 
-        linkButton.MouseButton1Click:Connect(function()
+        linkCard.MouseButton1Click:Connect(function()
             if setclipboard then
                 setclipboard(url)
             end
-            linkTitle.Text = "✅ " .. name
+            linkTitle.Text = "✅ " .. name:sub(4)
             linkDesc.Text = "Link copied to clipboard!"
             linkTitle.TextColor3 = Color3.fromRGB(0, 255, 0)
             
-            task.wait(1.5)
-            linkTitle.Text = "🔗 " .. name
-            linkDesc.Text = "Click to copy link"
-            linkTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
+            task.wait(2)
+            linkTitle.Text = name
+            linkDesc.Text = description
+            linkTitle.TextColor3 = self.Config.Colors.White
         end)
     end
 
     return window
 end
-
 function UI_Libry:ShowMainUI()
     -- Load semua components
     local Button = loadstring(game:HttpGet("https://raw.githubusercontent.com/STREE-HUB/UI.Libry/Button.lua"))()
