@@ -1000,6 +1000,15 @@ Tab4:Slider({
 	end
 })
 
+local Section = Tab4:Section({
+	Title = "Blantant Fishing",
+	Icon = "fish",
+	TextXAlignment = "Left",
+	TextSize = 17
+})
+
+Tab4:Divider()
+
 _G.AutoFishing = false
 _G.CancelDelay = 1.8
 _G.CompletedDelay = 1.6
@@ -1087,7 +1096,7 @@ Tab4:Input({
 })
 
 Tab4:Toggle({
-    Title = "Blantant Fishing",
+    Title = "Blatant Fishing",
     Default = false,
     Callback = function(v)
         _G.AutoFishing = v
