@@ -1043,16 +1043,16 @@ local function RequestGame()
     end)
 end
 
-local function Completed(minDelay)
+local function Completed(delay)
     pcall(function()
-        task.wait(minDelay or _G.CompletedDelay)
+        task.wait(delay or _G.CompletedDelay)
         RE.Completed:FireServer()
     end)
 end
 
-local function CancelFishing(minDelay)
+local function CancelFishing(delay)
     pcall(function()
-        task.wait(minDelay or _G.CancelDelay)
+        task.wait(delay or _G.CancelDelay)
         RF.Cancel:InvokeServer()
     end)
 end
