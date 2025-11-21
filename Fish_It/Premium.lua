@@ -1047,7 +1047,6 @@ end
 
 local function Completed()
     pcall(function()
-        task.wait(_G.CompletedDelay)
         RE.Completed:FireServer()
     end)
 end
@@ -1062,6 +1061,7 @@ end
 task.spawn(function()
     while task.wait(0.05) do
         if _G.AutoFishing then
+            -- Spam Equip di awal
             for i = 1, 5 do
                 EquipRod()
                 task.wait(0.02)
@@ -1070,27 +1070,30 @@ task.spawn(function()
             ChargeRod()
             task.wait(0.1)
             
+
             for i = 1, 3 do
                 EquipRod()
                 task.wait(0.02)
             end
             
             RequestGame()
-            
+            task.wait(0.1)
+
             for i = 1, 4 do
                 EquipRod()
                 task.wait(0.02)
             end
             
             Completed()
-            
+            task.wait(0.1)
+
             for i = 1, 3 do
                 EquipRod()
                 task.wait(0.02)
             end
             
             CancelFishing()
-            
+
             for i = 1, 4 do
                 EquipRod()
                 task.wait(0.02)
@@ -1126,6 +1129,42 @@ Tab4:Toggle({
     Default = false,
     Callback = function(v)
         _G.AutoFishing = v
+    end
+})
+
+local Section = Tab4:Section({
+	Title = "Gift",
+	Icon = "gift",
+	TextXAlignment = "Left",
+	TextSize = 17
+})
+
+Tab4:Divider()
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
+
+Tab4:Button({
+    Title = "Gift Skin Soul Scythe",
+    Locked = false,
+    Callback = function()
+        if GiftingController and GiftingController.Open then
+            GiftingController:Open("Soul Scythe")
+
+            WindUI:Notify({
+                Title = "Gift Open",
+                Content = "Soul Scythe Gift Opened Successfully",
+                Duration = 3,
+                Icon = "check"
+            })
+        else
+            WindUI:Notify({
+                Title = "Failed!!",
+                Content = "Patched",
+                Duration = 3,
+                Icon = "x"
+            })
+        end
     end
 })
 
