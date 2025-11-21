@@ -1001,10 +1001,10 @@ Tab4:Slider({
 })
 
 local Section = Tab4:Section({
-	Title = "Blantant",
-	Icon = "fish",
-	TextXAlignment = "Left",
-	TextSize = 17
+    Title = "Blantant",
+    Icon = "fish",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
 _G.AutoFishing = false
