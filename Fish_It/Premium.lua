@@ -1060,23 +1060,41 @@ local function CancelFishing()
 end
 
 task.spawn(function()
-    while task.wait() do
+    while task.wait(0.05) do
         if _G.AutoFishing then
-            EquipRod()
-            EquipRod()
-            EquipRod()
+            for i = 1, 5 do
+                EquipRod()
+                task.wait(0.02)
+            end
+            
             ChargeRod()
-            EquipRod()
-            EquipRod()
-            EquipRod()
-            EquipRod()
+            task.wait(0.1)
+            
+            for i = 1, 3 do
+                EquipRod()
+                task.wait(0.02)
+            end
+            
             RequestGame()
-            EquipRod()
-            EquipRod()
+            
+            for i = 1, 4 do
+                EquipRod()
+                task.wait(0.02)
+            end
+            
             Completed()
-            EquipRod()
-            EquipRod()
+            
+            for i = 1, 3 do
+                EquipRod()
+                task.wait(0.02)
+            end
+            
             CancelFishing()
+            
+            for i = 1, 4 do
+                EquipRod()
+                task.wait(0.02)
+            end
         end
     end
 end)
