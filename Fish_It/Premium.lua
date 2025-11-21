@@ -1043,28 +1043,32 @@ local function RequestGame()
     end)
 end
 
-local function Completed(delay)
+local function Completed()
     pcall(function()
-        task.wait(delay or _G.CompletedDelay)
+        task.wait(_G.CompletedDelay)
         RE.Completed:FireServer()
     end)
 end
 
-local function CancelFishing(delay)
+local function CancelFishing()
     pcall(function()
-        task.wait(delay or _G.CancelDelay)
+        task.wait(_G.CancelDelay)
         RF.Cancel:InvokeServer()
     end)
 end
 
 task.spawn(function()
-    while task.wait() do
+    while task.wait(0.2) do
         if _G.AutoFishing then
             EquipRod()
-            task.wait(0.1)
+            task.wait(0.15)
+
             ChargeRod()
-            task.wait(0.2)
+            task.wait(0.25)
+
             RequestGame()
+            task.wait(0.1)
+
             Completed()
             CancelFishing()
         end
