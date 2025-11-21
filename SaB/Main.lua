@@ -134,6 +134,29 @@ local Tab3 = Window:Tab({
     Icon = "user"
 })
 
+_G.InfiniteJump = true
+
+local UIS = game:GetService("UserInputService")
+
+UIS.JumpRequest:Connect(function()
+    if _G.InfiniteJump then
+        local chr = game.Players.LocalPlayer.Character
+        local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            hum:ChangeState(Enum.HumanoidStateType.Freefall)
+        end
+    end
+end)
+
+Tab3:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(v)
+        _G.InfiniteJump = v
+    end
+})
+
 local Tab4 = Window:Tab({
     Title = "Settings",
     Icon = "settings"
