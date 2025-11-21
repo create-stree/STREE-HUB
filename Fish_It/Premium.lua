@@ -1101,34 +1101,6 @@ Tab4:Toggle({
     end
 })
 
-local Section = Tab4:Section({
-	Title = "Character",
-	Icon = "person-standing",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-local function toggleAnimation(state)
-    if state then
-        for _, v in ipairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if v:IsA("Animation") or v:IsA("Animator") then
-                v:Destroy()
-            end
-        end
-        game.Players.LocalPlayer.Character.Humanoid:LoadAnimation = function() end
-    else
-        game.Players.LocalPlayer.Character.Humanoid:LoadAnimation = nil
-    end
-end
-
-Tab4:Toggle({
-    Title = "Disable Animations",
-    Default = false,
-    Callback = function(state)
-        toggleAnimation(state)
-    end
-})
-
 local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
