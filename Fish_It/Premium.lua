@@ -1000,7 +1000,7 @@ Tab4:Slider({
 	end
 })
 
-local Section = Tab4:Section({
+Tab4:Section({
     Title = "Blantant",
     Icon = "fish",
     TextXAlignment = "Left",
@@ -1043,32 +1043,28 @@ local function RequestGame()
     end)
 end
 
-local function Completed()
+local function Completed(minDelay)
     pcall(function()
-        task.wait(_G.CompletedDelay)
+        task.wait(minDelay or _G.CompletedDelay)
         RE.Completed:FireServer()
     end)
 end
 
-local function CancelFishing()
+local function CancelFishing(minDelay)
     pcall(function()
-        task.wait(_G.CancelDelay)
+        task.wait(minDelay or _G.CancelDelay)
         RF.Cancel:InvokeServer()
     end)
 end
 
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait() do
         if _G.AutoFishing then
             EquipRod()
-            task.wait(0.15)
-
-            ChargeRod()
-            task.wait(0.25)
-
-            RequestGame()
             task.wait(0.1)
-
+            ChargeRod()
+            task.wait(0.2)
+            RequestGame()
             Completed()
             CancelFishing()
         end
