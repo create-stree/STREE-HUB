@@ -1052,7 +1052,7 @@ Tab4:Divider()
 
 _G.AutoFishing = false
 _G.CancelDelay = 1.8
-_G.CompletedDelay = 1.6
+_G.CompletedDelay = 1.5
 
 local RS = game:GetService("ReplicatedStorage")
 local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
@@ -1082,63 +1082,34 @@ end
 
 local function RequestGame()
     pcall(function()
-        RF.Request:InvokeServer(-139.63, 0.996)
+        RF.Request:InvokeServer(-139.63, 0.996, 1761532005.497)
     end)
 end
 
-local function Completed()
+local function Completed(minDelay)
     pcall(function()
+        task.wait(minDelay or _G.CompletedDelay)
         RE.Completed:FireServer()
     end)
 end
 
-local function CancelFishing()
+local function CancelFishing(minDelay)
     pcall(function()
-        task.wait(_G.CancelDelay)
+        task.wait(minDelay or _G.CancelDelay)
         RF.Cancel:InvokeServer()
     end)
 end
 
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait() do
         if _G.AutoFishing then
-            -- Spam Equip di awal
-            for i = 1, 5 do
-                EquipRod()
-                task.wait(0.02)
-            end
-            
+            EquipRod()
+            task.wait(0.1)
             ChargeRod()
-            task.wait(0.1)
-            
-
-            for i = 1, 3 do
-                EquipRod()
-                task.wait(0.02)
-            end
-            
+            task.wait(0.2)
             RequestGame()
-            task.wait(0.1)
-
-            for i = 1, 4 do
-                EquipRod()
-                task.wait(0.02)
-            end
-            
             Completed()
-            task.wait(0.1)
-
-            for i = 1, 3 do
-                EquipRod()
-                task.wait(0.02)
-            end
-            
             CancelFishing()
-
-            for i = 1, 4 do
-                EquipRod()
-                task.wait(0.02)
-            end
         end
     end
 end)
@@ -1156,7 +1127,7 @@ Tab4:Input({
 
 Tab4:Input({
     Title = "Completed Delay",
-    Placeholder = "1.6",
+    Placeholder = "1.5",
     Callback = function(input)
         local num = tonumber(input)
         if num then
@@ -1166,7 +1137,7 @@ Tab4:Input({
 })
 
 Tab4:Toggle({
-    Title = "Blatant Fishing",
+    Title = "Blantant Fishing",
     Default = false,
     Callback = function(v)
         _G.AutoFishing = v
