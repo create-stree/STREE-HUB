@@ -347,7 +347,7 @@ end
 
 local function lempar()
     safeCall("lempar", function()
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, 1761532005.497)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-139.63, 0.996, -1761532005.497)
     end)
     safeCall("charge2", function()
         net["RF/ChargeFishingRod"]:InvokeServer()
@@ -1082,7 +1082,7 @@ end
 
 local function RequestGame()
     pcall(function()
-        RF.Request:InvokeServer(-139.63, 0.996, -11532005.497)
+        RF.Request:InvokeServer(-139.63, 0.996, -1761532005.497)
     end)
 end
 
