@@ -309,10 +309,29 @@ end
 local RS = game:GetService("ReplicatedStorage")
 local net = RS.Packages._Index["sleitnick_net@0.2.0"].net
 
-local function rod() safeCall("rod", function() net["RE/EquipToolFromHotbar"]:FireServer(1) end) end
-local function sell() safeCall("sell", function() net["RF/SellAllItems"]:InvokeServer() end) end
-local function autoon() safeCall("autoon", function() net["RF/UpdateAutoFishingState"]:InvokeServer(true) end) end
-local function autooff() safeCall("autooff", function() net["RF/UpdateAutoFishingState"]:InvokeServer(false) end) end
+local function rod()
+    safeCall("rod", function()
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
+    end)
+end
+
+local function sell()
+    safeCall("sell", function()
+        net["RF/SellAllItems"]:InvokeServer()
+    end)
+end
+
+local function autoon()
+    safeCall("autoon", function()
+        net["RF/UpdateAutoFishingState"]:InvokeServer(true)
+    end)
+end
+
+local function autooff()
+    safeCall("autooff", function()
+        net["RF/UpdateAutoFishingState"]:InvokeServer(false)
+    end)
+end
 
 local function instant_cycle()
     safeCall("cancel", function()
