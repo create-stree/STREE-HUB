@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.1.9",
+    Title = "v0.0.2.0",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -67,26 +67,6 @@ Tab1:Button({
     Callback = function()
         if setclipboard then
             setclipboard("https://discord.gg/jdmX43t5mY")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "WhatsApp",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "Telegram",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://t.me/StreeCoumminty")
         end
     end
 })
@@ -1430,24 +1410,19 @@ Tab6:Section({
 Tab6:Divider()
 
 local IslandLocations = {
-    ["Admin Event"] = Vector3.new(-1981, -442, 7428),
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
-    ["Enchant Room 2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
-    ["Halloween"] = Vector3.new(2106, 81, 3295),
     ["Kohana Volcano"] = Vector3.new(-545.302429, 17.1266193, 118.870537),
     ["Konoha"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
     ["Sacred Temple"] = Vector3.new(1498, -23, -644),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
-    ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
-    ["Underground Cellar"] = Vector3.new(2135, -93, -701),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
 }
 
@@ -1488,6 +1463,7 @@ Tab6:Divider()
 
 local FishingLocations = {
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+    ["Enchant Room 2"] = Vector3.new(1480, 126, -585),
     ["Konoha"] = Vector3.new(-603, 3, 719),
     ["Levers 1"] = Vector3.new(1475,4,-847),
     ["Levers 2"] = Vector3.new(882,5,-321),
@@ -1496,6 +1472,7 @@ local FishingLocations = {
     ["Sacred Temple"] = Vector3.new(1475,-22,-632),
     ["Spawn"] = Vector3.new(33, 9, 2810),
     ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
+    ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
     ["Underground Cellar"] = Vector3.new(2135,-92,-695),
     ["Volcano"] = Vector3.new(-632, 55, 197),
 }
@@ -1820,7 +1797,6 @@ Tab6:Dropdown({
 	AllowNone = true,
 	Callback = function(values)
 		selectedEvents = values
-		print("[EventTP] Selected Events:", table.concat(values, ", "))
 	end
 })
 
@@ -1908,6 +1884,29 @@ Tab7:Toggle({
     end
 })
 
+local RS = game:GetService("ReplicatedStorage")
+local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+local RE_Notify = Net:FindFirstChild("RE/ObtainedNewFishNotification")
+
+_G.DisableNotify = false
+
+Tab7:Toggle({
+    Title = "Disable Notify",
+    Desc = "No notification",
+    Default = false,
+    Callback = function(state)
+        _G.DisableNotify = state
+    end
+})
+
+if RE_Notify then
+    RE_Notify.OnClientEvent:Connect(function(...)
+        if not _G.DisableNotify then
+            return
+        end
+    end)
+end
+
 Tab7:Section({ 
     Title = "Server",
     Icon = "server",
@@ -1952,8 +1951,6 @@ Tab7:Button({
 
         if serverId then
             TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, game.Players.LocalPlayer)
-        else
-            warn("⚠️ No suitable server found!")
         end
     end
 })
@@ -2020,7 +2017,6 @@ Tab7:Button({
     Callback = function()
         local data = GetConfig()
         writefile(ConfigFolder.."/"..ConfigName, game:GetService("HttpService"):JSONEncode(data))
-        print("✅ Config saved!")
     end
 })
 
@@ -2032,9 +2028,6 @@ Tab7:Button({
             local data = readfile(ConfigFolder.."/"..ConfigName)
             local decoded = game:GetService("HttpService"):JSONDecode(data)
             ApplyConfig(decoded)
-            print("✅ Config applied!")
-        else
-            warn("⚠️ Config not found, please Save first.")
         end
     end
 })
@@ -2045,9 +2038,6 @@ Tab7:Button({
     Callback = function()
         if isfile(ConfigFolder.."/"..ConfigName) then
             delfile(ConfigFolder.."/"..ConfigName)
-            print("🗑 Config deleted!")
-        else
-            warn("⚠️ No config to delete.")
         end
     end
 })
