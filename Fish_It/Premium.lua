@@ -319,10 +319,6 @@ local function instant_cycle()
         net["RF/CancelFishingInputs"]:InvokeServer()
     end)
 
-    safeCall("equip1", function()
-        net["RE/EquipToolFromHotbar"]:FireServer(1)
-    end)
-
     safeCall("charge1", function()
         net["RF/ChargeFishingRod"]:InvokeServer(1756863567.217075)
     end)
@@ -330,12 +326,6 @@ local function instant_cycle()
     safeCall("request", function()
         net["RF/RequestFishingMinigameStarted"]:InvokeServer(-139.63796997070312, 0.9964792798079721)
     end)
-
-    for i = 1, 11 do
-        safeCall("equipMulti"..i, function()
-            net["RE/EquipToolFromHotbar"]:FireServer(1)
-        end)
-    end
 
     safeCall("complete", function()
         net["RE/FishingCompleted"]:FireServer()
