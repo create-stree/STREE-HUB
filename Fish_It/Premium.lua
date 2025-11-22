@@ -47,7 +47,7 @@ WindUI:Notify({
     Icon = "bell",
 })
 
-local Tab1 = Window:Tab({
+local Tab1 = Window:Tab({ 
     Title = "Info",
     Icon = "info",
 })
@@ -382,7 +382,6 @@ Tab3:Dropdown({
     Value = "Instant",
     Callback = function(v)
         mode = v
-        WindUI:Notify({Title = "Mode", Content = "Mode: " .. v, Duration = 3})
     end
 })
 
@@ -394,7 +393,6 @@ Tab3:Toggle({
         if v then
             if mode == "Instant" then
                 _G.Instant = true
-                WindUI:Notify({Title = "Auto Fishing", Content = "Instant ON", Duration = 3})
                 if fishThread then fishThread = nil end
                 fishThread = task.spawn(function()
                     while _G.AutoFishing and mode == "Instant" do
@@ -403,7 +401,6 @@ Tab3:Toggle({
                     end
                 end)
             else
-                WindUI:Notify({Title = "Auto Fishing", Content = "Legit ON", Duration = 3})
                 if fishThread then fishThread = nil end
                 fishThread = task.spawn(function()
                     while _G.AutoFishing and mode == "Legit" do
@@ -413,7 +410,6 @@ Tab3:Toggle({
                 end)
             end
         else
-            WindUI:Notify({Title = "Auto Fishing", Content = "OFF", Duration = 3})
             autooff()
             _G.Instant = false
             if fishThread then task.cancel(fishThread) end
@@ -425,10 +421,9 @@ Tab3:Toggle({
 Tab3:Slider({
     Title = "Instant Fishing Delay",
     Step = 0.01,
-    Value = {Min = 0.2, Max = 1, Default = 0.35},
+    Value = {Min = 0.05, Max = 5, Default = 0.65},
     Callback = function(v)
         _G.InstantDelay = v
-        WindUI:Notify({Title = "Delay", Content = "Instant Delay: " .. v .. "s", Duration = 2})
     end
 })
 
@@ -500,19 +495,9 @@ Tab3:Toggle({
                 if state then
                     c.TintColor = Color3.fromRGB(42, 226, 118)
                     c.Brightness = 0.4
-                    require(RS.Controllers.TextNotificationController):DeliverNotification({
-                        Type = "Text",
-                        Text = "Radar: Enabled",
-                        TextColor = {R = 9, G = 255, B = 0}
-                    })
                 else
                     c.TintColor = Color3.fromRGB(255, 0, 0)
                     c.Brightness = 0.2
-                    require(RS.Controllers.TextNotificationController):DeliverNotification({
-                        Type = "Text",
-                        Text = "Radar: Disabled",
-                        TextColor = {R = 255, G = 0, B = 0}
-                    })
                 end
 
                 require(RS.Packages.spr).target(c, 1, 1, correction)
