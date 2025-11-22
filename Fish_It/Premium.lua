@@ -1933,29 +1933,6 @@ Tab7:Toggle({
     end
 })
 
-local RS = game:GetService("ReplicatedStorage")
-local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
-local RE_Notify = Net:FindFirstChild("RE/ObtainedNewFishNotification")
-
-_G.DisableNotify = false
-
-Tab7:Toggle({
-    Title = "Disable Notify",
-    Desc = "No notification",
-    Default = false,
-    Callback = function(state)
-        _G.DisableNotify = state
-    end
-})
-
-if RE_Notify then
-    RE_Notify.OnClientEvent:Connect(function(...)
-        if not _G.DisableNotify then
-            return
-        end
-    end)
-end
-
 Tab7:Section({ 
     Title = "Server",
     Icon = "server",
