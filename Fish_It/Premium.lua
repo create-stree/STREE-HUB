@@ -179,7 +179,6 @@ Tab2:Toggle({
     Default = false,
     Callback = function(state)
         _G.InfiniteJump = state
-        end
     end
 })
 
@@ -249,9 +248,12 @@ Tab2:Toggle({
 })
 
 player.CharacterAdded:Connect(function(char)
-    if isFrozen then
+    if _G.FreezeCharacter then
         task.wait(0.5)
-        freezeCharacter(char)
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = originalCFrame
+        end
     end
 end)
 
@@ -1809,7 +1811,6 @@ Tab6:Toggle({
 		autoEventTPEnabled = state
 		if state then
 			task.spawn(runMultiEventTP)
-		else
 		end
 	end
 })
@@ -1901,7 +1902,7 @@ Tab7:Toggle({
 
 if RE_Notify then
     RE_Notify.OnClientEvent:Connect(function(...)
-        if not _G.DisableNotify then
+        if _G.DisableNotify then
             return
         end
     end)
