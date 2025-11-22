@@ -1581,6 +1581,15 @@ Tab6:Button({
     end
 })
 
+Tab6:Section({
+    Title = "Teleport Player",
+    Icon = "person-standing",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab6:Divider()
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -1595,17 +1604,9 @@ local function GetPlayerList()
 end
 
 local SelectedPlayer = nil
+local Dropdown
 
-Tab6:Section({
-    Title = "Teleport Player",
-    Icon = "person-standing",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab6:Divider()
-
-Tab6:Dropdown({
+Dropdown = Tab6:Dropdown({
     Title = "List Player",
     Values = GetPlayerList(),
     Value = GetPlayerList()[1],
@@ -1619,16 +1620,12 @@ Tab6:Button({
     Locked = false,
     Callback = function()
         if not SelectedPlayer then
-            warn("Belum pilih player!")
             return
         end
-
         local target = Players:FindFirstChild(SelectedPlayer)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
             LocalPlayer.Character.HumanoidRootPart.CFrame =
                 target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-        else
-            warn("Player tidak valid atau tidak ada!")
         end
     end
 })
@@ -1638,42 +1635,20 @@ Tab6:Button({
     Locked = false,
     Callback = function()
         local newList = GetPlayerList()
-        local success = false
-        
+
         if Dropdown.SetValues then
             Dropdown:SetValues(newList)
-            success = true
         elseif Dropdown.Refresh then
             Dropdown:Refresh(newList)
-            success = true
         elseif Dropdown.Update then
             Dropdown:Update(newList)
-            success = true
-        else
-            warn("Function update dropdown tidak ditemukan!")
         end
-        
+
         if newList[1] then
             SelectedPlayer = newList[1]
             if Dropdown.Set then
                 Dropdown:Set(newList[1])
             end
-        end
-
-        if success then
-            WindUI:Notify({
-                Title = "Refresh Successful!",
-                Content = tostring(#newList) .. " player found",
-                Duration = 3,
-                Icon = "check"
-            })
-        else
-            WindUI:Notify({
-                Title = "Refresh Failed",
-                Content = "Unable to update player list",
-                Duration = 3,
-                Icon = "x"
-            })
         end
     end
 })
