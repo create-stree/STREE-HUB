@@ -294,16 +294,16 @@ _G.CallBackoff = _G.CallBackoff or 1.5
 local lastCall = {}
 local function safeCall(k, f)
     local n = os.clock()
-    local d = _G.CallMinDelay
-    local b = _G.CallBackoff
-    if lastCall[k] and n - lastCall[k] < d then task.wait(d - (n - lastCall[k])) end
-    local o, r = pcall(f)
-    lastCall[k] = os.clock()
-    if not o then
-        local m = tostring(r):lower()
-        task.wait(m:find("429") or m:find("too many requests") and b or 0.2)
+    if lastCall[k] and n - lastCall[k] < _G.CallMinDelay then
+        task.wait(_G.CallMinDelay - (n - lastCall[k]))
     end
-    return o, r
+    local ok, result = pcall(f)
+    lastCall[k] = os.clock()
+    if not ok then
+        local msg = tostring(result):lower()
+        task.wait(msg:find("429") or msg:find("too many requests") and _G.CallBackoff or 0.2)
+    end
+    return ok, result
 end
 
 local RS = game:GetService("ReplicatedStorage")
@@ -333,42 +333,44 @@ local function autooff()
     end)
 end
 
+local function catch()
+    safeCall("catch", function()
+        net["RE/FishingCompleted"]:FireServer()
+    end)
+end
+
 local function charge()
     safeCall("charge", function()
-        net["RF/ChargeFishingRod"]:InvokeServer(math.huge)
+        net["RF/ChargeFishingRod"]:InvokeServer()
     end)
 end
 
 local function lempar()
     safeCall("lempar", function()
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-129.63, 0.996)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, 1761532005.497)
     end)
-end
-
-local function equip()
-    safeCall("equip", function()
-        net["RE/EquipToolFromHotbar"]:FireServer(1)
+    safeCall("charge2", function()
+        net["RF/ChargeFishingRod"]:InvokeServer()
     end)
-end
-
-local function instant_cycle()
-    equip()
-    charge()
-    lempar()
-    task.wait(_G.InstantDelay)
-    catch()
 end
 
 local function autosell()
     while _G.AutoSell do
         sell()
         local d = tonumber(_G.SellDelay) or 30
-        local w = 0
-        while w < d and _G.AutoSell do
+        local t = 0
+        while t < d and _G.AutoSell do
             task.wait(0.25)
-            w += 0.25
+            t += 0.25
         end
     end
+end
+
+local function instant_cycle()
+    charge()
+    lempar()
+    task.wait(_G.InstantDelay)
+    catch()
 end
 
 local Tab3 = Window:Tab({
@@ -421,7 +423,7 @@ Tab3:Toggle({
                 fishThread = task.spawn(function()
                     while _G.AutoFishing and mode == "Instant" do
                         instant_cycle()
-                        task.wait(_G.InstantDelay)
+                        task.wait(0.35)
                     end
                 end)
             else
@@ -504,28 +506,42 @@ Tab3:Toggle({
         local Lighting = game:GetService("Lighting")
         local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
         local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
+
         if Replion and NetFunction:InvokeServer(state) then
             local sound = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
             sound.PlaybackSpeed = 1 + math.random() * 0.3
-            local colorEffect = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
-            if colorEffect then
-                require(RS.Packages.spr).stop(colorEffect)
-                local timeController = require(RS.Controllers.ClientTimeController)
-                local profile = timeController._getLightingProfile and timeController:_getLightingProfile() or {}
+
+            local c = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
+            if c then
+                require(RS.Packages.spr).stop(c)
+
+                local time = require(RS.Controllers.ClientTimeController)
+                local profile = time._getLightingProfile and time:_getLightingProfile() or {}
                 local correction = profile.ColorCorrection or {}
                 correction.Brightness = correction.Brightness or 0.04
-                correction.TintColor = correction.TintColor or Color3.fromRGB(255, 255, 255)
+                correction.TintColor = correction.TintColor or Color3.fromRGB(255,255,255)
+
                 if state then
-                    colorEffect.TintColor = Color3.fromRGB(42, 226, 118)
-                    colorEffect.Brightness = 0.4
-                    require(RS.Controllers.TextNotificationController):DeliverNotification({Type = "Text", Text = "Radar: Enabled", TextColor = {R = 9, G = 255, B = 0}})
+                    c.TintColor = Color3.fromRGB(42, 226, 118)
+                    c.Brightness = 0.4
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
+                        Type = "Text",
+                        Text = "Radar: Enabled",
+                        TextColor = {R = 9, G = 255, B = 0}
+                    })
                 else
-                    colorEffect.TintColor = Color3.fromRGB(255, 0, 0)
-                    colorEffect.Brightness = 0.2
-                    require(RS.Controllers.TextNotificationController):DeliverNotification({Type = "Text", Text = "Radar: Disabled", TextColor = {R = 255, G = 0, B = 0}})
+                    c.TintColor = Color3.fromRGB(255, 0, 0)
+                    c.Brightness = 0.2
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
+                        Type = "Text",
+                        Text = "Radar: Disabled",
+                        TextColor = {R = 255, G = 0, B = 0}
+                    })
                 end
-                require(RS.Packages.spr).target(colorEffect, 1, 1, correction)
+
+                require(RS.Packages.spr).target(c, 1, 1, correction)
             end
+
             require(RS.Packages.spr).stop(Lighting)
             Lighting.ExposureCompensation = 1
             require(RS.Packages.spr).target(Lighting, 1, 2, {ExposureCompensation = 0})
