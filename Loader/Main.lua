@@ -17,9 +17,18 @@ local premiumKeys = {
     "ZkWmNtGpQrHxSaJlDyCfVuEbLoPiTn",
     "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuN",
     "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsM",
-    "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
+    "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT", -- 10
+    "aBcDeFgHiJkLmNoPqRsTuVwXyZ12345",
+    "mNoPqRsTuVwXyZAbCdEfGhIjKlMnOpQ",
+    "tUvWxYzAbCdEfGhIjKlMnOpQrStUvWx",
+    "bCdEfGhIjKlMnOpQrStUvWxYzAbCdEf",
+    "kLmNoPqRsTuVwXyZAbCdEfGhIjKlMnO",
+    "pQrStUvWxYzAbCdEfGhIjKlMnOpQrSt",
+    "wXyZAbCdEfGhIjKlMnOpQrStUvWxYzA",
+    "dEfGhIjKlMnOpQrStUvWxYzAbCdEfGh",
+    "jKlMnOpQrStUvWxYzAbCdEfGhIjKlMn",-- 20
     "developer_access",
-    "team_access"
+    "team_access",
 }
 
 local function isPremiumKey(key)
