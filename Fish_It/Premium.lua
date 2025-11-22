@@ -170,7 +170,6 @@ Tab2:Button({
             humanoid.UseJumpPower = true
             humanoid.JumpPower = 50
         end
-        print("🔄 Jump Power reset to 50")
     end
 })
 
@@ -185,7 +184,6 @@ Tab2:Button({
     Desc = "Return speed to normal (18)",
     Callback = function()
         Humanoid.WalkSpeed = 18
-        print("WalkSpeed reset to default (18)")
     end
 })
 
@@ -201,10 +199,6 @@ Tab2:Toggle({
     Default = false,
     Callback = function(state)
         _G.InfiniteJump = state
-        if state then
-            print("✅ Infinite Jump Active")
-        else
-            print("❌ Infinite Jump Inactive")
         end
     end
 })
@@ -1587,6 +1581,103 @@ Tab6:Button({
     end
 })
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function GetPlayerList()
+    local list = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(list, plr.Name)
+        end
+    end
+    return list
+end
+
+local SelectedPlayer = nil
+
+Tab6:Section({
+    Title = "Teleport Player",
+    Icon = "person-standing",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab6:Divider()
+
+Tab6:Dropdown({
+    Title = "List Player",
+    Values = GetPlayerList(),
+    Value = GetPlayerList()[1],
+    Callback = function(option)
+        SelectedPlayer = option
+    end
+})
+
+Tab6:Button({
+    Title = "Teleport to Player (Target)",
+    Locked = false,
+    Callback = function()
+        if not SelectedPlayer then
+            warn("Belum pilih player!")
+            return
+        end
+
+        local target = Players:FindFirstChild(SelectedPlayer)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame =
+                target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+        else
+            warn("Player tidak valid atau tidak ada!")
+        end
+    end
+})
+
+Tab6:Button({
+    Title = "Refresh Player List",
+    Locked = false,
+    Callback = function()
+        local newList = GetPlayerList()
+        local success = false
+        
+        if Dropdown.SetValues then
+            Dropdown:SetValues(newList)
+            success = true
+        elseif Dropdown.Refresh then
+            Dropdown:Refresh(newList)
+            success = true
+        elseif Dropdown.Update then
+            Dropdown:Update(newList)
+            success = true
+        else
+            warn("Function update dropdown tidak ditemukan!")
+        end
+        
+        if newList[1] then
+            SelectedPlayer = newList[1]
+            if Dropdown.Set then
+                Dropdown:Set(newList[1])
+            end
+        end
+
+        if success then
+            WindUI:Notify({
+                Title = "Refresh Successful!",
+                Content = tostring(#newList) .. " player found",
+                Duration = 3,
+                Icon = "check"
+            })
+        else
+            WindUI:Notify({
+                Title = "Refresh Failed",
+                Content = "Unable to update player list",
+                Duration = 3,
+                Icon = "x"
+            })
+        end
+    end
+})
+
 Tab6:Section({
     Title = "Event Teleporter",
     Icon = "calendar",
@@ -1842,6 +1933,29 @@ Tab7:Toggle({
     end
 })
 
+local RS = game:GetService("ReplicatedStorage")
+local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+local RE_Notify = Net:FindFirstChild("RE/ObtainedNewFishNotification")
+
+_G.DisableNotify = false
+
+Tab7:Toggle({
+    Title = "Disable Notify",
+    Desc = "No notification",
+    Default = false,
+    Callback = function(state)
+        _G.DisableNotify = state
+    end
+})
+
+if RE_Notify then
+    RE_Notify.OnClientEvent:Connect(function(...)
+        if not _G.DisableNotify then
+            return
+        end
+    end)
+end
+
 Tab7:Section({ 
     Title = "Server",
     Icon = "server",
@@ -1988,7 +2102,7 @@ Tab7:Button({
 
 Tab7:Section({ 
     Title = "Other Scripts",
-    Icon = "file-code-2",
+    Icon = "file-code-corner",
     TextXAlignment = "Left",
     TextSize = 17,
 })
