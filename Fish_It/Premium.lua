@@ -341,7 +341,7 @@ end
 
 local function lempar()
     safeCall("lempar", function()
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-139.63, 0.996)
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-129.63, 0.996)
     end)
 end
 
