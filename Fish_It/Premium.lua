@@ -333,22 +333,30 @@ local function autooff()
     end)
 end
 
+local function charge()
+    safeCall("charge", function()
+        net["RF/ChargeFishingRod"]:InvokeServer(math.huge)
+    end)
+end
+
+local function lempar()
+    safeCall("lempar", function()
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-139.63, 0.996)
+    end)
+end
+
+local function equip()
+    safeCall("equip", function()
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
+    end)
+end
+
 local function instant_cycle()
-    safeCall("cancel", function()
-        net["RF/CancelFishingInputs"]:InvokeServer()
-    end)
-
-    safeCall("charge1", function()
-        net["RF/ChargeFishingRod"]:InvokeServer(1756863567.217075)
-    end)
-
-    safeCall("request", function()
-        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-139.63796997070312, 0.9964792798079721)
-    end)
-
-    safeCall("complete", function()
-        net["RE/FishingCompleted"]:FireServer()
-    end)
+    equip()
+    charge()
+    lempar()
+    task.wait(_G.InstantDelay)
+    catch()
 end
 
 local function autosell()
