@@ -313,11 +313,33 @@ local function rod() safeCall("rod", function() net["RE/EquipToolFromHotbar"]:Fi
 local function sell() safeCall("sell", function() net["RF/SellAllItems"]:InvokeServer() end) end
 local function autoon() safeCall("autoon", function() net["RF/UpdateAutoFishingState"]:InvokeServer(true) end) end
 local function autooff() safeCall("autooff", function() net["RF/UpdateAutoFishingState"]:InvokeServer(false) end) end
-local function catch() safeCall("catch", function() net["RE/FishingCompleted"]:FireServer() end) end
-local function charge() safeCall("charge", function() net["RF/ChargeFishingRod"]:InvokeServer() end) end
-local function lempar()
-    safeCall("lempar", function() net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, 1761532005.497) end)
-    safeCall("charge2", function() net["RF/ChargeFishingRod"]:InvokeServer() end)
+
+local function instant_cycle()
+    safeCall("cancel", function()
+        net["RF/CancelFishingInputs"]:InvokeServer()
+    end)
+
+    safeCall("equip1", function()
+        net["RE/EquipToolFromHotbar"]:FireServer(1)
+    end)
+
+    safeCall("charge1", function()
+        net["RF/ChargeFishingRod"]:InvokeServer(1756863567.217075)
+    end)
+
+    safeCall("request", function()
+        net["RF/RequestFishingMinigameStarted"]:InvokeServer(-139.63796997070312, 0.9964792798079721)
+    end)
+
+    for i = 1, 11 do
+        safeCall("equipMulti"..i, function()
+            net["RE/EquipToolFromHotbar"]:FireServer(1)
+        end)
+    end
+
+    safeCall("complete", function()
+        net["RE/FishingCompleted"]:FireServer()
+    end)
 end
 
 local function autosell()
@@ -325,15 +347,11 @@ local function autosell()
         sell()
         local d = tonumber(_G.SellDelay) or 30
         local w = 0
-        while w < d and _G.AutoSell do task.wait(0.25) w = w + 0.25 end
+        while w < d and _G.AutoSell do
+            task.wait(0.25)
+            w += 0.25
+        end
     end
-end
-
-local function instant_cycle()
-    charge()
-    lempar()
-    task.wait(_G.InstantDelay)
-    catch()
 end
 
 local Tab3 = Window:Tab({
@@ -386,7 +404,7 @@ Tab3:Toggle({
                 fishThread = task.spawn(function()
                     while _G.AutoFishing and mode == "Instant" do
                         instant_cycle()
-                        task.wait(0.35)
+                        task.wait(_G.InstantDelay)
                     end
                 end)
             else
@@ -466,7 +484,6 @@ Tab3:Toggle({
     Title = "Radar",
     Value = false,
     Callback = function(state)
-        local RS = game:GetService("ReplicatedStorage")
         local Lighting = game:GetService("Lighting")
         local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
         local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
@@ -484,19 +501,11 @@ Tab3:Toggle({
                 if state then
                     colorEffect.TintColor = Color3.fromRGB(42, 226, 118)
                     colorEffect.Brightness = 0.4
-                    require(RS.Controllers.TextNotificationController):DeliverNotification({
-                        Type = "Text",
-                        Text = "Radar: Enabled",
-                        TextColor = {R = 9, G = 255, B = 0}
-                    })
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({Type = "Text", Text = "Radar: Enabled", TextColor = {R = 9, G = 255, B = 0}})
                 else
                     colorEffect.TintColor = Color3.fromRGB(255, 0, 0)
                     colorEffect.Brightness = 0.2
-                    require(RS.Controllers.TextNotificationController):DeliverNotification({
-                        Type = "Text",
-                        Text = "Radar: Disabled",
-                        TextColor = {R = 255, G = 0, B = 0}
-                    })
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({Type = "Text", Text = "Radar: Disabled", TextColor = {R = 255, G = 0, B = 0}})
                 end
                 require(RS.Packages.spr).target(colorEffect, 1, 1, correction)
             end
@@ -515,7 +524,6 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.DivingGear = state
-        local RS = game:GetService("ReplicatedStorage")
         local RemoteFolder = RS.Packages._Index["sleitnick_net@0.2.0"].net
         if state then
             RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(105)
