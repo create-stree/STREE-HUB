@@ -1,5 +1,68 @@
 local UI_Libry = {}
 
+function UI_Libry:CreateWindow(options)
+    -- Function untuk membuat window UI
+end
+
+function UI_Libry:ShowKeySystem()
+    -- Buat window sederhana untuk key system
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 400, 0, 300)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    frame.Parent = screenGui
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Text = "STREE HUB - KEY SYSTEM"
+    title.TextScaled = true
+    title.Parent = frame
+    
+    local description = Instance.new("TextLabel")
+    description.Size = UDim2.new(1, -20, 0, 40)
+    description.Position = UDim2.new(0, 10, 0, 60)
+    description.BackgroundTransparency = 1
+    description.TextColor3 = Color3.fromRGB(200, 200, 200)
+    description.Text = "Enter your premium key below:"
+    description.TextScaled = true
+    description.Parent = frame
+    
+    local keyBox = Instance.new("TextBox")
+    keyBox.Size = UDim2.new(1, -40, 0, 40)
+    keyBox.Position = UDim2.new(0, 20, 0, 110)
+    keyBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyBox.PlaceholderText = "Enter key here..."
+    keyBox.Text = ""
+    keyBox.Parent = frame
+    
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(1, -40, 0, 40)
+    submitButton.Position = UDim2.new(0, 20, 0, 170)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Text = "SUBMIT KEY"
+    submitButton.TextScaled = true
+    submitButton.Parent = frame
+    
+    submitButton.MouseButton1Click:Connect(function()
+        local key = keyBox.Text
+        if key == "PREMIUM123" or key == "STREEHUB2024" then -- Ganti dengan key valid
+            screenGui:Destroy()
+            self:ShowMainUI()
+        else
+            keyBox.Text = ""
+            keyBox.PlaceholderText = "Invalid key! Try again..."
+        end
+    end)
+end
+
 function UI_Libry:ShowMainUI()
     local Button = loadstring(game:HttpGet("https://raw.githubusercontent.com/STREE-HUB/UI.Libry/Button.lua"))()
     local Toggle = loadstring(game:HttpGet("https://raw.githubusercontent.com/STREE-HUB/UI.Libry/Toggle.lua"))()
@@ -142,7 +205,7 @@ end
 
 task.spawn(function()
     repeat task.wait() until game:IsLoaded()
-    UI_Libry:ShowMainUI()
+    UI_Libry:ShowKeySystem()
 end)
 
 return UI_Libry
