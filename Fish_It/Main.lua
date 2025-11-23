@@ -28,6 +28,20 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+Window:EditOpenButton({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://122683047852451",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(
+        Color3.fromHex("#000000"), 
+        Color3.fromHex("#39FF14")
+    ),
+    OnlyMobile = true,
+    Enabled = true,
+    Draggable = true,
+})
+
 Window:Tag({
     Title = "v0.0.3.0",
     Color = Color3.fromRGB(0, 255, 0),
