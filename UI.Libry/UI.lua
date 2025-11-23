@@ -142,7 +142,7 @@ end
 
 task.spawn(function()
     repeat task.wait() until game:IsLoaded()
-    UI_Libry:ShowKeySystem()
+    UI_Libry:ShowMainUI()
 end)
 
 return UI_Libry
