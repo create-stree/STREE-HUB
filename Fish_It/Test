@@ -1,113 +1,274 @@
 _G.AutoFishing = false
-_G.AutoSell = false
-_G.AutoBuyBait = false
 _G.AutoEquipRod = false
--
-local function simulateClick()
+_G.AutoSell = false
+_G.Radar = false
+_G.Instant = false
+_G.SellDelay = _G.SellDelay or 30
+_G.CallMinDelay = _G.CallMinDelay or 0.12
+_G.CallBackoff = _G.CallBackoff or 1.5
+_G.InstantDelay = _G.InstantDelay or 0.65
 
-    mouse1click() 
-
+local lastCall = {}
+local function safeCall(key, fn)
+    local now = os.clock()
+    local minDelay = _G.CallMinDelay
+    local backoff = _G.CallBackoff
+    if lastCall[key] and now - lastCall[key] < minDelay then
+        task.wait(minDelay - (now - lastCall[key]))
+    end
+    local ok, res = pcall(fn)
+    lastCall[key] = os.clock()
+    if not ok then
+        local m = tostring(res):lower()
+        if m:find("429") or m:find("too many requests") then
+            task.wait(backoff)
+        else
+            task.wait(0.2)
+        end
+    end
+    return ok, res
 end
 
-local Tab = Window:MakeTab({
-    Name = "Auto Farm",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
+local function rod()
+    safeCall("EquipToolFromHotbar", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]:FireServer(1)
+    end)
+end
+
+local function sell()
+    safeCall("SellAllItems", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/SellAllItems"]:InvokeServer()
+    end)
+end
+
+local function autoon()
+    safeCall("AutoFishingOn", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/UpdateAutoFishingState"]:InvokeServer(true)
+    end)
+end
+
+local function autooff()
+    safeCall("AutoFishingOff", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/UpdateAutoFishingState"]:InvokeServer(false)
+    end)
+end
+
+local function catch()
+    safeCall("FishingCompleted", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]:FireServer()
+    end)
+end
+
+local function charge()
+    safeCall("ChargeFishingRod", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer()
+    end)
+end
+
+local function lempar()
+    safeCall("RequestFishingMinigameStarted", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, -1761532005.497)
+    end)
+    safeCall("ChargeAfterThrow", function()
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer()
+    end)
+end
+
+local function autosell()
+    while _G.AutoSell do
+        sell()
+        local d = tonumber(_G.SellDelay) or 30
+        local t = 0
+        while t < d and _G.AutoSell do
+            task.wait(0.25)
+            t += 0.25
+        end
+    end
+end
+
+local function perform_instant_cycle()
+    charge()
+    task.wait(0)
+    lempar()
+    task.wait(_G.InstantDelay)
+    if _G.Instant then
+        for i = 1, 5 do
+            if not _G.Instant then break end
+            catch()
+            task.wait(0)
+        end
+    else
+        catch()
+    end
+end
+
+local Tab3 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark"
 })
 
-Tab:Toggle({
-    Name = "Auto Fishing (Humanized)",
-    Default = false,
-    Callback = function(value)
-        _G.AutoFishing = value
+Tab3:Section({
+    Title = "Fishing",
+    Icon = "anchor",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Divider()
+
+Tab3:Toggle({
+    Title = "Auto Equip Rod",
+    Value = false,
+    Callback = function(v)
+        _G.AutoEquipRod = v
+        if v then rod() end
     end
 })
 
-Tab:Slider({
-    Name = "Min Wait (seconds)",
-    Default = 3,
-    Min = 3,
-    Max = 10,
-    Callback = function(value)
-        _G.MinDelay = value
+local CurrentOption = "Instant"
+local autoFishingThread
+local autosellThread
+
+Tab3:Dropdown({
+    Title = "Mode",
+    Values = {"Instant","Legit"},
+    Value = "Instant",
+    Callback = function(v)
+        CurrentOption = v
+        WindUI:Notify({Title = "Mode Selected", Content = "Mode: " .. v, Duration = 3})
     end
 })
 
-Tab:Slider({
-    Name = "Max Wait (seconds)",
-    Default = 8,
-    Min = 5,
-    Max = 15,
-    Callback = function(value)
-        _G.MaxDelay = value
+Tab3:Toggle({
+    Title = "Auto Fishing",
+    Value = false,
+    Callback = function(v)
+        _G.AutoFishing = v
+        if v then
+            if autoFishingThread then task.cancel(autoFishingThread) end
+            if CurrentOption == "Instant" then
+                _G.Instant = true
+                autoFishingThread = task.spawn(function()
+                    while _G.AutoFishing and CurrentOption == "Instant" do
+                        perform_instant_cycle()
+                        task.wait(0)
+                    end
+                end)
+            else
+                _G.Instant = false
+                autoFishingThread = task.spawn(function()
+                    while _G.AutoFishing and CurrentOption == "Legit" do
+                        autoon()
+                        task.wait(1)
+                    end
+                end)
+            end
+        else
+            autooff()
+            _G.Instant = false
+            if autoFishingThread then task.cancel(autoFishingThread) end
+            autoFishingThread = nil
+        end
     end
 })
 
-Tab:Toggle({
-    Name = "Auto Sell Fish",
-    Default = false,
-    Callback = function(value)
-        _G.AutoSell = value
+Tab3:Slider({
+    Title = "Instant Fishing Delay",
+    Step = 0.01,
+    Value = {Min = 0.05, Max = 5, Default = 0.65},
+    Callback = function(v)
+        _G.InstantDelay = v
     end
 })
 
-local RepStorage = game:GetService("ReplicatedStorage")
-local NetIndex = RepStorage.Packages._Index["sleitnick_net@0.2.0"].net
+Tab3:Section({
+    Title = "Auto Sell",
+    Icon = "coins",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
 
-spawn(function()
-    while task.wait(0.1) do
-        if _G.AutoFishing then
-            pcall(function()
-                simulateClick()              
-                
-                local waitTime = math.random(_G.MinDelay or 3, _G.MaxDelay or 8)
-                print("Tunggu gigitan: " .. waitTime .. " detik.")
-                task.wait(waitTime)               
-                local clicksNeeded = math.random(8, 20) 
-                local totalReelTime = math.random(10, 20) / 100 
-                local delayBetweenClicks = totalReelTime / clicksNeeded
-                
-                for i = 1, clicksNeeded do
-                    simulateClick()
-                    
-                    task.wait(delayBetweenClicks * math.random(9, 11) / 10) 
+Tab3:Divider()
+
+Tab3:Toggle({
+    Title = "Auto Sell",
+    Value = false,
+    Callback = function(v)
+        _G.AutoSell = v
+        if v then
+            if autosellThread then task.cancel(autosellThread) end
+            autosellThread = task.spawn(autosell)
+        else
+            if autosellThread then task.cancel(autosellThread) end
+            autosellThread = nil
+        end
+    end
+})
+
+Tab3:Section({
+    Title = "Item",
+    Icon = "grid-2x2-check",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Divider()
+
+Tab3:Toggle({
+    Title = "Radar",
+    Value = false,
+    Callback = function(state)
+        local RS = game:GetService("ReplicatedStorage")
+        local Lighting = game:GetService("Lighting")
+        local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
+        local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
+        if Replion and NetFunction:InvokeServer(state) then
+            local s = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
+            s.PlaybackSpeed = 1 + math.random() * 0.3
+            local cc = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
+            if cc then
+                require(RS.Packages.spr).stop(cc)
+                local T = require(RS.Controllers.ClientTimeController)
+                local profile = T._getLightingProfile and T:_getLightingProfile() or {}
+                local correct = profile.ColorCorrection or {}
+                correct.Brightness = correct.Brightness or 0.04
+                correct.TintColor = correct.TintColor or Color3.fromRGB(255,255,255)
+                if state then
+                    cc.TintColor = Color3.fromRGB(42,226,118)
+                    cc.Brightness = 0.4
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
+                        Type="Text",
+                        Text="Radar: Enabled",
+                        TextColor={R=9,G=255,B=0}
+                    })
+                else
+                    cc.TintColor = Color3.fromRGB(255,0,0)
+                    cc.Brightness = 0.2
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
+                        Type="Text",
+                        Text="Radar: Disabled",
+                        TextColor={R=255,G=0,B=0}
+                    })
                 end
-                
-                print("Pancingan selesai. Menunggu 1 detik untuk siklus berikutnya.")
-            end)
-            
-           
-            task.wait(math.random(15, 35) / 10) 
+                require(RS.Packages.spr).target(cc,1,1,correct)
+            end
+            require(RS.Packages.spr).stop(Lighting)
+            Lighting.ExposureCompensation = 1
+            require(RS.Packages.spr).target(Lighting,1,2,{ExposureCompensation=0})
         end
     end
-end)
+})
 
-spawn(function()
-    while task.wait(math.random(60, 120)) do 
-        if _G.AutoSell then
-            pcall(function()
-                NetIndex["RE/SellAllFish"]:FireServer()
-            end)
+Tab3:Toggle({
+    Title = "Diving Gear",
+    Value = false,
+    Callback = function(state)
+        _G.DivingGear = state
+        local RemoteFolder = game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net
+        if state then
+            RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(105)
+        else
+            RemoteFolder["RF/UnequipOxygenTank"]:InvokeServer()
         end
     end
-end)
-
-spawn(function()
-    while task.wait(math.random(180, 300)) do 
-        if _G.AutoBuyBait then
-            pcall(function()
-                NetIndex["RE/BuyBait"]:FireServer("BasicBait", 50)
-            end)
-        end
-    end
-end)
-
-spawn(function()
-    while task.wait(30) do
-        if _G.AutoEquipRod then
-            pcall(function()
-                NetIndex["RE/EquipToolFromHotbar"]:FireServer(1)
-            end)
-        end
-    end
-end)
+})
