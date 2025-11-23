@@ -360,7 +360,7 @@ end
 
 local function lempar()
     safeCall("RequestFishingMinigameStarted", function()
-        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 0.996, -1761532005.497)
+        game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]:InvokeServer(-1.233, 1, -1761532005.497)
     end)
     safeCall("ChargeAfterThrow", function()
         game:GetService("ReplicatedStorage").Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]:InvokeServer()
@@ -381,18 +381,10 @@ end
 
 local function perform_instant_cycle()
     charge()
-    task.wait(0)
+    task.wait(0.21)
     lempar()
     task.wait(_G.InstantDelay)
-    if _G.Instant then
-        for i = 1, 5 do
-            if not _G.Instant then break end
-            catch()
-            task.wait(0)
-        end
-    else
-        catch()
-    end
+    catch()
 end
 
 local Tab3 = Window:Tab({
@@ -495,15 +487,6 @@ Tab3:Toggle({
             if autosellThread then task.cancel(autosellThread) end
             autosellThread = nil
         end
-    end
-})
-
-Tab3:Slider({
-    Title = "Sell Delay",
-    Step = 1,
-    Value = {Min = 1, Max = 120, Default = 30},
-    Callback = function(v)
-        _G.SellDelay = v
     end
 })
 
