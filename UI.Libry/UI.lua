@@ -1,5 +1,6 @@
+local UI_Libry = {}
+
 function UI_Libry:ShowMainUI()
-    -- Load semua components
     local Button = loadstring(game:HttpGet("https://raw.githubusercontent.com/STREE-HUB/UI.Libry/Button.lua"))()
     local Toggle = loadstring(game:HttpGet("https://raw.githubusercontent.com/STREE-HUB/UI.Libry/Toggle.lua"))()
     local Slider = loadstring(game:HttpGet("https://raw.githubusercontent.com/STREE-HUB/UI.Libry/Slider.lua"))()
@@ -17,7 +18,6 @@ function UI_Libry:ShowMainUI()
     local combatTab = window:CreateTab("Combat")
     local settingsTab = window:CreateTab("Settings")
 
-    -- Main Tab
     local welcomeLabel = Label:Create(mainTab.Content, {
         Title = "Welcome to STREE HUB!",
         Description = "Premium access activated • Enjoy your stay!",
@@ -56,7 +56,6 @@ function UI_Libry:ShowMainUI()
         end
     })
 
-    -- Combat Tab
     local combatLabel = Label:Create(combatTab.Content, {
         Title = "Combat Features",
         Description = "Various combat enhancements",
@@ -92,7 +91,6 @@ function UI_Libry:ShowMainUI()
         end
     })
 
-    -- Settings Tab
     local settingsLabel = Label:Create(settingsTab.Content, {
         Title = "UI Settings",
         Description = "Customize your experience",
@@ -142,7 +140,6 @@ function UI_Libry:ShowMainUI()
     return window
 end
 
--- ====== AUTO INITIALIZE ======
 task.spawn(function()
     repeat task.wait() until game:IsLoaded()
     UI_Libry:ShowKeySystem()
