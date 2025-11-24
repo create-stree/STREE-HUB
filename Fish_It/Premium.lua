@@ -1413,7 +1413,7 @@ Tab6:Divider()
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
-	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24)
+	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
@@ -1470,14 +1470,14 @@ local FishingLocations = {
 	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
 	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
     ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
-    ["Levers 1"] = Vector3.new(1475,4,-847),
-    ["Levers 2"] = Vector3.new(882,5,-321),
-    ["levers 3"] = Vector3.new(1425,6,126),
-    ["levers 4"] = Vector3.new(1837,4,-309),
-    ["Sacred Temple"] = Vector3.new(1475,-22,-632),
-    ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
+    ["Levers 1"] = Vector3.new(1475, 4, -847),
+    ["Levers 2"] = Vector3.new(882, 5, -321),
+    ["levers 3"] = Vector3.new(1425, 6,126),
+    ["levers 4"] = Vector3.new(1837, 4, -309),
+    ["Sacred Temple"] = Vector3.new(1475, -22, -632),
+    ["Sysyphus Statue"] = Vector3.new(-3693,-136, -1045),
     ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
-    ["Underground Cellar"] = Vector3.new(2135,-92,-695),
+    ["Underground Cellar"] = Vector3.new(2135, -92, -695),
     ["Volcano"] = Vector3.new(-632, 55, 197),
 }
 
