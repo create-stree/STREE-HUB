@@ -1157,24 +1157,19 @@ Tab5:Section({
 Tab5:Divider()
 
 local IslandLocations = {
-    ["Admin Event"] = Vector3.new(-1981, -442, 7428),
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
+	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
-    ["Enchant Room 2"] = Vector3.new(1480, 126, -585),
+	["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
-    ["Halloween"] = Vector3.new(2106, 81, 3295),
-    ["Kohana Volcano"] = Vector3.new(-545.302429, 17.1266193, 118.870537),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
-    ["Sacred Temple"] = Vector3.new(1498, -23, -644),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
-    ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
-    ["Underground Cellar"] = Vector3.new(2135, -93, -701),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
 }
 
@@ -1214,17 +1209,18 @@ Tab5:Section({
 Tab5:Divider()
 
 local FishingLocations = {
-    ["Ancient Ruin"] = Vector3.new(6033.74267578125, -585.9241943359375, 4620.7236328125),
-    ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
-    ["Levers 1"] = Vector3.new(1475,4,-847),
-    ["Levers 2"] = Vector3.new(882,5,-321),
-    ["levers 3"] = Vector3.new(1425,6,126),
-    ["levers 4"] = Vector3.new(1837,4,-309),
-    ["Sacred Temple"] = Vector3.new(1475,-22,-632),
-    ["Spawn"] = Vector3.new(33, 9, 2810),
-    ["Sysyphus Statue"] = Vector3.new(-3693,-136,-1045),
-    ["Underground Cellar"] = Vector3.new(2135,-92,-695),
+	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
+	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
+	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
+    ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
+    ["Levers 1"] = Vector3.new(1475, 4, -847),
+    ["Levers 2"] = Vector3.new(882, 5, -321),
+    ["levers 3"] = Vector3.new(1425, 6,126),
+    ["levers 4"] = Vector3.new(1837, 4, -309),
+    ["Sacred Temple"] = Vector3.new(1475, -22, -632),
+    ["Sysyphus Statue"] = Vector3.new(-3693,-136, -1045),
+    ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
+    ["Underground Cellar"] = Vector3.new(2135, -92, -695),
     ["Volcano"] = Vector3.new(-632, 55, 197),
 }
 
