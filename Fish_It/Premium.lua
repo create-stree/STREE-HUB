@@ -1412,7 +1412,6 @@ Tab6:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
-	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
 	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
@@ -1464,6 +1463,7 @@ Tab6:Section({
 Tab6:Divider()
 
 local FishingLocations = {
+	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Konoha"] = Vector3.new(-603, 3, 719),
