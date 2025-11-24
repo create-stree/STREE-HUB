@@ -40,7 +40,7 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "v0.0.2.0",
+    Title = "v0.0.0.1",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
