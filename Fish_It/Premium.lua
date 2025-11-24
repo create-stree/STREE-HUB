@@ -1464,9 +1464,7 @@ Tab6:Divider()
 
 local FishingLocations = {
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
-    ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
-    ["Enchant2"] = Vector3.new(1480, 126, -585),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
 	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
 	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
     ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
