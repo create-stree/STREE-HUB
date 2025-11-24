@@ -1420,7 +1420,7 @@ local IslandLocations = {
 	["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
@@ -1464,7 +1464,6 @@ Tab6:Divider()
 
 local FishingLocations = {
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
-    ["Kohana"] = Vector3.new(-603, 3, 719),
 	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
 	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
     ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
