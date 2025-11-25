@@ -3,13 +3,16 @@ local success, WindUI = pcall(function()
 end)
 
 if not success or not WindUI then
+    warn("⚠️ UI failed to load!")
     return
+else
+    print("✓ UI loaded successfully!")
 end
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
-    Author = "KirsiaSC | Fish It",
+    Author = "KirsiaSC | Blox Fruit",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(260, 290),
     Transparent = true,
