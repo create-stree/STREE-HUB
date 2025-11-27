@@ -18,7 +18,7 @@ WindUI:AddTheme({
     WindowTopbarIcon = Color3.fromHex("FFFFFF"),
 
     TabBackground = Color3.fromHex("#FFFFFF"),
-    TabTitle = Color3.fromHex("##39FF14"),
+    TabTitle = Color3.fromHex("#39FF14"),
     TabIcon = Color3.fromHex("#39FF14"),
 })
 
