@@ -95,26 +95,6 @@ Tab1:Button({
     end
 })
 
-Tab1:Button({
-    Title = "Telegram",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://t.me/StreeCoumminty")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "Website",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app/")
-        end
-    end
-})
-
 local Section = Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
