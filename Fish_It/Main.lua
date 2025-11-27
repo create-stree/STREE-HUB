@@ -12,14 +12,14 @@ end
 WindUI:AddTheme({
     Name = "Stree Hub",
     
-    WindowTopbarButtonIcon = Color3.fromHex("a1a1aa"), -- Icon
-    WindowTopbarTitle = Color3.fromHex("FFFFFF"), -- Text
-    WindowTopbarAuthor = Color3.fromHex("FFFFFF"), -- Text
-    WindowTopbarIcon = Color3.fromHex("FFFFFF"), -- Text
+    WindowTopbarButtonIcon = Color3.fromHex("a1a1aa"),
+    WindowTopbarTitle = Color3.fromHex("FFFFFF"),
+    WindowTopbarAuthor = Color3.fromHex("FFFFFF"),
+    WindowTopbarIcon = Color3.fromHex("FFFFFF"),
     
-    TabBackground = Color3.fromHex("#FFFFFF"), -- Text
-    TabTitle = Color3.fromHex("#FFFFFF"), -- Text
-    TabIcon = Color3.fromHex("a1a1aa"), -- Icon   
+    TabBackground = Color3.fromHex("#FFFFFF"),
+    TabTitle = Color3.fromHex("##39FF14"),
+    TabIcon = Color3.fromHex("#39FF14"),
 })
 
 local Window = WindUI:CreateWindow({
@@ -35,11 +35,10 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,
         Anonymous = true,
-        Callback = function()
-            WindUI:SetTheme("Stree Hub")
-        end,
     },
 })
+
+WindUI:SetTheme("Stree Hub")
 
 Window:EditOpenButton({
     Title = "STREE HUB",
