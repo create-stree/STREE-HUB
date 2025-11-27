@@ -86,11 +86,11 @@ Tab1:Button({
 })
 
 Tab1:Button({
-    Title = "Website",
+    Title = "WhatsApp",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app/")
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
         end
     end
 })
