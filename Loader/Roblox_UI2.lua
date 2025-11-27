@@ -1,4 +1,4 @@
--- STREE HUB - Loader & UI Final (NO KEYSYSTEM)
+-- STREE HUB - Loader & UI Final
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
