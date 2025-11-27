@@ -28,9 +28,30 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+Window:EditOpenButton({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://122683047852451",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(
+        Color3.fromHex("#000000"), 
+        Color3.fromHex("#39FF14")
+    ),
+    OnlyMobile = true,
+    Enabled = true,
+    Draggable = true,
+})
+
 Window:Tag({
-    Title = "v0.0.0.4",
+    Title = "v0.0.2.0",
     Color = Color3.fromRGB(0, 255, 0),
+    Radius = 17,
+})
+
+Window:Tag({
+    Title = "Premium",
+    Color = Color3.fromRGB(138, 43, 226),
+    Radius = 17,
 })
 
 WindUI:Notify({
@@ -40,20 +61,23 @@ WindUI:Notify({
     Icon = "bell",
 })
 
-local Tab1 = Window:Tab({
+local Tab1 = Window:Tab({ 
     Title = "Info",
-    Icon = "info"
+    Icon = "info",
 })
 
-local Section = Tab1:Section({
+Tab1:Section({
     Title = "Community Support",
+    Icon = "chevrons-left-right-ellipsis",
     TextXAlignment = "Left",
-    TextSize = 17
+    TextSize = 17,
 })
+
+Tab1:Divider()
 
 Tab1:Button({
     Title = "Discord",
-    Desc = "Click to copy link",
+    Desc = "click to copy link",
     Callback = function()
         if setclipboard then
             setclipboard("https://discord.gg/jdmX43t5mY")
@@ -63,7 +87,7 @@ Tab1:Button({
 
 Tab1:Button({
     Title = "WhatsApp",
-    Desc = "Click to copy link",
+    Desc = "click to copy link",
     Callback = function()
         if setclipboard then
             setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
@@ -71,31 +95,15 @@ Tab1:Button({
     end
 })
 
-Tab1:Button({
-    Title = "Telegram",
-    Desc = "Click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://t.me/StreeCoumminty")
-        end
-    end
-})
+Tab1:Divider()
 
-Tab1:Button({
-    Title = "Website",
-    Desc = "Click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app")
-        end
-    end
-})
-
-local Section = Tab1:Section({
+Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
     TextXAlignment = "Left",
-    TextSize = 17
+    TextSize = 17,
 })
+
+Tab1:Divider()
 
 Tab1:Keybind({
     Title = "Close/Open UI",
