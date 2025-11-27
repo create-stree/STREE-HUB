@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v0.0.0.3",
+    Title = "v0.0.0.4",
     Color = Color3.fromRGB(0, 255, 0),
 })
 
@@ -107,6 +107,91 @@ Tab1:Keybind({
 })
 
 local Tab2 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark",
+})
+
+local running = false
+local autoTP = false
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+
+local function hrp()
+    return LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function getNearestGen()
+    local h = hrp()
+    if not h then return end
+    local nearest, dist = nil, math.huge
+
+    for _, g in ipairs(workspace.Map.Ingame.Map:GetDescendants()) do
+        if g:IsA("Model") and g:FindFirstChild("Generator") then
+            local part = g.Generator:FindFirstChild("Primary") or g.Generator:FindFirstChildWhichIsA("BasePart")
+            if part then
+                local d = (h.Position - part.Position).Magnitude
+                if d < dist then
+                    dist = d
+                    nearest = g.Generator
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+local function tp(pos)
+    local h = hrp()
+    if h then h.CFrame = pos end
+end
+
+Tab2:Toggle({
+    Title = "Auto Teleport",
+    Desc = "Teleport to nearest generator",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(s)
+        autoTP = s
+    end
+})
+
+Tab2:Toggle({
+    Title = "Auto Generator",
+    Desc = "Full auto repair system",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        running = state
+        if state then
+            task.spawn(function()
+                while running do
+                    local gen = getNearestGen()
+                    local h = hrp()
+
+                    if gen and gen:FindFirstChild("Remotes") and h then
+                        local part = gen:FindFirstChild("Primary") or gen:FindFirstChildWhichIsA("BasePart")
+
+                        if autoTP and part then
+                            tp(part.CFrame + Vector3.new(0, 3, 0))
+                        end
+
+                        gen.Remotes.RF:InvokeServer("enter")
+                        task.wait(0.15)
+                        gen.Remotes.RE:FireServer()
+                        task.wait(0.15)
+                        gen.Remotes.RF:InvokeServer("leave")
+                    end
+
+                    task.wait(0.25)
+                end
+            end)
+        end
+    end
+})
+
+local Tab3 = Window:Tab({
     Title = "Players",
     Icon = "user",
 })
@@ -118,7 +203,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 
 _G.CustomJumpPower = 50
 
-local Input = Tab2:Input({
+Tab3:Input({
     Title = "WalkSpeed",
     Desc = "Minimum 16 speed",
     Value = "16",
@@ -137,7 +222,7 @@ local Input = Tab2:Input({
     end
 })
 
-local Input = Tab2:Input({
+Tab3:Input({
     Title = "Jump Power",
     Desc = "Minimum 50 jump",
     Value = "50",
@@ -160,7 +245,7 @@ local Input = Tab2:Input({
     end
 })
 
-local Button = Tab2:Button({
+Tab3:Button({
     Title = "Reset Jump Power",
     Desc = "Return Jump Power to normal (50)",
     Callback = function()
@@ -180,7 +265,7 @@ Player.CharacterAdded:Connect(function(char)
     humanoid.JumpPower = _G.CustomJumpPower or 50
 end)
 
-Tab2:Button({
+Tab3:Button({
     Title = "Reset Speed",
     Desc = "Return speed to normal (16)",
     Callback = function()
@@ -191,7 +276,7 @@ Tab2:Button({
 
 local UserInputService = game:GetService("UserInputService")
 
-local Toggle = Tab2:Toggle({
+Tab3:Toggle({
     Title = "Infinite Jump",
     Desc = "activate to use infinite jump",
     Icon = false,
@@ -217,7 +302,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-Tab2:Toggle({
+Tab3:Toggle({
     Title = "Infinite Stamina",
     Desc = "Energy never decrease [Beta]",
     Default = false,
@@ -244,12 +329,12 @@ Tab2:Toggle({
     end
 })
 
-local Tab3 = Window:Tab({
+local Tab4 = Window:Tab({
     Title = "Visual",
     Icon = "eye"
 })
 
-local Section = Tab3:Section({
+Tab4:Section({
     Title = "ESP Survivor",
     TextXAlignment = "Left",
     TextSize = 17
@@ -318,7 +403,7 @@ local function removeNameESP(char)
     end
 end
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Survivor Highlight",
     Desc = "Highlight survivors",
     Default = false,
@@ -344,7 +429,7 @@ Tab3:Toggle({
     end
 })
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Survivor Box",
     Desc = "Box survivors",
     Default = false,
@@ -370,13 +455,13 @@ Tab3:Toggle({
     end
 })
 
-local Section = Tab3:Section({
+Tab4:Section({
     Title = "ESP Killer",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Killer Highlight",
     Desc = "Highlight killer",
     Default = false,
@@ -402,7 +487,7 @@ Tab3:Toggle({
     end
 })
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Killer Box",
     Desc = "Box killer",
     Default = false,
@@ -428,13 +513,13 @@ Tab3:Toggle({
     end
 })
 
-local Section = Tab3:Section({
+Tab4:Section({
     Title = "ESP Other",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
-Tab3:Toggle({
+Tab4:Toggle({
     Title = "Name & Distance",
     Desc = "Show player names and distance",
     Default = false,
@@ -469,14 +554,14 @@ local Tab5 = Window:Tab({
     Icon = "settings"
 })
 
-local Section = Tab5:Section({
+Tab5:Section({
     Title = "Main",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
 Tab5:Toggle({
-    Title = "AntiAFK",
+    Title = "Anti AFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Default = false,
     Callback = function(state)
