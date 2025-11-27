@@ -9,21 +9,6 @@ else
     print("✓ UI loaded successfully!")
 end
 
-WindUI:AddTheme({
-    Name = "Stree Hub",
-
-    WindowShadow = Color3.fromHex("000000"),
-
-    WindowTopbarButtonIcon = Color3.fromHex("a1a1aa"),
-    WindowTopbarTitle = Color3.fromHex("FFFFFF"),
-    WindowTopbarAuthor = Color3.fromHex("FFFFFF"),
-    WindowTopbarIcon = Color3.fromHex("FFFFFF"),
-
-    TabBackground = Color3.fromHex("#000000"),
-    TabTitle = Color3.fromHex("#39FF14"),
-    TabIcon = Color3.fromHex("#39FF14"),
-})
-
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
@@ -39,8 +24,6 @@ local Window = WindUI:CreateWindow({
         Anonymous = true,
     },
 })
-
-WindUI:SetTheme("Stree Hub")
 
 Window:EditOpenButton({
     Title = "STREE HUB",
