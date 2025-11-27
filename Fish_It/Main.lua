@@ -11,12 +11,12 @@ end
 
 WindUI:AddTheme({
     Name = "Stree Hub",
-    
+
     WindowTopbarButtonIcon = Color3.fromHex("a1a1aa"),
     WindowTopbarTitle = Color3.fromHex("FFFFFF"),
     WindowTopbarAuthor = Color3.fromHex("FFFFFF"),
     WindowTopbarIcon = Color3.fromHex("FFFFFF"),
-    
+
     TabBackground = Color3.fromHex("#FFFFFF"),
     TabTitle = Color3.fromHex("##39FF14"),
     TabIcon = Color3.fromHex("#39FF14"),
