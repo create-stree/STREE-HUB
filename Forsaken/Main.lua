@@ -43,14 +43,14 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "v0.0.2.0",
+    Title = "v0.0.0.4",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Premium",
-    Color = Color3.fromRGB(138, 43, 226),
+    Title = "Freemium",
+    Color = Color3.fromRGB(205, 127, 50),
     Radius = 17,
 })
 
