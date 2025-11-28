@@ -43,7 +43,7 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "v0.0.2.1",
+    Title = "v0.0.2.2",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -2110,6 +2110,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
