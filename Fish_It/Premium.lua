@@ -43,7 +43,7 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "v0.0.2.0",
+    Title = "v0.0.2.1",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -86,11 +86,11 @@ Tab1:Button({
 })
 
 Tab1:Button({
-    Title = "Website",
+    Title = "WhatsApp",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app/")
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
         end
     end
 })
@@ -2102,3 +2102,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
