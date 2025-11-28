@@ -1338,7 +1338,6 @@ Tab5:Section({
 
 Tab5:Divider()
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
 local weatherKeyMap = {
@@ -1370,23 +1369,12 @@ Tab5:Dropdown({
 
 Tab5:Input({
     Title = "Buy Delay (minutes)",
-    Desc = "Default 9 Minutes"
+    Desc = "Default 9 Minutes",
     Placeholder = "9",
     Callback = function(input)
         local num = tonumber(input)
         if num and num > 0 then
             buyDelay = num * 60
-            WindUI:Notify({
-                Title = "Delay Updated",
-                Content = "Pembelian setiap " .. num .. " menit",
-                Duration = 2
-            })
-        else
-            WindUI:Notify({
-                Title = "Input Invalid",
-                Content = "Masukkan angka > 0",
-                Duration = 2
-            })
         end
     end
 })
@@ -2122,5 +2110,6 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
