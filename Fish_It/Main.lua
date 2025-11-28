@@ -1030,7 +1030,7 @@ Tab4:Button({
     end  
 })
 
-local Tab4Section = Tab4:Section({ 
+Tab4:Section({ 
     Title = "Buy Weathers",
     Icon = "shrimp",
     TextXAlignment = "Left",
