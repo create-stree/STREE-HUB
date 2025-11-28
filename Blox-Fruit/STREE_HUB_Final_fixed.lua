@@ -1,5 +1,19 @@
 local success, WindUI = pcall(function()
-    return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+    local httpget
+    if type(game.HttpGet) == "function" then
+        httpget = function(u) return game:HttpGet(u) end
+    elseif syn and syn.request then
+        httpget = function(u) return syn.request{Url = u, Method = 'GET'}.Body end
+    elseif http and http.request then
+        httpget = function(u) return http.request{Url = u, Method = 'GET'}.Body end
+    else
+        error("no http available")
+    end
+    local src = httpget("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua")
+    local chunk = (loadstring and loadstring(src)) or (load and load(src))
+    if type(chunk) == "function" then
+        return chunk()
+    end
 end)
 
 if not success or not WindUI then
