@@ -1350,15 +1350,17 @@ local weatherKeyMap = {
     ["Shark Hunt (300k Coins)"] = "Shark Hunt"
 }
 
-local weatherNames = {  
-    "Wind (10k Coins)", "Snow (15k Coins)", "Cloudy (20k Coins)",  
+local weatherNames = {
+    "Wind (10k Coins)", "Snow (15k Coins)", "Cloudy (20k Coins)",
     "Storm (35k Coins)", "Radiant (50k Coins)", "Shark Hunt (300k Coins)"
 }
 
 local selectedWeathers = {}
+local autoBuyEnabled = false
+local buyDelay = 540
 
 Tab5:Dropdown({
-    Title = "Select Weather Event",
+    Title = "Select Weather",
     Values = weatherNames,
     Multi = true,
     Callback = function(values)
@@ -1366,8 +1368,28 @@ Tab5:Dropdown({
     end
 })
 
-local autoBuyEnabled = false
-local buyDelay = 0.5
+Tab5:Input({
+    Title = "Buy Delay (minutes)",
+    Desc = "Default 9 Minutes"
+    Placeholder = "9",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num and num > 0 then
+            buyDelay = num * 60
+            WindUI:Notify({
+                Title = "Delay Updated",
+                Content = "Pembelian setiap " .. num .. " menit",
+                Duration = 2
+            })
+        else
+            WindUI:Notify({
+                Title = "Input Invalid",
+                Content = "Masukkan angka > 0",
+                Duration = 2
+            })
+        end
+    end
+})
 
 local function startAutoBuy()
     task.spawn(function()
@@ -1380,31 +1402,29 @@ local function startAutoBuy()
                     end)
                     if success then
                         WindUI:Notify({
-                            Title = "Buy",
-                            Content = "Purchased " .. displayName,
-                            Duration = 1
+                            Title = "Weather Purchased",
+                            Content = displayName .. " berhasil dibeli",
+                            Duration = 2
                         })
                     else
                         warn("Error buying weather:", err)
                     end
-                    task.wait(buyDelay)
                 end
             end
-            task.wait(0.1)
+            task.wait(buyDelay)
         end
     end)
 end
 
 Tab5:Toggle({
-    Title = "Buy Weather Event",
-    Desc = "Automatically purchase selected weather event",
+    Title = "Buy Weather",
     Value = false,
     Callback = function(state)
         autoBuyEnabled = state
         if state then
             WindUI:Notify({
                 Title = "Auto Buy",
-                Content = "Enabled",
+                Content = "Enabled (Beli setiap " .. (buyDelay / 60) .. " menit)",
                 Duration = 2
             })
             startAutoBuy()
@@ -2102,4 +2122,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
