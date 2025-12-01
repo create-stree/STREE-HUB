@@ -43,7 +43,7 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "v0.0.2.3",
+    Title = "v0.0.2.4",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1355,7 +1355,7 @@ local selectedWeathers = {}
 local autoBuyEnabled = false
 local buyDelay = 540
 
-Tab1:Dropdown({
+Tab5:Dropdown({
     Title = "Select Weather",
     Values = weatherNames,
     Multi = true,
@@ -2163,4 +2163,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
