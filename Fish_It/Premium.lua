@@ -1355,7 +1355,7 @@ local selectedWeathers = {}
 local autoBuyEnabled = false
 local buyDelay = 540
 
-Tab1:Dropdown({
+Tab5:Dropdown({
     Title = "Select Weather",
     Values = weatherNames,
     Multi = true,
@@ -1371,17 +1371,6 @@ Tab5:Input({
         local num = tonumber(input)
         if num and num > 0 then
             buyDelay = num * 60
-            WindUI:Notify({
-                Title = "Delay Updated",
-                Content = "Pembelian setiap " .. num .. " menit",
-                Duration = 2
-            })
-        else
-            WindUI:Notify({
-                Title = "Input Invalid",
-                Content = "Masukkan angka > 0",
-                Duration = 2
-            })
         end
     end
 })
@@ -1903,7 +1892,6 @@ Tab7:Toggle({
     end
 })
 
-
 Tab7:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
@@ -2162,3 +2150,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
