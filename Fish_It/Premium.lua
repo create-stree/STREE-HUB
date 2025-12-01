@@ -43,7 +43,7 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "v0.0.2.4",
+    Title = "v0.0.2.5",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1355,7 +1355,7 @@ local selectedWeathers = {}
 local autoBuyEnabled = false
 local buyDelay = 540
 
-Tab5:Dropdown({
+Tab1:Dropdown({
     Title = "Select Weather",
     Values = weatherNames,
     Multi = true,
@@ -1366,7 +1366,6 @@ Tab5:Dropdown({
 
 Tab5:Input({
     Title = "Buy Delay (minutes)",
-    Desc = "Default 9 Minutes"
     Placeholder = "9",
     Callback = function(input)
         local num = tonumber(input)
