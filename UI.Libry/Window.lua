@@ -1811,14 +1811,5 @@ local moduleReturns = {
     [27] = ToggleElement
 }
 
--- Function to load modules
-local function requireModule(id)
-    local moduleFunc = moduleReturns[id]
-    if moduleFunc then
-        return moduleFunc()
-    end
-    return nil
-end
-
--- Return the main library
-return requireModule(1)
+-- Return the main module directly
+return MainModule()
