@@ -1800,16 +1800,46 @@ local ToggleElement = function()
     return Toggle
 end
 
-local moduleReturns = {
-    [1] = MainModule,
-    [8] = AssetModule,
-    [20] = ButtonElement,
-    [22] = DropdownElement,
-    [23] = InputElement,
-    [25] = ParagraphElement,
-    [26] = SliderElement,
-    [27] = ToggleElement
+local Modules = {
+    MainModule = MainModule,
+    AssetModule = AssetModule,
+    ButtonElement = ButtonElement,
+    DropdownElement = DropdownElement,
+    InputElement = InputElement,
+    ParagraphElement = ParagraphElement,
+    SliderElement = SliderElement,
+    ToggleElement = ToggleElement
 }
 
--- Return the main module directly
+local function getModule(id)
+    if id == 1 then
+        return MainModule
+    elseif id == 8 then
+        return AssetModule
+    elseif id == 20 then
+        return ButtonElement
+    elseif id == 22 then
+        return DropdownElement
+    elseif id == 23 then
+        return InputElement
+    elseif id == 25 then
+        return ParagraphElement
+    elseif id == 26 then
+        return SliderElement
+    elseif id == 27 then
+        return ToggleElement
+    else
+        return function()
+            return {
+                New = function() end,
+                assets = {},
+                Names = {"Dark", "Light"},
+                init = function() end,
+                Enable = function() end,
+                Disable = function() end
+            }
+        end
+    end
+end
+
 return MainModule()
