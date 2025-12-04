@@ -1813,33 +1813,49 @@ local Modules = {
 
 local function getModule(id)
     if id == 1 then
-        return MainModule
-    elseif id == 8 then
-        return AssetModule
-    elseif id == 20 then
-        return ButtonElement
-    elseif id == 22 then
-        return DropdownElement
-    elseif id == 23 then
-        return InputElement
-    elseif id == 25 then
-        return ParagraphElement
-    elseif id == 26 then
-        return SliderElement
-    elseif id == 27 then
-        return ToggleElement
-    else
-        return function()
-            return {
-                New = function() end,
-                assets = {},
-                Names = {"Dark", "Light"},
-                init = function() end,
-                Enable = function() end,
-                Disable = function() end
-            }
-        end
+        local lib = MainModule()
+        return lib
     end
+    
+    return {}
 end
 
+local function MainModule()
+    local library = {
+        CreateWindow = function(options)
+            print("Window created:", options.Title)
+            return {
+                AddTab = function(name)
+                    print("Tab added:", name)
+                    return {
+                        AddSection = function(sectionName)
+                            print("Section added:", sectionName)
+                            return {
+                                AddButton = function(btnOptions)
+                                    print("Button:", btnOptions.Title)
+                                end,
+                                AddToggle = function(toggleOptions)
+                                    print("Toggle:", toggleOptions.Title)
+                                end,
+                                AddSlider = function(sliderOptions)
+                                    print("Slider:", sliderOptions.Title)
+                                end
+                            }
+                        end
+                    }
+                end
+            }
+        end,
+        Notify = function(options)
+            print("Notification:", options.Title)
+        end,
+        OpenImageWindow = function(options)
+            print("Image window opened with ID:", options.ImageId)
+        end
+    }
+    
+    return library
+end
+
+-- Return library
 return MainModule()
