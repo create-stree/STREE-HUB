@@ -1800,7 +1800,6 @@ local ToggleElement = function()
     return Toggle
 end
 
--- Module return table
 local moduleReturns = {
     [1] = MainModule,
     [8] = AssetModule,
@@ -1822,4 +1821,4 @@ local function requireModule(id)
 end
 
 -- Return the main library
-return requireModul(1)
+return requireModule(1)
