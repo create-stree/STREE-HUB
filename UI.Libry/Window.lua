@@ -905,3 +905,921 @@ local MainModule = function()
     
     return Library
 end
+
+-- Asset module
+local AssetModule = function()
+    return {
+        Close = 'rbxassetid://9886659671',
+        Min = 'rbxassetid://9886659276',
+        Max = 'rbxassetid://9886659406',
+        Restore = 'rbxassetid://9886659001',
+        Logo = 'rbxassetid://10709790948',
+        ImageWindow = 'rbxassetid://113067683358494'
+    }
+end
+
+-- Button element
+local ButtonElement = function()
+    local Creator = getModule(18)
+    local Components = getModule(7)
+    
+    local New = Creator.New
+    local AddSignal = Creator.AddSignal
+    
+    local Button = {}
+    Button.__index = Button
+    Button.__type = "Button"
+    
+    function Button.New(container, name, options)
+        assert(options.Title, "Button - Missing Title")
+        
+        options.Callback = options.Callback or function() end
+        
+        local element = getModule(11)(options.Title, options.Description, container.Container, true)
+        
+        local icon = New("ImageLabel", {
+            Image = "rbxassetid://10709791437",
+            Size = UDim2.fromOffset(16, 16),
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -10, 0.5, 0),
+            BackgroundTransparency = 1,
+            Parent = element.Frame,
+            ThemeTag = {ImageColor3 = "Text"}
+        })
+        
+        AddSignal(element.Frame.MouseButton1Click, function()
+            container.Library:SafeCallback(options.Callback)
+        end)
+        
+        return element
+    end
+    
+    return Button
+end
+
+-- Dropdown element
+local DropdownElement = function()
+    local TweenService = game:GetService("TweenService")
+    local UserInputService = game:GetService("UserInputService")
+    local Players = game:GetService("Players")
+    local Workspace = game:GetService("Workspace")
+    
+    local Creator = getModule(18)
+    local Flipper = getModule(30)
+    
+    local New = Creator.New
+    local AddSignal = Creator.AddSignal
+    local SpringMotor = Creator.SpringMotor
+    
+    local Dropdown = {}
+    Dropdown.__index = Dropdown
+    Dropdown.__type = "Dropdown"
+    
+    function Dropdown.New(container, name, options)
+        local library = container.Library
+        
+        assert(options.Values, "Dropdown - Missing Values")
+        assert(options.Default ~= nil, "Dropdown - Missing Default value")
+        
+        options.Callback = options.Callback or function() end
+        options.Multi = options.Multi or false
+        
+        local dropdownData = {
+            Values = options.Values,
+            Value = options.Default,
+            Multi = options.Multi,
+            Buttons = {},
+            Opened = false,
+            Type = "Dropdown",
+            Callback = options.Callback
+        }
+        
+        local element = getModule(11)(options.Title, options.Description, container.Container, false)
+        element.DescLabel.Size = UDim2.new(1, -170, 0, 14)
+        
+        dropdownData.SetTitle = element.SetTitle
+        dropdownData.SetDesc = element.SetDesc
+        
+        -- Value display
+        local valueLabel = New("TextLabel", {
+            FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+            Text = "Value",
+            TextColor3 = Color3.fromRGB(240, 240, 240),
+            TextSize = 13,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Size = UDim2.new(1, -30, 0, 14),
+            Position = UDim2.new(0, 8, 0.5, 0),
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundTransparency = 1,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            ThemeTag = {TextColor3 = "Text"}
+        })
+        
+        local dropdownIcon = New("ImageLabel", {
+            Image = "rbxassetid://10709790948",
+            Size = UDim2.fromOffset(16, 16),
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -8, 0.5, 0),
+            BackgroundTransparency = 1,
+            ThemeTag = {ImageColor3 = "SubText"}
+        })
+        
+        -- Main dropdown button
+        local dropdownButton = New("TextButton", {
+            Size = UDim2.fromOffset(160, 30),
+            Position = UDim2.new(1, -10, 0.5, 0),
+            AnchorPoint = Vector2.new(1, 0.5),
+            BackgroundTransparency = 0.9,
+            Parent = element.Frame,
+            ThemeTag = {BackgroundColor3 = "DropdownFrame"}
+        }, {
+            New("UICorner", {CornerRadius = UDim.new(0, 5)}),
+            New("UIStroke", {
+                Transparency = 0.5,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                ThemeTag = {Color = "InElementBorder"}
+            }),
+            dropdownIcon,
+            valueLabel
+        })
+        
+        -- Dropdown list
+        local listLayout = New("UIListLayout", {Padding = UDim.new(0, 3)})
+        
+        local scrollingFrame = New("ScrollingFrame", {
+            Size = UDim2.new(1, -5, 1, -10),
+            Position = UDim2.fromOffset(5, 5),
+            BackgroundTransparency = 1,
+            BottomImage = "rbxassetid://6889812791",
+            MidImage = "rbxassetid://6889812721",
+            TopImage = "rbxassetid://6276641225",
+            ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
+            ScrollBarImageTransparency = 0.95,
+            ScrollBarThickness = 4,
+            BorderSizePixel = 0,
+            CanvasSize = UDim2.fromScale(0, 0)
+        }, {listLayout})
+        
+        local dropdownHolder = New("Frame", {
+            Size = UDim2.fromScale(1, 0.6),
+            ThemeTag = {BackgroundColor3 = "DropdownHolder"}
+        }, {
+            scrollingFrame,
+            New("UICorner", {CornerRadius = UDim.new(0, 7)}),
+            New("UIStroke", {
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                ThemeTag = {Color = "DropdownBorder"}
+            }),
+            New("ImageLabel", {
+                BackgroundTransparency = 1,
+                Image = "http://www.roblox.com/asset/?id=5554236805",
+                ScaleType = Enum.ScaleType.Slice,
+                SliceCenter = Rect.new(23, 23, 277, 277),
+                Size = UDim2.fromScale(1, 1) + UDim2.fromOffset(30, 30),
+                Position = UDim2.fromOffset(-15, -15),
+                ImageColor3 = Color3.fromRGB(0, 0, 0),
+                ImageTransparency = 0.1
+            })
+        })
+        
+        local dropdownFrame = New("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.fromOffset(170, 300),
+            Parent = library.GUI,
+            Visible = false
+        }, {
+            dropdownHolder,
+            New("UISizeConstraint", {MinSize = Vector2.new(170, 0)})
+        })
+        
+        table.insert(library.OpenFrames, dropdownFrame)
+        
+        -- Positioning function
+        local function updatePosition()
+            local offset = 0
+            local camera = Workspace.CurrentCamera
+            local mouse = Players.LocalPlayer:GetMouse()
+            
+            if camera.ViewportSize.Y - dropdownButton.AbsolutePosition.Y < dropdownFrame.AbsoluteSize.Y - 5 then
+                offset = dropdownFrame.AbsoluteSize.Y - 5 - (camera.ViewportSize.Y - dropdownButton.AbsolutePosition.Y) + 40
+            end
+            
+            dropdownFrame.Position = UDim2.fromOffset(
+                dropdownButton.AbsolutePosition.X - 1,
+                dropdownButton.AbsolutePosition.Y - 5 - offset
+            )
+        end
+        
+        local maxWidth = 0
+        
+        local function updateSize()
+            if #dropdownData.Values > 10 then
+                dropdownFrame.Size = UDim2.fromOffset(maxWidth, 392)
+            else
+                dropdownFrame.Size = UDim2.fromOffset(maxWidth, listLayout.AbsoluteContentSize.Y + 10)
+            end
+        end
+        
+        local function updateCanvas()
+            scrollingFrame.CanvasSize = UDim2.fromOffset(0, listLayout.AbsoluteContentSize.Y)
+        end
+        
+        -- Initialize
+        updatePosition()
+        updateSize()
+        
+        -- Signals
+        AddSignal(dropdownButton:GetPropertyChangedSignal("AbsolutePosition"), updatePosition)
+        
+        AddSignal(dropdownButton.MouseButton1Click, function()
+            if dropdownData.Opened then
+                dropdownData:Close()
+            else
+                dropdownData:Open()
+            end
+        end)
+        
+        AddSignal(UserInputService.InputBegan, function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                local mouse = Players.LocalPlayer:GetMouse()
+                local holderPos = dropdownHolder.AbsolutePosition
+                local holderSize = dropdownHolder.AbsoluteSize
+                
+                if mouse.X < holderPos.X or mouse.X > holderPos.X + holderSize.X or
+                   mouse.Y < (holderPos.Y - 20 - 1) or mouse.Y > holderPos.Y + holderSize.Y then
+                    dropdownData:Close()
+                end
+            end
+        end)
+        
+        local scrollFrame = container.ScrollFrame
+        
+        function dropdownData:Open()
+            self.Opened = true
+            if scrollFrame then
+                scrollFrame.ScrollingEnabled = false
+            end
+            dropdownFrame.Visible = true
+            TweenService:Create(dropdownHolder, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                Size = UDim2.fromScale(1, 1)
+            }):Play()
+        end
+        
+        function dropdownData:Close()
+            self.Opened = false
+            if scrollFrame then
+                scrollFrame.ScrollingEnabled = true
+            end
+            dropdownHolder.Size = UDim2.fromScale(1, 0.6)
+            dropdownFrame.Visible = false
+        end
+        
+        function dropdownData:Display()
+            local values = self.Values
+            local displayText = ""
+            
+            if self.Multi then
+                for valueName, _ in pairs(self.Value or {}) do
+                    if table.find(values, valueName) then
+                        displayText = displayText .. valueName .. ", "
+                    end
+                end
+                displayText = displayText:sub(1, #displayText - 2)
+            else
+                displayText = self.Value or ""
+            end
+            
+            valueLabel.Text = (displayText == "" and "--" or displayText)
+        end
+        
+        function dropdownData:GetActiveValues()
+            if self.Multi then
+                local active = {}
+                for valueName, _ in pairs(self.Value or {}) do
+                    table.insert(active, valueName)
+                end
+                return active
+            else
+                return self.Value and 1 or 0
+            end
+        end
+        
+        function dropdownData:BuildDropdownList()
+            local values = self.Values
+            local buttons = {}
+            
+            -- Clear existing buttons
+            for _, child in ipairs(scrollingFrame:GetChildren()) do
+                if not child:IsA("UIListLayout") then
+                    child:Destroy()
+                end
+            end
+            
+            maxWidth = 0
+            
+            for _, valueName in ipairs(values) do
+                local buttonData = {}
+                
+                -- Selection indicator
+                local selectionIndicator = New("Frame", {
+                    Size = UDim2.fromOffset(4, 14),
+                    BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+                    Position = UDim2.fromOffset(-1, 16),
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    ThemeTag = {BackgroundColor3 = "Accent"}
+                }, {
+                    New("UICorner", {CornerRadius = UDim.new(0, 2)})
+                })
+                
+                -- Button label
+                local buttonLabel = New("TextLabel", {
+                    FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                    Text = valueName,
+                    TextColor3 = Color3.fromRGB(200, 200, 200),
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Position = UDim2.fromOffset(10, 0),
+                    Name = "ButtonLabel",
+                    ThemeTag = {TextColor3 = "Text"}
+                })
+                
+                -- Button
+                local button = New("TextButton", {
+                    Size = UDim2.new(1, -5, 0, 32),
+                    BackgroundTransparency = 1,
+                    ZIndex = 23,
+                    Text = "",
+                    Parent = scrollingFrame,
+                    ThemeTag = {BackgroundColor3 = "DropdownOption"}
+                }, {
+                    selectionIndicator,
+                    buttonLabel,
+                    New("UICorner", {CornerRadius = UDim.new(0, 6)})
+                })
+                
+                -- Determine if selected
+                local isSelected
+                if self.Multi then
+                    isSelected = self.Value and self.Value[valueName] or false
+                else
+                    isSelected = self.Value == valueName
+                end
+                
+                -- Motor animations
+                local bgMotor, bgSetGoal = SpringMotor(1, button, "BackgroundTransparency")
+                local indicatorMotor, indicatorSetGoal = SpringMotor(1, selectionIndicator, "BackgroundTransparency")
+                
+                local heightMotor = Flipper.SingleMotor.new(6)
+                heightMotor:onStep(function(value)
+                    selectionIndicator.Size = UDim2.new(0, 4, 0, value)
+                end)
+                
+                -- Mouse events
+                AddSignal(button.MouseEnter, function()
+                    bgSetGoal(isSelected and 0.85 or 0.89)
+                end)
+                
+                AddSignal(button.MouseLeave, function()
+                    bgSetGoal(isSelected and 0.89 or 1)
+                end)
+                
+                AddSignal(button.MouseButton1Down, function()
+                    bgSetGoal(0.92)
+                end)
+                
+                AddSignal(button.MouseButton1Up, function()
+                    bgSetGoal(isSelected and 0.85 or 0.89)
+                end)
+                
+                function buttonData:UpdateButton()
+                    if dropdownData.Multi then
+                        isSelected = dropdownData.Value and dropdownData.Value[valueName] or false
+                        if isSelected then
+                            bgSetGoal(0.89)
+                        end
+                    else
+                        isSelected = dropdownData.Value == valueName
+                        bgSetGoal(isSelected and 0.89 or 1)
+                    end
+                    
+                    heightMotor:setGoal(Flipper.Spring.new(isSelected and 14 or 6, {frequency = 6}))
+                    indicatorSetGoal(isSelected and 0 or 1)
+                end
+                
+                -- Click handler
+                buttonLabel.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        local newState = not isSelected
+                        
+                        if dropdownData:GetActiveValues() == 1 and not newState and not options.AllowNull then
+                            -- Don't allow deselecting if only one is selected and null not allowed
+                        else
+                            if dropdownData.Multi then
+                                isSelected = newState
+                                dropdownData.Value = dropdownData.Value or {}
+                                dropdownData.Value[valueName] = isSelected and true or nil
+                            else
+                                isSelected = newState
+                                dropdownData.Value = isSelected and valueName or nil
+                                
+                                -- Update all buttons for single select
+                                for _, otherButton in pairs(buttons) do
+                                    otherButton:UpdateButton()
+                                end
+                            end
+                            
+                            buttonData:UpdateButton()
+                            dropdownData:Display()
+                            library:SafeCallback(dropdownData.Callback, dropdownData.Value)
+                            
+                            if dropdownData.Changed then
+                                library:SafeCallback(dropdownData.Changed, dropdownData.Value)
+                            end
+                        end
+                    end
+                end)
+                
+                buttonData:UpdateButton()
+                buttons[button] = buttonData
+                
+                -- Update max width
+                if buttonLabel.TextBounds.X > maxWidth then
+                    maxWidth = buttonLabel.TextBounds.X
+                end
+            end
+            
+            maxWidth = maxWidth + 30
+            updateCanvas()
+            updateSize()
+            dropdownData:Display()
+        end
+        
+        function dropdownData:SetValues(newValues)
+            if newValues then
+                self.Values = newValues
+            end
+            self:BuildDropdownList()
+        end
+        
+        function dropdownData:OnChanged(callback)
+            self.Changed = callback
+            if callback then
+                callback(self.Value)
+            end
+        end
+        
+        function dropdownData:SetValue(newValue)
+            if self.Multi then
+                local tempValue = {}
+                if type(newValue) == "table" then
+                    for _, valueName in ipairs(newValue) do
+                        if table.find(self.Values, valueName) then
+                            tempValue[valueName] = true
+                        end
+                    end
+                end
+                self.Value = tempValue
+            else
+                if not newValue then
+                    self.Value = nil
+                elseif table.find(self.Values, newValue) then
+                    self.Value = newValue
+                end
+            end
+            
+            self:BuildDropdownList()
+            library:SafeCallback(self.Callback, self.Value)
+            
+            if self.Changed then
+                library:SafeCallback(self.Changed, self.Value)
+            end
+        end
+        
+        function dropdownData:Destroy()
+            element:Destroy()
+            if library.Options[name] then
+                library.Options[name] = nil
+            end
+        end
+        
+        -- Initial build
+        dropdownData:BuildDropdownList()
+        
+        -- Set default value
+        if options.Default then
+            dropdownData:SetValue(options.Default)
+        end
+        
+        library.Options[name] = dropdownData
+        return dropdownData
+    end
+    
+    return Dropdown
+end
+
+-- Input element
+local InputElement = function()
+    local Creator = getModule(18)
+    
+    local New = Creator.New
+    local AddSignal = Creator.AddSignal
+    
+    local Input = {}
+    Input.__index = Input
+    Input.__type = "Input"
+    
+    function Input.New(container, name, options)
+        local library = container.Library
+        
+        assert(options.Title, "Input - Missing Title")
+        
+        options.Callback = options.Callback or function() end
+        
+        local inputData = {
+            Value = options.Default or "",
+            Numeric = options.Numeric or false,
+            Finished = options.Finished or false,
+            Callback = options.Callback,
+            Type = "Input"
+        }
+        
+        local element = getModule(11)(options.Title, options.Description, container.Container, false)
+        
+        inputData.SetTitle = element.SetTitle
+        inputData.SetDesc = element.SetDesc
+        
+        local textbox = getModule(15)(element.Frame, true)
+        textbox.Frame.Position = UDim2.new(1, -10, 0.5, 0)
+        textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
+        textbox.Frame.Size = UDim2.fromOffset(160, 30)
+        textbox.Input.Text = options.Default or ""
+        textbox.Input.PlaceholderText = options.Placeholder or ""
+        
+        local inputField = textbox.Input
+        
+        function inputData:SetValue(newValue)
+            if options.MaxLength and #newValue > options.MaxLength then
+                newValue = newValue:sub(1, options.MaxLength)
+            end
+            
+            if self.Numeric then
+                if not tonumber(newValue) and #newValue > 0 then
+                    newValue = self.Value
+                end
+            end
+            
+            self.Value = newValue
+            inputField.Text = newValue
+            library:SafeCallback(self.Callback, self.Value)
+            
+            if self.Changed then
+                library:SafeCallback(self.Changed, self.Value)
+            end
+        end
+        
+        if inputData.Finished then
+            AddSignal(inputField.FocusLost, function(enterPressed)
+                if not enterPressed then return end
+                inputData:SetValue(inputField.Text)
+            end)
+        else
+            AddSignal(inputField:GetPropertyChangedSignal("Text"), function()
+                inputData:SetValue(inputField.Text)
+            end)
+        end
+        
+        function inputData:OnChanged(callback)
+            self.Changed = callback
+            if callback then
+                callback(self.Value)
+            end
+        end
+        
+        function inputData:Destroy()
+            element:Destroy()
+            if library.Options[name] then
+                library.Options[name] = nil
+            end
+        end
+        
+        library.Options[name] = inputData
+        return inputData
+    end
+    
+    return Input
+end
+
+-- Paragraph element
+local ParagraphElement = function()
+    local Creator = getModule(18)
+    
+    local Paragraph = {}
+    Paragraph.__index = Paragraph
+    Paragraph.__type = "Paragraph"
+    
+    function Paragraph.New(container, name, options)
+        assert(options.Title, "Paragraph - Missing Title")
+        
+        options.Content = options.Content or ""
+        
+        local element = getModule(11)(options.Title, options.Content, container.Container, false)
+        element.Frame.BackgroundTransparency = 0.92
+        element.Border.Transparency = 0.6
+        
+        return element
+    end
+    
+    return Paragraph
+end
+
+-- Slider element
+local SliderElement = function()
+    local UserInputService = game:GetService("UserInputService")
+    local Creator = getModule(18)
+    
+    local New = Creator.New
+    local AddSignal = Creator.AddSignal
+    
+    local Slider = {}
+    Slider.__index = Slider
+    Slider.__type = "Slider"
+    
+    function Slider.New(container, name, options)
+        local library = container.Library
+        
+        assert(options.Title, "Slider - Missing Title")
+        assert(options.Default, "Slider - Missing default value")
+        assert(options.Min, "Slider - Missing minimum value")
+        assert(options.Max, "Slider - Missing maximum value")
+        assert(options.Rounding, "Slider - Missing rounding value")
+        
+        local sliderData = {
+            Value = nil,
+            Min = options.Min,
+            Max = options.Max,
+            Rounding = options.Rounding,
+            Callback = options.Callback or function() end,
+            Type = "Slider"
+        }
+        
+        local isDragging = false
+        
+        local element = getModule(11)(options.Title, options.Description, container.Container, false)
+        element.DescLabel.Size = UDim2.new(1, -170, 0, 14)
+        
+        sliderData.SetTitle = element.SetTitle
+        sliderData.SetDesc = element.SetDesc
+        
+        -- Slider handle
+        local handle = New("ImageLabel", {
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(0, -7, 0.5, 0),
+            Size = UDim2.fromOffset(14, 14),
+            Image = "http://www.roblox.com/asset/?id=12266946128",
+            ThemeTag = {ImageColor3 = "Accent"}
+        })
+        
+        -- Track frames
+        local trackArea = New("Frame", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(7, 0),
+            Size = UDim2.new(1, -14, 1, 0)
+        }, {handle})
+        
+        local fill = New("Frame", {
+            Size = UDim2.new(0, 0, 1, 0),
+            ThemeTag = {BackgroundColor3 = "Accent"}
+        }, {
+            New("UICorner", {CornerRadius = UDim.new(1, 0)})
+        })
+        
+        local valueLabel = New("TextLabel", {
+            FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+            Text = "Value",
+            TextSize = 12,
+            TextWrapped = true,
+            TextXAlignment = Enum.TextXAlignment.Right,
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 100, 0, 14),
+            Position = UDim2.new(0, -4, 0.5, 0),
+            AnchorPoint = Vector2.new(1, 0.5),
+            ThemeTag = {TextColor3 = "SubText"}
+        })
+        
+        -- Main slider frame
+        local sliderFrame = New("Frame", {
+            Size = UDim2.new(1, 0, 0, 4),
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -10, 0.5, 0),
+            BackgroundTransparency = 0.4,
+            Parent = element.Frame,
+            ThemeTag = {BackgroundColor3 = "SliderRail"}
+        }, {
+            New("UICorner", {CornerRadius = UDim.new(1, 0)}),
+            New("UISizeConstraint", {MaxSize = Vector2.new(150, math.huge)}),
+            valueLabel,
+            fill,
+            trackArea
+        })
+        
+        -- Mouse events for dragging
+        AddSignal(handle.InputBegan, function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = true
+            end
+        end)
+        
+        AddSignal(handle.InputEnded, function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = false
+            end
+        end)
+        
+        AddSignal(UserInputService.InputChanged, function(input)
+            if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement) then
+                local percent = math.clamp(
+                    (input.Position.X - trackArea.AbsolutePosition.X) / trackArea.AbsoluteSize.X,
+                    0, 1
+                )
+                sliderData:SetValue(sliderData.Min + ((sliderData.Max - sliderData.Min) * percent))
+            end
+        end)
+        
+        function sliderData:OnChanged(callback)
+            self.Changed = callback
+            if callback then
+                callback(self.Value)
+            end
+        end
+        
+        function sliderData:SetValue(newValue)
+            self.Value = library:Round(math.clamp(newValue, self.Min, self.Max), self.Rounding)
+            
+            local percent = (self.Value - self.Min) / (self.Max - self.Min)
+            handle.Position = UDim2.new(percent, -7, 0.5, 0)
+            fill.Size = UDim2.fromScale(percent, 1)
+            valueLabel.Text = tostring(self.Value)
+            
+            library:SafeCallback(self.Callback, self.Value)
+            
+            if self.Changed then
+                library:SafeCallback(self.Changed, self.Value)
+            end
+        end
+        
+        function sliderData:Destroy()
+            element:Destroy()
+            if library.Options[name] then
+                library.Options[name] = nil
+            end
+        end
+        
+        -- Set initial value
+        sliderData:SetValue(options.Default)
+        
+        library.Options[name] = sliderData
+        return sliderData
+    end
+    
+    return Slider
+end
+
+-- Toggle element
+local ToggleElement = function()
+    local TweenService = game:GetService("TweenService")
+    local Creator = getModule(18)
+    
+    local New = Creator.New
+    local AddSignal = Creator.AddSignal
+    local OverrideTag = Creator.OverrideTag
+    
+    local Toggle = {}
+    Toggle.__index = Toggle
+    Toggle.__type = "Toggle"
+    
+    function Toggle.New(container, name, options)
+        local library = container.Library
+        
+        assert(options.Title, "Toggle - Missing Title")
+        
+        local toggleData = {
+            Value = options.Default or false,
+            Callback = options.Callback or function() end,
+            Type = "Toggle"
+        }
+        
+        local element = getModule(11)(options.Title, options.Description, container.Container, true)
+        element.DescLabel.Size = UDim2.new(1, -54, 0, 14)
+        
+        toggleData.SetTitle = element.SetTitle
+        toggleData.SetDesc = element.SetDesc
+        
+        -- Toggle components
+        local toggleIcon = New("ImageLabel", {
+            AnchorPoint = Vector2.new(0, 0.5),
+            Size = UDim2.fromOffset(14, 14),
+            Position = UDim2.new(0, 2, 0.5, 0),
+            Image = "http://www.roblox.com/asset/?id=12266946128",
+            ImageTransparency = 0.5,
+            ThemeTag = {ImageColor3 = "ToggleSlider"}
+        })
+        
+        local toggleStroke = New("UIStroke", {
+            Transparency = 0.5,
+            ThemeTag = {Color = "ToggleSlider"}
+        })
+        
+        local toggleFrame = New("Frame", {
+            Size = UDim2.fromOffset(36, 18),
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -10, 0.5, 0),
+            Parent = element.Frame,
+            BackgroundTransparency = 1,
+            ThemeTag = {BackgroundColor3 = "Accent"}
+        }, {
+            New("UICorner", {CornerRadius = UDim.new(0, 9)}),
+            toggleStroke,
+            toggleIcon
+        })
+        
+        function toggleData:OnChanged(callback)
+            self.Changed = callback
+            if callback then
+                callback(self.Value)
+            end
+        end
+        
+        function toggleData:SetValue(newValue)
+            newValue = not not newValue
+            self.Value = newValue
+            
+            OverrideTag(toggleStroke, {Color = newValue and "Accent" or "ToggleSlider"})
+            OverrideTag(toggleIcon, {ImageColor3 = newValue and "ToggleToggled" or "ToggleSlider"})
+            
+            TweenService:Create(toggleIcon, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0, newValue and 19 or 2, 0.5, 0)
+            }):Play()
+            
+            TweenService:Create(toggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                BackgroundTransparency = newValue and 0 or 1
+            }):Play()
+            
+            toggleIcon.ImageTransparency = newValue and 0 or 0.5
+            
+            library:SafeCallback(self.Callback, self.Value)
+            
+            if self.Changed then
+                library:SafeCallback(self.Changed, self.Value)
+            end
+        end
+        
+        -- Click handler
+        AddSignal(toggleFrame.MouseButton1Click, function()
+            toggleData:SetValue(not toggleData.Value)
+        end)
+        
+        function toggleData:Destroy()
+            element:Destroy()
+            if library.Options[name] then
+                library.Options[name] = nil
+            end
+        end
+        
+        -- Set initial value
+        toggleData:SetValue(options.Default)
+        
+        library.Options[name] = toggleData
+        return toggleData
+    end
+    
+    return Toggle
+end
+
+-- Module return table
+local moduleReturns = {
+    [1] = MainModule,
+    [8] = AssetModule,
+    [20] = ButtonElement,
+    [22] = DropdownElement,
+    [23] = InputElement,
+    [25] = ParagraphElement,
+    [26] = SliderElement,
+    [27] = ToggleElement
+}
+
+-- Function to load modules
+local function requireModule(id)
+    local moduleFunc = moduleReturns[id]
+    if moduleFunc then
+        return moduleFunc()
+    end
+    return nil
+end
+
+-- Return the main library
+return requireModul(1)
