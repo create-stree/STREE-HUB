@@ -28,6 +28,20 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+Window:EditOpenButton({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://122683047852451",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(
+        Color3.fromHex("#000000"), 
+        Color3.fromHex("#39FF14")
+    ),
+    OnlyMobile = true,
+    Enabled = true,
+    Draggable = true,
+})
+
 Window:Tag({
     Title = "Version",
     Color = Color3.fromRGB(0, 255, 0),
@@ -82,7 +96,7 @@ Tab1:Divider()
 
 Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
-    TextXAlignment = "middle",
+    TextXAlignment = "Left",
     TextSize = 17,
 })
 
