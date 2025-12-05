@@ -44,13 +44,6 @@ local Window = StreeHub:CreateWindow({
     Acrylic = true
 })
 
-if not success or not WindUI then
-    warn("⚠️ UI failed to load!")
-    return
-else
-    print("✓ UI loaded successfully!")
-end
-
 -- Add tabs
 local MainTab = Window:AddTab("Main")
 local VisualsTab = Window:AddTab("Visuals")
