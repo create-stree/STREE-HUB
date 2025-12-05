@@ -78,32 +78,17 @@ Tab1:Button({
     end
 })
 
-Tab1:Button({
-    Title = "Telegram",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://t.me/StreeCoumminty")
-        end
-    end
-})
-
-Tab1:Button({
-    Title = "Website",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app/")
-        end
-    end
-})
-
 Tab1:Divider()
 
 Tab1:Section({
     Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
-    TextXAlignment = "Left",
+    TextXAlignment = "middle",
     TextSize = 17,
+})
+
+Tab1:Paragraph({
+    Title = "Support",
+    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
 Tab1:Divider()
@@ -114,5 +99,31 @@ Tab1:Keybind({
     Value = "G",
     Callback = function(v)
         Window:SetToggleKey(Enum.KeyCode[v])
+    end
+})
+
+local Tab2 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark"
+})
+
+Tab2:Dropdown({
+    Title = "Select",
+    Desc = "Select Rock",
+    Values = { "Basalt", "Basalt Core", "Basalt Rock", "Basalt Vein", "Boulder", "Crimson Crystal", "Cyan Crystal", "Earth Crystal", "Lava Rock", "Lucky Block", "Light Crystal", "Pebble", "Rock", "Violet Crystal", "Volcanic Rock" },
+    Value = { "Category A" },
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        
+    end
+})
+
+Tab2:Toggle({
+    Title = "Auto Farm",
+    Desc = "Automatic Farm Mine",
+    Value = false,
+    Callback = function(state) 
+        
     end
 })
