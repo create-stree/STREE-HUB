@@ -1,5 +1,38 @@
--- Load library
-loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/UI.Libry/Window.lua"))()
+print("=== DEBUG UI LIBRARY ===")
+
+-- Coba load library
+local success, result = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/UI.Libry/Window.lua"))()
+end)
+
+if success then
+    print("✓ Library berhasil di-load")
+    if result then
+        StreeHub = result
+        print("✓ StreeHub dari return value:", type(StreeHub))
+    elseif getgenv().StreeHub then
+        StreeHub = getgenv().StreeHub
+        print("✓ StreeHub dari getgenv():", type(StreeHub))
+    else
+        warn("✗ StreeHub tidak ditemukan!")
+        return
+    end
+else
+    warn("✗ Gagal load library:", result)
+    return
+end
+
+-- Cek apakah CreateWindow ada
+if type(StreeHub.CreateWindow) ~= "function" then
+    warn("✗ CreateWindow bukan fungsi!")
+    print("Fungsi yang tersedia di StreeHub:")
+    for k, v in pairs(StreeHub) do
+        print("  " .. k .. ": " .. type(v))
+    end
+    return
+end
+
+print("✓ CreateWindow ditemukan sebagai fungsi")
 
 -- Create window
 local Window = StreeHub:CreateWindow({
@@ -10,6 +43,13 @@ local Window = StreeHub:CreateWindow({
     Theme = "Dark",
     Acrylic = true
 })
+
+if not success or not WindUI then
+    warn("⚠️ UI failed to load!")
+    return
+else
+    print("✓ UI loaded successfully!")
+end
 
 -- Add tabs
 local MainTab = Window:AddTab("Main")
