@@ -132,7 +132,7 @@ Tab2:Dropdown({
     Title = "Select",
     Desc = "Select Rock",
     Values = { "Basalt", "Basalt Core", "Basalt Rock", "Basalt Vein", "Boulder", "Crimson Crystal", "Cyan Crystal", "Earth Crystal", "Lava Rock", "Lucky Block", "Light Crystal", "Pebble", "Rock", "Violet Crystal", "Volcanic Rock" },
-    Value = { "Pebble" },
+    Value = "Pebble",
     Multi = true,
     AllowNone = true,
     Callback = function(option)
