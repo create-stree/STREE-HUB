@@ -226,8 +226,8 @@ end
 _G.AutoFarm = false
 
 Tab2:Toggle({
-    Title = "Auto Farm",
-    Desc = "Walking, Flying, Noclip",
+    Title = "Auto Mining",
+    Desc = "Automatic Farm Mining",
     Value = false,
     Callback = function(state)
         _G.AutoFarm = state
@@ -237,7 +237,7 @@ Tab2:Toggle({
 
                 local plr = game.Players.LocalPlayer
                 local char = plr.Character
-                if not safe(char) then continue end
+                if not (char ~= nil) then continue end
 
                 local hrp = char:FindFirstChild("HumanoidRootPart")
                 if not hrp then continue end
