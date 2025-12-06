@@ -121,6 +121,8 @@ local Section = Tab1:Section({
 
 Tab2:Divider()
 
+local SelectedRocks = {}
+
 Tab2:Dropdown({
     Title = "Select",
     Desc = "Select Rock",
@@ -129,15 +131,63 @@ Tab2:Dropdown({
     Multi = true,
     AllowNone = true,
     Callback = function(option)
-        
+        SelectedRocks = option
     end
 })
+
+_G.AutoMine = false
 
 Tab2:Toggle({
     Title = "Auto Farm",
     Desc = "Automatic Farm Mine",
     Value = false,
-    Callback = function(state) 
-        
+    Callback = function(state)
+        _G.AutoMine = state
+
+        task.spawn(function()
+            while _G.AutoMine do
+                task.wait()
+
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then continue end
+
+                local root = char.HumanoidRootPart
+                local nearest = nil
+                local dist = math.huge
+
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if v:IsA("Model") and v:FindFirstChildWhichIsA("Humanoid") then
+                        if table.find(SelectedRocks, v.Name) then
+                            local hrp = v:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                local d = (root.Position - hrp.Position).Magnitude
+                                if d < dist then
+                                    dist = d
+                                    nearest = v
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if nearest and nearest:FindFirstChildWhichIsA("Humanoid") then
+                    local targetHRP = nearest:FindFirstChild("HumanoidRootPart")
+                    if targetHRP then
+                        root.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 4)
+
+                        for _, tool in pairs(plr.Backpack:GetChildren()) do
+                            if tool:IsA("Tool") and tool.Name:lower():find("pick") then
+                                tool.Parent = char
+                            end
+                        end
+
+                        if char:FindFirstChildOfClass("Tool") then
+                            char:FindFirstChildOfClass("Tool"):Activate()
+                        end
+                    end
+                end
+            end
+        end)
     end
 })
