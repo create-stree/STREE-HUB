@@ -72,6 +72,8 @@ local Section = Tab1:Section({
     TextSize = 17,
 })
 
+Tab1:Divider()
+
 Tab1:Button({
     Title = "Discord",
     Desc = "click to copy link",
@@ -143,6 +145,45 @@ Tab2:Dropdown({
 
 _G.AutoMine = false
 local ownDebounce = false
+local noclipEnabled = false
+local noclipConnection = nil
+
+local function enableNoclip()
+    if noclipConnection then return end
+    noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+        if not noclipEnabled then return end
+        local plr = game.Players.LocalPlayer
+        if not plr then return end
+        local char = plr.Character
+        if not char then return end
+        for _, v in ipairs(char:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end)
+end
+
+local function disableNoclip()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+end
+
+Tab2:Toggle({
+    Title = "Noclip",
+    Desc = "Walk through objects",
+    Value = false,
+    Callback = function(state)
+        noclipEnabled = state
+        if noclipEnabled then
+            enableNoclip()
+        else
+            disableNoclip()
+        end
+    end
+})
 
 Tab2:Toggle({
     Title = "Auto Farm",
@@ -171,36 +212,48 @@ Tab2:Toggle({
                 end
                 local nearestObj = nil
                 local nearestDist = math.huge
+                local validTargets = {}
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     for _, name in ipairs(SelectedRocks) do
-                        if obj.Name:lower():find(name:lower()) then
-                            local targetPart = nil
-                            if obj:IsA("Model") then
-                                targetPart = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
-                                if not targetPart then
-                                    for _, c in ipairs(obj:GetChildren()) do
-                                        if c:IsA("BasePart") then
-                                            targetPart = c
-                                            break
-                                        end
-                                    end
-                                end
-                            elseif obj:IsA("BasePart") then
-                                targetPart = obj
-                            end
-                            if targetPart and targetPart.Position then
-                                local d = (hrp.Position - targetPart.Position).Magnitude
-                                if d < nearestDist then
-                                    nearestDist = d
-                                    nearestObj = {model = obj, part = targetPart}
+                        if obj.Name == name or obj.Name:lower():find(name:lower()) then
+                            table.insert(validTargets, obj)
+                            break
+                        end
+                    end
+                end
+                for _, obj in ipairs(validTargets) do
+                    local targetPart = nil
+                    if obj:IsA("Model") then
+                        targetPart = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
+                        if not targetPart then
+                            for _, c in ipairs(obj:GetChildren()) do
+                                if c:IsA("BasePart") then
+                                    targetPart = c
+                                    break
                                 end
                             end
+                        end
+                    elseif obj:IsA("BasePart") then
+                        targetPart = obj
+                    end
+                    if targetPart and targetPart.Position then
+                        local d = (hrp.Position - targetPart.Position).Magnitude
+                        if d < nearestDist then
+                            nearestDist = d
+                            nearestObj = {model = obj, part = targetPart}
                         end
                     end
                 end
                 if not nearestObj then
                     task.wait(1)
                     continue
+                end
+                if noclipEnabled then
+                    for _, v in ipairs(char:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            v.CanCollide = false
+                        end
+                    end
                 end
                 local targetPos = nearestObj.part.Position
                 local offset = Vector3.new(0, 0, 4)
@@ -257,3 +310,9 @@ Tab2:Toggle({
         end)
     end
 })
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    if noclipEnabled then
+        enableNoclip()
+    end
+end)
