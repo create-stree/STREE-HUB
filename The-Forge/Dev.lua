@@ -122,11 +122,6 @@ local Section = Tab2:Section({
 Tab2:Divider()
 
 local SelectedRocks = {}
-local Xoffset, Yoffset, Zoffset = 0, 4, 0
-
-local function safe(obj)
-    return obj ~= nil
-end
 
 Tab2:Dropdown({
     Title = "Select",
@@ -138,159 +133,127 @@ Tab2:Dropdown({
     Callback = function(option)
         if typeof(option) == "table" then
             SelectedRocks = option
-        else
+        elseif typeof(option) == "string" then
             SelectedRocks = { option }
+        else
+            SelectedRocks = {}
         end
     end
 })
 
-Tab2:Slider({
-    Title = "X Offset",
-    Min = -20,
-    Max = 20,
-    Value = 0,
-    Callback = function(v)
-        Xoffset = v
-    end
-})
-
-Tab2:Slider({
-    Title = "Y Offset",
-    Min = -20,
-    Max = 20,
-    Value = 4,
-    Callback = function(v)
-        Yoffset = v
-    end
-})
-
-Tab2:Slider({
-    Title = "Z Offset",
-    Min = -20,
-    Max = 20,
-    Value = 0,
-    Callback = function(v)
-        Zoffset = v
-    end
-})
-
-local flying = false
-local noclipConn = nil
-
-local function enableFly(char)
-    if flying then return end
-    flying = true
-    local hrp = safe(char) and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    local bv = Instance.new("BodyVelocity")
-    local bg = Instance.new("BodyGyro")
-    bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-    bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-    bv.Parent = hrp
-    bg.Parent = hrp
-    task.spawn(function()
-        while flying do
-            task.wait()
-            bg.CFrame = workspace.Camera.CFrame
-        end
-        bv:Destroy()
-        bg:Destroy()
-    end)
-end
-
-local function disableFly()
-    flying = false
-end
-
-local function enableNoclip()
-    if noclipConn then return end
-    noclipConn = game.RunService.Stepped:Connect(function()
-        local char = game.Players.LocalPlayer.Character
-        if safe(char) then
-            for _, v in ipairs(char:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                end
-            end
-        end
-    end)
-end
-
-local function disableNoclip()
-    if noclipConn then
-        noclipConn:Disconnect()
-        noclipConn = nil
-    end
-end
-
-_G.AutoFarm = false
+_G.AutoMine = false
+local ownDebounce = false
 
 Tab2:Toggle({
-    Title = "Auto Mining",
-    Desc = "Automatic Farm Mining",
+    Title = "Auto Farm",
+    Desc = "Automatic Farm Mine",
     Value = false,
     Callback = function(state)
-        _G.AutoFarm = state
+        _G.AutoMine = state
+        if _G.AutoMine and ownDebounce then
+            return
+        end
         task.spawn(function()
-            while _G.AutoFarm do
+            ownDebounce = true
+            while _G.AutoMine do
                 task.wait(0.2)
-
                 local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                if not (char ~= nil) then continue end
-
+                if not plr then break end
+                local char = plr.Character or plr.CharacterAdded:Wait()
                 local hrp = char:FindFirstChild("HumanoidRootPart")
-                if not hrp then continue end
-
-                if #SelectedRocks == 0 then
-                    SelectedRocks = { "Pebble" }
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if not hrp or not hum then
+                    task.wait(1)
+                    continue
                 end
-
-                local nearestObj, nearestDist, nearestPart = nil, math.huge, nil
-
+                if #SelectedRocks == 0 then
+                    SelectedRocks = {"Pebble"}
+                end
+                local nearestObj = nil
+                local nearestDist = math.huge
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     for _, name in ipairs(SelectedRocks) do
                         if obj.Name:lower():find(name:lower()) then
-                            local p
-                            if obj:IsA("BasePart") then
-                                p = obj
-                            elseif obj:IsA("Model") then
-                                p = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                            local targetPart = nil
+                            if obj:IsA("Model") then
+                                targetPart = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
+                                if not targetPart then
+                                    for _, c in ipairs(obj:GetChildren()) do
+                                        if c:IsA("BasePart") then
+                                            targetPart = c
+                                            break
+                                        end
+                                    end
+                                end
+                            elseif obj:IsA("BasePart") then
+                                targetPart = obj
                             end
-                            if p then
-                                local d = (hrp.Position - p.Position).Magnitude
+                            if targetPart and targetPart.Position then
+                                local d = (hrp.Position - targetPart.Position).Magnitude
                                 if d < nearestDist then
-                                    nearestObj = obj
                                     nearestDist = d
-                                    nearestPart = p
+                                    nearestObj = {model = obj, part = targetPart}
                                 end
                             end
                         end
                     end
                 end
-
-                if not nearestPart then continue end
-
-                enableFly(char)
-                enableNoclip()
-
-                local target = nearestPart.Position + Vector3.new(Xoffset, Yoffset, Zoffset)
-                local dir = (target - hrp.Position).Unit
-
-                local bv = hrp:FindFirstChildOfClass("BodyVelocity")
-                if bv then
-                    bv.Velocity = dir * 25
+                if not nearestObj then
+                    task.wait(1)
+                    continue
                 end
-
-                local tool = char:FindFirstChildOfClass("Tool") or plr.Backpack:FindFirstChildOfClass("Tool")
-                if tool then
-                    tool.Parent = char
-                    tool:Activate()
+                local targetPos = nearestObj.part.Position
+                local offset = Vector3.new(0, 0, 4)
+                pcall(function()
+                    hrp.CFrame = CFrame.new(targetPos + offset)
+                end)
+                local equipped = char:FindFirstChildOfClass("Tool")
+                if not equipped then
+                    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+                        if tool:IsA("Tool") and (tool.Name:lower():find("pick") or tool.Name:lower():find("axe") or tool.Name:lower():find("pickaxe")) then
+                            tool.Parent = char
+                            equipped = tool
+                            break
+                        end
+                    end
                 end
+                if not equipped then
+                    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            tool.Parent = char
+                            equipped = tool
+                            break
+                        end
+                    end
+                end
+                local startTime = tick()
+                while _G.AutoMine and tick() - startTime < 8 do
+                    if not nearestObj.part or not nearestObj.part.Parent then break end
+                    if (hrp.Position - nearestObj.part.Position).Magnitude > 7 then
+                        break
+                    end
+                    if equipped and equipped.Parent == char then
+                        pcall(function()
+                            equipped:Activate()
+                        end)
+                    end
+                    task.wait(0.6)
+                    if not nearestObj.model.Parent then
+                        break
+                    end
+                    local hum2 = nearestObj.model:FindFirstChildWhichIsA("Humanoid")
+                    if hum2 and hum2.Health <= 0 then
+                        break
+                    else
+                        local p = nearestObj.part
+                        if not p or p.Transparency >= 1 or p.Size.Magnitude <= 0.1 then
+                            break
+                        end
+                    end
+                end
+                task.wait(0.2)
             end
-
-            disableFly()
-            disableNoclip()
+            ownDebounce = false
         end)
     end
 })
