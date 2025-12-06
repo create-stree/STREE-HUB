@@ -113,7 +113,7 @@ local Tab2 = Window:Tab({
     Icon = "landmark"
 })
 
-local Section = Tab1:Section({
+local Section = Tab2:Section({
     Title = "Mining Farm",
     TextXAlignment = "Left",
     TextSize = 17,
