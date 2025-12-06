@@ -124,6 +124,10 @@ Tab2:Divider()
 local SelectedRocks = {}
 local Xoffset, Yoffset, Zoffset = 0, 4, 0
 
+local function safe(obj)
+    return obj ~= nil
+end
+
 Tab2:Dropdown({
     Title = "Select",
     Desc = "Select Rock",
@@ -136,8 +140,6 @@ Tab2:Dropdown({
             SelectedRocks = option
         elseif typeof(option) == "string" then
             SelectedRocks = { option }
-        else
-            SelectedRocks = {}
         end
     end
 })
@@ -178,7 +180,8 @@ local noclipConn = nil
 local function enableFly(char)
     if flying then return end
     flying = true
-    local hrp = char:WaitForChild("HumanoidRootPart")
+    local hrp = safe(char) and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
     local bv = Instance.new("BodyVelocity")
     local bg = Instance.new("BodyGyro")
     bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
@@ -202,9 +205,8 @@ end
 local function enableNoclip()
     if noclipConn then return end
     noclipConn = game.RunService.Stepped:Connect(function()
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character
-        if char then
+        local char = game.Players.LocalPlayer.Character
+        if safe(char) then
             for _, v in ipairs(char:GetDescendants()) do
                 if v:IsA("BasePart") then
                     v.CanCollide = false
@@ -232,15 +234,20 @@ Tab2:Toggle({
         task.spawn(function()
             while _G.AutoFarm do
                 task.wait(0.2)
+
                 local plr = game.Players.LocalPlayer
-                local char = plr.Character or plr.CharacterAdded:Wait()
+                local char = plr.Character
+                if not safe(char) then continue end
+
                 local hrp = char:FindFirstChild("HumanoidRootPart")
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if not hrp or not hum then break end
+                if not hrp then continue end
+
                 if #SelectedRocks == 0 then
-                    SelectedRocks = {"Pebble"}
+                    SelectedRocks = { "Pebble" }
                 end
+
                 local nearestObj, nearestDist, nearestPart = nil, math.huge, nil
+
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     for _, name in ipairs(SelectedRocks) do
                         if obj.Name:lower():find(name:lower()) then
@@ -248,58 +255,40 @@ Tab2:Toggle({
                             if obj:IsA("BasePart") then
                                 p = obj
                             elseif obj:IsA("Model") then
-                                p = obj.PrimaryPart
-                                if not p then
-                                    for _, c in ipairs(obj:GetChildren()) do
-                                        if c:IsA("BasePart") then
-                                            p = c
-                                            break
-                                        end
-                                    end
-                                end
+                                p = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
                             end
                             if p then
                                 local d = (hrp.Position - p.Position).Magnitude
                                 if d < nearestDist then
-                                    nearestDist = d
                                     nearestObj = obj
+                                    nearestDist = d
                                     nearestPart = p
                                 end
                             end
                         end
                     end
                 end
-                if not nearestObj then
-                    task.wait(1)
-                    continue
-                end
+
+                if not nearestPart then continue end
+
                 enableFly(char)
                 enableNoclip()
-                local targetPos = nearestPart.Position + Vector3.new(Xoffset, Yoffset, Zoffset)
-                local dir = (targetPos - hrp.Position).Unit
-                local speed = 25
+
+                local target = nearestPart.Position + Vector3.new(Xoffset, Yoffset, Zoffset)
+                local dir = (target - hrp.Position).Unit
+
                 local bv = hrp:FindFirstChildOfClass("BodyVelocity")
                 if bv then
-                    bv.Velocity = dir * speed
+                    bv.Velocity = dir * 25
                 end
-                local tool = char:FindFirstChildOfClass("Tool")
-                if not tool then
-                    for _, t in ipairs(plr.Backpack:GetChildren()) do
-                        if t:IsA("Tool") then
-                            t.Parent = char
-                            tool = t
-                            break
-                        end
-                    end
-                end
+
+                local tool = char:FindFirstChildOfClass("Tool") or plr.Backpack:FindFirstChildOfClass("Tool")
                 if tool then
+                    tool.Parent = char
                     tool:Activate()
                 end
-                if nearestDist < 6 then
-                    local bv2 = hrp:FindFirstChildOfClass("BodyVelocity")
-                    if bv2 then bv2.Velocity = Vector3.new(0, 0, 0) end
-                end
             end
+
             disableFly()
             disableNoclip()
         end)
