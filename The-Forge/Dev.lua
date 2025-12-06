@@ -127,15 +127,22 @@ Tab2:Dropdown({
     Title = "Select",
     Desc = "Select Rock",
     Values = { "Basalt", "Basalt Core", "Basalt Rock", "Basalt Vein", "Boulder", "Crimson Crystal", "Cyan Crystal", "Earth Crystal", "Lava Rock", "Lucky Block", "Light Crystal", "Pebble", "Rock", "Violet Crystal", "Volcanic Rock" },
-    Value = { "None" },
+    Value = { "Pebble" },
     Multi = true,
     AllowNone = true,
     Callback = function(option)
-        SelectedRocks = option
+        if typeof(option) == "table" then
+            SelectedRocks = option
+        elseif typeof(option) == "string" then
+            SelectedRocks = { option }
+        else
+            SelectedRocks = {}
+        end
     end
 })
 
 _G.AutoMine = false
+local ownDebounce = false
 
 Tab2:Toggle({
     Title = "Auto Farm",
@@ -143,51 +150,110 @@ Tab2:Toggle({
     Value = false,
     Callback = function(state)
         _G.AutoMine = state
-
+        if _G.AutoMine and ownDebounce then
+            return
+        end
         task.spawn(function()
+            ownDebounce = true
             while _G.AutoMine do
-                task.wait()
-
+                task.wait(0.2)
                 local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                if not char or not char:FindFirstChild("HumanoidRootPart") then continue end
-
-                local root = char.HumanoidRootPart
-                local nearest = nil
-                local dist = math.huge
-
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("Model") and v:FindFirstChildWhichIsA("Humanoid") then
-                        if table.find(SelectedRocks, v.Name) then
-                            local hrp = v:FindFirstChild("HumanoidRootPart")
-                            if hrp then
-                                local d = (root.Position - hrp.Position).Magnitude
-                                if d < dist then
-                                    dist = d
-                                    nearest = v
+                if not plr then break end
+                local char = plr.Character or plr.CharacterAdded:Wait()
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if not hrp or not hum then
+                    task.wait(1)
+                    continue
+                end
+                if #SelectedRocks == 0 then
+                    SelectedRocks = {"Pebble"}
+                end
+                local nearestObj = nil
+                local nearestDist = math.huge
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    for _, name in ipairs(SelectedRocks) do
+                        if obj.Name:lower():find(name:lower()) then
+                            local targetPart = nil
+                            if obj:IsA("Model") then
+                                targetPart = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
+                                if not targetPart then
+                                    for _, c in ipairs(obj:GetChildren()) do
+                                        if c:IsA("BasePart") then
+                                            targetPart = c
+                                            break
+                                        end
+                                    end
+                                end
+                            elseif obj:IsA("BasePart") then
+                                targetPart = obj
+                            end
+                            if targetPart and targetPart.Position then
+                                local d = (hrp.Position - targetPart.Position).Magnitude
+                                if d < nearestDist then
+                                    nearestDist = d
+                                    nearestObj = {model = obj, part = targetPart}
                                 end
                             end
                         end
                     end
                 end
-
-                if nearest and nearest:FindFirstChildWhichIsA("Humanoid") then
-                    local targetHRP = nearest:FindFirstChild("HumanoidRootPart")
-                    if targetHRP then
-                        root.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 4)
-
-                        for _, tool in pairs(plr.Backpack:GetChildren()) do
-                            if tool:IsA("Tool") and tool.Name:lower():find("pick") then
-                                tool.Parent = char
-                            end
-                        end
-
-                        if char:FindFirstChildOfClass("Tool") then
-                            char:FindFirstChildOfClass("Tool"):Activate()
+                if not nearestObj then
+                    task.wait(1)
+                    continue
+                end
+                local targetPos = nearestObj.part.Position
+                local offset = Vector3.new(0, 0, 4)
+                pcall(function()
+                    hrp.CFrame = CFrame.new(targetPos + offset)
+                end)
+                local equipped = char:FindFirstChildOfClass("Tool")
+                if not equipped then
+                    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+                        if tool:IsA("Tool") and (tool.Name:lower():find("pick") or tool.Name:lower():find("axe") or tool.Name:lower():find("pickaxe")) then
+                            tool.Parent = char
+                            equipped = tool
+                            break
                         end
                     end
                 end
+                if not equipped then
+                    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            tool.Parent = char
+                            equipped = tool
+                            break
+                        end
+                    end
+                end
+                local startTime = tick()
+                while _G.AutoMine and tick() - startTime < 8 do
+                    if not nearestObj.part or not nearestObj.part.Parent then break end
+                    if (hrp.Position - nearestObj.part.Position).Magnitude > 7 then
+                        break
+                    end
+                    if equipped and equipped.Parent == char then
+                        pcall(function()
+                            equipped:Activate()
+                        end)
+                    end
+                    task.wait(0.6)
+                    if not nearestObj.model.Parent then
+                        break
+                    end
+                    local hum2 = nearestObj.model:FindFirstChildWhichIsA("Humanoid")
+                    if hum2 and hum2.Health <= 0 then
+                        break
+                    else
+                        local p = nearestObj.part
+                        if not p or p.Transparency >= 1 or p.Size.Magnitude <= 0.1 then
+                            break
+                        end
+                    end
+                end
+                task.wait(0.2)
             end
+            ownDebounce = false
         end)
     end
 })
