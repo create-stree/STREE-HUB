@@ -138,7 +138,7 @@ Tab2:Dropdown({
     Callback = function(option)
         if typeof(option) == "table" then
             SelectedRocks = option
-        elseif typeof(option) == "string" then
+        else
             SelectedRocks = { option }
         end
     end
@@ -251,7 +251,7 @@ Tab2:Toggle({
                 for _, obj in ipairs(workspace:GetDescendants()) do
                     for _, name in ipairs(SelectedRocks) do
                         if obj.Name:lower():find(name:lower()) then
-                            local p = nil
+                            local p
                             if obj:IsA("BasePart") then
                                 p = obj
                             elseif obj:IsA("Model") then
