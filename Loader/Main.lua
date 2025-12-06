@@ -60,8 +60,8 @@ local gameScripts = {
     },
     [18687417158] = {
         name = "Forsaken",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua"
+        free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c",
+        premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
     }
 }
 
