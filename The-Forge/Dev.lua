@@ -121,7 +121,14 @@ local Section = Tab2:Section({
 
 Tab2:Divider()
 
+local PathfindingService = game:GetService("PathfindingService")
 local SelectedRocks = {}
+local FlySpeed = 80
+local WalkSpeed = 20
+local UseFly = false
+local UseNoclip = true
+local _G.AutoMine = false
+local moving = false
 
 Tab2:Dropdown({
     Title = "Select",
@@ -141,8 +148,84 @@ Tab2:Dropdown({
     end
 })
 
-_G.AutoMine = false
-local ownDebounce = false
+Tab2:Toggle({
+    Title = "Fly Mode",
+    Desc = "Enable flying movement",
+    Value = false,
+    Callback = function(state)
+        UseFly = state
+    end
+})
+
+Tab2:Toggle({
+    Title = "Noclip While Moving",
+    Desc = "Disable collisions while moving",
+    Value = true,
+    Callback = function(state)
+        UseNoclip = state
+    end
+})
+
+Tab2:Slider({
+    Title = "Fly Speed",
+    Min = 20,
+    Max = 200,
+    Value = 80,
+    Callback = function(v)
+        FlySpeed = v
+    end
+})
+
+Tab2:Slider({
+    Title = "Walk Speed",
+    Min = 8,
+    Max = 40,
+    Value = 20,
+    Callback = function(v)
+        WalkSpeed = v
+    end
+})
+
+local function setNoclip(state, char)
+    if not char then return end
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not state and true or false
+        end
+    end
+end
+
+local function simpleFlyTo(hrp, targetPos, speed, stopDist)
+    local dt = task.wait
+    local dir = (targetPos - hrp.Position)
+    local dist = dir.Magnitude
+    local t = tick()
+    while dist > stopDist and tick() - t < 25 do
+        local step = math.clamp(speed * (task.wait() or 0.033), 0, speed)
+        local newPos = hrp.Position:Lerp(targetPos, math.clamp(step/dist, 0, 1))
+        hrp.CFrame = CFrame.new(newPos, targetPos)
+        dir = (targetPos - hrp.Position)
+        dist = dir.Magnitude
+        task.wait()
+    end
+end
+
+local function pathWalkTo(plr, hrp, targetPos, humanoid, stopDist)
+    local path = PathfindingService:CreatePath({AgentRadius = 2, AgentHeight = 5, AgentCanJump = true, AgentWalkableTypes = {Enum.Material.Grass, Enum.Material.SmoothPlastic, Enum.Material.Cobblestone}})
+    path:ComputeAsync(hrp.Position, targetPos)
+    local waypoints = path.Status == Enum.PathStatus.Success and path:GetWaypoints() or {}
+    for i, wp in ipairs(waypoints) do
+        if not _G.AutoMine then break end
+        if wp.Action == Enum.PathWaypointAction.Jump then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+        local ok, err = pcall(function()
+            humanoid:MoveTo(wp.Position)
+        end)
+        local reached = humanoid.MoveToFinished:Wait()
+        task.wait(0.1)
+    end
+end
 
 Tab2:Toggle({
     Title = "Auto Farm",
@@ -150,25 +233,18 @@ Tab2:Toggle({
     Value = false,
     Callback = function(state)
         _G.AutoMine = state
-        if _G.AutoMine and ownDebounce then
-            return
-        end
+        if _G.AutoMine and moving then return end
         task.spawn(function()
-            ownDebounce = true
+            moving = true
             while _G.AutoMine do
                 task.wait(0.2)
                 local plr = game.Players.LocalPlayer
                 if not plr then break end
                 local char = plr.Character or plr.CharacterAdded:Wait()
                 local hrp = char:FindFirstChild("HumanoidRootPart")
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if not hrp or not hum then
-                    task.wait(1)
-                    continue
-                end
-                if #SelectedRocks == 0 then
-                    SelectedRocks = {"Pebble"}
-                end
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if not hrp or not humanoid then task.wait(1) ; continue end
+                if #SelectedRocks == 0 then SelectedRocks = {"Pebble"} end
                 local nearestObj = nil
                 local nearestDist = math.huge
                 for _, obj in ipairs(workspace:GetDescendants()) do
@@ -198,15 +274,22 @@ Tab2:Toggle({
                         end
                     end
                 end
-                if not nearestObj then
-                    task.wait(1)
-                    continue
-                end
+                if not nearestObj then task.wait(1) ; continue end
                 local targetPos = nearestObj.part.Position
-                local offset = Vector3.new(0, 0, 4)
-                pcall(function()
-                    hrp.CFrame = CFrame.new(targetPos + offset)
-                end)
+                local approachOffset = Vector3.new(0, 0, 3)
+                local destination = targetPos + approachOffset
+                if UseNoclip then setNoclip(true, char) end
+                if UseFly then
+                    humanoid.PlatformStand = true
+                    simpleFlyTo(hrp, destination, FlySpeed, 3)
+                    humanoid.PlatformStand = false
+                else
+                    local oldWalk = humanoid.WalkSpeed
+                    humanoid.WalkSpeed = WalkSpeed
+                    pathWalkTo(plr, hrp, destination, humanoid, 3)
+                    humanoid.WalkSpeed = oldWalk
+                end
+                if UseNoclip then setNoclip(false, char) end
                 local equipped = char:FindFirstChildOfClass("Tool")
                 if not equipped then
                     for _, tool in ipairs(plr.Backpack:GetChildren()) do
@@ -227,33 +310,22 @@ Tab2:Toggle({
                     end
                 end
                 local startTime = tick()
-                while _G.AutoMine and tick() - startTime < 8 do
+                while _G.AutoMine and tick() - startTime < 10 do
                     if not nearestObj.part or not nearestObj.part.Parent then break end
-                    if (hrp.Position - nearestObj.part.Position).Magnitude > 7 then
-                        break
-                    end
+                    if (hrp.Position - nearestObj.part.Position).Magnitude > 8 then break end
                     if equipped and equipped.Parent == char then
-                        pcall(function()
-                            equipped:Activate()
-                        end)
+                        pcall(function() equipped:Activate() end)
                     end
                     task.wait(0.6)
-                    if not nearestObj.model.Parent then
-                        break
-                    end
+                    if not nearestObj.model.Parent then break end
                     local hum2 = nearestObj.model:FindFirstChildWhichIsA("Humanoid")
-                    if hum2 and hum2.Health <= 0 then
-                        break
-                    else
-                        local p = nearestObj.part
-                        if not p or p.Transparency >= 1 or p.Size.Magnitude <= 0.1 then
-                            break
-                        end
-                    end
+                    if hum2 and hum2.Health <= 0 then break end
+                    local p = nearestObj.part
+                    if not p or p.Transparency >= 1 or p.Size.Magnitude <= 0.1 then break end
                 end
                 task.wait(0.2)
             end
-            ownDebounce = false
+            moving = false
         end)
     end
 })
