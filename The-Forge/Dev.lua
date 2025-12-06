@@ -94,18 +94,10 @@ Tab1:Button({
 
 Tab1:Divider()
 
-Tab1:Section({
-    Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
 Tab1:Paragraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
-
-Tab1:Divider()
 
 Tab1:Keybind({
     Title = "Close/Open UI",
@@ -121,11 +113,19 @@ local Tab2 = Window:Tab({
     Icon = "landmark"
 })
 
+local Section = Tab1:Section({
+    Title = "Mining Farm",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab2:Divider()
+
 Tab2:Dropdown({
     Title = "Select",
     Desc = "Select Rock",
     Values = { "Basalt", "Basalt Core", "Basalt Rock", "Basalt Vein", "Boulder", "Crimson Crystal", "Cyan Crystal", "Earth Crystal", "Lava Rock", "Lucky Block", "Light Crystal", "Pebble", "Rock", "Violet Crystal", "Volcanic Rock" },
-    Value = { "Category A" },
+    Value = { "None" },
     Multi = true,
     AllowNone = true,
     Callback = function(option)
