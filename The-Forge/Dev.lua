@@ -145,13 +145,11 @@ Tab2:Dropdown({
 
 _G.AutoMine = false
 local ownDebounce = false
-local noclipEnabled = false
 local noclipConnection = nil
 
 local function enableNoclip()
     if noclipConnection then return end
     noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-        if not noclipEnabled then return end
         local plr = game.Players.LocalPlayer
         if not plr then return end
         local char = plr.Character
@@ -172,28 +170,23 @@ local function disableNoclip()
 end
 
 Tab2:Toggle({
-    Title = "Noclip",
-    Desc = "Walk through objects",
+    Title = "Auto Farm",
+    Desc = "Automatic Farm Mine + Noclip",
     Value = false,
     Callback = function(state)
-        noclipEnabled = state
-        if noclipEnabled then
+        _G.AutoMine = state
+        
+        -- Aktifkan Noclip otomatis saat Auto Farm aktif
+        if _G.AutoMine then
             enableNoclip()
         else
             disableNoclip()
         end
-    end
-})
-
-Tab2:Toggle({
-    Title = "Auto Farm",
-    Desc = "Automatic Farm Mine",
-    Value = false,
-    Callback = function(state)
-        _G.AutoMine = state
+        
         if _G.AutoMine and ownDebounce then
             return
         end
+        
         task.spawn(function()
             ownDebounce = true
             while _G.AutoMine do
@@ -248,18 +241,26 @@ Tab2:Toggle({
                     task.wait(1)
                     continue
                 end
-                if noclipEnabled then
-                    for _, v in ipairs(char:GetDescendants()) do
-                        if v:IsA("BasePart") then
-                            v.CanCollide = false
-                        end
-                    end
-                end
+                
+                -- Posisi di BAWAH objek (di dalam tanah)
                 local targetPos = nearestObj.part.Position
-                local offset = Vector3.new(0, 0, 4)
+                local offset = Vector3.new(0, -5, 0) -- Posisi di BAWAH target (negatif Y)
+                
+                -- CFrame yang menghadap ke atas
+                local cframePos = targetPos + offset
+                
+                -- Hitung rotasi untuk menghadap ke atas
+                -- Menggunakan CFrame.Angles untuk rotasi ke atas
+                local upCFrame = CFrame.new(cframePos) * CFrame.Angles(math.rad(-90), 0, 0)
+                
                 pcall(function()
-                    hrp.CFrame = CFrame.new(targetPos + offset)
+                    -- Set posisi dan rotasi
+                    hrp.CFrame = upCFrame
+                    
+                    -- Nonaktifkan gravitasi agar tidak jatuh
+                    hum.PlatformStand = true
                 end)
+                
                 local equipped = char:FindFirstChildOfClass("Tool")
                 if not equipped then
                     for _, tool in ipairs(plr.Backpack:GetChildren()) do
@@ -279,21 +280,34 @@ Tab2:Toggle({
                         end
                     end
                 end
+                
                 local startTime = tick()
                 while _G.AutoMine and tick() - startTime < 8 do
                     if not nearestObj.part or not nearestObj.part.Parent then break end
-                    if (hrp.Position - nearestObj.part.Position).Magnitude > 7 then
-                        break
-                    end
+                    
+                    -- Update posisi agar tetap di bawah target
+                    local newTargetPos = nearestObj.part.Position
+                    local newCframePos = newTargetPos + Vector3.new(0, -5, 0) -- Tetap di bawah
+                    
+                    -- Perbarui rotasi untuk tetap menghadap ke atas
+                    local newUpCFrame = CFrame.new(newCframePos) * CFrame.Angles(math.rad(-90), 0, 0)
+                    
+                    pcall(function()
+                        hrp.CFrame = newUpCFrame
+                    end)
+                    
                     if equipped and equipped.Parent == char then
                         pcall(function()
                             equipped:Activate()
                         end)
                     end
+                    
                     task.wait(0.6)
+                    
                     if not nearestObj.model.Parent then
                         break
                     end
+                    
                     local hum2 = nearestObj.model:FindFirstChildWhichIsA("Humanoid")
                     if hum2 and hum2.Health <= 0 then
                         break
@@ -307,12 +321,37 @@ Tab2:Toggle({
                 task.wait(0.2)
             end
             ownDebounce = false
+            
+            -- Reset PlatformStand saat Auto Farm dimatikan
+            local plr = game.Players.LocalPlayer
+            if plr and plr.Character then
+                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.PlatformStand = false
+                end
+            end
         end)
     end
 })
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-    if noclipEnabled then
+    if _G.AutoMine then
         enableNoclip()
+        task.wait(0.5)
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.PlatformStand = true
+        end
+    end
+end)
+
+-- Reset PlatformStand saat karakter mati
+game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+    local plr = game.Players.LocalPlayer
+    if plr and plr.Character then
+        local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.PlatformStand = false
+        end
     end
 end)
