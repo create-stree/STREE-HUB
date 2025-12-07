@@ -298,60 +298,50 @@ Tab2:Toggle({
                     continue
                 end
                 
-                -- GERAKAN MULUS KE OBJEK (seperti berjalan)
+                -- GERAKAN MULUS KE OBJEK
                 local targetPos = nearestObj.part.Position
-                local undergroundPos = Vector3.new(targetPos.X, targetPos.Y - 5, targetPos.Z) -- Posisi di bawah tanah
+                local undergroundPos = Vector3.new(targetPos.X, targetPos.Y - 5, targetPos.Z)
                 
-                -- Hitung arah dan jarak ke target
                 local direction = (undergroundPos - hrp.Position).Unit
                 local distance = (hrp.Position - undergroundPos).Magnitude
                 
-                -- Kecepatan berjalan natural (tidak terlalu cepat)
+                -- Kecepatan bertahap
                 local walkSpeed = 16
-                
                 if distance > 10 then
-                    -- Jika jarak jauh, gerakan lebih cepat tapi natural
                     walkSpeed = 22
                 elseif distance > 5 then
-                    -- Jarak sedang
                     walkSpeed = 18
                 else
-                    -- Jarak dekat, pelan-pelan
                     walkSpeed = 12
                 end
                 
-                -- Set walk speed untuk animasi berjalan
+                -- Set walk speed
                 hum.WalkSpeed = walkSpeed
                 
-                -- Gerakan mulus menggunakan BodyVelocity
+                -- Gerakan dengan BodyVelocity
                 local bv = hrp:FindFirstChild("BodyVelocity") or Instance.new("BodyVelocity")
                 bv.Parent = hrp
-                bv.MaxForce = Vector3.new(4000, 4000, 4000) -- Force yang wajar
+                bv.MaxForce = Vector3.new(4000, 4000, 4000)
                 bv.Velocity = direction * walkSpeed
                 
-                -- Orientasi menghadap ke atas
+                -- Menghadap ke atas
                 local bg = hrp:FindFirstChild("BodyGyro") or Instance.new("BodyGyro")
                 bg.Parent = hrp
                 bg.MaxTorque = Vector3.new(4000, 4000, 4000)
-                bg.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0)) -- Menghadap ke atas
+                bg.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
                 
                 -- Auto click mining
                 local miningStartTime = tick()
                 while _G.AutoMine and tick() - miningStartTime < 5 do
                     if not nearestObj.part or not nearestObj.part.Parent then break end
                     
-                    -- Update target position
                     local currentTargetPos = nearestObj.part.Position
                     local currentUndergroundPos = Vector3.new(currentTargetPos.X, currentTargetPos.Y - 5, currentTargetPos.Z)
                     
-                    -- Update direction
                     local currentDirection = (currentUndergroundPos - hrp.Position).Unit
                     local currentDistance = (hrp.Position - currentUndergroundPos).Magnitude
                     
-                    -- Update velocity
                     bv.Velocity = currentDirection * walkSpeed
-                    
-                    -- Update orientation
                     bg.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
                     
                     -- Auto click mining
@@ -363,11 +353,10 @@ Tab2:Toggle({
                     
                     task.wait(0.1)
                     
-                    -- Jika sudah dekat, tetap di posisi dan mining
+                    -- Jika sudah dekat
                     if currentDistance < 3 then
-                        bv.Velocity = Vector3.new(0, 0, 0) -- Berhenti bergerak
+                        bv.Velocity = Vector3.new(0, 0, 0)
                         
-                        -- Tetap mining
                         while _G.AutoMine and currentDistance < 3 do
                             if equipped and equipped.Parent == char then
                                 pcall(function()
@@ -377,7 +366,6 @@ Tab2:Toggle({
                             
                             task.wait(0.3)
                             
-                            -- Update distance
                             if nearestObj.part and nearestObj.part.Parent then
                                 currentTargetPos = nearestObj.part.Position
                                 currentDistance = (hrp.Position - Vector3.new(currentTargetPos.X, currentTargetPos.Y - 5, currentTargetPos.Z)).Magnitude
@@ -404,32 +392,16 @@ Tab2:Toggle({
                     end
                 end
                 
-                -- Bersihkan BodyVelocity dan BodyGyro
+                -- Hapus BodyVelocity dan BodyGyro
                 if bv then bv:Destroy() end
                 if bg then bg:Destroy() end
                 
-                task.wait(0.5) -- Delay sebelum cari objek baru
+                task.wait(0.5)
             end
             ownDebounce = false
             
-            -- Reset saat Auto Farm dimatikan
-            local plr = game.Players.LocalPlayer
-            if plr and plr.Character then
-                local char = plr.Character
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                
-                if hum then
-                    hum.WalkSpeed = 16
-                end
-                
-                if hrp then
-                    local bv = hrp:FindFirstChild("BodyVelocity")
-                    local bg = hrp:FindFirstChild("BodyGyro")
-                    if bv then bv:Destroy() end
-                    if bg then bg:Destroy() end
-                end
-            end
+            -- TIDAK ADA RESET SAAT AUTO FARM DIMATIKAN
+            -- Karakter tetap dalam kondisi terakhir
         end)
     end
 })
