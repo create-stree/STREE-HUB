@@ -123,7 +123,8 @@ local Section = Tab2:Section({
 
 Tab2:Divider()
 
-local SelectedRocks = {}
+-- set default supaya dropdown initial sudah dipakai
+local SelectedRocks = { "Pebble" }
 
 Tab2:Dropdown({
     Title = "Select",
@@ -149,6 +150,7 @@ local noclipConnection = nil
 local miningToolNames = {"Pickaxe", "Drill", "Hammer", "Axe", "Tool"}
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local function enableNoclip()
     if noclipConnection then return end
@@ -237,37 +239,47 @@ local function smoothLookAt(hrp, targetPos, duration)
     end
 end
 
--- GANTI moveToTargetSmooth jadi slide incremental CFrame (speed = 26)
-local function moveToTargetSmooth(char, destination)
+-- dynamic slide move: update dest while moving (speed = 26)
+local function moveToTargetSmooth(char, getTargetPartFunc)
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum or not hrp then return false end
 
-    local speed = 26 -- studs per second
-    local timeout = 12
+    local speed = 26
+    local timeout = 14
     local startTime = tick()
 
-    local function reached()
-        return (hrp.Position - destination).Magnitude <= 1.6
+    local function reached(dest)
+        return (hrp.Position - dest).Magnitude <= 1.6
     end
 
-    while not reached() and _G.AutoMine and tick() - startTime < timeout do
-        local dt = 1/60
-        -- direction to destination
-        local dir = destination - hrp.Position
-        local dist = dir.Magnitude
-        if dist <= 0.01 then break end
-        local moveStep = dir.Unit * math.min(speed * dt, dist)
+    -- get initial dest
+    local part = getTargetPartFunc()
+    if not part or not part.Parent then return false end
+    local dest = Vector3.new(part.Position.X, part.Position.Y - 6, part.Position.Z)
 
-        -- compute new position and smooth look
-        local newPos = hrp.Position + moveStep
-        local lookC = CFrame.new(newPos, Vector3.new(destination.X, destination.Y + 2, destination.Z))
-        hrp.CFrame = hrp.CFrame:Lerp(lookC, 0.45)
+    while _G.AutoMine and tick() - startTime < timeout do
+        -- refresh target part each loop
+        part = getTargetPartFunc()
+        if not part or not part.Parent then return false end
+        dest = Vector3.new(part.Position.X, part.Position.Y - 6, part.Position.Z)
+
+        if reached(dest) then return true end
+
+        local dt = 1/60
+        local dir = dest - hrp.Position
+        local dist = dir.Magnitude
+        if dist > 0.01 then
+            local moveStep = dir.Unit * math.min(speed * dt, dist)
+            local newPos = hrp.Position + moveStep
+            local lookC = CFrame.new(newPos, Vector3.new(part.Position.X, part.Position.Y + 2, part.Position.Z))
+            hrp.CFrame = hrp.CFrame:Lerp(lookC, 0.48)
+        end
 
         RunService.RenderStepped:Wait()
     end
 
-    return reached()
+    return (hrp.Position - dest).Magnitude <= 1.6
 end
 
 Tab2:Toggle({
@@ -278,9 +290,14 @@ Tab2:Toggle({
         _G.AutoMine = state
 
         if _G.AutoMine then
+            -- langsung enable noclip dan langsung nembus tanah saat toggle on
             enableNoclip()
             local plr = Players.LocalPlayer
-            if plr and plr.Character then
+            if plr and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = plr.Character.HumanoidRootPart
+                -- teleport sedikit lebih dalam supaya pasti aman
+                hrp.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y - 10, hrp.Position.Z)
+                task.wait(0.12)
                 equipBestMiningTool()
             end
         else
@@ -298,7 +315,7 @@ Tab2:Toggle({
             end
 
             while _G.AutoMine do
-                task.wait(0.5)
+                task.wait(0.45)
                 local plr = Players.LocalPlayer
                 if not plr then break end
                 local char = plr.Character
@@ -320,12 +337,13 @@ Tab2:Toggle({
                     equipped = equipBestMiningTool()
                 end
 
-                if #SelectedRocks == 0 then
+                if not SelectedRocks or #SelectedRocks == 0 then
                     SelectedRocks = {"Pebble"}
                 end
 
+                -- kumpulkan semua target matching dengan SelectedRocks (cek nama persis)
                 local validTargets = {}
-                for _, obj in ipairs(workspace:GetDescendants()) do
+                for _, obj in ipairs(Workspace:GetDescendants()) do
                     if obj:IsA("BasePart") or obj:IsA("Model") then
                         for _, rockName in ipairs(SelectedRocks) do
                             if obj.Name == rockName then
@@ -337,10 +355,11 @@ Tab2:Toggle({
                 end
 
                 if #validTargets == 0 then
-                    task.wait(2)
+                    task.wait(1.6)
                     continue
                 end
 
+                -- cari terdekat dari posisi saat ini (hrp)
                 local nearestObj = nil
                 local nearestDist = math.huge
                 for _, obj in ipairs(validTargets) do
@@ -372,74 +391,102 @@ Tab2:Toggle({
                 end
 
                 if not nearestObj then
-                    task.wait(2)
+                    task.wait(1.2)
                     continue
                 end
 
-                local targetPos = nearestObj.position
-                local undergroundStart = Vector3.new(hrp.Position.X, hrp.Position.Y - 8, hrp.Position.Z)
-                hrp.CFrame = CFrame.new(undergroundStart) -- teleport down once to be under ground (safe)
-                task.wait(0.2)
-
+                -- teleport sedikit bawah (safe) BEFORE moving, pastikan noclip sudah aktif
                 enableNoclip()
-                task.wait(0.15)
+                local undergroundStart = Vector3.new(hrp.Position.X, hrp.Position.Y - 10, hrp.Position.Z)
+                hrp.CFrame = CFrame.new(undergroundStart)
+                task.wait(0.08)
 
-                local destBelow = Vector3.new(targetPos.X, targetPos.Y - 6, targetPos.Z)
+                -- fungsi untuk mengambil part target terbaru (dipakai di moveToTargetSmooth)
+                local function getPart()
+                    if nearestObj.model and nearestObj.model.Parent then
+                        -- refresh nearestObj.part jika PrimaryPart hilang
+                        if nearestObj.model:IsA("Model") then
+                            if nearestObj.model.PrimaryPart and nearestObj.model.PrimaryPart.Parent then
+                                return nearestObj.model.PrimaryPart
+                            else
+                                for _, c in ipairs(nearestObj.model:GetChildren()) do
+                                    if c:IsA("BasePart") and c.Parent then
+                                        return c
+                                    end
+                                end
+                            end
+                        elseif nearestObj.model:IsA("BasePart") then
+                            return nearestObj.model
+                        end
+                    end
+                    return nil
+                end
 
-                local moved = moveToTargetSmooth(char, destBelow)
+                -- move (dynamic) ke bawah target, fallback handled inside
+                local moved = moveToTargetSmooth(char, getPart)
                 if not moved then
-                    -- fallback try small MoveTo loops (kept for robustness)
+                    -- fallback: small MoveTo attempts (keamanan)
                     for i = 1, 3 do
                         if not _G.AutoMine then break end
+                        local part = getPart()
+                        if not part then break end
+                        local destBelow = Vector3.new(part.Position.X, part.Position.Y - 6, part.Position.Z)
                         hum:MoveTo(destBelow)
                         hum.MoveToFinished:Wait()
-                        smoothLookAt(hrp, targetPos, 0.12)
+                        smoothLookAt(hrp, part.Position, 0.12)
                     end
                 end
 
-                -- face the object smoothly and slightly tilt up
-                smoothLookAt(hrp, targetPos, 0.25)
+                -- ensure face exact object
+                local currPart = getPart()
+                if currPart and currPart.Parent then
+                    smoothLookAt(hrp, currPart.Position, 0.18)
+                end
 
+                -- mining loop: klik sampai hancur
                 local miningTime = 0
-                local maxMiningTime = 20
-
+                local maxMiningTime = 25
                 while _G.AutoMine and miningTime < maxMiningTime do
-                    if not nearestObj.model or not nearestObj.model.Parent then
-                        break
+                    -- refresh
+                    currPart = getPart()
+                    if not currPart or not currPart.Parent then break end
+
+                    -- update targetPos
+                    local targetPos = currPart.Position
+
+                    -- re-equip jika perlu
+                    if not (equipped and equipped.Parent == char) then
+                        equipped = equipBestMiningTool()
                     end
 
-                    if nearestObj.part and nearestObj.part.Parent then
-                        local newPos = nearestObj.part.Position
-                        targetPos = newPos
-                    end
-
+                    -- aktifkan tool
                     if equipped and equipped.Parent == char then
                         pcall(function()
                             if equipped:FindFirstChild("Activate") or equipped:IsA("Tool") then
                                 equipped:Activate()
                             else
-                                if equipped.Activate then
-                                    equipped:Activate()
-                                end
+                                if equipped.Activate then equipped:Activate() end
                             end
                         end)
-                    else
-                        equipped = equipBestMiningTool()
                     end
 
-                    smoothLookAt(hrp, targetPos, 0.12)
+                    -- face & tiny adjust
+                    if hrp and targetPos then
+                        smoothLookAt(hrp, targetPos, 0.08)
+                    end
 
-                    task.wait(0.45)
-                    miningTime = miningTime + 0.45
+                    task.wait(0.16)
+                    miningTime = miningTime + 0.16
 
-                    if nearestObj.part then
-                        if nearestObj.part.Transparency >= 1 or nearestObj.part.Size.Magnitude < 0.1 or not nearestObj.part.Parent then
+                    -- break jika target hilang atau sudah transparent/sangat kecil
+                    if currPart then
+                        if not currPart.Parent or currPart.Transparency >= 1 or currPart.Size.Magnitude < 0.1 then
                             break
                         end
                     end
                 end
 
-                task.wait(0.6)
+                task.wait(0.45)
             end
 
             ownDebounce = false
@@ -457,6 +504,7 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
         if hrp and hum then
             task.wait(0.5)
             equipBestMiningTool()
+            -- pastikan posisi tidak miring
             hrp.CFrame = hrp.CFrame * CFrame.Angles(0,0,0)
         end
     end
