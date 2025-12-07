@@ -34,7 +34,7 @@ Window:EditOpenButton({
     CornerRadius = UDim.new(0,16),
     StrokeThickness = 2,
     Color = ColorSequence.new(
-        Color3.fromHex("#000000"), 
+        Color3.fromHex("#000000"),
         Color3.fromHex("#39FF14")
     ),
     OnlyMobile = true,
@@ -147,11 +147,14 @@ _G.AutoMine = false
 local ownDebounce = false
 local noclipConnection = nil
 local miningToolNames = {"Pickaxe", "Drill", "Hammer", "Axe", "Tool"}
+local Players = game:GetService("Players")
+local PathfindingService = game:GetService("PathfindingService")
+local RunService = game:GetService("RunService")
 
 local function enableNoclip()
     if noclipConnection then return end
-    noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-        local plr = game.Players.LocalPlayer
+    noclipConnection = RunService.Stepped:Connect(function()
+        local plr = Players.LocalPlayer
         if not plr then return end
         local char = plr.Character
         if not char then return end
@@ -159,6 +162,10 @@ local function enableNoclip()
             if v:IsA("BasePart") then
                 v.CanCollide = false
             end
+        end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CanCollide = false
         end
     end)
 end
@@ -171,27 +178,24 @@ local function disableNoclip()
 end
 
 local function equipBestMiningTool()
-    local plr = game.Players.LocalPlayer
+    local plr = Players.LocalPlayer
     if not plr then return nil end
-    
     local char = plr.Character
     if not char then return nil end
-    
+
     local bestTool = nil
     local bestToolValue = 0
-    
+
     for _, tool in ipairs(plr.Backpack:GetChildren()) do
         if tool:IsA("Tool") then
             local toolName = tool.Name:lower()
             local isMiningTool = false
-            
             for _, name in ipairs(miningToolNames) do
                 if toolName:find(name:lower()) then
                     isMiningTool = true
                     break
                 end
             end
-            
             if isMiningTool then
                 local toolValue = 0
                 if toolName:find("pickaxe") then toolValue = 100
@@ -199,7 +203,7 @@ local function equipBestMiningTool()
                 elseif toolName:find("hammer") then toolValue = 80
                 elseif toolName:find("axe") then toolValue = 70
                 else toolValue = 10 end
-                
+
                 if toolValue > bestToolValue then
                     bestToolValue = toolValue
                     bestTool = tool
@@ -207,20 +211,65 @@ local function equipBestMiningTool()
             end
         end
     end
-    
+
     if bestTool then
         bestTool.Parent = char
         return bestTool
     end
-    
+
     for _, tool in ipairs(plr.Backpack:GetChildren()) do
         if tool:IsA("Tool") then
             tool.Parent = char
             return tool
         end
     end
-    
+
     return nil
+end
+
+local function smoothLookAt(hrp, targetPos, duration)
+    local start = tick()
+    local initialCFrame = hrp.CFrame
+    while tick() - start < (duration or 0.25) do
+        local alpha = math.clamp((tick() - start) / (duration or 0.25), 0, 1)
+        local lookCFrame = CFrame.new(hrp.Position, Vector3.new(targetPos.X, targetPos.Y + 2, targetPos.Z))
+        hrp.CFrame = initialCFrame:Lerp(lookCFrame, alpha)
+        RunService.RenderStepped:Wait()
+    end
+end
+
+local function moveToTargetSmooth(char, destination)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return false end
+
+    local path = nil
+    local success, err = pcall(function()
+        path = PathfindingService:CreatePath({
+            AgentHeight = 5,
+            AgentRadius = 2,
+            AgentCanJump = true,
+            WaypointSpacing = 4
+        })
+        path:ComputeAsync(hrp.Position, destination)
+    end)
+
+    if not path or path.Status ~= Enum.PathStatus.Success then
+        return false
+    end
+
+    local waypoints = path:GetWaypoints()
+    for i, wp in ipairs(waypoints) do
+        if not _G.AutoMine then return false end
+        local wpPos = wp.Position
+        hum:MoveTo(wpPos)
+        local reached = hum.MoveToFinished:Wait()
+        local lookPos = destination
+        smoothLookAt(hrp, lookPos, 0.18)
+        task.wait(0.05)
+    end
+
+    return true
 end
 
 Tab2:Toggle({
@@ -229,239 +278,192 @@ Tab2:Toggle({
     Value = false,
     Callback = function(state)
         _G.AutoMine = state
-        
+
         if _G.AutoMine then
-            -- Aktifkan Noclip
             enableNoclip()
-            
-            -- Auto equip tool
-            local plr = game.Players.LocalPlayer
+            local plr = Players.LocalPlayer
             if plr and plr.Character then
                 equipBestMiningTool()
             end
         else
-            -- Matikan Noclip saja
             disableNoclip()
         end
-        
+
         if _G.AutoMine and ownDebounce then
             return
         end
-        
+
         task.spawn(function()
             ownDebounce = true
-            
-            -- Pastikan noclip aktif
             if _G.AutoMine then
                 enableNoclip()
             end
-            
+
             while _G.AutoMine do
                 task.wait(0.5)
-                
-                local plr = game.Players.LocalPlayer
+                local plr = Players.LocalPlayer
                 if not plr then break end
-                
                 local char = plr.Character
                 if not char then
                     char = plr.CharacterAdded:Wait()
                     task.wait(0.5)
                 end
-                
-                local hrp = char:WaitForChild("HumanoidRootPart", 5)
-                local hum = char:WaitForChild("Humanoid", 5)
-                
+
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local hum = char:FindFirstChildOfClass("Humanoid")
+
                 if not hrp or not hum then
                     task.wait(1)
                     continue
                 end
-                
-                -- Auto equip alat mining
+
                 local equipped = char:FindFirstChildOfClass("Tool")
                 if not equipped then
                     equipped = equipBestMiningTool()
                 end
-                
+
                 if #SelectedRocks == 0 then
                     SelectedRocks = {"Pebble"}
                 end
-                
-                -- DEBUG: Print untuk melihat apa yang dipilih
-                print("Mencari objek dengan nama:", SelectedRocks)
-                
-                -- Cari semua objek yang cocok
+
                 local validTargets = {}
-                for _, obj in ipairs(workspace:GetChildren()) do
-                    for _, rockName in ipairs(SelectedRocks) do
-                        if obj.Name == rockName then
-                            table.insert(validTargets, obj)
-                            print("Found:", obj.Name, "at:", obj:GetPivot().Position)
-                        end
-                    end
-                end
-                
-                -- Juga cari di dalam folder-folder
-                for _, folder in ipairs(workspace:GetChildren()) do
-                    if folder:IsA("Folder") or folder:IsA("Model") then
-                        for _, obj in ipairs(folder:GetDescendants()) do
-                            for _, rockName in ipairs(SelectedRocks) do
-                                if obj.Name == rockName then
-                                    table.insert(validTargets, obj)
-                                    print("Found in folder:", obj.Name, "at:", obj:GetPivot().Position)
-                                end
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") or obj:IsA("Model") then
+                        for _, rockName in ipairs(SelectedRocks) do
+                            if obj.Name == rockName then
+                                table.insert(validTargets, obj)
+                                break
                             end
                         end
                     end
                 end
-                
+
                 if #validTargets == 0 then
-                    print("Tidak ditemukan objek yang cocok!")
                     task.wait(2)
                     continue
                 end
-                
-                -- Cari objek terdekat
+
                 local nearestObj = nil
                 local nearestDist = math.huge
-                
                 for _, obj in ipairs(validTargets) do
                     local targetPart = nil
                     local targetPos = nil
-                    
                     if obj:IsA("Model") then
                         targetPart = obj.PrimaryPart
                         if not targetPart then
-                            -- Cari part pertama yang ada
-                            for _, part in ipairs(obj:GetChildren()) do
-                                if part:IsA("BasePart") then
-                                    targetPart = part
+                            for _, child in ipairs(obj:GetChildren()) do
+                                if child:IsA("BasePart") then
+                                    targetPart = child
                                     break
                                 end
                             end
                         end
-                        if targetPart then
-                            targetPos = targetPart.Position
-                        end
+                        if targetPart then targetPos = targetPart.Position end
                     elseif obj:IsA("BasePart") then
                         targetPart = obj
                         targetPos = obj.Position
                     end
-                    
+
                     if targetPos then
                         local distance = (hrp.Position - targetPos).Magnitude
-                        print("Distance to", obj.Name, ":", distance)
-                        
                         if distance < nearestDist then
                             nearestDist = distance
-                            nearestObj = {
-                                model = obj,
-                                part = targetPart,
-                                position = targetPos
-                            }
+                            nearestObj = { model = obj, part = targetPart, position = targetPos }
                         end
                     end
                 end
-                
+
                 if not nearestObj then
-                    print("Tidak ada objek yang valid ditemukan!")
                     task.wait(2)
                     continue
                 end
-                
-                print("Menuju ke:", nearestObj.model.Name, "jarak:", nearestDist)
-                
-                -- Posisi di dalam tanah (10 stud di bawah objek)
-                local undergroundPos = Vector3.new(
-                    nearestObj.position.X,
-                    nearestObj.position.Y - 10,  -- DI BAWAH TANAH
-                    nearestObj.position.Z
-                )
-                
-                -- TELEPORT langsung ke posisi bawah tanah
-                hrp.CFrame = CFrame.new(undergroundPos) * CFrame.Angles(math.rad(-90), 0, 0)  -- MENGHADAP KE ATAS
-                
-                print("Teleport ke bawah tanah, menghadap ke atas")
-                
-                -- Mining loop
+
+                local targetPos = nearestObj.position
+                local undergroundStart = Vector3.new(hrp.Position.X, hrp.Position.Y - 8, hrp.Position.Z)
+                hrp.CFrame = CFrame.new(undergroundStart) -- teleport down once to be under ground (safe)
+                task.wait(0.2)
+
+                enableNoclip()
+                task.wait(0.15)
+
+                local destBelow = Vector3.new(targetPos.X, targetPos.Y - 6, targetPos.Z)
+
+                local moved = moveToTargetSmooth(char, destBelow)
+                if not moved then
+                    -- fallback: try MoveTo directly a few times
+                    for i = 1, 3 do
+                        if not _G.AutoMine then break end
+                        hum:MoveTo(destBelow)
+                        hum.MoveToFinished:Wait()
+                        smoothLookAt(hrp, targetPos, 0.12)
+                    end
+                end
+
+                -- face the object smoothly and slightly tilt up
+                smoothLookAt(hrp, targetPos, 0.25)
+
                 local miningTime = 0
-                local maxMiningTime = 10  -- 10 detik mining per objek
-                
+                local maxMiningTime = 20
+
                 while _G.AutoMine and miningTime < maxMiningTime do
                     if not nearestObj.model or not nearestObj.model.Parent then
-                        print("Objek sudah hancur")
                         break
                     end
-                    
-                    -- Update posisi jika objek bergerak
+
                     if nearestObj.part and nearestObj.part.Parent then
                         local newPos = nearestObj.part.Position
-                        undergroundPos = Vector3.new(newPos.X, newPos.Y - 10, newPos.Z)
-                        hrp.CFrame = CFrame.new(undergroundPos) * CFrame.Angles(math.rad(-90), 0, 0)
+                        targetPos = newPos
                     end
-                    
-                    -- Auto click mining
+
                     if equipped and equipped.Parent == char then
                         pcall(function()
-                            equipped:Activate()
-                            print("Mining...")
+                            if equipped:FindFirstChild("Activate") or equipped:IsA("Tool") then
+                                equipped:Activate()
+                            else
+                                if equipped.Activate then
+                                    equipped:Activate()
+                                end
+                            end
                         end)
                     else
-                        -- Re-equip jika tool hilang
                         equipped = equipBestMiningTool()
                     end
-                    
-                    task.wait(0.5)
-                    miningTime = miningTime + 0.5
-                    
-                    -- Cek jika objek sudah hancur
-                    if not nearestObj.model.Parent then
-                        print("Objek hancur, cari yang baru")
-                        break
-                    end
-                    
-                    -- Cek transparansi/ukuran objek
+
+                    smoothLookAt(hrp, targetPos, 0.12)
+
+                    task.wait(0.45)
+                    miningTime = miningTime + 0.45
+
                     if nearestObj.part then
-                        if nearestObj.part.Transparency >= 1 or nearestObj.part.Size.Magnitude < 0.1 then
-                            print("Objek sudah tidak visible")
+                        if nearestObj.part.Transparency >= 1 or nearestObj.part.Size.Magnitude < 0.1 or not nearestObj.part.Parent then
                             break
                         end
                     end
                 end
-                
-                print("Selesai mining objek ini, cari yang baru...")
-                task.wait(1)
+
+                task.wait(0.6)
             end
-            
+
             ownDebounce = false
-            print("Auto Farm dihentikan")
+            disableNoclip()
         end)
     end
 })
 
--- Handle character respawn
 game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-    task.wait(1)  -- Tunggu karakter fully loaded
-    
+    task.wait(1)
     if _G.AutoMine then
-        print("Karakter respawn, aktifkan ulang Auto Farm...")
         enableNoclip()
-        
-        -- Tunggu HRP dan Humanoid
         local hrp = char:WaitForChild("HumanoidRootPart", 5)
         local hum = char:WaitForChild("Humanoid", 5)
-        
         if hrp and hum then
-            -- Auto equip tool
             task.wait(0.5)
             equipBestMiningTool()
-            
-            -- Set posisi ke atas
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(math.rad(-90), 0, 0)
+            hrp.CFrame = hrp.CFrame * CFrame.Angles(0,0,0)
         end
     end
 end)
 
--- Cleanup saat keluar
 game.Players.LocalPlayer.CharacterRemoving:Connect(function()
     if noclipConnection then
         disableNoclip()
