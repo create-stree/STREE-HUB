@@ -148,7 +148,6 @@ local ownDebounce = false
 local noclipConnection = nil
 local miningToolNames = {"Pickaxe", "Drill", "Hammer", "Axe", "Tool"}
 local Players = game:GetService("Players")
-local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 
 local function enableNoclip()
@@ -238,38 +237,37 @@ local function smoothLookAt(hrp, targetPos, duration)
     end
 end
 
+-- GANTI moveToTargetSmooth jadi slide incremental CFrame (speed = 26)
 local function moveToTargetSmooth(char, destination)
-    local hum = char:FindFirstChildOfClass("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum or not hrp then return false end
 
-    local path = nil
-    local success, err = pcall(function()
-        path = PathfindingService:CreatePath({
-            AgentHeight = 5,
-            AgentRadius = 2,
-            AgentCanJump = true,
-            WaypointSpacing = 4
-        })
-        path:ComputeAsync(hrp.Position, destination)
-    end)
+    local speed = 26 -- studs per second
+    local timeout = 12
+    local startTime = tick()
 
-    if not path or path.Status ~= Enum.PathStatus.Success then
-        return false
+    local function reached()
+        return (hrp.Position - destination).Magnitude <= 1.6
     end
 
-    local waypoints = path:GetWaypoints()
-    for i, wp in ipairs(waypoints) do
-        if not _G.AutoMine then return false end
-        local wpPos = wp.Position
-        hum:MoveTo(wpPos)
-        local reached = hum.MoveToFinished:Wait()
-        local lookPos = destination
-        smoothLookAt(hrp, lookPos, 0.18)
-        task.wait(0.05)
+    while not reached() and _G.AutoMine and tick() - startTime < timeout do
+        local dt = 1/60
+        -- direction to destination
+        local dir = destination - hrp.Position
+        local dist = dir.Magnitude
+        if dist <= 0.01 then break end
+        local moveStep = dir.Unit * math.min(speed * dt, dist)
+
+        -- compute new position and smooth look
+        local newPos = hrp.Position + moveStep
+        local lookC = CFrame.new(newPos, Vector3.new(destination.X, destination.Y + 2, destination.Z))
+        hrp.CFrame = hrp.CFrame:Lerp(lookC, 0.45)
+
+        RunService.RenderStepped:Wait()
     end
 
-    return true
+    return reached()
 end
 
 Tab2:Toggle({
@@ -390,7 +388,7 @@ Tab2:Toggle({
 
                 local moved = moveToTargetSmooth(char, destBelow)
                 if not moved then
-                    -- fallback: try MoveTo directly a few times
+                    -- fallback try small MoveTo loops (kept for robustness)
                     for i = 1, 3 do
                         if not _G.AutoMine then break end
                         hum:MoveTo(destBelow)
