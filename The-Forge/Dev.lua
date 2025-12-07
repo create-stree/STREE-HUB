@@ -146,6 +146,8 @@ Tab2:Dropdown({
 _G.AutoMine = false
 local ownDebounce = false
 local noclipConnection = nil
+local autoClickEnabled = true -- Default auto click aktif
+local miningToolNames = {"Pickaxe", "Drill", "Hammer", "Axe", "Tool"} -- Nama-nama alat mining
 
 local function enableNoclip()
     if noclipConnection then return end
@@ -168,6 +170,84 @@ local function disableNoclip()
         noclipConnection = nil
     end
 end
+
+local function equipBestMiningTool()
+    local plr = game.Players.LocalPlayer
+    if not plr then return nil end
+    
+    local char = plr.Character
+    if not char then return nil end
+    
+    -- Cari tool terbaik dari backpack
+    local bestTool = nil
+    local bestToolValue = 0
+    
+    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            -- Cek apakah ini alat mining
+            local toolName = tool.Name:lower()
+            local isMiningTool = false
+            
+            for _, name in ipairs(miningToolNames) do
+                if toolName:find(name:lower()) then
+                    isMiningTool = true
+                    break
+                end
+            end
+            
+            if isMiningTool then
+                -- Prioritaskan tool berdasarkan urutan yang ditentukan
+                local toolValue = 0
+                if toolName:find("pickaxe") then toolValue = 100
+                elseif toolName:find("drill") then toolValue = 90
+                elseif toolName:find("hammer") then toolValue = 80
+                elseif toolName:find("axe") then toolValue = 70
+                else toolValue = 10 end
+                
+                if toolValue > bestToolValue then
+                    bestToolValue = toolValue
+                    bestTool = tool
+                end
+            end
+        end
+    end
+    
+    -- Jika ditemukan alat mining, equip
+    if bestTool then
+        bestTool.Parent = char
+        return bestTool
+    end
+    
+    -- Jika tidak ada alat mining spesifik, coba equip tool apapun
+    for _, tool in ipairs(plr.Backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            tool.Parent = char
+            return tool
+        end
+    end
+    
+    return nil
+end
+
+local function autoClickTool(tool)
+    if not tool then return end
+    if not autoClickEnabled then return end
+    
+    -- Auto click dengan interval yang sesuai
+    pcall(function()
+        tool:Activate()
+    end)
+end
+
+-- Toggle untuk Auto Click (opsional)
+Tab2:Toggle({
+    Title = "Auto Click",
+    Desc = "Auto click mining tool",
+    Value = true,
+    Callback = function(state)
+        autoClickEnabled = state
+    end
+})
 
 Tab2:Toggle({
     Title = "Auto Farm",
@@ -250,7 +330,6 @@ Tab2:Toggle({
                 local cframePos = targetPos + offset
                 
                 -- Hitung rotasi untuk menghadap ke atas
-                -- Menggunakan CFrame.Angles untuk rotasi ke atas
                 local upCFrame = CFrame.new(cframePos) * CFrame.Angles(math.rad(-90), 0, 0)
                 
                 pcall(function()
@@ -261,22 +340,23 @@ Tab2:Toggle({
                     hum.PlatformStand = true
                 end)
                 
+                -- Auto equip alat mining terbaik
                 local equipped = char:FindFirstChildOfClass("Tool")
                 if not equipped then
-                    for _, tool in ipairs(plr.Backpack:GetChildren()) do
-                        if tool:IsA("Tool") and (tool.Name:lower():find("pick") or tool.Name:lower():find("axe") or tool.Name:lower():find("pickaxe")) then
-                            tool.Parent = char
-                            equipped = tool
-                            break
-                        end
-                    end
+                    equipped = equipBestMiningTool()
                 end
+                
+                -- Pastikan ada tool yang di-equip
                 if not equipped then
-                    for _, tool in ipairs(plr.Backpack:GetChildren()) do
-                        if tool:IsA("Tool") then
-                            tool.Parent = char
-                            equipped = tool
-                            break
+                    equipped = char:FindFirstChildOfClass("Tool")
+                    if not equipped then
+                        -- Coba equip tool apapun
+                        for _, tool in ipairs(plr.Backpack:GetChildren()) do
+                            if tool:IsA("Tool") then
+                                tool.Parent = char
+                                equipped = tool
+                                break
+                            end
                         end
                     end
                 end
@@ -296,13 +376,19 @@ Tab2:Toggle({
                         hrp.CFrame = newUpCFrame
                     end)
                     
-                    if equipped and equipped.Parent == char then
-                        pcall(function()
-                            equipped:Activate()
-                        end)
+                    -- Auto equip jika tool hilang
+                    if not char:FindFirstChildOfClass("Tool") then
+                        equipped = equipBestMiningTool()
+                    else
+                        equipped = char:FindFirstChildOfClass("Tool")
                     end
                     
-                    task.wait(0.6)
+                    -- Auto click jika ada tool
+                    if equipped and equipped.Parent == char then
+                        autoClickTool(equipped)
+                    end
+                    
+                    task.wait(0.3) -- Interval auto click lebih cepat
                     
                     if not nearestObj.model.Parent then
                         break
@@ -342,6 +428,9 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
         if hum then
             hum.PlatformStand = true
         end
+        -- Auto equip saat karakter respawn
+        task.wait(0.3)
+        equipBestMiningTool()
     end
 end)
 
