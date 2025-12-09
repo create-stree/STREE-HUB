@@ -2705,4 +2705,5 @@ do
     if antiAfk.enabled then AA_Start() end
 end
 
+
 end)
