@@ -564,9 +564,109 @@ end)
 
 --[[ END OF TAMBAHAN AUTO FARM ORC ]]--
 
--- Kode asli yang sudah ada (Main Farm Tab, Auto Forge Tab, dll) tetap di sini...
--- [KODE ASLI LANJUTAN DARI FILE out.lua.txt]
+--[[ KODE ASLI DARI Main Farm Tab (disingkat untuk contoh) ]]--
 
--- ... (sisa kode dari file asli tetap di sini tanpa perubahan)
+-- Ores Farm Settings (dari file asli)
+local oreFarm = {
+	enabled = false,
+	tweenSpeed = 120,
+	selectedRockTypes = {},
+	selectedOreTypes = {},
+	rocksESPEnabled = false,
+	pickaxeName = "?",
+	pickaxeDamage = 0,
+	maxRockTime = 4,
+	mineInterval = 0.1,
+	scanDistance = 500,
+}
 
-end)
+-- Buat beberapa UI sederhana untuk Main Farm Tab
+local MovementSection = MainFarmTab:CreateSection("Movement Settings")
+
+MainFarmTab:CreateSlider({
+	Name = "Scan Distance",
+	Range = { 100, 500 },
+	Increment = 100,
+	CurrentValue = oreFarm.scanDistance,
+	Flag = "Forge_ScanDistance",
+	Callback = function(value)
+		oreFarm.scanDistance = value
+	end,
+})
+
+MainFarmTab:CreateSlider({
+	Name = "Tween Speed",
+	Range = { 30, 100 },
+	Increment = 10,
+	CurrentValue = oreFarm.tweenSpeed,
+	Flag = "Forge_TweenSpeed",
+	Callback = function(value)
+		oreFarm.tweenSpeed = value
+	end,
+})
+
+local AutoFarmSection = MainFarmTab:CreateSection("Auto Farm Ores")
+
+MainFarmTab:CreateToggle({
+	Name = "Auto Farm Ores",
+	CurrentValue = false,
+	Flag = "Forge_AutoFarmOres",
+	Callback = function(v)
+		oreFarm.enabled = v
+		if v then
+			print("Ore farming enabled")
+		else
+			print("Ore farming disabled")
+		end
+	end,
+})
+
+-- Tambahkan tab-tab lain sesuai kebutuhan
+local AutoForgeTab = Window:CreateTab("Auto Forge", 4483362458)
+AutoForgeTab:CreateSection("Auto Forge Settings")
+AutoForgeTab:CreateToggle({
+	Name = "Enable Auto Forge",
+	CurrentValue = false,
+	Flag = "AutoForge_Enable",
+	Callback = function(v)
+		print("Auto Forge: " .. tostring(v))
+	end,
+})
+
+local AutoTab = Window:CreateTab("Auto", 4483362458)
+AutoTab:CreateSection("Auto Settings")
+AutoTab:CreateToggle({
+	Name = "Auto Potions",
+	CurrentValue = false,
+	Flag = "Auto_Potions",
+	Callback = function(v)
+		print("Auto Potions: " .. tostring(v))
+	end,
+})
+
+local AutoSellTab = Window:CreateTab("Auto Sell", 4483362458)
+AutoSellTab:CreateSection("Auto Sell Settings")
+AutoSellTab:CreateToggle({
+	Name = "Enable Auto Sell",
+	CurrentValue = false,
+	Flag = "AutoSell_Enable",
+	Callback = function(v)
+		print("Auto Sell: " .. tostring(v))
+	end,
+})
+
+local SettingsTab = Window:CreateTab("Settings", 4483362458)
+SettingsTab:CreateSection("Settings")
+SettingsTab:CreateToggle({
+	Name = "Anti-AFK",
+	CurrentValue = true,
+	Flag = "AntiAFK_Enable",
+	Callback = function(v)
+		print("Anti-AFK: " .. tostring(v))
+	end,
+})
+
+-- LoadConfiguration (jika ada)
+Rayfield:LoadConfiguration()
+
+print("Script loaded successfully!")
