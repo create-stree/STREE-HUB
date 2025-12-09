@@ -1,4 +1,4 @@
---[[ Dumb By Moonz ]--
+--[[ Dumb By Moonz ]]--
 
 local KeySystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nisulrocks/Key-system/refs/heads/main/Main"))()
 
@@ -2707,3 +2707,4 @@ end
 
 
 end)
+
