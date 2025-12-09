@@ -515,3 +515,189 @@ game.Players.LocalPlayer.CharacterRemoving:Connect(function()
         disableNoclip()
     end
 end)
+
+----------------------------------------------------------------
+-- ADDITION: Auto Farm Mode "Tidur / Nempel Batu"
+-- Toggle baru: Auto Farm (Tidur) -- berjalan terpisah dari _G.AutoMine
+----------------------------------------------------------------
+
+-- global flag (tidak clash dengan _G.AutoMine)
+_G.AutoOreSleep = false
+local sleepDebounce = false
+
+-- helper: cari part/model batu terdekat yang nama cocok dengan SelectedRocks
+local function GetNearestRockForSleep()
+    local plr = Players.LocalPlayer
+    if not plr or not plr.Character then return nil end
+    local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local nearest = nil
+    local ndist = math.huge
+
+    -- perhatikan: kita mencari BasePart atau Model yang matching SelectedRocks
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            for _, name in ipairs(SelectedRocks) do
+                if obj.Name == name then
+                    -- dapatkan representative part
+                    local part = nil
+                    if obj:IsA("BasePart") then
+                        part = obj
+                    elseif obj:IsA("Model") then
+                        part = obj.PrimaryPart
+                        if not part then
+                            for _, c in ipairs(obj:GetChildren()) do
+                                if c:IsA("BasePart") then
+                                    part = c
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    if part and part.Parent then
+                        local d = (hrp.Position - part.Position).Magnitude
+                        if d < ndist then
+                            ndist = d
+                            nearest = part
+                        end
+                    end
+                    break
+                end
+            end
+        end
+    end
+
+    return nearest
+end
+
+-- fungsi untuk "tidur/nempel" di atas batu dan auto-pukul
+local function SleepAndMineAtRock(part)
+    local plr = Players.LocalPlayer
+    if not plr or not plr.Character then return false end
+    local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    -- pastikan pakai tool yang sesuai
+    local equipped = plr.Character:FindFirstChildOfClass("Tool")
+    if not equipped then
+        equipped = equipBestMiningTool()
+        task.wait(0.12)
+    end
+
+    -- posisi: sedikit di atas batu, nempel
+    pcall(function()
+        hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+        hrp.CFrame = CFrame.new(part.Position + Vector3.new(0, 2, 0))
+    end)
+
+    -- loop pukul hingga hilang atau flag dimatikan
+    local maxTime = 30
+    local start = tick()
+    while _G.AutoOreSleep and tick() - start < maxTime do
+        if not part or not part.Parent then break end
+        -- re-equip bila perlu
+        if not (equipped and equipped.Parent == plr.Character) then
+            equipped = equipBestMiningTool()
+        end
+
+        -- face ke target
+        if hrp and part.Position then
+            smoothLookAt(hrp, part.Position, 0.06)
+        end
+
+        -- aktifkan tool jika ada
+        if equipped and equipped.Parent == plr.Character then
+            pcall(function()
+                if equipped:FindFirstChild("Activate") or equipped:IsA("Tool") then
+                    equipped:Activate()
+                else
+                    if equipped.Activate then equipped:Activate() end
+                end
+            end)
+        end
+
+        task.wait(0.12)
+        -- jika part hilang, break
+        if not part.Parent or part.Transparency >= 1 or part.Size.Magnitude < 0.1 then
+            break
+        end
+    end
+
+    return true
+end
+
+-- UI Toggle untuk Mode Tidur
+Tab2:Toggle({
+    Title = "Auto Farm Rock",
+    Desc = "Automatic farm rock NEW",
+    Value = false,
+    Callback = function(state)
+        _G.AutoOreSleep = state
+
+        -- jika diaktifkan, pastikan noclip untuk nembus tanah (re-use fungsi)
+        if _G.AutoOreSleep then
+            enableNoclip()
+        else
+            -- matikan noclip jika tidak ada _G.AutoMine berjalan
+            if not _G.AutoMine then
+                disableNoclip()
+            end
+        end
+
+        if _G.AutoOreSleep and sleepDebounce then return end
+
+        task.spawn(function()
+            sleepDebounce = true
+            while _G.AutoOreSleep do
+                task.wait(0.35)
+                local plr = Players.LocalPlayer
+                if not plr then break end
+                if not plr.Character or not plr.Character.Parent then
+                    plr.CharacterAdded:Wait()
+                    task.wait(0.6)
+                end
+                local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then task.wait(0.6) continue end
+
+                -- cari rock terdekat
+                local rockPart = GetNearestRockForSleep()
+                if not rockPart then
+                    task.wait(1.2)
+                    continue
+                end
+
+                -- nempel di atas rock (teleport sedikit di atas)
+                pcall(function()
+                    hrp.CFrame = CFrame.new(rockPart.Position + Vector3.new(0,2.2,0))
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                end)
+
+                -- panggil loop mining "sleep" (sampai batu hilang atau timeout)
+                SleepAndMineAtRock(rockPart)
+
+                task.wait(0.45)
+            end
+            sleepDebounce = false
+            -- nonaktifkan noclip jika kedua mode mati
+            if not _G.AutoMine and not _G.AutoOreSleep then
+                disableNoclip()
+            end
+        end)
+    end
+})
+
+-- Pastikan saat respawn, mode Sleep tetap equip tool jika diaktifkan
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    if _G.AutoOreSleep or _G.AutoMine then
+        enableNoclip()
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        local hum = char:WaitForChild("Humanoid", 5)
+        if hrp and hum then
+            task.wait(0.5)
+            equipBestMiningTool()
+            hrp.CFrame = hrp.CFrame * CFrame.Angles(0,0,0)
+        end
+    end
+end)
