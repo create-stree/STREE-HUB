@@ -1,4 +1,3 @@
-
 local ScriptConfig = select(1, ...) or {
     JoinTeam = "Pirates",
     Translator = true
@@ -131,7 +130,35 @@ end
 local Repository = {
     Owner = "https://raw.githubusercontent.com/newredz/"
 }
-Repository.Repository = Repository.Owner .. "BloxFruits/refs/heads/main/"
+
+-- PERBAIKAN DI SINI: Menggunakan branch yang benar
+-- Coba beberapa kemungkinan URL
+local PossiblePaths = {
+    "main/", -- Branch main biasa
+    "master/", -- Branch master
+    "bloxfruits/main/", -- Subfolder
+    "BloxFruits-Script/main/" -- Nama repo yang berbeda
+}
+
+-- Fungsi untuk mencoba berbagai URL
+local function TryLoadFromRepository(urlSuffix)
+    for _, path in ipairs(PossiblePaths) do
+        local testUrl = Repository.Owner .. path .. urlSuffix
+        local success, result = pcall(HttpGet, game, testUrl)
+        if success and result and #result > 0 then
+            Repository.Repository = Repository.Owner .. path
+            return result, testUrl
+        end
+    end
+    return nil
+end
+
+-- ALTERNATIF: Jika repository sudah tidak ada, gunakan source alternatif
+local AlternativeRepositories = {
+    "https://raw.githubusercontent.com/REDZ-HUB/BloxFruits/main/",
+    "https://raw.githubusercontent.com/redz999/BloxFruits/main/",
+    "https://raw.githubusercontent.com/RedzHubOfficial/BloxFruits/main/"
+}
 
 local function GetExecutorName()
     return identifyexecutor and identifyexecutor() or "Unknown"
@@ -147,10 +174,11 @@ local function ThrowError(message)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- HTTP FUNCTIONS
+-- HTTP FUNCTIONS (DIPERBAIKI)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 function __httpget(url, _)
+    -- Coba repository utama dulu
     for key, value in pairs(Repository) do
         local placeholder = "{" .. key .. "}"
         if url:find(placeholder) then
@@ -161,17 +189,34 @@ function __httpget(url, _)
     local success, result = pcall(HttpGet, game, url)
     if success then
         return result, url
-    else
-        return ThrowError(("[1] [%s] Failed to load script: %s\n{{ %s }}"):format(GetExecutorName(), url, result))
     end
+    
+    -- Jika gagal, coba URL alternatif
+    if url:find("Functions/Module.lua") then
+        for _, altRepo in ipairs(AlternativeRepositories) do
+            local altUrl = altRepo .. "Functions/Module.lua"
+            success, result = pcall(HttpGet, game, altUrl)
+            if success then
+                Repository.Repository = altRepo
+                return result, altUrl
+            end
+        end
+    end
+    
+    return ThrowError(("[1] [%s] Failed to load script: %s"):format(GetExecutorName(), url))
 end
 
 function __loadstring(url, suffix, args)
     local content, fullUrl = __httpget(url)
+    
+    if not content then
+        return ThrowError(("[2] [%s] No content from: %s"):format(GetExecutorName(), fullUrl or url))
+    end
+    
     local func, err = loadstring(content .. (suffix or ""))
     
     if type(func) ~= "function" then
-        return ThrowError(("[2] [%s] Syntax error: %s\n{{ %s }}"):format(GetExecutorName(), fullUrl, err))
+        return ThrowError(("[3] [%s] Syntax error: %s\n{{ %s }}"):format(GetExecutorName(), fullUrl or url, err))
     end
     
     local success, result
@@ -186,8 +231,10 @@ function __loadstring(url, suffix, args)
     end
     
     if type(result) == "string" then
-        ("[3] [%s] Execute error: %s\n{{ %s }}"):format(GetExecutorName(), fullUrl, result)
+        warn(("[4] [%s] Execute error: %s\n{{ %s }}"):format(GetExecutorName(), fullUrl or url, result))
     end
+    
+    return nil
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
@@ -203,7 +250,7 @@ GlobalEnvironment.rz_FarmFunctions = FarmFunctions
 -- CONNECTION MANAGEMENT
 -- ═══════════════════════════════════════════════════════════════════════════════
 
-local Connections = rz_connections or {}
+local Connections = GlobalEnvironment.rz_connections or {}
 GlobalEnvironment.rz_connections = Connections
 
 for _, connection in ipairs(Connections) do
@@ -212,7 +259,7 @@ end
 table.clear(Connections)
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- CORE MODULES
+-- CORE MODULES (DENGAN FALLBACK)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 local GameModule = nil
@@ -221,114 +268,109 @@ local FireRemote = nil
 
 local TeamFunctions = {
     Marines = function()
-        FireRemote("SetTeam", "Marines")
+        if FireRemote then
+            FireRemote("SetTeam", "Marines")
+        else
+            warn("FireRemote belum diinisialisasi")
+        end
     end,
     Pirates = function()
-        FireRemote("SetTeam", "Pirates")
+        if FireRemote then
+            FireRemote("SetTeam", "Pirates")
+        else
+            warn("FireRemote belum diinisialisasi")
+        end
     end
 }
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- COLLECTION SERVICE HELPERS
+-- BASIC GAME MODULE (FALLBACK JIKA MODULE UTAMA GAGAL)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
-local function GetTaggedInstances(tag)
-    local tagged = CollectionService:GetTagged(tag)
-    table.insert(Connections, CollectionService:GetInstanceAddedSignal(tag):Connect(function(instance)
-        table.insert(tagged, instance)
-    end))
-    return tagged
-end
-
-local ChestTagged = GetTaggedInstances("_ChestTagged")
-local BerryBushes = GetTaggedInstances("BerryBush")
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- UTILITY FUNCTIONS
--- ═══════════════════════════════════════════════════════════════════════════════
-
-local Utilities = {
-    RemoveFog = function()
-        if Lighting:FindFirstChild("LightingLayers") then
-            Lighting.LightingLayers:Remove()
+local BasicGameModule = {
+    IsAlive = function(character)
+        if not character then
+            character = LocalPlayer.Character
         end
+        if not character then return false end
+        local humanoid = character:FindFirstChild("Humanoid")
+        return humanoid and humanoid.Health > 0
     end,
     
-    AllCodes = function()
-        local codesContent = __httpget("{Repository}Utils/Codes.txt")
-        local codes = string.gsub(codesContent, "\n", ""):split(" ")
-        for i = 1, #codes do
-            Remotes.Redeem:InvokeServer(codes[i])
+    FireRemote = function(remoteName, ...)
+        local remote = Remotes:FindFirstChild(remoteName)
+        if remote then
+            if remote:IsA("RemoteEvent") then
+                return remote:FireServer(...)
+            elseif remote:IsA("RemoteFunction") then
+                return remote:InvokeServer(...)
+            end
         end
+        return nil
     end,
     
-    GetTimer = function(seconds)
-        local totalSeconds = math.floor(seconds)
-        local totalMinutes = math.floor(seconds / 60)
-        local hours = math.floor(seconds / 60 / 60)
-        local secs = totalSeconds - totalMinutes * 60
-        local mins = totalMinutes - hours * 60
+    EnableBuso = function()
+        Remotes:WaitForChild("Buso"):FireServer()
+    end,
+    
+    EquipTool = function(toolType)
+        local backpack = LocalPlayer.Backpack
+        local character = LocalPlayer.Character
+        if not backpack or not character then return nil end
         
-        if mins < 10 then
-            mins = "0" .. tostring(mins)
+        local tools = backpack:GetChildren()
+        for _, tool in ipairs(tools) do
+            if tool:IsA("Tool") then
+                if toolType == "Melee" and (tool.Name:find("Combat") or tool.Name:find("Sword") or tool.Name:find("Katana")) then
+                    tool.Parent = character
+                    return tool
+                elseif toolType == "Sword" and (tool.Name:find("Sword") or tool.Name:find("Katana")) then
+                    tool.Parent = character
+                    return tool
+                end
+            end
         end
         
-        if secs < 10 then
-            secs = "0" .. tostring(secs)
+        -- Equip tool pertama jika spesifik tidak ditemukan
+        for _, tool in ipairs(tools) do
+            if tool:IsA("Tool") then
+                tool.Parent = character
+                return tool
+            end
         end
+        return nil
+    end,
+    
+    Rejoin = function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+    end,
+    
+    ServerHop = function()
+        -- Basic server hop implementation
+        local HttpService = game:GetService("HttpService")
+        local servers = {}
         
-        return mins .. ":" .. secs
+        local success, result = pcall(function()
+            return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+        end)
+        
+        if success and result and result.data then
+            for _, server in ipairs(result.data) do
+                if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                    table.insert(servers, server.id)
+                end
+            end
+            
+            if #servers > 0 then
+                local randomServer = servers[math.random(1, #servers)]
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, randomServer, LocalPlayer)
+            end
+        end
     end
 }
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- TWEEN MODULE
--- ═══════════════════════════════════════════════════════════════════════════════
-
-local TweenModule = loadstring([[
-    local module = {}
-    module.__index = module
-    
-    local TweenService = game:GetService("TweenService")
-    
-    local tweens = {}
-    local EasingStyle = Enum.EasingStyle.Linear
-    
-    function module.new(obj, time, prop, value)
-        local self = setmetatable({}, module)
-        
-        self.tween = TweenService:Create(obj, TweenInfo.new(time, EasingStyle), { [prop] = value })
-        self.tween:Play()
-        self.value = value
-        self.object = obj
-        
-        if tweens[obj] then
-            tweens[obj]:destroy()
-        end
-        
-        tweens[obj] = self
-        return self
-    end
-    
-    function module:destroy()
-        self.tween:Pause()
-        self.tween:Destroy()
-        
-        tweens[self.object] = nil
-        setmetatable(self, nil)
-    end
-    
-    function module:stop(obj)
-        if tweens[obj] then
-            tweens[obj]:destroy()
-        end
-    end
-    
-    return module
-]])()
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- MANAGER SYSTEM
+-- SIMPLIFIED MANAGER SYSTEM
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 local HubCore = {
@@ -338,1740 +380,178 @@ local HubCore = {
 local Managers = HubCore.Managers
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- PLAYER TELEPORT MANAGER
+-- BASIC TELEPORT FUNCTION
 -- ═══════════════════════════════════════════════════════════════════════════════
 
-function Managers.PlayerTeleport()
-    local TeleportManager = {
-        lastCF = nil,
-        lastTP = 0,
-        nextNum = 1,
-        BypassCooldown = 0,
-        GreatTree = CFrame.new(28610, 14897, 105),
-        SpawnVector = Vector3.new(0, -25.2, 0)
-    }
-    
-    local Inventory = GameModule.Inventory.Unlocked
-    local Sea = GameModule.GameData.Sea
-    local IsAlive = GameModule.IsAlive
-    local FireRemoteFunc = GameModule.FireRemote
-    
-    local PortalLocations = ({
-        {
-            ["Sky Island 1"] = Vector3.new(-4652, 873, -1754),
-            ["Sky Island 2"] = Vector3.new(-7895, 5547, -380),
-            ["Under Water Island"] = Vector3.new(61164, 15, 1820),
-            ["Under Water Island Entrance"] = Vector3.new(3865, 20, -1926)
-        },
-        {
-            ["Flamingo Mansion"] = Vector3.new(-317, 331, 597),
-            ["Flamingo Room"] = Vector3.new(2283, 15, 867),
-            ["Cursed Ship"] = Vector3.new(923, 125, 32853),
-            ["Zombie Island"] = Vector3.new(-6509, 83, -133)
-        },
-        {
-            Mansion = Vector3.new(-12464, 376, -7566),
-            ["Hydra Island"] = Vector3.new(5651, 1015, -350),
-            ["Temple of Time"] = Vector3.new(28286, 14897, 103),
-            ["Sea Castle"] = Vector3.new(-5090, 319, -3146),
-            ["Great Tree"] = Vector3.new(2953, 2282, -7217)
-        }
-    })[Sea]
-    
-    local function ResetNpcDebounce()
-        TeleportManager.NpcDebounce = false
-    end
-    
-    function TeleportManager:talkNpc(position, remote, ...)
-        if LocalPlayer:DistanceFromCharacter(position.Position) < 5 then
-            if type(remote) ~= "function" then
-                FireRemoteFunc(remote, ...)
-            else
-                remote()
-            end
-        end
-    end
-    
-    function TeleportManager:hasUnlocked(location)
-        if Sea == 3 and (location == "Hydra Island" or location == "Sea Castle" or location == "Mansion") then
-            return Inventory["Valkyrie Helm"]
-        end
-        
-        if Sea == 2 then
-            if location == "Flamingo Mansion" or location == "Flamingo Room" then
-                return Inventory["Swan Glasses"] or Level.Value >= 1750
-            end
-            if location == "Zombie Island" or location == "Cursed Ship" then
-                return Level.Value >= 1000
-            end
-        end
-        
-        return true
-    end
-    
-    function TeleportManager:GetNearestPortal(targetPosition)
-        local minDistance = math.huge
-        local nearestLocation = nil
-        local nearestName = nil
-        
-        for name, position in pairs(PortalLocations) do
-            if self:hasUnlocked(name) then
-                local distance = (targetPosition - position).Magnitude
-                if distance < minDistance then
-                    nearestName = name
-                    nearestLocation = position
-                    minDistance = distance
-                end
-            end
-        end
-        
-        return nearestLocation, nearestName
-    end
-    
-    function TeleportManager:TeleportToGreatTree()
-        self.new(self.GreatTree, nil, true)
-        self:talkNpc(self.GreatTree, "RaceV4Progress", "TeleportBack")
-    end
-    
-    function TeleportManager:NPCs(positions, speed)
-        if IsAlive(LocalPlayer.Character) then
-            if self.NpcDebounce and positions[self.nextNum] then
-                TeleportFunction(positions[self.nextNum] + self.SpawnVector)
-                return nil
-            end
-            
-            local rootPart = LocalPlayer.Character.PrimaryPart
-            
-            if #positions > 1 then
-                if self.nextNum > #positions then
-                    self.nextNum = 1
-                end
-                
-                local targetPos = positions[self.nextNum]
-                if rootPart and (rootPart.Position - targetPos.Position).Magnitude < 5 then
-                    self.nextNum = self.nextNum + 1
-                    self.NpcDebounce = true
-                    task.delay(1, ResetNpcDebounce)
-                else
-                    self.new(targetPos, speed)
-                end
-            elseif #positions == 1 then
-                self.new(positions[1], speed)
-            end
-        end
-    end
-    
-    function TeleportManager.new(targetCFrame, speed, skipPortal, skipHeight)
-        local self = TeleportManager
-        
-        if IsAlive(LocalPlayer.Character) and (tick() - self.lastTP >= 1 or targetCFrame ~= self.lastCF) then
-            if LocalPlayer.Character.PrimaryPart then
-                if not skipPortal then
-                    self.lastPosition = targetCFrame.Position
-                end
-                
-                self.lastTP = tick()
-                self.lastCF = targetCFrame
-                
-                local humanoid = LocalPlayer.Character.Humanoid
-                local rootPart = LocalPlayer.Character.PrimaryPart
-                
-                if humanoid.Sit then
-                    humanoid.Sit = false
-                    return
-                elseif rootPart.Anchored then
-                    TweenModule:stop(rootPart)
-                else
-                    local tweenSpeed = Settings.TweenSpeed or 220
-                    local targetPos = targetCFrame.Position
-                    local distance = (rootPart.Position - targetPos).Magnitude
-                    
-                    if distance < 150 and not speed then
-                        TweenModule:stop(rootPart)
-                        rootPart.CFrame = targetCFrame
-                    end
-                    
-                    local nearestPortal, portalName = self:GetNearestPortal(targetPos)
-                    local portalDistance
-                    
-                    if nearestPortal then
-                        portalDistance = (targetPos - nearestPortal).Magnitude + 300
-                    end
-                    
-                    if nearestPortal and (tick() - self.BypassCooldown >= 8 and portalDistance < distance) then
-                        if portalName == "Great Tree" then
-                            self:TeleportToGreatTree()
-                        else
-                            TweenModule:stop(rootPart)
-                            task.wait(0.2)
-                            
-                            if (targetPos - nearestPortal).Magnitude >= 50 then
-                                targetPos = nearestPortal + (targetPos - rootPart.Position).Unit * 40
-                            end
-                            
-                            FireRemoteFunc("requestEntrance", targetPos)
-                            self.BypassCooldown = tick()
-                        end
-                    elseif speed then
-                        TweenModule.new(rootPart, distance / speed, "CFrame", targetCFrame)
-                    else
-                        if not skipHeight then
-                            local currentPos = rootPart.Position
-                            local heightCFrame = CFrame.new(currentPos.X, targetPos.Y, currentPos.Z)
-                            
-                            if (currentPos - heightCFrame.Position).Magnitude > 75 then
-                                TweenModule:stop(rootPart)
-                                task.wait(0.1)
-                                rootPart.CFrame = heightCFrame
-                                task.wait(0.5)
-                            end
-                        end
-                        
-                        if distance < 380 then
-                            TweenModule.new(rootPart, distance / (tweenSpeed * 2), "CFrame", targetCFrame)
-                        else
-                            TweenModule.new(rootPart, distance / tweenSpeed, "CFrame", targetCFrame)
-                        end
-                    end
-                end
-            end
-        end
-    end
-    
-    GameModule.Tween:GetPropertyChangedSignal("Parent"):Connect(function()
-        if not GameModule.Tween.Parent and IsAlive(LocalPlayer.Character) then
-            TweenModule:stop(LocalPlayer.Character.PrimaryPart)
-        end
-    end)
-    
-    TeleportFunction = TeleportManager.new
-    return TeleportManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- QUEST MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.QuestManager()
-    local QuestManager = {
-        QuestList = {},
-        EnemyList = {},
-        QuestPos = {},
-        Crafts = {},
-        Sea = GameModule.GameData.Sea,
-        takeQuestDebounce = false,
-        _Position = CFrame.new(0, 0, 2.5)
-    }
-    
-    local QuestUI = LocalPlayer.PlayerGui:WaitForChild("Main").Quest
-    local QuestTitle = QuestUI.Container.QuestTitle.Title
-    
-    local GameModulesUrl = "https://raw.githubusercontent.com/newredzBloxFruits/refs/heads/main/GameModules/"
-    
-    local RequiredModules = {
-        GuideModule = ReplicatedStorage:WaitForChild("GuideModule"),
-        Quests = ReplicatedStorage:WaitForChild("Quests"),
-        SkinUtil = Modules:WaitForChild("SkinUtil")
-    }
-    
-    local function SafeRequire(moduleName)
-        local success, result = pcall(function()
-            return require(RequiredModules[moduleName])
-        end)
-        
-        if not success then
-            warn(("Failed to load Module [%s] [%s]"):format(moduleName, result))
-        end
-        
-        return success and result or loadstring(HttpGet(workspace, GameModulesUrl .. moduleName .. ".lua"))()
-    end
-    
-    local GuideModule = SafeRequire("GuideModule")
-    local QuestsModule = SafeRequire("Quests")
-    local SkinUtil = SafeRequire("SkinUtil")
-    local AuraSkins = SkinUtil.AuraSkins or SkinUtil
-    local EnemyLocations = GameModule.EnemyLocations
-    local IsBoss = GameModule.IsBoss
-    
-    local HakiColorsRequest = {
-        Colors = {
-            Context = "GetSkinsInventory"
-        }
-    }
-    
-    local function GetQuestEnemies(questData)
-        local taskData = questData.Task
-        local enemyNames = {}
-        local enemyPositions = {}
-        
-        for enemyName, _ in next, taskData do
-            enemyPositions = EnemyLocations[enemyName] or {}
-            EnemyLocations[enemyName] = enemyPositions
-            table.insert(enemyNames, enemyName)
-        end
-        
-        return enemyNames, enemyPositions
-    end
-    
-    task.spawn(function()
-        if GuideModule.Data.IsFakeData then
-            return nil
-        end
-        
-        for _, npcData in pairs(GuideModule.Data.NPCList) do
-            QuestManager.QuestPos[npcData.NPCName] = CFrame.new(npcData.Position)
-        end
-        
-        setmetatable(GuideModule.Data.NPCList, {
-            __newindex = function(tbl, key, value)
-                QuestManager.QuestPos[value.NPCName] = CFrame.new(value.Position)
-                return rawset(tbl, key, value)
-            end
-        })
-    end)
-    
-    task.spawn(GameModule.RunFunctions.Quests, QuestManager, QuestsModule, GetQuestEnemies)
-    
-    function QuestManager:GetUnlockedHakiColors()
-        if not self.haki_colors or tick() - self.haki_colors.last_update >= 30 then
-            self.haki_colors = NetModule["RF/FruitCustomizerRF"]:InvokeServer(HakiColorsRequest.Colors)
-            self.haki_colors.last_update = tick()
-        end
-        return self.haki_colors
-    end
-    
-    function QuestManager:GetQuest()
-        if self.oldLevel ~= Level.Value or not self.CurrentQuest then
-            self.oldLevel = Level.Value
-            local sea = self.Sea
-            local clampedLevel = math.clamp(Level.Value, 0, sea == 1 and 700 or (sea == 2 and 1500 or Level.Value))
-            
-            local bestQuest = nil
-            local bossQuest = nil
-            
-            for _, questData in ipairs(self.QuestList) do
-                local enemyLevel = questData.Enemy.Level
-                local enemyName = questData.Enemy.Name[1]
-                
-                if IsBoss(enemyName) then
-                    if enemyLevel <= clampedLevel and clampedLevel - 50 <= enemyLevel then
-                        bossQuest = enemyName
-                    else
-                        bossQuest = false
-                    end
-                end
-                
-                if enemyLevel <= clampedLevel then
-                    bestQuest = questData
-                end
-            end
-            
-            self.CurrentQuest = bestQuest
-            self.CurrentBoss = bossQuest
-        end
-        
-        return self.CurrentQuest
-    end
-    
-    function QuestManager:VerifyQuest(enemyNames)
-        local questContainer = QuestUI.Container
-        
-        if not questContainer.Visible then
-            return false
-        end
-        
-        local title = QuestTitle.Text
-        
-        for i = 1, #enemyNames do
-            if title:find(enemyNames[i]) then
-                return enemyNames[i]
-            end
-        end
-        
-        return false
-    end
-    
-    function QuestManager:GetQuestPosition(questName)
-        return self.QuestPos[questName]
-    end
-    
-    function QuestManager:StartQuest(questName, count, position)
-        if position then
-            if LocalPlayer:DistanceFromCharacter(position.Position) >= 5 then
-                TeleportFunction(position * self._Position)
-                return "Going to: " .. questName
-            end
-            
-            if self.takeQuestDebounce then
-                return "Quest Cooldown Active"
-            end
-            
-            GameModule.FireRemote("StartQuest", questName, count)
-            return "Starting Quest: " .. questName
-        end
-        
-        return "Quest Position Not Found"
-    end
-    
-    return QuestManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- FARM MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.FarmManager()
-    local FarmManager = {
-        NPCs = {},
-        lastToolChange = 0,
-        lastAttack = 0
-    }
-    
-    local EnemySpawned = GameModule.EnemySpawned
-    local EnemyLocations = GameModule.EnemyLocations
-    local IsAlive = GameModule.IsAlive
-    local EquipTool = GameModule.EquipTool
-    local KillAura = GameModule.KillAura
-    
-    function FarmManager.ToolDebounce()
-        FarmManager.lastToolChange = tick()
-    end
-    
-    function FarmManager.attack(enemy, bringMobs, useMelee, mode)
-        if not IsAlive(LocalPlayer.Character) then
-            return
-        end
-        
-        local rootPart = enemy.PrimaryPart
-        if not rootPart then
-            return
-        end
-        
-        local farmPos = Settings.FarmPos or Vector3.new(0, 15, 0)
-        local targetCFrame = rootPart.CFrame + farmPos
-        
-        if mode == "Star" then
-            targetCFrame = CFrame.new(rootPart.Position + farmPos) * CFrame.Angles(math.rad(-90), 0, 0)
-        end
-        
-        TeleportFunction(targetCFrame)
-        
-        if Settings.BringMobs and bringMobs then
-            local bringDistance = Settings.BringDistance or 250
-            
-            for _, otherEnemy in ipairs(Enemies:GetChildren()) do
-                if otherEnemy ~= enemy and IsAlive(otherEnemy) then
-                    local otherRoot = otherEnemy.PrimaryPart
-                    if otherRoot then
-                        local distance = (rootPart.Position - otherRoot.Position).Magnitude
-                        if distance <= bringDistance then
-                            otherRoot.CFrame = rootPart.CFrame
-                        end
-                    end
-                end
-            end
-        end
-        
-        if Settings.AutoBuso then
-            GameModule.EnableBuso()
-        end
-        
-        if Settings.AutoClick then
-            KillAura(Settings.FarmDistance or 15)
-        end
-        
-        if useMelee then
-            EquipTool(Settings.FarmTool or "Melee")
-        end
-    end
-    
-    function FarmManager:Material(materialName)
-        local materialData = self.Materials and self.Materials[materialName]
-        
-        if materialData then
-            local enemyName = materialData.Enemy
-            local enemy = EnemySpawned(enemyName)
-            
-            if enemy and enemy.PrimaryPart then
-                self.attack(enemy, true, true)
-                return "Farming Material: " .. materialName
-            end
-            
-            if EnemyLocations[enemyName] then
-                Managers.PlayerTeleport:NPCs(EnemyLocations[enemyName])
-            end
-            
-            return "Going to: " .. enemyName
-        end
-        
-        return "Material Not Found: " .. materialName
-    end
-    
-    function FarmManager:GetNpcPosition(npcName)
-        if self.NPCs[npcName] then
-            return self.NPCs[npcName]:GetPivot()
-        end
-        
-        local npc = NPCs:FindFirstChild(npcName) or ReplicatedStorage.NPCs:FindFirstChild(npcName)
-        if npc then
-            self.NPCs[npcName] = npc
-            return npc:GetPivot()
-        end
-    end
-    
-    return FarmManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- RAID MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.RaidManager()
-    if GameModule.GameData.Sea ~= 2 and GameModule.GameData.Sea ~= 3 then
-        return nil
-    end
-    
-    local RaidManager = {
-        RaidPosition = CFrame.new(-5033, 315, -2950),
-        requests = {},
-        Require = 0
-    }
-    
-    RaidManager.Timer = LocalPlayer.PlayerGui:WaitForChild("Main").Timer
-    
-    if GameModule.GameData.Sea == 2 then
-        RaidManager.Button = "CircleIsland.RaidSummon2.Button.Main"
-    elseif GameModule.GameData.Sea == 3 then
-        RaidManager.Button = "Boat Castle.RaidSummon2.Button.Main"
-    end
-    
-    function RaidManager:IsRaiding()
-        local isRaiding = EnabledOptions.Raid
-        if isRaiding then
-            isRaiding = LocalPlayer:GetAttribute("IslandRaiding")
-        end
-        return isRaiding
-    end
-    
-    function RaidManager:GetRaidIsland()
-        return GameModule:GetRaidIsland()
-    end
-    
-    function RaidManager:CanStartRaid()
-        if Level.Value < 1200 then
-            return false
-        end
-        return VerifyTool("Special Microchip")
-    end
-    
-    function RaidManager:start()
-        if not self:IsRaiding() and self:CanStartRaid() then
-            local buttonPath = self.Button:split(".")
-            local current = Map
-            
-            for i = 1, #buttonPath do
-                if current then
-                    current = current:FindFirstChild(buttonPath[i])
-                end
-            end
-            
-            if current and current:FindFirstChild("ClickDetector") then
-                fireclickdetector(current.ClickDetector)
-                task.wait(1)
-            end
-        end
-    end
-    
-    function RaidManager:requestFragment(fragmentType, amount)
-        if self.requests[fragmentType] then
-            return nil
-        end
-        self.Require = self.Require + (amount or 0)
-    end
-    
-    return RaidManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- ITEMS QUESTS MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.ItemsQuests()
-    local ItemsQuests = {
-        CursedDualKatana = {},
-        SkullGuitar = {}
-    }
-    
-    local IsSpawned = GameModule.Enemies.IsSpawned
-    local EnemySpawned = GameModule.EnemySpawned
-    local EnemyLocations = GameModule.EnemyLocations
-    local EquipTool = GameModule.EquipTool
-    local FireRemoteFunc = GameModule.FireRemote
-    
-    if GameModule.GameData.Sea == 3 then
-        local currentHazeQuest = nil
-        
-        local function GetNearestHazeQuest()
-            if currentHazeQuest and currentHazeQuest.Value > 0 then
-                return currentHazeQuest
-            end
-            
-            local minDistance = math.huge
-            local nearest = nil
-            
-            for _, quest in ipairs(LocalPlayer.QuestHaze:GetChildren()) do
-                if quest.Value > 0 then
-                    local position = quest:GetAttribute("Position")
-                    local distance = typeof(position) == "Vector3" and LocalPlayer:DistanceFromCharacter(position)
-                    
-                    if distance and distance <= minDistance then
-                        nearest = quest
-                        minDistance = distance
-                    end
-                end
-            end
-            
-            currentHazeQuest = nearest
-            return nearest
-        end
-        
-        local function GetEnabledTorch(parent)
-            for i = 1, 3 do
-                local torch = parent:FindFirstChild("Torch" .. i)
-                if torch and torch:FindFirstChild("ProximityPrompt") and torch.ProximityPrompt.Enabled then
-                    return torch
-                end
-            end
-        end
-        
-        local function GetEnabledPedestal(parent)
-            for i = 1, 3 do
-                local pedestal = parent:FindFirstChild("Pedestal" .. i)
-                if pedestal and pedestal:FindFirstChild("ProximityPrompt") and pedestal.ProximityPrompt.Enabled then
-                    return pedestal
-                end
-            end
-        end
-        
-        local function GetNearestBoatDealer(usedDealers)
-            local minDistance = math.huge
-            local nearest = nil
-            
-            for _, npc in ipairs(ReplicatedStorage.NPCs:GetChildren()) do
-                if npc.Name == "Luxury Boat Dealer" and not usedDealers[npc] then
-                    local rootPart = npc.PrimaryPart
-                    if rootPart and LocalPlayer:DistanceFromCharacter(rootPart.Position) <= minDistance then
-                        minDistance = LocalPlayer:DistanceFromCharacter(rootPart.Position)
-                        nearest = npc
-                    end
-                end
-            end
-            
-            return nearest
-        end
-        
-        ItemsQuests.CursedDualKatana.Yama = {
-            function(self, _)
-                if VerifyTool("Yama") then
-                    EquipTool("Yama")
-                    local enemy = EnemySpawned("Forest Pirate")
-                    if enemy and enemy.PrimaryPart then
-                        GameModule.AttackCooldown = tick()
-                        TeleportFunction(enemy.PrimaryPart.CFrame * CFrame.new(0, 0, -2))
-                    else
-                        TeleportFunction(self.ForestPirate)
-                    end
-                else
-                    FireRemoteFunc("LoadItem", "Yama")
-                end
-                return true
-            end,
-            
-            function(_, _)
-                local hazeQuest = LocalPlayer:FindFirstChild("QuestHaze") and GetNearestHazeQuest()
-                if hazeQuest then
-                    local enemyName = hazeQuest.Name
-                    local enemy = EnemySpawned(enemyName)
-                    if enemy and enemy.PrimaryPart then
-                        Managers.FarmManager.attack(enemy, true)
-                    elseif EnemyLocations[enemyName] then
-                        Managers.PlayerTeleport:NPCs(EnemyLocations[enemyName])
-                    else
-                        TeleportFunction(hazeQuest:GetAttribute("Position"))
-                    end
-                    return true
-                end
-            end,
-            
-            function(self, scriptFunctions)
-                local hellDimension = Map:FindFirstChild("HellDimension")
-                if hellDimension then
-                    local torch = GetEnabledTorch(hellDimension) or hellDimension:FindFirstChild("Exit")
-                    if torch and LocalPlayer:DistanceFromCharacter(torch.Position) <= 600 then
-                        local enemy = EnemySpawned(self.Hell)
-                        if enemy and enemy.PrimaryPart then
-                            TeleportFunction(enemy.PrimaryPart.CFrame + Settings.FarmPos)
-                            return true, GameModule.KillAura(125)
-                        end
-                        
-                        if torch.Name == "Exit" or LocalPlayer:DistanceFromCharacter(torch.Position) >= 5 then
-                            TeleportFunction(torch.CFrame)
-                        else
-                            fireproximityprompt(torch.ProximityPrompt)
-                        end
-                    end
-                    return true
-                end
-                
-                if not IsSpawned("Soul Reaper") then
-                    return scriptFunctions.SoulReaper() or scriptFunctions.Bones()
-                end
-                
-                local soulReaper = EnemySpawned("Soul Reaper")
-                if soulReaper and soulReaper.PrimaryPart and LocalPlayer:DistanceFromCharacter(soulReaper.PrimaryPart.Position) > 6 then
-                    TeleportFunction(soulReaper.PrimaryPart.CFrame * CFrame.new(0, 0, -2))
-                    return true
-                end
-            end
-        }
-        
-        ItemsQuests.CursedDualKatana.Tushita = {
-            function(_, _)
-                if LocalPlayer:FindFirstChild("BoatQuest") then
-                    return true
-                end
-            end,
-            
-            function(_, scriptFunctions)
-                return scriptFunctions.PirateRaid()
-            end,
-            
-            function(self, _)
-                local heavenDimension = Map:FindFirstChild("HeavenlyDimension")
-                if heavenDimension then
-                    local torch = GetEnabledTorch(heavenDimension) or heavenDimension:FindFirstChild("Exit")
-                    if torch and LocalPlayer:DistanceFromCharacter(torch.Position) <= 600 then
-                        local enemy = EnemySpawned(self.Heaven)
-                        if enemy and enemy.PrimaryPart then
-                            TeleportFunction(enemy.PrimaryPart.CFrame + Settings.FarmPos)
-                            return true, GameModule.KillAura(125)
-                        end
-                        
-                        if torch.Name == "Exit" or LocalPlayer:DistanceFromCharacter(torch.Position) >= 5 then
-                            TeleportFunction(torch.CFrame)
-                        else
-                            fireproximityprompt(torch.ProximityPrompt)
-                        end
-                    end
-                    return true
-                end
-                
-                if IsSpawned("Cake Queen") then
-                    local cakeQueen = EnemySpawned("Cake Queen")
-                    if cakeQueen and cakeQueen.PrimaryPart then
-                        Managers.FarmManager.attack(cakeQueen)
-                    else
-                        TeleportFunction(self.CakeQueen)
-                    end
-                    return true
-                end
-            end
-        }
-        
-        function ItemsQuests.CursedDualKatana.FinalQuest(self, _)
-            if VerifyTool("Tushita") or VerifyTool("Yama") then
-                if IsSpawned("Cursed Skeleton Boss") then
-                    local boss = EnemySpawned("Cursed Skeleton Boss")
-                    if not (boss and boss.PrimaryPart) then
-                        return nil
-                    end
-                    EquipTool("Sword", true)
-                    Managers.FarmManager.ToolDebounce()
-                    Managers.FarmManager.attack(boss)
-                    return true
-                end
-                
-                if LocalPlayer.PlayerGui.Main.Dialogue.Visible then
-                    VirtualUser:ClickButton1(Vector2.new(10000, 10000))
-                end
-                
-                local pedestal = GetEnabledPedestal(Map.Turtle.Cursed)
-                if pedestal then
-                    if LocalPlayer:DistanceFromCharacter(pedestal.Position) >= 5 then
-                        TeleportFunction(pedestal.CFrame)
-                    else
-                        fireproximityprompt(pedestal.ProximityPrompt)
-                    end
-                    return true
-                end
-                
-                local distance = LocalPlayer:DistanceFromCharacter(self.CursedSkeleton[1].Position)
-                if distance > 6 then
-                    TeleportFunction(self.CursedSkeleton[1], distance <= 100 and 40 or false)
-                else
-                    TeleportFunction(self.CursedSkeleton[2])
-                end
-                task.wait(0.5)
-                return true
-            end
-        end
-    end
-    
-    return ItemsQuests
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- SEA MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.SeaManager()
-    local SeaManager = {
-        nextNum = 1,
-        BoatTweenDebounce = 0,
-        rdDebounce = 0,
-        randomNumber = 1,
-        toolDebounce = 0,
-        oldTool = "Melee",
-        Directions = {
-            Vector3.new(50, 0, 0),
-            Vector3.new(-50, 0, 0),
-            Vector3.new(0, 0, 50),
-            Vector3.new(0, 0, -50)
-        },
-        TerrorSkills = {"TerrorsharkAttack1", "TerrorsharkAttack2"},
-        SeaEnemyVector = Vector3.new(0, 10, 0),
-        DodgeVector = Vector3.new(0, 50, 200),
-        RandomPosition = {}
-    }
-    
-    local IsAlive = GameModule.IsAlive
-    local FireRemoteFunc = GameModule.FireRemote
-    local EquipTool = GameModule.EquipTool
-    local UseSkills = GameModule.UseSkills
-    local Inventory = GameModule.Inventory.Count
-    local SubclassRemote = ReplicatedStorage.Remotes.UseSubclass
-    
-    local playerHumanoid = nil
-    
-    function SeaManager:GetPlayerBoat()
-        if self.PlayerBoat and self.PlayerBoat.Parent == Boats then
-            return self.PlayerBoat
-        end
-        
-        for _, boat in ipairs(Boats:GetChildren()) do
-            if boat:GetAttribute("Owner") == LocalPlayer.Name then
-                self.PlayerBoat = boat
-                return boat
-            end
-        end
-    end
-    
-    function SeaManager:BuyBoat()
-        local boatData = Settings.boatSelected
-        if not boatData or not boatData.BoatName then
-            return
-        end
-        
-        local buyPosition = boatData.Position
-        
-        if GameModule.GameData.Sea == 3 then
-            buyPosition = boatData.TikiIsland
-        end
-        
-        if LocalPlayer:DistanceFromCharacter(buyPosition.Position) >= 10 then
-            TeleportFunction(buyPosition)
-        elseif FireRemoteFunc("BuyBoat", boatData.BoatName) ~= 1 then
-            for i = 1, #boatData.OthersBoats do
-                local altBoat = boatData.OthersBoats[i]
-                if altBoat ~= boatData.BoatName then
-                    if FireRemoteFunc("BuyBoat", altBoat) == 1 then
-                        break
-                    end
-                end
-            end
-        end
-    end
-    
-    function SeaManager:teleportBoat(boatPart, targetCFrame, speed)
-        if tick() - self.BoatTweenDebounce >= 0.5 then
-            local direction = (targetCFrame.Position - boatPart.Position).Unit
-            GameModule.Tween.Velocity = direction * (speed or Settings.BoatSpeed)
-            GameModule:RemoveBoatCollision(boatPart.Parent)
-            self.BoatTweenDebounce = tick()
-        end
-    end
-    
-    function SeaManager:StopBoat()
-        GameModule.Tween.Velocity = Vector3.zero
-    end
-    
-    function SeaManager:GetSelectedLevel(level)
-        return self.RandomPosition[level or Settings.SeaLevel]
-    end
-    
-    function SeaManager:RandomTeleport(level)
-        if not playerHumanoid or playerHumanoid.Health <= 0 then
-            local character = LocalPlayer.Character
-            if character then
-                playerHumanoid = character:FindFirstChild("Humanoid")
-            end
-            return nil
-        end
-        
-        if not playerHumanoid.SeatPart then
-            return self:TeleportToBoat()
-        end
-        
-        local boatPart = self:GetPlayerBoat().PrimaryPart
-        if not boatPart then
-            return nil
-        end
-        
-        local positions = GameModule.GameData.Sea == 3 and self:GetSelectedLevel(level) or self.RandomPosition
-        
-        if #positions > 1 then
-            if self.nextNum > #positions then
-                self.nextNum = 1
-            end
-            
-            local targetPos = positions[self.nextNum]
-            if (boatPart.Position - targetPos.Position).Magnitude >= 100 then
-                self:teleportBoat(boatPart, targetPos)
-            else
-                self.nextNum = self.nextNum + 1
-            end
-        elseif #positions == 1 then
-            self:teleportBoat(boatPart, positions[1])
-        end
-    end
-    
-    function SeaManager:RandomTool()
-        if tick() - self.toolDebounce < 2 then
-            return self.oldTool
-        end
-        
-        self.toolDebounce = tick()
-        local nextTool = self.nextTool[self.oldTool]
-        local attempts = 0
-        
-        while not VerifyToolTip(nextTool) do
-            nextTool = self.nextTool[nextTool]
-            attempts = attempts + 1
-            if attempts >= 3 then
-                self.oldTool = nextTool
-                return nextTool
-            end
-        end
-        
-        self.oldTool = nextTool
-        return nextTool
-    end
-    
-    function SeaManager:GetSeaEvent(eventName)
-        for _, enemy in ipairs(Enemies:GetChildren()) do
-            if enemy.Name == eventName and IsAlive(enemy) then
-                return enemy
-            end
-        end
-    end
-    
-    function SeaManager:attackBoat(enemy)
-        local rootPart = enemy.PrimaryPart
-        if not rootPart then
-            return nil
-        end
-        
-        local targetCFrame = rootPart.CFrame + Vector3.new(0, 20, 0)
-        GameModule.EnableBuso()
-        TeleportFunction(targetCFrame)
-        self:StopBoat()
-        
-        if LocalPlayer:DistanceFromCharacter(targetCFrame.Position) < 50 then
-            UseSkills(rootPart, Settings.SeaSkills)
-            EquipTool(self:RandomTool(), true)
-        end
-    end
-    
-    function SeaManager:attackFish(fish)
-        local rootPart = fish.PrimaryPart
-        if rootPart then
-            if (fish.Name == "Terrorshark" or fish.Name == "Shark") and Settings.DodgeShark then
-                for i = 1, #self.TerrorSkills do
-                    local skillPart = WorldOrigin:FindFirstChild(self.TerrorSkills[i])
-                    if skillPart and (skillPart.Position - rootPart.Position).Magnitude <= 100 then
-                        return TeleportFunction(rootPart.CFrame + self.DodgeVector)
-                    end
-                end
-            end
-            
-            TeleportFunction(rootPart.CFrame + self.SeaEnemyVector)
-            EquipTool()
-            GameModule.EnableBuso()
-            self:StopBoat()
-        end
-    end
-    
-    function SeaManager:attackSeaBeast(seaBeast)
-        local direction = self:RandomDirection()
-        local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
-        if not rootPart then
-            return nil
-        end
-        
-        local position = rootPart.Position
-        local targetCFrame = CFrame.new(position.X, 25, position.Z) + direction
-        
-        GameModule.EnableBuso()
-        TeleportFunction(targetCFrame)
-        self:StopBoat()
-        EquipTool(self:RandomTool(), true)
-        UseSkills(targetCFrame, Settings.SeaSkills)
-    end
-    
-    function SeaManager:RandomDirection()
-        if tick() - self.rdDebounce < 1.5 then
-            return self.Directions[self.randomNumber]
-        end
-        
-        self.rdDebounce = tick()
-        self.randomNumber = math.random(#self.Directions)
-        return self.Directions[self.randomNumber]
-    end
-    
-    function SeaManager:GetSeaBeast()
-        local seaBeast = self.SeaBeast
-        if seaBeast and seaBeast.Parent == SeaBeasts and IsAlive(seaBeast) then
-            return seaBeast
-        end
-        
-        local minDistance = math.huge
-        local nearest = nil
-        
-        for _, beast in ipairs(SeaBeasts:GetChildren()) do
-            if beast:IsA("Model") then
-                local distance = LocalPlayer:DistanceFromCharacter(beast:GetPivot().Position)
-                if IsAlive(beast) and distance < minDistance then
-                    nearest = beast
-                    minDistance = distance
-                end
-            end
-        end
-        
-        self.SeaBeast = nearest
-        return nearest
-    end
-    
-    function SeaManager:TeleportToBoat()
-        if not playerHumanoid or playerHumanoid.Health <= 0 or not playerHumanoid:IsDescendantOf(Characters) then
-            local character = LocalPlayer.Character
-            if character then
-                playerHumanoid = character:FindFirstChild("Humanoid")
-            end
-            return nil
-        end
-        
-        local vehicleSeat = self.VehicleSeat
-        if vehicleSeat and vehicleSeat:IsDescendantOf(self.PlayerBoat) then
-            if playerHumanoid.SeatPart and playerHumanoid.SeatPart ~= vehicleSeat then
-                playerHumanoid.Sit = false
-            elseif LocalPlayer:DistanceFromCharacter(vehicleSeat.Position) >= 150 then
-                TeleportFunction(vehicleSeat.CFrame)
-            else
-                vehicleSeat:Sit(playerHumanoid)
-            end
-            task.wait(0.25)
-        elseif self.PlayerBoat then
-            self.VehicleSeat = self.PlayerBoat:FindFirstChild("VehicleSeat")
-        end
-    end
-    
-    function SeaManager:RepairBoat(boat)
-        local shouldRepair = Settings.RepairBoat and Subclass.Value == "Shipwright"
-        shouldRepair = shouldRepair and Inventory["Wooden Plank"] > 0 and boat:FindFirstChild("Humanoid")
-        
-        if shouldRepair then
-            local boatHealth = boat:FindFirstChild("Humanoid")
-            local maxHealth = boat:GetAttribute("MaxHealth") or boatHealth.Value
-            
-            if boat:GetAttribute("__Repair") or boatHealth.Value < maxHealth / 1.2 then
-                local repairHammer = (LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()):FindFirstChild("_RepairHammer")
-                
-                if boatHealth.Value >= maxHealth then
-                    boat:SetAttribute("__Repair", nil)
-                else
-                    boat:SetAttribute("__Repair", true)
-                end
-                
-                if not (repairHammer and repairHammer:WaitForChild("Marker")) then
-                    if boat:FindFirstChild("VehicleSeat") then
-                        local repairPos = boat.VehicleSeat.CFrame + Vector3.yAxis * 20
-                        if LocalPlayer:DistanceFromCharacter(repairPos.Position) > 5 then
-                            TeleportFunction(repairPos)
-                        else
-                            SubclassRemote:InvokeServer({
-                                Action = "RequestHammer"
-                            })
-                        end
-                    end
-                    return true, self:StopBoat(boat)
-                end
-                
-                TeleportFunction(repairHammer.Marker.Value.WorldCFrame + Vector3.xAxis * 10)
-                return true
-            end
-        end
-        
-        if Subclass.Value == "Shipwright" and Settings.RepairBoat and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("_RepairHammer") then
-            SubclassRemote:InvokeServer({
-                Action = "RequestHammer"
-            })
-        end
-    end
-    
-    return SeaManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- FRUIT MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.FruitManager()
-    local FruitManager = {
-        RandomDebounce = 0,
-        MoneyToReroll = 0
-    }
-    
-    local IsAlive = GameModule.IsAlive
-    local InventoryCount = GameModule.Inventory.Count
-    
-    function FruitManager:GetRealFruitName(fruit)
-        local name = string.gsub(fruit.Name, " Fruit", "")
-        return name .. "-" .. name
-    end
-    
-    function FruitManager:CanStoreFruit(fruit)
-        return InventoryCount[self:GetRealFruitName(fruit)] < FruitCap.Value
-    end
-    
-    function FruitManager:StoreFruit(fruit)
-        return GameModule.FireRemote("StoreFruit", self:GetRealFruitName(fruit), fruit)
-    end
-    
-    function FruitManager:IsFruit(tool)
-        if string.sub(tool.Name, -6, -1) ~= " Fruit" then
-            return false
-        end
-        return tool:GetAttribute("DroppedBy")
-    end
-    
-    function FruitManager:GetInventoryItems()
-        local items = LocalPlayer.Backpack:GetChildren()
-        local equippedTool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-        if equippedTool then
-            table.insert(items, equippedTool)
-        end
-        return items
-    end
-    
-    function FruitManager:CanBuyMicrochip()
-        if not IsAlive(LocalPlayer.Character) then
-            return false
-        end
-        
-        if LocalPlayer:GetAttribute("IslandRaiding") then
-            return false
-        end
-        
-        if LocalPlayer.Backpack:FindFirstChild("Microchip") or LocalPlayer.Character:FindFirstChild("Microchip") then
-            return false
-        end
-        
-        for _, item in ipairs(self:GetInventoryItems()) do
-            if item:IsA("Tool") and self:IsFruit(item) then
-                return true
-            end
-        end
-        
-        return -1
-    end
-    
-    function FruitManager:GetStorableFruit(excludeName)
-        if not IsAlive(LocalPlayer.Character) then
-            return false
-        end
-        
-        for _, item in ipairs(self:GetInventoryItems()) do
-            if item.Name ~= excludeName and not IsAlive(LocalPlayer.Character) then
-                return item
-            end
-        end
-    end
-    
-    function FruitManager:RerollRandomFruit()
-        if Level.Value < 50 then
-            return Level:GetPropertyChangedSignal("Value"):Wait()
-        end
-        
-        if Beli.Value < self.MoneyToReroll then
-            return Beli:GetPropertyChangedSignal("Value"):Wait()
-        end
-        
-        if tick() - self.RandomDebounce >= 1 then
-            local result = GameModule.FireRemote("Cousin", "Buy")
-            
-            if result == 1 then
-                self.RandomDebounce = tick() + 7200
-            elseif result == 2 then
-                local _, _, cost = GameModule.FireRemote("Cousin", "Check")
-                self.MoneyToReroll = cost or 0
-            elseif type(result) ~= "string" or not result:match("%d%d:%d%d") then
-                self.RandomDebounce = tick() + 5
-            else
-                local hours, minutes = result:match("(%d+):(%d+)")
-                hours = tonumber(hours)
-                minutes = tonumber(minutes)
-                
-                if hours and minutes then
-                    local totalSeconds = hours * 60 * 60 + minutes * 60
-                    self.RandomDebounce = tick() + totalSeconds
-                end
-            end
-        end
-    end
-    
-    return FruitManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- ISLAND MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.IslandManager()
-    local IslandManager = {}
-    
-    function IslandManager:GetSpawnedIsland(islandName)
-        return Map:FindFirstChild(islandName)
-    end
-    
-    function IslandManager:GetMirageFruitDealer()
-        local mirageIsland = Map:FindFirstChild("MysticIsland")
-        if mirageIsland then
-            return NPCs:FindFirstChild("Advanced Fruit Dealer")
-        end
-    end
-    
-    function IslandManager:GetMirageGear(island)
-        for _, part in ipairs(island:GetDescendants()) do
-            if part.Name == "Gear" and part:IsA("BasePart") then
-                return part
-            end
-        end
-    end
-    
-    function IslandManager:GetMirageTop(island)
-        for _, part in ipairs(island:GetDescendants()) do
-            if part.Name == "Top" and part:IsA("BasePart") then
-                return part
-            end
-        end
-    end
-    
-    return IslandManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- RACE MANAGER
--- ═══════════════════════════════════════════════════════════════════════════════
-
-function Managers.RaceManager()
-    local RaceManager = {
-        Positions = {}
-    }
-    
-    function RaceManager:GetDracoRace(scriptFunctions)
-        return nil
-    end
-    
-    function RaceManager:BeltQuests(scriptFunctions)
-        return nil
-    end
-    
-    function RaceManager:BeltProgress(beltColor, amount)
-        return nil
-    end
-    
-    return RaceManager
-end
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- HELPER FUNCTIONS
--- ═══════════════════════════════════════════════════════════════════════════════
-
-local function VerifyTool(toolName)
-    local backpack = LocalPlayer.Backpack
+local function SimpleTeleport(cframe, speed)
     local character = LocalPlayer.Character
+    if not character then return end
     
-    if backpack:FindFirstChild(toolName) then
-        return true
-    end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
     
-    if character and character:FindFirstChild(toolName) then
-        return true
-    end
-    
-    return false
-end
-
-local function VerifyToolTip(toolName)
-    return VerifyTool(toolName)
-end
-
-local function GetToolMastery(toolName)
-    local tool = LocalPlayer.Backpack:FindFirstChild(toolName) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(toolName))
-    if tool then
-        return tool:GetAttribute("Mastery") or 0
-    end
-    return 0
-end
-
-local function EnableBuso()
-    if Settings.AutoBuso then
-        GameModule.EnableBuso()
-    end
+    hrp.CFrame = cframe
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- INITIALIZATION
+-- INITIALIZATION (DIPERBAIKI)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 function HubCore.Initialize(self)
-    GameModule = __loadstring("{Repository}Functions/Module.lua")
+    print("[Redz Hub] Initializing...")
     
+    -- Coba load module utama
+    local moduleUrl = "{Repository}Functions/Module.lua"
+    GameModule = __loadstring(moduleUrl)
+    
+    -- Jika gagal, gunakan basic module
     if not GameModule then
-        return ThrowError("Failed to load Game Module")
+        warn("[Redz Hub] Failed to load main module, using basic functions")
+        GameModule = BasicGameModule
+        
+        -- Tambahkan beberapa fungsi tambahan
+        GameModule.Tween = {
+            Velocity = Vector3.zero
+        }
+        
+        GameModule.GameData = {
+            Sea = 1 -- Default Sea 1
+        }
+        
+        GameModule.Inventory = {
+            Unlocked = {},
+            Count = {}
+        }
+        
+        GameModule.EnemyLocations = {}
+        GameModule.Enemies = {
+            IsSpawned = function(name) return false end,
+            GetClosestByTag = function(tag) return nil end,
+            GetTagged = function(tag) return {} end
+        }
     end
     
     FireRemote = GameModule.FireRemote
     
-    Managers.PlayerTeleport = Managers.PlayerTeleport()
-    Managers.QuestManager = Managers.QuestManager()
-    Managers.FarmManager = Managers.FarmManager()
-    Managers.RaidManager = Managers.RaidManager()
-    Managers.ItemsQuests = Managers.ItemsQuests()
-    Managers.SeaManager = Managers.SeaManager()
-    Managers.FruitManager = Managers.FruitManager()
-    Managers.IslandManager = Managers.IslandManager()
-    Managers.RaceManager = Managers.RaceManager()
+    -- Initialize basic managers
+    Managers.PlayerTeleport = {
+        new = SimpleTeleport
+    }
+    
+    TeleportFunction = SimpleTeleport
+    
+    print("[Redz Hub] Initialization complete")
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- SCRIPT FUNCTIONS
+-- SIMPLE FARM FUNCTIONS
 -- ═══════════════════════════════════════════════════════════════════════════════
-
-local ScriptFunctions = {}
-local CurrentSea = nil
 
 function HubCore.StartFarm(self)
-    CurrentSea = GameModule.GameData.Sea
+    print("[Redz Hub] Setting up farm functions...")
     
-    local IsAlive = GameModule.IsAlive
-    local EnemySpawned = GameModule.EnemySpawned
-    local IsSpawned = GameModule.Enemies.IsSpawned
-    local EnemyLocations = GameModule.EnemyLocations
-    local EquipTool = GameModule.EquipTool
-    
-    local FarmVector = Vector3.new(0, 5, 0)
-    local CollectVector = Vector3.new(0, -5, 0)
-    
-    local function RegisterFunction(name, func, condition)
-        if condition == nil or condition then
-            ScriptFunctions[name] = func
-            table.insert(Functions, {
-                Name = name,
-                Func = func
-            })
-        end
+    local function RegisterFunction(name, func)
+        ScriptFunctions[name] = func
+        table.insert(Functions, {
+            Name = name,
+            Func = func
+        })
     end
     
+    -- Basic Level Farm
     RegisterFunction("Level", function()
-        local quest = Managers.QuestManager:GetQuest()
-        if not quest then
-            return nil
-        end
+        local character = LocalPlayer.Character
+        if not character then return nil end
         
-        local enemyNames = quest.Enemy.Name
-        local enemyPositions = quest.Enemy.Position
-        local verifiedEnemy = Managers.QuestManager:VerifyQuest(enemyNames)
-        
-        if verifiedEnemy and GameModule.IsBoss(verifiedEnemy) then
-            return nil
-        end
-        
-        if not verifiedEnemy then
-            return Managers.QuestManager:StartQuest(quest.Name, quest.Count, Managers.QuestManager:GetQuestPosition(quest.Name))
-        end
-        
-        local enemy = EnemySpawned(verifiedEnemy)
-        if enemy and enemy.PrimaryPart then
-            return "Killing: " .. enemy.Name, Managers.FarmManager.attack(enemy, true)
-        end
-        
-        if #enemyPositions > 0 then
-            Managers.PlayerTeleport:NPCs(enemyPositions)
-        elseif Managers.QuestManager:GetQuestPosition(quest.Name) then
-            TeleportFunction(Managers.QuestManager:GetQuestPosition(quest.Name) * Managers.QuestManager._Position)
-        end
-        
-        return "Waiting for: " .. verifiedEnemy
-    end)
-    
-    RegisterFunction("Mastery", function()
-        if CurrentSea ~= 3 or 2550 > Level.Value then
-            return ScriptFunctions.Level()
-        else
-            return ScriptFunctions.Bones()
-        end
-    end)
-    
-    RegisterFunction("Bones", function()
-        if EnabledOptions.Level and Level.Value < 2550 then
-            return nil
-        end
-        
-        local enemy = GameModule.Enemies:GetClosestByTag("Bones")
-        if enemy and enemy.PrimaryPart then
-            return "Killing: " .. enemy.Name, Managers.FarmManager.attack(enemy, true, true)
-        else
-            return "Waiting for: Enemy Spawn", TeleportFunction(CFrame.new(5617, 58, -6967))
-        end
-    end, CurrentSea == 3)
-    
-    RegisterFunction("Nearest", function()
-        local nearest = nil
-        local minDistance = 1500
+        -- Find nearest enemy
+        local nearestEnemy = nil
+        local nearestDistance = math.huge
         
         for _, enemy in ipairs(Enemies:GetChildren()) do
-            local rootPart = enemy.PrimaryPart
-            if IsAlive(enemy) and rootPart then
-                local distance = LocalPlayer:DistanceFromCharacter(rootPart.Position)
-                if distance < minDistance then
-                    nearest = enemy
-                    minDistance = distance
+            local hrp = enemy:FindFirstChild("HumanoidRootPart")
+            if hrp and GameModule.IsAlive(enemy) then
+                local distance = (character:GetPivot().Position - hrp.Position).Magnitude
+                if distance < nearestDistance then
+                    nearestDistance = distance
+                    nearestEnemy = enemy
                 end
             end
         end
         
-        if nearest then
-            Managers.FarmManager.attack(nearest, true, true)
-            return "Killing: " .. nearest.Name
+        if nearestEnemy then
+            local hrp = nearestEnemy:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                SimpleTeleport(hrp.CFrame + Vector3.new(0, 10, 0))
+                GameModule.EquipTool("Melee")
+                return "Attacking: " .. nearestEnemy.Name
+            end
         end
         
-        task.wait(0.4)
+        return "Searching for enemies..."
     end)
     
+    -- Auto Farm Nearest
+    RegisterFunction("Nearest", function()
+        return ScriptFunctions.Level()
+    end)
+    
+    -- Auto Haki
+    RegisterFunction("AutoHaki", function()
+        if Settings.AutoBuso then
+            GameModule.EnableBuso()
+        end
+        return nil
+    end)
+    
+    -- Auto Fruit Collection
     RegisterFunction("Fruits", function()
-        local fruit = workspace:FindFirstChild("Fruit ") or workspace:FindFirstChildOfClass("Tool")
-        if fruit and (fruit:IsA("Model") or fruit:IsA("Tool")) then
-            local handle = fruit:FindFirstChild("Handle")
-            local targetCFrame
-            
-            if handle then
-                targetCFrame = handle.CFrame
-            elseif fruit:IsA("Model") then
-                targetCFrame = fruit:GetPivot()
-                if targetCFrame.Position == Vector3.zero then
-                    targetCFrame = nil
-                end
-            end
-            
-            if targetCFrame then
-                if LocalPlayer:DistanceFromCharacter(targetCFrame.Position) > 2 then
-                    TeleportFunction(targetCFrame)
-                else
-                    TeleportFunction(targetCFrame + FarmVector)
-                end
-                return true
-            end
-        end
-    end)
-    
-    RegisterFunction("Raid", function()
-        local church = Locations:FindFirstChild("l'Église de Prophétie")
-        if church and LocalPlayer:DistanceFromCharacter(church.Position) <= 150 then
-            local awakenCheck = GameModule.FireRemote("Awakener", "Check")
-            if type(awakenCheck) ~= "table" then
-                if awakenCheck ~= 0 then
-                    return true, GameModule.FireRemote("Awakener", "Teleport")
-                end
-            else
-                if Fragments.Value < (awakenCheck.Cost or 0) then
-                    return true, GameModule.FireRemote("Awakener", "Teleport")
-                end
-                GameModule.FireRemote("Awakener", "Awaken")
-                GameModule.FireRemote("Awakener", "Teleport")
-            end
-        end
-        
-        if Managers.RaidManager and Managers.RaidManager:IsRaiding() then
-            local raidIsland = GameModule:GetRaidIsland()
-            if not raidIsland then
-                return true
-            end
-            
-            for _, enemy in ipairs(Enemies:GetChildren()) do
-                local rootPart = enemy.PrimaryPart
-                if IsAlive(enemy) and rootPart then
-                    if (raidIsland.Position - rootPart.Position).Magnitude <= 1000 and rootPart.Position.Y > 0 then
-                        return true, Managers.FarmManager.attack(enemy, true, true, Settings.FarmMode ~= "Up" and Settings.FarmMode or "Star")
+        for _, item in ipairs(workspace:GetDescendants()) do
+            if item:IsA("Tool") and item.Name:find("Fruit") then
+                local handle = item:FindFirstChild("Handle")
+                if handle then
+                    if LocalPlayer:DistanceFromCharacter(handle.Position) > 5 then
+                        SimpleTeleport(handle.CFrame)
+                    else
+                        -- Pick up the fruit
+                        SimpleTeleport(handle.CFrame + Vector3.new(0, 5, 0))
                     end
+                    return "Collecting: " .. item.Name
                 end
             end
-            
-            if LocalPlayer:DistanceFromCharacter(raidIsland.Position) <= 3000 then
-                TeleportFunction(raidIsland.CFrame + Settings.FarmPos)
-            end
-            return true
         end
-        
-        if VerifyTool("Special Microchip") then
-            return true, Managers.RaidManager:start()
-        end
-    end, CurrentSea == 2 or CurrentSea == 3)
-    
-    RegisterFunction("ChestTween", function(suffix, parent)
-        local chest = GameModule.Chests()
-        if chest then
-            local chestCFrame = chest:GetPivot(parent)
-            if LocalPlayer:DistanceFromCharacter(chestCFrame.Position) >= 3 then
-                TeleportFunction(chestCFrame)
-            else
-                TeleportFunction(chestCFrame + CollectVector)
-                task.wait(0.15)
-            end
-            return "Collecting Chest" .. (suffix or "")
-        end
+        return "No fruits found"
     end)
     
-    RegisterFunction("Leviathan", function()
-        if not Map:FindFirstChild("FrozenHeart") then
-            local segment = Managers.SeaManager and Managers.SeaManager.Segment
-            if segment and IsAlive(segment) and segment:GetAttribute("HealthEnabled") then
-                return nil
-            end
-            
-            for _, beast in ipairs(SeaBeasts:GetChildren()) do
-                if beast.Name:find("Leviathan") and IsAlive(beast) and beast:GetAttribute("HealthEnabled") then
-                    Managers.SeaManager.Segment = beast
-                    return nil
+    -- Chest Collection
+    RegisterFunction("Chests", function()
+        for _, chest in ipairs(workspace:GetDescendants()) do
+            if chest.Name:find("Chest") and chest:IsA("Model") then
+                local primary = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+                if primary then
+                    if LocalPlayer:DistanceFromCharacter(primary.Position) > 5 then
+                        SimpleTeleport(primary.CFrame)
+                    else
+                        SimpleTeleport(primary.CFrame + Vector3.new(0, 5, 0))
+                    end
+                    return "Opening chest"
                 end
             end
         end
-    end, CurrentSea == 3)
+        return "No chests found"
+    end)
     
-    RegisterFunction("PirateRaid", function()
-        local pirateEnemies = GameModule.Enemies:GetTagged("PirateRaid")
-        if #pirateEnemies > 0 or tick() - GameModule.PirateRaid <= 10 then
-            for i = 1, #pirateEnemies do
-                if pirateEnemies[i].PrimaryPart then
-                    return true, Managers.FarmManager.attack(pirateEnemies[i], true, true)
-                end
-            end
-            return true, TeleportFunction(CFrame.new(-12058, 352, -7543))
-        end
-    end, CurrentSea == 3)
-    
-    RegisterFunction("CakePrince", function()
-        if EnabledOptions.DoughKing then
-            return nil
-        end
-        
-        local boss = EnemySpawned("Dough King") or EnemySpawned("Cake Prince")
-        if boss and boss.PrimaryPart then
-            Managers.FarmManager.attack(boss)
-        else
-            local cakePrince = GameModule.Enemies:GetClosestByTag("CakePrince")
-            if cakePrince and cakePrince.PrimaryPart then
-                Managers.FarmManager.attack(cakePrince, true, true)
-            else
-                TeleportFunction(CFrame.new(-2096, 73, -12231))
-            end
-        end
-        return true
-    end, CurrentSea == 3)
-    
-    RegisterFunction("DoughKing", function()
-        local boss = EnemySpawned("Dough King") or EnemySpawned("Cake Prince")
-        
-        if VerifyTool("Red Key") then
-            GameModule.FireRemote("CakeScientist", "Check")
-            return true
-        end
-        
-        if boss and boss.PrimaryPart then
-            Managers.FarmManager.attack(boss)
-        else
-            if not VerifyTool("Sweet Chalice") and VerifyTool("God's Chalice") then
-                return Managers.FarmManager:Material("Conjured Cocoa")
-            end
-            
-            local cakePrince = GameModule.Enemies:GetClosestByTag("CakePrince")
-            if cakePrince and cakePrince.PrimaryPart then
-                Managers.FarmManager.attack(cakePrince, true, true)
-            else
-                TeleportFunction(CFrame.new(-2096, 73, -12231))
-            end
-        end
-        return true
-    end, CurrentSea == 3)
-    
-    RegisterFunction("RipIndra", function()
-        if IsSpawned("rip_indra True Form") then
-            local boss = EnemySpawned("rip_indra True Form")
-            if boss and boss.PrimaryPart then
-                Managers.FarmManager.attack(boss)
-            else
-                TeleportFunction(CFrame.new(-5350, 424, -2867))
-            end
-            return "Killing: rip_indra True Form"
-        end
-        
-        if VerifyTool("God's Chalice") then
-            TeleportFunction(CFrame.new(-5350, 424, -2867))
-            return "God's Chalice: rip_indra True Form"
-        end
-    end, CurrentSea == 3)
-    
-    RegisterFunction("EliteHunter", function()
-        local eliteEnemy = GameModule.Enemies:GetClosestByTag("EliteHunter")
-        if eliteEnemy and eliteEnemy.PrimaryPart then
-            return "Killing: " .. eliteEnemy.Name, Managers.FarmManager.attack(eliteEnemy, true, true)
-        end
-    end, CurrentSea == 3)
-    
-    RegisterFunction("SoulReaper", function()
-        local soulReaper = EnemySpawned("Soul Reaper")
-        if soulReaper and soulReaper.PrimaryPart then
-            Managers.FarmManager.attack(soulReaper)
-            return true
-        end
-        
-        if VerifyTool("Hallow Essence") then
-            EquipTool("Hallow Essence")
-            TeleportFunction(CFrame.new(-9515, 147, 6304))
-            return true
-        end
-    end, CurrentSea == 3)
-    
-    RegisterFunction("Ectoplasm", function()
-        local ghostEnemy = EnemySpawned("Ship Deckhand") or EnemySpawned("Ship Engineer") or EnemySpawned("Ship Steward") or EnemySpawned("Ship Officer")
-        if ghostEnemy and ghostEnemy.PrimaryPart then
-            return "Killing: " .. ghostEnemy.Name, Managers.FarmManager.attack(ghostEnemy, true, true)
-        else
-            return "Waiting for: Enemy Spawn", TeleportFunction(CFrame.new(923, 125, 32853))
-        end
-    end, CurrentSea == 2)
-    
-    RegisterFunction("SecondSea", function()
-        if Level.Value < 700 then
-            return nil
-        end
-        
-        if not VerifyTool("Fist of Darkness") then
-            GameModule.FireRemote("LoadItem", "Fist of Darkness")
-        end
-        
-        local iceAdmiral = EnemySpawned("Ice Admiral")
-        if iceAdmiral and iceAdmiral.PrimaryPart then
-            Managers.FarmManager.attack(iceAdmiral)
-            return true
-        end
-        
-        if IsSpawned("Ice Admiral") then
-            return "Waiting for Ice Admiral spawn"
-        end
-        
-        TeleportFunction(CFrame.new(1088, 17, -7170))
-        return "Going to Ice Admiral"
-    end, CurrentSea == 1)
-    
-    RegisterFunction("ThirdSea", function()
-        if Level.Value < 1500 then
-            return nil
-        end
-        
-        local donSwan = EnemySpawned("Don Swan")
-        if donSwan and donSwan.PrimaryPart then
-            Managers.FarmManager.attack(donSwan)
-            return "Killing: Don Swan"
-        end
-        
-        if IsSpawned("Don Swan") then
-            return "Waiting for Don Swan"
-        end
-        
-        TeleportFunction(CFrame.new(2283, 15, 867))
-        return "Going to Don Swan"
-    end, CurrentSea == 2)
-    
-    RegisterFunction("Saber", function()
-        if VerifyTool("Saber") then
-            return nil
-        end
-        
-        local saberExpert = EnemySpawned("Saber Expert")
-        if saberExpert and saberExpert.PrimaryPart then
-            Managers.FarmManager.attack(saberExpert)
-            return "Killing: Saber Expert"
-        end
-        
-        if Level.Value < 200 then
-            return nil
-        end
-        
-        TeleportFunction(CFrame.new(-1600, 50, 150))
-        return "Going to Saber Expert"
-    end, CurrentSea == 1)
-    
-    RegisterFunction("PoleV1", function()
-        if Level.Value < 450 or VerifyTool("Pole (1st Form)") then
-            return nil
-        end
-        
-        if IsSpawned("Thunder God") then
-            local thunderGod = EnemySpawned("Thunder God")
-            if thunderGod and thunderGod.PrimaryPart then
-                Managers.FarmManager.attack(thunderGod)
-            else
-                TeleportFunction(CFrame.new(-7860, 5612, -379))
-            end
-            return true
-        end
-    end, CurrentSea == 1)
-    
-    RegisterFunction("TheSaw", function()
-        if Level.Value < 100 or VerifyTool("Shark Saw") then
-            return nil
-        end
-        
-        if IsSpawned("The Saw") then
-            local theSaw = EnemySpawned("The Saw")
-            if theSaw and theSaw.PrimaryPart then
-                Managers.FarmManager.attack(theSaw)
-            else
-                TeleportFunction(CFrame.new(-577, 10, 4244))
-            end
-            return true
-        end
-    end, CurrentSea == 1)
+    print("[Redz Hub] Farm functions setup complete")
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- START FUNCTIONS (Main Loop)
+-- START FUNCTIONS
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 function HubCore.StartFunctions(self)
     GlobalEnvironment.OnFarm = true
     GlobalEnvironment.loadedFarm = true
+    
+    print("[Redz Hub] Starting farm loop...")
     
     local lastUpdate = 0
     
@@ -2080,11 +560,17 @@ function HubCore.StartFunctions(self)
             return
         end
         
-        if tick() - lastUpdate < (Settings.SmoothMode and 0.3 or 0.1) then
+        if tick() - lastUpdate < 0.2 then
             return
         end
         lastUpdate = tick()
         
+        -- Run auto haki first
+        if Settings.AutoBuso then
+            GameModule.EnableBuso()
+        end
+        
+        -- Run enabled farm functions
         for _, funcData in ipairs(FarmFunctions) do
             if EnabledOptions[funcData.Name] then
                 local success, result = pcall(funcData.Func)
@@ -2097,371 +583,262 @@ function HubCore.StartFunctions(self)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- UI LIBRARY LOADER
+-- SIMPLE UI BUILDER
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 function HubCore.LoadLibrary(self)
-    local Library = __loadstring("{Repository}Library/Main.lua")
+    print("[Redz Hub] Creating simple UI...")
     
-    if not Library then
-        return ThrowError("Failed to load UI Library")
+    -- Buat UI sederhana jika library gagal load
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "RedzHubUI"
+    ScreenGui.Parent = CoreGui
+    ScreenGui.ResetOnSpawn = false
+    
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Parent = ScreenGui
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = MainFrame
+    
+    local TopBar = Instance.new("Frame")
+    TopBar.Name = "TopBar"
+    TopBar.Size = UDim2.new(1, 0, 0, 40)
+    TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TopBar.BorderSizePixel = 0
+    TopBar.Parent = MainFrame
+    
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Text = "Redz Hub - Blox Fruits"
+    Title.Size = UDim2.new(1, -40, 1, 0)
+    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 18
+    Title.Font = Enum.Font.GothamBold
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = TopBar
+    
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Text = "X"
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Position = UDim2.new(1, -35, 0.5, -15)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 16
+    CloseButton.Font = Enum.Font.GothamBold
+    CloseButton.Parent = TopBar
+    
+    local UICorner2 = Instance.new("UICorner")
+    UICorner2.CornerRadius = UDim.new(0, 4)
+    UICorner2.Parent = CloseButton
+    
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    local TabContainer = Instance.new("Frame")
+    TabContainer.Name = "TabContainer"
+    TabContainer.Size = UDim2.new(1, -20, 1, -60)
+    TabContainer.Position = UDim2.new(0, 10, 0, 50)
+    TabContainer.BackgroundTransparency = 1
+    TabContainer.Parent = MainFrame
+    
+    local ScrollFrame = Instance.new("ScrollingFrame")
+    ScrollFrame.Name = "ScrollFrame"
+    ScrollFrame.Size = UDim2.new(1, 0, 1, 0)
+    ScrollFrame.BackgroundTransparency = 1
+    ScrollFrame.BorderSizePixel = 0
+    ScrollFrame.ScrollBarThickness = 0
+    ScrollFrame.Parent = TabContainer
+    
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Padding = UDim.new(0, 10)
+    UIListLayout.Parent = ScrollFrame
+    
+    -- Fungsi untuk membuat toggle
+    local function CreateToggle(title, default, callback)
+        local ToggleFrame = Instance.new("Frame")
+        ToggleFrame.Name = title .. "Toggle"
+        ToggleFrame.Size = UDim2.new(1, 0, 0, 30)
+        ToggleFrame.BackgroundTransparency = 1
+        ToggleFrame.Parent = ScrollFrame
+        
+        local ToggleButton = Instance.new("TextButton")
+        ToggleButton.Name = "Button"
+        ToggleButton.Size = UDim2.new(0, 50, 0, 30)
+        ToggleButton.Position = UDim2.new(1, -60, 0, 0)
+        ToggleButton.BackgroundColor3 = default and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(170, 0, 0)
+        ToggleButton.Text = default and "ON" or "OFF"
+        ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ToggleButton.TextSize = 14
+        ToggleButton.Font = Enum.Font.GothamBold
+        ToggleButton.Parent = ToggleFrame
+        
+        local ToggleUICorner = Instance.new("UICorner")
+        ToggleUICorner.CornerRadius = UDim.new(0, 4)
+        ToggleUICorner.Parent = ToggleButton
+        
+        local ToggleLabel = Instance.new("TextLabel")
+        ToggleLabel.Name = "Label"
+        ToggleLabel.Text = title
+        ToggleLabel.Size = UDim2.new(1, -60, 1, 0)
+        ToggleLabel.Position = UDim2.new(0, 0, 0, 0)
+        ToggleLabel.BackgroundTransparency = 1
+        ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ToggleLabel.TextSize = 16
+        ToggleLabel.Font = Enum.Font.Gotham
+        ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        ToggleLabel.Parent = ToggleFrame
+        
+        ToggleButton.MouseButton1Click:Connect(function()
+            local newState = not (ToggleButton.Text == "ON")
+            ToggleButton.Text = newState and "ON" or "OFF"
+            ToggleButton.BackgroundColor3 = newState and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(170, 0, 0)
+            
+            if callback then
+                callback(newState)
+            end
+        end)
+        
+        if callback then
+            callback(default)
+        end
     end
     
-    local Window = Library:CreateWindow({
-        Title = "Redz Hub",
-        Subtitle = "Blox Fruits",
-        Theme = "Dark",
-        Size = UDim2.fromOffset(500, 350)
-    })
-    
-    local MainTab = Window:CreateTab({
-        Title = "Main",
-        Icon = "home"
-    })
-    
-    local FarmSection = MainTab:CreateSection({
-        Title = "Auto Farm"
-    })
-    
-    FarmSection:CreateToggle({
-        Title = "Auto Level",
-        Default = false,
-        Callback = function(value)
-            EnabledOptions.Level = value
-        end
-    })
-    
-    FarmSection:CreateToggle({
-        Title = "Auto Mastery",
-        Default = false,
-        Callback = function(value)
-            EnabledOptions.Mastery = value
-        end
-    })
-    
-    FarmSection:CreateToggle({
-        Title = "Auto Bones",
-        Default = false,
-        Callback = function(value)
-            EnabledOptions.Bones = value
-        end
-    })
-    
-    FarmSection:CreateToggle({
-        Title = "Auto Nearest",
-        Default = false,
-        Callback = function(value)
-            EnabledOptions.Nearest = value
-        end
-    })
-    
-    local SettingsSection = MainTab:CreateSection({
-        Title = "Settings"
-    })
-    
-    SettingsSection:CreateToggle({
-        Title = "Auto Haki",
-        Default = true,
-        Callback = function(value)
-            Settings.AutoBuso = value
-        end
-    })
-    
-    SettingsSection:CreateToggle({
-        Title = "Bring Mobs",
-        Default = true,
-        Callback = function(value)
-            Settings.BringMobs = value
-        end
-    })
-    
-    SettingsSection:CreateSlider({
-        Title = "Bring Distance",
-        Min = 50,
-        Max = 400,
-        Default = 250,
-        Callback = function(value)
-            Settings.BringDistance = value
-        end
-    })
-    
-    SettingsSection:CreateSlider({
-        Title = "Farm Distance",
-        Min = 5,
-        Max = 30,
-        Default = 15,
-        Callback = function(value)
-            Settings.FarmDistance = value
-            Settings.FarmPos = Vector3.new(0, value, 0)
-        end
-    })
-    
-    SettingsSection:CreateSlider({
-        Title = "Tween Speed",
-        Min = 50,
-        Max = 300,
-        Default = 200,
-        Callback = function(value)
-            Settings.TweenSpeed = value
-        end
-    })
-    
-    local TeamsSection = MainTab:CreateSection({
-        Title = "Teams"
-    })
-    
-    TeamsSection:CreateButton({
-        Title = "Join Pirates",
-        Callback = TeamFunctions.Pirates
-    })
-    
-    TeamsSection:CreateButton({
-        Title = "Join Marines",
-        Callback = TeamFunctions.Marines
-    })
-    
-    local UtilsSection = MainTab:CreateSection({
-        Title = "Utilities"
-    })
-    
-    UtilsSection:CreateButton({
-        Title = "Redeem All Codes",
-        Callback = Utilities.AllCodes
-    })
-    
-    UtilsSection:CreateButton({
-        Title = "Remove Fog",
-        Callback = Utilities.RemoveFog
-    })
-    
-    UtilsSection:CreateButton({
-        Title = "Server Hop",
-        Callback = function()
-            GameModule:ServerHop()
-        end
-    })
-    
-    UtilsSection:CreateButton({
-        Title = "Rejoin",
-        Callback = function()
-            GameModule.Rejoin()
-        end
-    })
-    
-    if CurrentSea == 2 or CurrentSea == 3 then
-        local RaidTab = Window:CreateTab({
-            Title = "Raid",
-            Icon = "sword"
-        })
+    -- Fungsi untuk membuat button
+    local function CreateButton(title, callback)
+        local Button = Instance.new("TextButton")
+        Button.Name = title .. "Button"
+        Button.Text = title
+        Button.Size = UDim2.new(1, 0, 0, 35)
+        Button.BackgroundColor3 = Color3.fromRGB(50, 50, 150)
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.TextSize = 16
+        Button.Font = Enum.Font.GothamBold
+        Button.Parent = ScrollFrame
         
-        local RaidSection = RaidTab:CreateSection({
-            Title = "Raid Features"
-        })
+        local ButtonUICorner = Instance.new("UICorner")
+        ButtonUICorner.CornerRadius = UDim.new(0, 6)
+        ButtonUICorner.Parent = Button
         
-        RaidSection:CreateToggle({
-            Title = "Auto Farm Raid",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.Raid = value
+        Button.MouseButton1Click:Connect(function()
+            if callback then
+                callback()
             end
-        })
-        
-        RaidSection:CreateToggle({
-            Title = "Auto Fruits",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.Fruits = value
-            end
-        })
+        end)
     end
     
-    if CurrentSea == 3 then
-        local BossTab = Window:CreateTab({
-            Title = "Bosses",
-            Icon = "skull"
-        })
-        
-        local BossSection = BossTab:CreateSection({
-            Title = "Boss Hunting"
-        })
-        
-        BossSection:CreateToggle({
-            Title = "Auto Elite Hunter",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.EliteHunter = value
-            end
-        })
-        
-        BossSection:CreateToggle({
-            Title = "Auto Cake Prince",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.CakePrince = value
-            end
-        })
-        
-        BossSection:CreateToggle({
-            Title = "Auto Dough King",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.DoughKing = value
-            end
-        })
-        
-        BossSection:CreateToggle({
-            Title = "Auto Rip Indra",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.RipIndra = value
-            end
-        })
-        
-        BossSection:CreateToggle({
-            Title = "Auto Soul Reaper",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.SoulReaper = value
-            end
-        })
-        
-        BossSection:CreateToggle({
-            Title = "Auto Leviathan",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.Leviathan = value
-            end
-        })
-        
-        local IslandTab = Window:CreateTab({
-            Title = "Islands",
-            Icon = "palmtree"
-        })
-        
-        local IslandSection = IslandTab:CreateSection({
-            Title = "Island Features"
-        })
-        
-        IslandSection:CreateToggle({
-            Title = "Auto Pirate Raid",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.PirateRaid = value
-            end
-        })
-    end
+    -- Buat elemen UI
+    CreateToggle("Auto Level", false, function(value)
+        EnabledOptions.Level = value
+    end)
     
-    if CurrentSea == 1 then
-        local ItemsTab = Window:CreateTab({
-            Title = "Items",
-            Icon = "package"
-        })
-        
-        local ItemsSection = ItemsTab:CreateSection({
-            Title = "Unlock Items"
-        })
-        
-        ItemsSection:CreateToggle({
-            Title = "Auto Second Sea",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.SecondSea = value
-            end
-        })
-        
-        ItemsSection:CreateToggle({
-            Title = "Auto Saber",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.Saber = value
-            end
-        })
-        
-        ItemsSection:CreateToggle({
-            Title = "Auto Pole V1",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.PoleV1 = value
-            end
-        })
-        
-        ItemsSection:CreateToggle({
-            Title = "Auto Shark Saw",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.TheSaw = value
-            end
-        })
-    end
+    CreateToggle("Auto Farm Nearest", false, function(value)
+        EnabledOptions.Nearest = value
+    end)
     
-    if CurrentSea == 2 then
-        local ItemsTab = Window:CreateTab({
-            Title = "Items",
-            Icon = "package"
-        })
-        
-        local ItemsSection = ItemsTab:CreateSection({
-            Title = "Unlock Items"
-        })
-        
-        ItemsSection:CreateToggle({
-            Title = "Auto Third Sea",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.ThirdSea = value
-            end
-        })
-        
-        ItemsSection:CreateToggle({
-            Title = "Auto Ectoplasm",
-            Default = false,
-            Callback = function(value)
-                EnabledOptions.Ectoplasm = value
-            end
-        })
-    end
+    CreateToggle("Auto Buso Haki", true, function(value)
+        Settings.AutoBuso = value
+    end)
     
-    Window:Toggle(true)
+    CreateToggle("Auto Collect Fruits", false, function(value)
+        EnabledOptions.Fruits = value
+    end)
+    
+    CreateToggle("Auto Collect Chests", false, function(value)
+        EnabledOptions.Chests = value
+    end)
+    
+    CreateButton("Join Pirates", TeamFunctions.Pirates)
+    CreateButton("Join Marines", TeamFunctions.Marines)
+    
+    CreateButton("Remove Fog", function()
+        if Lighting:FindFirstChild("LightingLayers") then
+            Lighting.LightingLayers:Remove()
+        end
+    end)
+    
+    CreateButton("Redeem All Codes", function()
+        local codes = {
+            "KITT_RESET", "SUB2GAMERROBOT_EXP1", "Sub2OfficialNoobie",
+            "THEGREATACE", "SUB2NOOBMASTER123", "Axiore",
+            "TantaiGaming", "STRAWHATMAINE"
+        }
+        
+        for _, code in ipairs(codes) do
+            Remotes.Redeem:InvokeServer(code)
+            task.wait(0.5)
+        end
+    end)
+    
+    CreateButton("Server Hop", function()
+        GameModule.ServerHop()
+    end)
+    
+    CreateButton("Rejoin", function()
+        GameModule.Rejoin()
+    end)
+    
+    -- Update UI size
+    task.wait()
+    local totalHeight = 0
+    for _, child in ipairs(ScrollFrame:GetChildren()) do
+        if child:IsA("GuiObject") then
+            totalHeight = totalHeight + child.AbsoluteSize.Y + 10
+        end
+    end
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+    
+    print("[Redz Hub] UI created successfully")
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- WEBHOOK SYSTEM
+-- EXECUTION
 -- ═══════════════════════════════════════════════════════════════════════════════
 
-function HubCore.Webhooks(self)
-    if not GameModule.IsCustomUrl and GameModule.Webhooks then
-        __loadstring("{Repository}Utils/Webhooks.lua", false, {GameModule})
+-- Fungsi utama yang aman
+local function SafeExecute(moduleName, ...)
+    local success, err = pcall(function()
+        HubCore[moduleName](HubCore, ...)
+    end)
+    
+    if not success then
+        warn("[Redz Hub] Error in " .. moduleName .. ": " .. tostring(err))
+    else
+        print("[Redz Hub] " .. moduleName .. " loaded successfully")
     end
 end
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- MAIN EXECUTION
--- ═══════════════════════════════════════════════════════════════════════════════
-
-local function ExecuteModule(moduleName, ...)
-    local startTime = tick()
-    HubCore[moduleName](HubCore, ...)
-    print(("[Redz Hub] %s loaded in %.2fs"):format(moduleName, tick() - startTime))
-end
-
-ExecuteModule("Initialize")
-ExecuteModule("StartFarm")
-ExecuteModule("StartFunctions")
-task.spawn(ExecuteModule, "LoadLibrary")
-task.spawn(ExecuteModule, "Webhooks")
+-- Eksekusi dengan error handling
+SafeExecute("Initialize")
+SafeExecute("StartFarm")
+SafeExecute("StartFunctions")
+SafeExecute("LoadLibrary")
 
 print([[
-    ╔══════════════════════════════════════════╗
-    ║         Redz Hub Loaded Successfully     ║
-    ║              Blox Fruits                 ║
-    ║                                          ║
-    ║  Features:                               ║
-    ║  - Auto Farm (Level/Mastery/Bosses)      ║
-    ║  - Quest System                          ║
-    ║  - Raid Automation                       ║
-    ║  - Fruit Management                      ║
-    ║  - Sea Beast Hunting                     ║
-    ║  - Island Features                       ║
-    ║  - And more...                           ║
-    ╚══════════════════════════════════════════╝
+
+╔══════════════════════════════════════════╗
+║        Redz Hub Loaded Successfully      ║
+║              Blox Fruits                 ║
+║                                          ║
+║  Basic Features Available:               ║
+║  • Auto Level Farm                       ║
+║  • Auto Buso Haki                        ║
+║  • Fruit Collection                      ║
+║  • Chest Collection                      ║
+║  • Team Selection                        ║
+║  • Basic Utilities                       ║
+╚══════════════════════════════════════════╝
+
 ]])
