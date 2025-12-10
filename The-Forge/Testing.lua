@@ -240,12 +240,16 @@ Tab:Dropdown({
 
 Tab:Slider({
     Title = "Safe HP %",
-    Value = mobFarm.safeHealthPercent,
-    Min = 0,
-    Max = 100,
-    Callback = function(v)
+    Desc = "mobFarm.safeHealthPercent",
+    Step = 1,
+    Value = {
+        Min = 20,
+        Max = 120,
+        Default = 70,
+    },
+    Callback = function(value)
         mobFarm.safeHealthPercent = v
-    end,
+    end
 })
 
 Tab:Toggle({
