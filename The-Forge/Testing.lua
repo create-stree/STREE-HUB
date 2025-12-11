@@ -1,6 +1,3 @@
---// The Forge Auto Farm - Full WindUI Port (Final)
---// Credit: Nisulrocks (original), WindUI (framework)
-
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
@@ -156,15 +153,88 @@ end
 
 --// WINDUI
 local Window = WindUI:CreateWindow({
-    Title = "The Forge Auto Farm",
-    Icon = "rbxassetid://4483362458",
-    Author = "Nisulrocks | WindUI Full Port",
-    Folder = "TheForgeWindUI",
-    Size = UDim2.fromOffset(320, 400),
+    Title = "STREE HUB",
+    Icon = "rbxassetid://86466533300907",
+    Author = "KirsiaSC | The Forge",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(260, 290),
     Transparent = true,
     Theme = "Dark",
-    SideBarWidth = 180,
+    SideBarWidth = 170,
     HasOutline = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            WindUI:SetTheme("Dark")
+        end,
+    },
+})
+
+Window:EditOpenButton({
+    Enabled = false,
+})
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local G2L = {}
+
+G2L["ScreenGui_1"] = Instance.new("ScreenGui")
+G2L["ScreenGui_1"].Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+CollectionService:AddTag(G2L["ScreenGui_1"], "main")
+
+G2L["ButtonRezise_2"] = Instance.new("ImageButton")
+G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
+G2L["ButtonRezise_2"].BorderSizePixel = 0
+G2L["ButtonRezise_2"].Draggable = true
+G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+G2L["ButtonRezise_2"].Size = UDim2.new(0, 60, 0, 60)
+G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
+
+local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
+corner.CornerRadius = UDim.new(0, 8)
+
+local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
+neon.Thickness = 2
+neon.Color = Color3.fromRGB(0, 255, 0)
+neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
+    G2L["ButtonRezise_2"].Visible = false
+    Window:Open()
+end)
+
+Window:OnClose(function()
+    G2L["ButtonRezise_2"].Visible = true
+end)
+
+Window:OnDestroy(function()
+    G2L["ButtonRezise_2"].Visible = false
+end)
+
+G2L["ButtonRezise_2"].Visible = false
+
+G2L["ButtonRezise_2"].Visible = false
+
+Window:Tag({
+    Title = "Version",
+    Color = Color3.fromRGB(0, 255, 0),
+    Radius = 17,
+})
+
+Window:Tag({
+    Title = "Testing",
+    Color = Color3.fromRGB(0, 0, 0),
+    Radius = 17,
+})
+
+WindUI:Notify({
+    Title = "STREE HUB Loaded",
+    Content = "UI loaded successfully!",
+    Duration = 3,
+    Icon = "bell",
 })
 
 local MainTab = Window:Tab({
