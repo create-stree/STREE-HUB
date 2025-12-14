@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thank You, Penguin 🐧</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fbc2eb, #a18cd1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .container {
+            position: relative;
+            text-align: center;
+            padding: 45px 50px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            box-shadow: 0 0 45px rgba(255, 105, 180, 0.5);
+            animation: fadeIn 1.2s ease;
+            max-width: 430px;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 14px;
+        }
+
+        p {
+            opacity: 0.95;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 12px 36px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff4d6d, #ff85a1);
+            color: #fff;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 24px rgba(255, 77, 109, 0.9);
+        }
+
+        #time {
+            display: block;
+            margin-top: 24px;
+            font-size: 0.85rem;
+            opacity: 0.75;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .heart {
+            position: absolute;
+            top: -10px;
+            font-size: 18px;
+            animation: fall linear forwards;
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <audio autoplay loop>
+        <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_1e8d9a6a4c.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <h1 id="title">Thank You, Penguin 🐧❤️</h1>
+        <p id="desc">
+            Thank you for always being by my side, Penguin.<br>
+            Your love, patience, and care mean everything to me.<br>
+            I’m so grateful to have you in my life.
+        </p>
+
+        <button id="btn">Tap ❤️</button>
+        <span id="time"></span>
+    </div>
+
+    <script>
+        const partnerName = "Penguin 🐧";
+
+        const title = document.getElementById("title");
+        const desc = document.getElementById("desc");
+        const btn = document.getElementById("btn");
+        const timeText = document.getElementById("time");
+
+        btn.addEventListener("click", () => {
+            title.textContent = `I Love You, ${partnerName} 💕`;
+            desc.innerHTML =
+                "Thank you for loving me just the way I am.<br>" +
+                "You are my happiness, my comfort, and my home.<br>" +
+                "Forever grateful, forever yours ❤️";
+            btn.textContent = "💖";
+        });
+
+        function updateTime() {
+            timeText.textContent = new Date().toLocaleTimeString();
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function createHeart() {
+            const heart = document.createElement("div");
+            heart.className = "heart";
+            heart.textContent = "❤️";
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.fontSize = Math.random() * 14 + 16 + "px";
+            heart.style.animationDuration = Math.random() * 3 + 4 + "s";
+            document.body.appendChild(heart);
+
+            setTimeout(() => heart.remove(), 7000);
+        }
+
+        setInterval(createHeart, 300);
+    </script>
+
+</body>
+</html>
