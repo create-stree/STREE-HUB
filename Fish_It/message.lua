@@ -672,32 +672,37 @@ local player = Players.LocalPlayer
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
 local QuestList = require(ReplicatedStorage.Shared.Quests.QuestList)
-local questData = Replion.Client:WaitReplion("Data")
+local data = Replion.Client:WaitReplion("Data")
 
-local runningAll = false
-local mainLoop
+local running = false
+local loopTask
 
-local function getQuestProgress(path, list)
-    local data = questData:Get(path)
-    if not data or not data.Quests then return end
-    local result = {}
-    for i,info in ipairs(list) do
-        local q = data.Quests[i]
-        local target = info.Arguments.value
-        local current = q and q.Progress or 0
-        result[i] = current >= target
-    end
-    return result
+local function hasGhostfin()
+    local inv = data:Get({"Inventory","Rods"})
+    return inv and inv.Ghostfin ~= nil
 end
 
-local function allDone(tbl)
-    for _,v in pairs(tbl) do
+local function getProgress(path, list)
+    local q = data:Get(path)
+    if not q or not q.Quests then return end
+    local t = {}
+    for i,v in ipairs(list) do
+        local p = q.Quests[i]
+        local cur = p and p.Progress or 0
+        local max = v.Arguments.value
+        t[i] = cur >= max
+    end
+    return t
+end
+
+local function doneAll(t)
+    for _,v in pairs(t) do
         if not v then return false end
     end
     return true
 end
 
-local function far(cf, d)
+local function far(cf,d)
     local c = player.Character
     if not c or not c:FindFirstChild("HumanoidRootPart") then return true end
     return (c.HumanoidRootPart.Position - cf.Position).Magnitude > d
@@ -710,27 +715,30 @@ local function tp(cf)
     end
 end
 
-local DeepSeaPosA = CFrame.new(-3737, -136, -881)
-local DeepSeaPosB = CFrame.new(-3650.4873, -269.269318, -1652.68323)
-local JunglePosA = CFrame.new(1223, 52, -1845)
-local JunglePosB = CFrame.new(1301, 49, -1762)
+local DeepSeaA = CFrame.new(-3737, -136, -881)
+local DeepSeaB = CFrame.new(-3650.4873, -269.269318, -1652.68323)
+local JungleA = CFrame.new(1223, 52, -1845)
+local JungleB = CFrame.new(1301, 49, -1762)
 
-local function autoLoop()
-    while runningAll do
-        local ds = getQuestProgress({"DeepSea","Available","Forever"}, QuestList.DeepSea.Forever)
-        local ej = getQuestProgress({"ElementJungle","Available","Forever"}, QuestList.ElementJungle.Forever)
+local function autoRun()
+    while running do
+        local ghostfin = hasGhostfin()
+        local ds = getProgress({"DeepSea","Available","Forever"}, QuestList.DeepSea.Forever)
+        local ej = getProgress({"ElementJungle","Available","Forever"}, QuestList.ElementJungle.Forever)
 
-        if ds and not allDone(ds) then
-            local target = DeepSeaPosA
-            if ds[1] then target = DeepSeaPosB end
-            if far(target, 10) then tp(target) end
-        elseif ej and not allDone(ej) then
-            local target = JunglePosA
-            if ej[1] then target = JunglePosB end
-            if far(target, 10) then tp(target) end
+        if not ghostfin and ds and not doneAll(ds) then
+            local target = DeepSeaA
+            if ds[1] then target = DeepSeaB end
+            if far(target,10) then tp(target) end
+
+        elseif ej and not doneAll(ej) then
+            local target = JungleA
+            if ej[1] then target = JungleB end
+            if far(target,10) then tp(target) end
+
         else
-            runningAll = false
-            AutoAllToggle:Set(false)
+            running = false
+            AutoQuestToggle:Set(false)
             break
         end
 
@@ -738,51 +746,47 @@ local function autoLoop()
     end
 end
 
-AutoAllToggle = Tab3:Toggle({
-    Title = "Auto Complete Deep Sea + Element Jungle",
+AutoQuestToggle = Tab3:Toggle({
+    Title = "Auto Deep Sea → Element Jungle",
     Default = false,
     Callback = function(v)
-        runningAll = v
+        running = v
         if v then
-            mainLoop = task.spawn(autoLoop)
+            loopTask = task.spawn(autoRun)
         else
-            if mainLoop then
-                task.cancel(mainLoop)
-                mainLoop = nil
+            if loopTask then
+                task.cancel(loopTask)
+                loopTask = nil
             end
         end
     end
 })
 
 Tab3:Button({
-    Title = "Check Deep Sea Progress",
+    Title = "Check Quest Progress",
     Callback = function()
-        local data = questData:Get({"DeepSea","Available","Forever"})
-        if not data then return end
         local txt = ""
-        for i,info in ipairs(QuestList.DeepSea.Forever) do
-            local q = data.Quests[i]
-            local cur = q and q.Progress or 0
-            local max = info.Arguments.value
-            txt = txt..i..". "..info.DisplayName.." "..cur.."/"..max.."\n"
+        local ds = data:Get({"DeepSea","Available","Forever"})
+        if ds then
+            txt = txt.."[Deep Sea]\n"
+            for i,v in ipairs(QuestList.DeepSea.Forever) do
+                local q = ds.Quests[i]
+                local c = q and q.Progress or 0
+                local m = v.Arguments.value
+                txt = txt..i..". "..v.DisplayName.." "..c.."/"..m.."\n"
+            end
         end
-        WindUI:Notify({Title="Deep Sea",Content=txt,Duration=10})
-    end
-})
-
-Tab3:Button({
-    Title = "Check Element Jungle Progress",
-    Callback = function()
-        local data = questData:Get({"ElementJungle","Available","Forever"})
-        if not data then return end
-        local txt = ""
-        for i,info in ipairs(QuestList.ElementJungle.Forever) do
-            local q = data.Quests[i]
-            local cur = q and q.Progress or 0
-            local max = info.Arguments.value
-            txt = txt..i..". "..info.DisplayName.." "..cur.."/"..max.."\n"
+        local ej = data:Get({"ElementJungle","Available","Forever"})
+        if ej then
+            txt = txt.."\n[Element Jungle]\n"
+            for i,v in ipairs(QuestList.ElementJungle.Forever) do
+                local q = ej.Quests[i]
+                local c = q and q.Progress or 0
+                local m = v.Arguments.value
+                txt = txt..i..". "..v.DisplayName.." "..c.."/"..m.."\n"
+            end
         end
-        WindUI:Notify({Title="Element Jungle",Content=txt,Duration=10})
+        WindUI:Notify({Title="Quest Progress",Content=txt,Duration=10})
     end
 })
 
@@ -2652,6 +2656,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
