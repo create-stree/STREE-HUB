@@ -707,8 +707,8 @@ local rs = game:GetService("ReplicatedStorage")
 local players = game:GetService("Players")
 local player = players.LocalPlayer
 
-local QuestList = require(rs.Quests.QuestList)
-local QuestUtility = require(rs.Quests.QuestUtility)
+local QuestList = require(ReplicatedStorage.Shared.Quests.QuestList)
+local QuestUtility = require(ReplicatedStorage.Shared.Quests.QuestUtility)
 local Replion = require(rs.Packages.Replion)
 
 local repl = nil
@@ -2685,6 +2685,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
