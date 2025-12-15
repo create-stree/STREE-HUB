@@ -666,266 +666,123 @@ Tab3:Section({
     TextSize = 17
 })
 
-local rs = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local Shared = rs:WaitForChild("Shared")
-local QuestsFolder = Shared:WaitForChild("Quests")
+local Replion = require(ReplicatedStorage.Packages.Replion)
+local QuestList = require(ReplicatedStorage.Shared.Quests.QuestList)
+local questData = Replion.Client:WaitReplion("Data")
 
-local QuestList = require(QuestsFolder:WaitForChild("QuestList"))
-local QuestUtility = require(QuestsFolder:WaitForChild("QuestUtility"))
-local Replion = require(rs:WaitForChild("Packages"):WaitForChild("Replion"))
+local runningAll = false
+local mainLoop
 
-local DataReplion
-task.spawn(function()
-    DataReplion = Replion.Client:WaitReplion("Data")
-end)
-
-local function GetDeepSeaData()
-    if not DataReplion then return end
-    return DataReplion:Get(QuestList.DeepSea.ReplionPath)
+local function getQuestProgress(path, list)
+    local data = questData:Get(path)
+    if not data or not data.Quests then return end
+    local result = {}
+    for i,info in ipairs(list) do
+        local q = data.Quests[i]
+        local target = info.Arguments.value
+        local current = q and q.Progress or 0
+        result[i] = current >= target
+    end
+    return result
 end
+
+local function allDone(tbl)
+    for _,v in pairs(tbl) do
+        if not v then return false end
+    end
+    return true
+end
+
+local function far(cf, d)
+    local c = player.Character
+    if not c or not c:FindFirstChild("HumanoidRootPart") then return true end
+    return (c.HumanoidRootPart.Position - cf.Position).Magnitude > d
+end
+
+local function tp(cf)
+    local c = player.Character
+    if c and c:FindFirstChild("HumanoidRootPart") then
+        c.HumanoidRootPart.CFrame = cf
+    end
+end
+
+local DeepSeaPosA = CFrame.new(-3737, -136, -881)
+local DeepSeaPosB = CFrame.new(-3650.4873, -269.269318, -1652.68323)
+local JunglePosA = CFrame.new(1223, 52, -1845)
+local JunglePosB = CFrame.new(1301, 49, -1762)
+
+local function autoLoop()
+    while runningAll do
+        local ds = getQuestProgress({"DeepSea","Available","Forever"}, QuestList.DeepSea.Forever)
+        local ej = getQuestProgress({"ElementJungle","Available","Forever"}, QuestList.ElementJungle.Forever)
+
+        if ds and not allDone(ds) then
+            local target = DeepSeaPosA
+            if ds[1] then target = DeepSeaPosB end
+            if far(target, 10) then tp(target) end
+        elseif ej and not allDone(ej) then
+            local target = JunglePosA
+            if ej[1] then target = JunglePosB end
+            if far(target, 10) then tp(target) end
+        else
+            runningAll = false
+            AutoAllToggle:Set(false)
+            break
+        end
+
+        task.wait(10)
+    end
+end
+
+AutoAllToggle = Tab3:Toggle({
+    Title = "Auto Complete Deep Sea + Element Jungle",
+    Default = false,
+    Callback = function(v)
+        runningAll = v
+        if v then
+            mainLoop = task.spawn(autoLoop)
+        else
+            if mainLoop then
+                task.cancel(mainLoop)
+                mainLoop = nil
+            end
+        end
+    end
+})
 
 Tab3:Button({
-    Title = "Check Quest DeepSea",
+    Title = "Check Deep Sea Progress",
     Callback = function()
-        local data = GetDeepSeaData()
-        if not data or not data.Available or not data.Available.Forever then return end
-
-        local progressText = ""
-        local quests = data.Available.Forever.Quests
-
-        for i, q in ipairs(quests) do
-            local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
-            if info then
-                local maxVal = QuestUtility.GetQuestValue(DataReplion, info)
-                local percent = math.floor(math.clamp(q.Progress / maxVal, 0, 1) * 100)
-                progressText ..= i .. ". " .. info.DisplayName .. " : " .. q.Progress .. "/" .. maxVal .. " (" .. percent .. "%)\n"
-            end
+        local data = questData:Get({"DeepSea","Available","Forever"})
+        if not data then return end
+        local txt = ""
+        for i,info in ipairs(QuestList.DeepSea.Forever) do
+            local q = data.Quests[i]
+            local cur = q and q.Progress or 0
+            local max = info.Arguments.value
+            txt = txt..i..". "..info.DisplayName.." "..cur.."/"..max.."\n"
         end
-
-        WindUI:Notify({
-            Title = "Deep Sea Quest",
-            Content = progressText,
-            Duration = 10
-        })
+        WindUI:Notify({Title="Deep Sea",Content=txt,Duration=10})
     end
 })
 
-local function getDeepSeaProgress()
-    local data = GetDeepSeaData()
-    if not data or not data.Available or not data.Available.Forever then return end
-
-    local result = {}
-
-    for i, q in ipairs(data.Available.Forever.Quests) do
-        local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
-        if info then
-            local maxVal = QuestUtility.GetQuestValue(DataReplion, info)
-            result[i] = {
-                name = info.DisplayName,
-                current = q.Progress,
-                target = maxVal,
-                completed = q.Progress >= maxVal,
-                redeemed = q.Redeemed or false
-            }
+Tab3:Button({
+    Title = "Check Element Jungle Progress",
+    Callback = function()
+        local data = questData:Get({"ElementJungle","Available","Forever"})
+        if not data then return end
+        local txt = ""
+        for i,info in ipairs(QuestList.ElementJungle.Forever) do
+            local q = data.Quests[i]
+            local cur = q and q.Progress or 0
+            local max = info.Arguments.value
+            txt = txt..i..". "..info.DisplayName.." "..cur.."/"..max.."\n"
         end
-    end
-
-    return result
-end
-
-local function isPlayerFarFromTarget(cf, dist)
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return true end
-    return (hrp.Position - cf.Position).Magnitude > dist
-end
-
-local function teleportToLocation(cf)
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = cf
-    end
-end
-
-local runningDeepSea = false
-local deepSeaLoop
-
-local function startDeepSeaQuest()
-    local quest234Location = CFrame.new(-3737, -136, -881)
-    local quest1Location = CFrame.new(-3650.4873, -269.269318, -1652.68323)
-
-    while runningDeepSea do
-        local progress = getDeepSeaProgress()
-        if not progress then
-            task.wait(30)
-            continue
-        end
-
-        local allCompleted = true
-        for i = 1, 4 do
-            if progress[i] and not progress[i].completed then
-                allCompleted = false
-                break
-            end
-        end
-
-        if allCompleted then
-            runningDeepSea = false
-            break
-        end
-
-        local quest234Completed = true
-        for i = 2, 4 do
-            if progress[i] and not progress[i].completed then
-                quest234Completed = false
-                break
-            end
-        end
-
-        local target = quest234Completed and quest1Location or quest234Location
-
-        if isPlayerFarFromTarget(target, 10) then
-            teleportToLocation(target)
-        end
-
-        task.wait(10)
-    end
-end
-
-Tab3:Toggle({
-    Title = "Auto Complete Deep Sea",
-    Default = false,
-    Callback = function(state)
-        runningDeepSea = state
-        if state then
-            deepSeaLoop = task.spawn(startDeepSeaQuest)
-        else
-            if deepSeaLoop then
-                task.cancel(deepSeaLoop)
-                deepSeaLoop = nil
-            end
-        end
-    end
-})
-
-local rs = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local Shared = rs:WaitForChild("Shared")
-local QuestsFolder = Shared:WaitForChild("Quests")
-
-local QuestList = require(QuestsFolder:WaitForChild("QuestList"))
-local QuestUtility = require(QuestsFolder:WaitForChild("QuestUtility"))
-local Replion = require(rs:WaitForChild("Packages"):WaitForChild("Replion"))
-
-local DataReplion
-task.spawn(function()
-    DataReplion = Replion.Client:WaitReplion("Data")
-end)
-
-local function GetElementJungleData()
-    if not DataReplion then return end
-    return DataReplion:Get(QuestList.ElementJungle.ReplionPath)
-end
-
-local function getElementJungleProgress()
-    local data = GetElementJungleData()
-    if not data or not data.Available or not data.Available.Forever then return end
-
-    local result = {}
-    for i, q in ipairs(data.Available.Forever.Quests) do
-        local info = QuestUtility:GetQuestData("ElementJungle","Forever",q.QuestId)
-        if info then
-            local maxVal = QuestUtility.GetQuestValue(DataReplion, info)
-            result[i] = {
-                name = info.DisplayName,
-                current = q.Progress,
-                target = maxVal,
-                completed = q.Progress >= maxVal,
-                redeemed = q.Redeemed or false
-            }
-        end
-    end
-    return result
-end
-
-local function isPlayerFarFromTarget(cf, dist)
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return true end
-    return (hrp.Position - cf.Position).Magnitude > dist
-end
-
-local function teleportToLocation(cf)
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = cf
-    end
-end
-
-local runningElementJungle = false
-local elementJungleLoop
-
-local function startElementJungleQuest()
-    local quest234Location = CFrame.new(1234, 56, -789)
-    local quest1Location   = CFrame.new(1350, 60, -820)
-
-    while runningElementJungle do
-        local progress = getElementJungleProgress()
-        if not progress then
-            task.wait(30)
-            continue
-        end
-
-        local allCompleted = true
-        for i = 1, 4 do
-            if progress[i] and not progress[i].completed then
-                allCompleted = false
-                break
-            end
-        end
-
-        if allCompleted then
-            runningElementJungle = false
-            break
-        end
-
-        local quest234Completed = true
-        for i = 2, 4 do
-            if progress[i] and not progress[i].completed then
-                quest234Completed = false
-                break
-            end
-        end
-
-        local target = quest234Completed and quest1Location or quest234Location
-        if isPlayerFarFromTarget(target, 10) then
-            teleportToLocation(target)
-        end
-
-        task.wait(10)
-    end
-end
-
-Tab3:Toggle({
-    Title = "Auto Complete Element Jungle",
-    Default = false,
-    Callback = function(state)
-        runningElementJungle = state
-        if state then
-            elementJungleLoop = task.spawn(startElementJungleQuest)
-        else
-            if elementJungleLoop then
-                task.cancel(elementJungleLoop)
-                elementJungleLoop = nil
-            end
-        end
+        WindUI:Notify({Title="Element Jungle",Content=txt,Duration=10})
     end
 })
 
@@ -2795,6 +2652,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
