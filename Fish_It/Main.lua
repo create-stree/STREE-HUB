@@ -77,14 +77,14 @@ G2L["ButtonRezise_2"].Visible = false
 G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
-    Title = "Version",
+    Title = "0.0.3.1",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Dev",
-    Color = Color3.fromRGB(0, 0, 0),
+    Title = "Freemium",
+    Color = Color3.fromRGB(205, 127, 50),
     Radius = 17,
 })
 
@@ -677,8 +677,11 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.FPSBoost = state
+
         local Lighting = game:GetService("Lighting")
         local Terrain = workspace:FindFirstChildOfClass("Terrain")
+
+        _G._FPSObjects = _G._FPSObjects or {}
 
         if state then
             if not _G.OldSettings then
@@ -713,15 +716,25 @@ Tab3:Toggle({
             end
 
             for _,v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.Color = Color3.new(1,1,1)
-                    v.CastShadow = false
-                    v.Reflectance = 0
-                elseif v:IsA("Light") then
-                    v.Enabled = false
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = false
+                if not _G._FPSObjects[v] then
+                    if v:IsA("BasePart") then
+                        _G._FPSObjects[v] = {
+                            Material = v.Material,
+                            Color = v.Color,
+                            CastShadow = v.CastShadow,
+                            Reflectance = v.Reflectance
+                        }
+                        v.Material = Enum.Material.SmoothPlastic
+                        v.Color = Color3.new(1,1,1)
+                        v.CastShadow = false
+                        v.Reflectance = 0
+                    elseif v:IsA("Light") then
+                        _G._FPSObjects[v] = {Enabled = v.Enabled}
+                        v.Enabled = false
+                    elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                        _G._FPSObjects[v] = {Enabled = v.Enabled}
+                        v.Enabled = false
+                    end
                 end
             end
         else
@@ -742,15 +755,20 @@ Tab3:Toggle({
                 end
             end
 
-            for _,v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("Light") then
-                    v.Enabled = true
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = true
-                elseif v:IsA("BasePart") then
-                    v.CastShadow = true
+            for obj,data in pairs(_G._FPSObjects) do
+                if obj and obj.Parent then
+                    if obj:IsA("BasePart") then
+                        obj.Material = data.Material
+                        obj.Color = data.Color
+                        obj.CastShadow = data.CastShadow
+                        obj.Reflectance = data.Reflectance
+                    elseif obj:IsA("Light") or obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                        obj.Enabled = data.Enabled
+                    end
                 end
             end
+
+            table.clear(_G._FPSObjects)
         end
     end
 })
@@ -817,6 +835,7 @@ Tab3:Toggle({
 
 Tab3:Section({
     Title = "Enchant Features",
+	Icon = "flask-conical",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -921,7 +940,7 @@ function getCurrentRodEnchant()
     return nil
 end
 
-local Paragraph = Tab3:Paragraph({
+Tab3:Paragraph({
     Title = "Enchanting Features",
     Desc = "Loading...",
     RichText = true
@@ -1215,12 +1234,12 @@ local function StartAutoFishing()
 	end)
 end
 
-local Tab4 = Window:Tab({
-	Title = "Exclusive",
-	Icon = "star"
+Tab3:Section({ 
+	Title = "Webhook Fish Caught",
+	Icon = "webhook",
+	TextXAlignment = "Left",
+	TextSize = 17 
 })
-
-Tab4:Section({ Title = "Webhook Fish Caught", TextXAlignment = "Left", TextSize = 17 })
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
@@ -1383,7 +1402,7 @@ function sendNewFishWebhook(newlyCaughtFish)
     end)
 end
 
-U = Tab4:Input({
+U = Tab3:Input({
     Title = "URL Webhook",
     Placeholder = "Paste your Discord Webhook URL here",
     Value = _G.WebhookURL or "",
@@ -1392,7 +1411,7 @@ U = Tab4:Input({
     end
 })
 
-V = Tab4:Dropdown({
+V = Tab3:Dropdown({
     Title = "Rarity Filter",
     Values = rarityList,
     Multi = true,
@@ -1403,7 +1422,7 @@ V = Tab4:Dropdown({
     end
 })
 
-WU = Tab4:Toggle({
+WU = Tab3:Toggle({
     Title = "Send Webhook",
     Value = _G.DetectNewFishActive or false,
     Callback = function(state)
@@ -1411,157 +1430,24 @@ WU = Tab4:Toggle({
     end
 })
 
-Tab4:Button({
+Tab3:Button({
     Title = "Test Webhook",
     Callback = sendTestWebhook
 })
 
-local Section = Tab4:Section({
-	Title = "Kaitun System",
-	Icon = "antenna",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-Tab4:Toggle({
-	Title = "Enable Kaitun",
-	Desc = "Automatic fishing system",
-	Default = false,
-	Callback = function(state)
-		_G.AutoFishingEnabled = state
-		if state then
-			CreateBackground()
-			WindUI:Notify({Title = "Auto Fishing", Content = "Activated!", Duration = 3})
-			StartAutoFishing()
-		else
-			RemoveBackground()
-			WindUI:Notify({Title = "Auto Fishing", Content = "Stopped.", Duration = 3})
-		end
-	end
-})
-
-Tab4:Toggle({
-	Title = "Auto Sell Fish",
-	Desc = "Automatically sell caught fish",
-	Default = true,
-	Callback = function(state)
-		_G.AutoSellFish = state
-		WindUI:Notify({
-			Title = "Auto Sell",
-			Content = state and "Enabled" or "Disabled",
-			Duration = 2
-		})
-	end
-})
-
-Tab4:Slider({
-	Title = "Fishing Delay",
-	Desc = "Adjust cast/reel timing (seconds)",
-	Min = 0.2,
-	Max = 2,
-	Default = 0.5,
-	Callback = function(value)
-		_G.FishingDelay = value
-		WindUI:Notify({
-			Title = "Fishing Delay",
-			Content = "Delay set to " .. tostring(value) .. "s",
-			Duration = 2
-		})
-	end
-})
-
-local Section = Tab4:Section({
-	Title = "Blantant Fishing",
-	Icon = "fish",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-local z1 = Tab4:Toggle({
-    Title = "Blantant",
-    Value = c.d,
-    Callback = function(z2)
-        x(z2)
-    end
-})
-
-local z3 = Tab4:Input({
-    Title = "Cancel Delay",
-    Placeholder = "1.7",
-    Default = tostring(c.e),
-    Callback = function(z4)
-        local z5 = tonumber(z4)
-        if z5 and z5 > 0 then
-            c.e = z5
-        end
-    end
-})
-
-local z6 = Tab4:Input({
-    Title = "Complete Delay",
-    Placeholder = "1.4",
-    Default = tostring(c.f),
-    Callback = function(z7)
-        local z8 = tonumber(z7)
-        if z8 and z8 > 0 then
-            c.f = z8 + 0.5
-        end
-    end
-})
-
-local Section = Tab4:Section({
-	Title = "Gift",
-	Icon = "gift",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
-
-Tab4:Button({
-    Title = "Gift Skin Soul Scythe",
-    Locked = false,
-    Callback = function()
-        if GiftingController and GiftingController.Open then
-            GiftingController:Open("Soul Scythe")
-
-            WindUI:Notify({
-                Title = "Gift Open",
-                Content = "Soul Scythe Gift Opened Successfully",
-                Duration = 3,
-                Icon = "check"
-            })
-        else
-            WindUI:Notify({
-                Title = "Failed!!",
-                Content = "Patched",
-                Duration = 3,
-                Icon = "x"
-            })
-        end
-    end
-})
-
-local Tab5 = Window:Tab({
+local Tab4 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
 })
 
-Tab5:Section({ 
+Tab4:Section({ 
     Title = "Buy Rod",
     Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab5:Divider()
+Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]
@@ -1607,7 +1493,7 @@ local rodKeyMap = {
 
 local selectedRod = rodNames[1]
 
-Tab5:Dropdown({
+Tab4:Dropdown({
     Title = "Select Rod",
     Values = rodNames,
     Value = selectedRod,
@@ -1634,14 +1520,14 @@ Tab5:Button({
     end
 })
 
-Tab5:Section({
+Tab4:Section({
     Title = "Buy Baits",
     Icon = "compass",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab5:Divider()
+Tab4:Divider()
 
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
@@ -1675,7 +1561,7 @@ local baitKeyMap = {
 
 local selectedBait = baitNames[1]  
 
-Tab5:Dropdown({  
+Tab4:Dropdown({  
     Title = "Select Bait",  
     Values = baitNames,  
     Value = selectedBait,  
@@ -1684,7 +1570,7 @@ Tab5:Dropdown({
     end  
 })  
 
-Tab5:Button({  
+Tab4:Button({  
     Title = "Buy Bait",  
     Callback = function()  
         local key = baitKeyMap[selectedBait]  
@@ -1701,7 +1587,7 @@ Tab5:Button({
     end  
 })
 
-Tab5:Section({ 
+Tab4:Section({ 
     Title = "Buy Weathers",
     Icon = "shrimp",
     TextXAlignment = "Left",
@@ -1731,7 +1617,7 @@ local selectedWeathers = {}
 local autoBuyEnabled = false
 local buyDelay = 540
 
-Tab5:Dropdown({
+Tab4:Dropdown({
     Title = "Select Weather",
     Values = weatherNames,
     Multi = true,
@@ -1740,7 +1626,7 @@ Tab5:Dropdown({
     end
 })
 
-Tab5:Input({
+Tab4:Input({
     Title = "Buy Delay (minutes)",
     Placeholder = "9",
     Callback = function(input)
@@ -1776,7 +1662,7 @@ local function startAutoBuy()
     end)
 end
 
-Tab5:Toggle({
+Tab4:Toggle({
     Title = "Buy Weather",
     Value = false,
     Callback = function(state)
@@ -1798,12 +1684,12 @@ Tab5:Toggle({
     end
 })
 
-local Tab6 = Window:Tab({
+local Tab5 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
 
-Tab6:Section({ 
+Tab5:Section({ 
     Title = "Island",
     Icon = "tree-palm",
     TextXAlignment = "Left",
@@ -1814,7 +1700,6 @@ Tab6:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
-	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
@@ -1822,7 +1707,7 @@ local IslandLocations = {
 	["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
@@ -1831,7 +1716,7 @@ local IslandLocations = {
 
 local SelectedIsland = nil
 
-local IslandDropdown = Tab6:Dropdown({
+Tab5:Dropdown({
     Title = "Select Island",
     Values = (function()
         local keys = {}
@@ -1846,7 +1731,7 @@ local IslandDropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Island",
     Callback = function()
         if SelectedIsland and IslandLocations[SelectedIsland] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1855,23 +1740,20 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({ 
+Tab5:Section({ 
     Title = "Fishing Spot",
     Icon = "spotlight",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local FishingLocations = {
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
-	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
-	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
-    ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Levers 1"] = Vector3.new(1475, 4, -847),
     ["Levers 2"] = Vector3.new(882, 5, -321),
     ["levers 3"] = Vector3.new(1425, 6,126),
@@ -1885,7 +1767,7 @@ local FishingLocations = {
 
 local SelectedFishing = nil
 
-Tab6:Dropdown({
+Tab5:Dropdown({
     Title = "Select Spot",
     Values = (function()
         local keys = {}
@@ -1900,7 +1782,7 @@ Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Fishing Spot",
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1909,14 +1791,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Location NPC",
     Icon = "bot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local NPC_Locations = {
     ["Alex"] = Vector3.new(43,17,2876),
@@ -1940,7 +1822,7 @@ local NPC_Locations = {
 
 local SelectedNPC = nil
 
-Tab6:Dropdown({
+Tab5:Dropdown({
     Title = "Select NPC",
     Values = (function()
         local keys = {}
@@ -1955,7 +1837,7 @@ Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to NPC",
     Callback = function()
         if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1964,14 +1846,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Teleport Player",
     Icon = "person-standing",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -1989,7 +1871,7 @@ end
 local SelectedPlayer = nil
 local Dropdown
 
-Dropdown = Tab6:Dropdown({
+Tab5:Dropdown({
     Title = "List Player",
     Values = GetPlayerList(),
     Value = GetPlayerList()[1],
@@ -1998,7 +1880,7 @@ Dropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Player (Target)",
     Locked = false,
     Callback = function()
@@ -2013,7 +1895,7 @@ Tab6:Button({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Refresh Player List",
     Locked = false,
     Callback = function()
@@ -2036,14 +1918,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Event Teleporter",
     Icon = "calendar",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
@@ -2196,7 +2078,7 @@ local function runMultiEventTP()
 	destroyEventPlatform()
 end
 
-Tab6:Dropdown({
+Tab5:Dropdown({
 	Title = "Select Events",
 	Values = eventNames,
 	Multi = true,
@@ -2206,7 +2088,7 @@ Tab6:Dropdown({
 	end
 })
 
-Tab6:Toggle({
+Tab5:Toggle({
 	Title = "Auto Event",
 	Icon = false,
 	Type = false,
@@ -2219,7 +2101,7 @@ Tab6:Toggle({
 	end
 })
 
-local Tab7 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
@@ -2245,7 +2127,7 @@ local customLevel = defaultLevel
 local keepHidden = false
 local rgbThread = nil
 
-Tab7:Input({
+Tab6:Input({
     Title = "Hide Name",
     Placeholder = "Input Name",
     Default = defaultHeader,
@@ -2257,7 +2139,7 @@ Tab7:Input({
     end
 })
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "Hide Identity",
     Default = false,
     Callback = function(state)
@@ -2268,7 +2150,7 @@ Tab7:Toggle({
     end
 })
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -2305,7 +2187,7 @@ Tab7:Toggle({
     end
 })
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -2339,7 +2221,7 @@ local RE_Notify = Net:FindFirstChild("RE/ObtainedNewFishNotification")
 
 _G.DisableNotify = false
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "Disable Notify",
     Desc = "No notification",
     Default = false,
@@ -2356,16 +2238,16 @@ if RE_Notify then
     end)
 end
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Server",
     Icon = "server",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
-Tab7:Button({
+Tab6:Button({
     Title = "Rejoin Server",
     Desc = "Reconnect to current server",
     Callback = function()
@@ -2373,7 +2255,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Server Hop",
     Desc = "Switch to another server",
     Callback = function()
@@ -2404,14 +2286,14 @@ Tab7:Button({
     end
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Config",
     Icon = "folder-open",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
 local ConfigFolder = "STREE_HUB/Configs"
 if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
@@ -2460,7 +2342,7 @@ local function ApplyConfig(data)
     end
 end
 
-Tab7:Button({
+Tab6:Button({
     Title = "Save Config",
     Desc = "Save all settings",
     Callback = function()
@@ -2469,7 +2351,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Load Config",
     Desc = "Use saved config",
     Callback = function()
@@ -2481,7 +2363,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
     Callback = function()
@@ -2491,16 +2373,16 @@ Tab7:Button({
     end
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Other Scripts",
     Icon = "file-code-corner",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
-Tab7:Button({
+Tab6:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -2509,7 +2391,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Simple Shader",
     Desc = "Shader",
     Locked = false,
@@ -2518,7 +2400,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
@@ -2526,18 +2408,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
