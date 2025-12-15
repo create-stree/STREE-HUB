@@ -598,6 +598,347 @@ Tab3:Section({
 Tab3:Divider()
 
 Tab3:Toggle({
+    Title = "Radar",
+    Value = false,
+    Callback = function(state)
+        local RS = game:GetService("ReplicatedStorage")
+        local Lighting = game:GetService("Lighting")
+        local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
+        local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
+        if Replion and NetFunction:InvokeServer(state) then
+            local s = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
+            s.PlaybackSpeed = 1 + math.random() * 0.3
+            local cc = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
+            if cc then
+                require(RS.Packages.spr).stop(cc)
+                local T = require(RS.Controllers.ClientTimeController)
+                local profile = T._getLightingProfile and T:_getLightingProfile() or {}
+                local correct = profile.ColorCorrection or {}
+                correct.Brightness = correct.Brightness or 0.04
+                correct.TintColor = correct.TintColor or Color3.fromRGB(255,255,255)
+                if state then
+                    cc.TintColor = Color3.fromRGB(42,226,118)
+                    cc.Brightness = 0.4
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
+                        Type="Text",
+                        Text="Radar: Enabled",
+                        TextColor={R=9,G=255,B=0}
+                    })
+                else
+                    cc.TintColor = Color3.fromRGB(255,0,0)
+                    cc.Brightness = 0.2
+                    require(RS.Controllers.TextNotificationController):DeliverNotification({
+                        Type="Text",
+                        Text="Radar: Disabled",
+                        TextColor={R=255,G=0,B=0}
+                    })
+                end
+                require(RS.Packages.spr).target(cc,1,1,correct)
+            end
+            require(RS.Packages.spr).stop(Lighting)
+            Lighting.ExposureCompensation = 1
+            require(RS.Packages.spr).target(Lighting,1,2,{ExposureCompensation=0})
+        end
+    end
+})
+
+Tab3:Toggle({
+    Title = "Diving Gear",
+    Desc = "Oxygen Tank",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.DivingGear = state
+        local RemoteFolder = RS.Packages._Index["sleitnick_net@0.2.0"].net
+        if state then
+            RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(105)
+        else
+            RemoteFolder["RF/UnequipOxygenTank"]:InvokeServer()
+        end
+    end
+})
+
+Tab3:Section({
+    Title = "Quest",
+    Icon = "scroll-text",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+local rs = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local Shared = rs:WaitForChild("Shared")
+local QuestsFolder = Shared:WaitForChild("Quests")
+
+local QuestList = require(QuestsFolder:WaitForChild("QuestList"))
+local QuestUtility = require(QuestsFolder:WaitForChild("QuestUtility"))
+local Replion = require(rs:WaitForChild("Packages"):WaitForChild("Replion"))
+
+local DataReplion
+task.spawn(function()
+    DataReplion = Replion.Client:WaitReplion("Data")
+end)
+
+local function GetDeepSeaData()
+    if not DataReplion then return end
+    return DataReplion:Get(QuestList.DeepSea.ReplionPath)
+end
+
+Tab3:Button({
+    Title = "Check Quest DeepSea",
+    Callback = function()
+        local data = GetDeepSeaData()
+        if not data or not data.Available or not data.Available.Forever then return end
+
+        local progressText = ""
+        local quests = data.Available.Forever.Quests
+
+        for i, q in ipairs(quests) do
+            local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
+            if info then
+                local maxVal = QuestUtility.GetQuestValue(DataReplion, info)
+                local percent = math.floor(math.clamp(q.Progress / maxVal, 0, 1) * 100)
+                progressText ..= i .. ". " .. info.DisplayName .. " : " .. q.Progress .. "/" .. maxVal .. " (" .. percent .. "%)\n"
+            end
+        end
+
+        WindUI:Notify({
+            Title = "Deep Sea Quest",
+            Content = progressText,
+            Duration = 10
+        })
+    end
+})
+
+local function getDeepSeaProgress()
+    local data = GetDeepSeaData()
+    if not data or not data.Available or not data.Available.Forever then return end
+
+    local result = {}
+
+    for i, q in ipairs(data.Available.Forever.Quests) do
+        local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
+        if info then
+            local maxVal = QuestUtility.GetQuestValue(DataReplion, info)
+            result[i] = {
+                name = info.DisplayName,
+                current = q.Progress,
+                target = maxVal,
+                completed = q.Progress >= maxVal,
+                redeemed = q.Redeemed or false
+            }
+        end
+    end
+
+    return result
+end
+
+local function isPlayerFarFromTarget(cf, dist)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return true end
+    return (hrp.Position - cf.Position).Magnitude > dist
+end
+
+local function teleportToLocation(cf)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.CFrame = cf
+    end
+end
+
+local runningDeepSea = false
+local deepSeaLoop
+
+local function startDeepSeaQuest()
+    local quest234Location = CFrame.new(-3737, -136, -881)
+    local quest1Location = CFrame.new(-3650.4873, -269.269318, -1652.68323)
+
+    while runningDeepSea do
+        local progress = getDeepSeaProgress()
+        if not progress then
+            task.wait(30)
+            continue
+        end
+
+        local allCompleted = true
+        for i = 1, 4 do
+            if progress[i] and not progress[i].completed then
+                allCompleted = false
+                break
+            end
+        end
+
+        if allCompleted then
+            runningDeepSea = false
+            break
+        end
+
+        local quest234Completed = true
+        for i = 2, 4 do
+            if progress[i] and not progress[i].completed then
+                quest234Completed = false
+                break
+            end
+        end
+
+        local target = quest234Completed and quest1Location or quest234Location
+
+        if isPlayerFarFromTarget(target, 10) then
+            teleportToLocation(target)
+        end
+
+        task.wait(10)
+    end
+end
+
+Tab3:Toggle({
+    Title = "Auto Complete Deep Sea",
+    Default = false,
+    Callback = function(state)
+        runningDeepSea = state
+        if state then
+            deepSeaLoop = task.spawn(startDeepSeaQuest)
+        else
+            if deepSeaLoop then
+                task.cancel(deepSeaLoop)
+                deepSeaLoop = nil
+            end
+        end
+    end
+})
+
+local rs = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local Shared = rs:WaitForChild("Shared")
+local QuestsFolder = Shared:WaitForChild("Quests")
+
+local QuestList = require(QuestsFolder:WaitForChild("QuestList"))
+local QuestUtility = require(QuestsFolder:WaitForChild("QuestUtility"))
+local Replion = require(rs:WaitForChild("Packages"):WaitForChild("Replion"))
+
+local DataReplion
+task.spawn(function()
+    DataReplion = Replion.Client:WaitReplion("Data")
+end)
+
+local function GetElementJungleData()
+    if not DataReplion then return end
+    return DataReplion:Get(QuestList.ElementJungle.ReplionPath)
+end
+
+local function getElementJungleProgress()
+    local data = GetElementJungleData()
+    if not data or not data.Available or not data.Available.Forever then return end
+
+    local result = {}
+    for i, q in ipairs(data.Available.Forever.Quests) do
+        local info = QuestUtility:GetQuestData("ElementJungle","Forever",q.QuestId)
+        if info then
+            local maxVal = QuestUtility.GetQuestValue(DataReplion, info)
+            result[i] = {
+                name = info.DisplayName,
+                current = q.Progress,
+                target = maxVal,
+                completed = q.Progress >= maxVal,
+                redeemed = q.Redeemed or false
+            }
+        end
+    end
+    return result
+end
+
+local function isPlayerFarFromTarget(cf, dist)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return true end
+    return (hrp.Position - cf.Position).Magnitude > dist
+end
+
+local function teleportToLocation(cf)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.CFrame = cf
+    end
+end
+
+local runningElementJungle = false
+local elementJungleLoop
+
+local function startElementJungleQuest()
+    local quest234Location = CFrame.new(1234, 56, -789)
+    local quest1Location   = CFrame.new(1350, 60, -820)
+
+    while runningElementJungle do
+        local progress = getElementJungleProgress()
+        if not progress then
+            task.wait(30)
+            continue
+        end
+
+        local allCompleted = true
+        for i = 1, 4 do
+            if progress[i] and not progress[i].completed then
+                allCompleted = false
+                break
+            end
+        end
+
+        if allCompleted then
+            runningElementJungle = false
+            break
+        end
+
+        local quest234Completed = true
+        for i = 2, 4 do
+            if progress[i] and not progress[i].completed then
+                quest234Completed = false
+                break
+            end
+        end
+
+        local target = quest234Completed and quest1Location or quest234Location
+        if isPlayerFarFromTarget(target, 10) then
+            teleportToLocation(target)
+        end
+
+        task.wait(10)
+    end
+end
+
+Tab3:Toggle({
+    Title = "Auto Complete Element Jungle",
+    Default = false,
+    Callback = function(state)
+        runningElementJungle = state
+        if state then
+            elementJungleLoop = task.spawn(startElementJungleQuest)
+        else
+            if elementJungleLoop then
+                task.cancel(elementJungleLoop)
+                elementJungleLoop = nil
+            end
+        end
+    end
+})
+
+Tab3:Section({     
+    Title = "Gameplay",
+    Icon = "gamepad",
+    TextXAlignment = "Left",
+    TextSize = 17,    
+})
+
+Tab3:Divider()
+
+Tab3:Toggle({
     Title = "FPS Boost",
     Desc = "Optimizes performance for smooth gameplay",
     Icon = false,
@@ -668,99 +1009,6 @@ Tab3:Toggle({
                     Terrain.WaterWaveSize = _G.OldSettings.WaterWaveSize
                     Terrain.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
                 end
-            end
-
-            for _,v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("Light") then
-                    v.Enabled = true
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = true
-                elseif v:IsA("BasePart") then
-                    v.CastShadow = true
-                end
-            end
-        end
-    end
-})
-
-Tab3:Toggle({
-    Title = "Diving Gear",
-    Desc = "Oxygen Tank",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(state)
-        _G.DivingGear = state
-        local RemoteFolder = RS.Packages._Index["sleitnick_net@0.2.0"].net
-        if state then
-            RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(105)
-        else
-            RemoteFolder["RF/UnequipOxygenTank"]:InvokeServer()
-        end
-    end
-})
-
-Tab3:Section({     
-    Title = "Gameplay",
-    Icon = "gamepad",
-    TextXAlignment = "Left",
-    TextSize = 17,    
-})
-
-Tab3:Divider()
-
-Tab3:Toggle({
-    Title = "FPS Boost",
-    Desc = "Optimizes performance for smooth gameplay",
-    Icon = false,
-    Type = false,
-    Default = false,
-    Callback = function(state)
-        _G.FPSBoost = state
-        local Lighting = game:GetService("Lighting")
-
-        if state then
-            if not _G.OldSettings then
-                _G.OldSettings = {
-                    GlobalShadows = Lighting.GlobalShadows,
-                    FogEnd = Lighting.FogEnd,
-                    Brightness = Lighting.Brightness,
-                    Ambient = Lighting.Ambient,
-                    OutdoorAmbient = Lighting.OutdoorAmbient,
-                    ColorShift_Top = Lighting.ColorShift_Top,
-                    ColorShift_Bottom = Lighting.ColorShift_Bottom
-                }
-            end
-
-            Lighting.GlobalShadows = false
-            Lighting.FogEnd = 1e10
-            Lighting.Brightness = 0
-            Lighting.Ambient = Color3.new(1,1,1)
-            Lighting.OutdoorAmbient = Color3.new(1,1,1)
-            Lighting.ColorShift_Top = Color3.new(0,0,0)
-            Lighting.ColorShift_Bottom = Color3.new(0,0,0)
-
-            for _,v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.Color = Color3.new(1,1,1)
-                    v.CastShadow = false
-                    v.Reflectance = 0
-                elseif v:IsA("Light") then
-                    v.Enabled = false
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = false
-                end
-            end
-        else
-            if _G.OldSettings then
-                Lighting.GlobalShadows = _G.OldSettings.GlobalShadows
-                Lighting.FogEnd = _G.OldSettings.FogEnd
-                Lighting.Brightness = _G.OldSettings.Brightness
-                Lighting.Ambient = _G.OldSettings.Ambient
-                Lighting.OutdoorAmbient = _G.OldSettings.OutdoorAmbient
-                Lighting.ColorShift_Top = _G.OldSettings.ColorShift_Top
-                Lighting.ColorShift_Bottom = _G.OldSettings.ColorShift_Bottom
             end
 
             for _,v in ipairs(workspace:GetDescendants()) do
@@ -2547,6 +2795,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
