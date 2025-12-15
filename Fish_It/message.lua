@@ -672,6 +672,7 @@ local player = Players.LocalPlayer
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
 local QuestList = require(ReplicatedStorage.Shared.Quests.QuestList)
+local QuestTrackers = require(ReplicatedStorage.Shared.Quests.QuestTrackers)
 local data = Replion.Client:WaitReplion("Data")
 
 local running = false
@@ -685,60 +686,69 @@ end
 local function getProgress(path, list)
     local q = data:Get(path)
     if not q or not q.Quests then return end
-    local t = {}
-    for i,v in ipairs(list) do
-        local p = q.Quests[i]
-        local cur = p and p.Progress or 0
-        local max = v.Arguments.value
-        t[i] = cur >= max
+    local progressTable = {}
+    for i, questData in ipairs(list) do
+        local quest = q.Quests[i]
+        local current = quest and quest.Progress or 0
+        local required = questData.Arguments.value
+        progressTable[i] = current >= required
     end
-    return t
+    return progressTable
 end
 
-local function doneAll(t)
-    for _,v in pairs(t) do
-        if not v then return false end
+local function doneAll(progressTable)
+    for _, completed in pairs(progressTable) do
+        if not completed then return false end
     end
     return true
 end
 
-local function far(cf,d)
-    local c = player.Character
-    if not c or not c:FindFirstChild("HumanoidRootPart") then return true end
-    return (c.HumanoidRootPart.Position - cf.Position).Magnitude > d
+local function far(position, distance)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return true end
+    return (character.HumanoidRootPart.Position - position).Magnitude > distance
 end
 
-local function tp(cf)
-    local c = player.Character
-    if c and c:FindFirstChild("HumanoidRootPart") then
-        c.HumanoidRootPart.CFrame = cf
+local function teleport(position)
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = position
     end
 end
 
-local DeepSeaA = CFrame.new(-3737, -136, -881)
-local DeepSeaB = CFrame.new(-3650.4873, -269.269318, -1652.68323)
-local JungleA = CFrame.new(1223, 52, -1845)
-local JungleB = CFrame.new(1301, 49, -1762)
+local function getTargetPositions(zoneName, questIndex)
+    if QuestTrackers[zoneName] and QuestTrackers[zoneName].Forever then
+        local tracker = QuestTrackers[zoneName].Forever[questIndex]
+        if tracker then
+            return CFrame.new(tracker.Position.X, tracker.Position.Y, tracker.Position.Z)
+        end
+    end
+    return nil
+end
 
 local function autoRun()
     while running do
         local ghostfin = hasGhostfin()
-        local ds = getProgress({"DeepSea","Available","Forever"}, QuestList.DeepSea.Forever)
-        local ej = getProgress({"ElementJungle","Available","Forever"}, QuestList.ElementJungle.Forever)
+        local deepSeaProgress = getProgress({"DeepSea","Available","Forever"}, QuestList.DeepSea.Forever)
+        local jungleProgress = getProgress({"ElementJungle","Available","Forever"}, QuestList.ElementJungle.Forever)
 
-        if not ghostfin and ds and not doneAll(ds) then
-            local target = DeepSeaA
-            if ds[1] then target = DeepSeaB end
-            if far(target,10) then tp(target) end
+        if not ghostfin and deepSeaProgress and not doneAll(deepSeaProgress) then
+            local questIndex = deepSeaProgress[1] and 2 or 1
+            local targetPosition = getTargetPositions("DeepSea", questIndex)
+            if targetPosition and far(targetPosition.Position, 10) then
+                teleport(targetPosition)
+            end
 
-        elseif ej and not doneAll(ej) then
-            local target = JungleA
-            if ej[1] then target = JungleB end
-            if far(target,10) then tp(target) end
+        elseif jungleProgress and not doneAll(jungleProgress) then
+            local questIndex = jungleProgress[1] and 2 or 1
+            local targetPosition = getTargetPositions("ElementJungle", questIndex)
+            if targetPosition and far(targetPosition.Position, 10) then
+                teleport(targetPosition)
+            end
 
         else
             running = false
-            AutoQuestToggle:Set(false)
+            if AutoQuestToggle then AutoQuestToggle:Set(false) end
             break
         end
 
@@ -749,9 +759,9 @@ end
 AutoQuestToggle = Tab3:Toggle({
     Title = "Auto Deep Sea → Element Jungle",
     Default = false,
-    Callback = function(v)
-        running = v
-        if v then
+    Callback = function(enabled)
+        running = enabled
+        if enabled then
             loopTask = task.spawn(autoRun)
         else
             if loopTask then
@@ -765,28 +775,31 @@ AutoQuestToggle = Tab3:Toggle({
 Tab3:Button({
     Title = "Check Quest Progress",
     Callback = function()
-        local txt = ""
-        local ds = data:Get({"DeepSea","Available","Forever"})
-        if ds then
-            txt = txt.."[Deep Sea]\n"
-            for i,v in ipairs(QuestList.DeepSea.Forever) do
-                local q = ds.Quests[i]
-                local c = q and q.Progress or 0
-                local m = v.Arguments.value
-                txt = txt..i..". "..v.DisplayName.." "..c.."/"..m.."\n"
+        local progressText = ""
+        
+        local deepSeaData = data:Get({"DeepSea","Available","Forever"})
+        if deepSeaData then
+            progressText = progressText .. "[Deep Sea]\n"
+            for i, questData in ipairs(QuestList.DeepSea.Forever) do
+                local quest = deepSeaData.Quests[i]
+                local current = quest and quest.Progress or 0
+                local required = questData.Arguments.value
+                progressText = progressText .. i .. ". " .. questData.DisplayName .. " " .. current .. "/" .. required .. "\n"
             end
         end
-        local ej = data:Get({"ElementJungle","Available","Forever"})
-        if ej then
-            txt = txt.."\n[Element Jungle]\n"
-            for i,v in ipairs(QuestList.ElementJungle.Forever) do
-                local q = ej.Quests[i]
-                local c = q and q.Progress or 0
-                local m = v.Arguments.value
-                txt = txt..i..". "..v.DisplayName.." "..c.."/"..m.."\n"
+        
+        local jungleData = data:Get({"ElementJungle","Available","Forever"})
+        if jungleData then
+            progressText = progressText .. "\n[Element Jungle]\n"
+            for i, questData in ipairs(QuestList.ElementJungle.Forever) do
+                local quest = jungleData.Quests[i]
+                local current = quest and quest.Progress or 0
+                local required = questData.Arguments.value
+                progressText = progressText .. i .. ". " .. questData.DisplayName .. " " .. current .. "/" .. required .. "\n"
             end
         end
-        WindUI:Notify({Title="Quest Progress",Content=txt,Duration=10})
+        
+        WindUI:Notify({Title = "Quest Progress", Content = progressText, Duration = 10})
     end
 })
 
@@ -2656,6 +2669,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
