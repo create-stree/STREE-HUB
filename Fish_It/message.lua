@@ -707,22 +707,25 @@ local rs = game:GetService("ReplicatedStorage")
 local players = game:GetService("Players")
 local player = players.LocalPlayer
 
-local QuestList = require(ReplicatedStorage.Shared.Quests.QuestList)
-local QuestUtility = require(ReplicatedStorage.Shared.Quests.QuestUtility)
-local Replion = require(rs.Packages.Replion)
+local Shared = rs:WaitForChild("Shared")
+local Quests = Shared:WaitForChild("Quests")
 
-local repl = nil
+local QuestList = require(Quests:WaitForChild("QuestList"))
+local QuestUtility = require(Quests:WaitForChild("QuestUtility"))
+local Replion = require(rs:WaitForChild("Packages"):WaitForChild("Replion"))
+
+local repl
 task.spawn(function()
     repl = Replion.Client:WaitReplion("Data")
 end)
 
 local function GetEJ()
-    if not repl then return nil end
+    if not repl then return end
     return repl:Get(QuestList.ElementJungle.ReplionPath)
 end
 
 local function GetDeepSea()
-    if not repl then return nil end
+    if not repl then return end
     return repl:Get(QuestList.DeepSea.ReplionPath)
 end
 
@@ -732,7 +735,7 @@ _G.CheckEJ = function()
         WindUI:Notify({Title="Element Jungle",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
         return
     end
-    
+
     local quests = data.Available.Forever.Quests
     local total = #quests
     local done = 0
@@ -741,14 +744,14 @@ _G.CheckEJ = function()
     for _,q in ipairs(quests) do
         local info = QuestUtility:GetQuestData("ElementJungle","Forever",q.QuestId)
         if info then
-            local maxVal = QuestUtility.GetQuestValue(repl,info)
-            local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
-            if percent>=100 then done+=1 end
-            list = list..info.DisplayName.." - "..percent.."%\n"
+            local maxVal = QuestUtility.GetQuestValue(repl, info)
+            local percent = math.floor(math.clamp(q.Progress / maxVal, 0, 1) * 100)
+            if percent >= 100 then done += 1 end
+            list ..= info.DisplayName .. " - " .. percent .. "%\n"
         end
     end
 
-    local totalPercent = math.floor((done/total)*100)
+    local totalPercent = math.floor((done / total) * 100)
     WindUI:Notify({
         Title="Element Jungle Progress",
         Content="Total: "..totalPercent.."%\n\n"..list,
@@ -772,14 +775,14 @@ _G.CheckQuestProgress = function()
     for _,q in ipairs(quests) do
         local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
         if info then
-            local maxVal = QuestUtility.GetQuestValue(repl,info)
-            local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
-            if percent>=100 then done+=1 end
-            list = list..info.DisplayName.." - "..percent.."%\n"
+            local maxVal = QuestUtility.GetQuestValue(repl, info)
+            local percent = math.floor(math.clamp(q.Progress / maxVal, 0, 1) * 100)
+            if percent >= 100 then done += 1 end
+            list ..= info.DisplayName .. " - " .. percent .. "%\n"
         end
     end
 
-    local totalPercent = math.floor((done/total)*100)
+    local totalPercent = math.floor((done / total) * 100)
     WindUI:Notify({
         Title="Deep Sea Progress",
         Content="Total: "..totalPercent.."%\n\n"..list,
@@ -2685,6 +2688,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
