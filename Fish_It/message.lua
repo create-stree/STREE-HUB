@@ -1,7 +1,3 @@
-loadstring([[
-    function LPH_NO_VIRTUALIZE(f) return f end;
-]])();
-
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
@@ -26,35 +22,65 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,
         Anonymous = true,
-        Callback = function()
-            WindUI:SetTheme("Dark")
-        end,
     },
 })
 
 Window:EditOpenButton({
-    Title = "STREE HUB",
-    Icon = "rbxassetid://122683047852451",
-    CornerRadius = UDim.new(0,16),
-    StrokeThickness = 2,
-    Color = ColorSequence.new(
-        Color3.fromHex("#000000"), 
-        Color3.fromHex("#39FF14")
-    ),
-    OnlyMobile = true,
-    Enabled = true,
-    Draggable = true,
+    Enabled = false,
 })
 
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local G2L = {}
+
+G2L["ScreenGui_1"] = Instance.new("ScreenGui")
+G2L["ScreenGui_1"].Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+CollectionService:AddTag(G2L["ScreenGui_1"], "main")
+
+G2L["ButtonRezise_2"] = Instance.new("ImageButton")
+G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
+G2L["ButtonRezise_2"].BorderSizePixel = 0
+G2L["ButtonRezise_2"].Draggable = true
+G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+G2L["ButtonRezise_2"].Size = UDim2.new(0, 60, 0, 60)
+G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
+
+local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
+corner.CornerRadius = UDim.new(0, 8)
+
+local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
+neon.Thickness = 2
+neon.Color = Color3.fromRGB(0, 255, 0)
+neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
+    G2L["ButtonRezise_2"].Visible = false
+    Window:Open()
+end)
+
+Window:OnClose(function()
+    G2L["ButtonRezise_2"].Visible = true
+end)
+
+Window:OnDestroy(function()
+    G2L["ButtonRezise_2"].Visible = false
+end)
+
+G2L["ButtonRezise_2"].Visible = false
+
+G2L["ButtonRezise_2"].Visible = false
+
 Window:Tag({
-    Title = "v0.0.2.5",
+    Title = "Version",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Premium",
-    Color = Color3.fromRGB(138, 43, 226),
+    Title = "Dev",
+    Color = Color3.fromRGB(0, 0, 0),
     Radius = 17,
 })
 
@@ -90,21 +116,20 @@ Tab1:Button({
 })
 
 Tab1:Button({
-    Title = "Website",
+    Title = "WhatsApp",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app/")
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
         end
     end
 })
 
 Tab1:Divider()
 
-Tab1:Section({
-    Title = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
-    TextXAlignment = "Left",
-    TextSize = 17,
+Tab1:Paragraph({
+    Title = "Support",
+    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
 Tab1:Divider()
@@ -2628,4 +2653,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
