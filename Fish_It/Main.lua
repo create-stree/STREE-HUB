@@ -1243,7 +1243,7 @@ function sendNewFishWebhook(newlyCaughtFish)
         embeds = {{
             title = "StreeHub Fish caught!",
             description = string.format("Congrats! **%s** You obtained new **%s** here for full detail fish :", playerName, newFishRarity),
-            url = "https://discord.gg/vorahub",
+            url = "https://discord.gg/jdmX43t5mY",
             color = 65280,
             fields = {
                 { name = "Name Fish :",        value = "```\n"..newFishDetails.Name.."```" },
@@ -1256,7 +1256,7 @@ function sendNewFishWebhook(newlyCaughtFish)
             },
             footer = {
                 text = "StreeHub Webhook",
-                icon_url = "https://cdn.discordapp.com/attachments/1449595260656287867/1450267367991935181/Tak_berjudul71_20251212095602.png?ex=6941ea3d&is=694098bd&hm=2b814db98a402c7be890ae80fc23499abe95bcc2c209abbdc8871c5601295136&f5fe"
+                icon_url = "https://cdn.discordapp.com/attachments/1449595260656287867/1450267367991935181/Tak_berjudul71_20251212095602.png?ex=6941ea3d&is=694098bd&hm=2b814db98a402c7be890ae80fc23499abe95bcc2c209abbdc8871c5601295136&"
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z"),
             thumbnail = {
@@ -2284,4 +2284,5 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
