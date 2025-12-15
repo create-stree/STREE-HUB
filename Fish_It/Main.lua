@@ -1470,7 +1470,7 @@ Tab4:Section({
     TextSize = 17,
 })
 
-Tab5:Divider()
+Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
@@ -1572,7 +1572,7 @@ Tab5:Section({
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
@@ -2284,4 +2284,3 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
