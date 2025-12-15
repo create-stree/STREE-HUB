@@ -1201,7 +1201,7 @@ function sendTestWebhook()
 
     local payload = {
         username = "StreeHub Webhook",
-        avatar_url = "https://cdn.discordapp.com/attachments/1434789394929287178/1448926732705988659/Swuppie.jpg?ex=693d09ac&is=693bb82c&hm=88d4c68207470eb4abc79d9b68227d85171aded5d3d99e9a76edcd823862f5fe",
+        avatar_url = "https://cdn.discordapp.com/attachments/1449595260656287867/1450267367991935181/Tak_berjudul71_20251212095602.png?ex=6941ea3d&is=694098bd&hm=2b814db98a402c7be890ae80fc23499abe95bcc2c209abbdc8871c5601295136&",
         embeds = {{
             title = "Test Webhook Connected",
             description = "Webhook connection successful!",
@@ -2284,5 +2284,6 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
