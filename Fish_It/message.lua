@@ -657,93 +657,94 @@ local rs = game:GetService("ReplicatedStorage")
 local players = game:GetService("Players")
 local player = players.LocalPlayer
 
-local QuestList = require(rs.Shared.Quests.QuestList)
-local QuestUtility = require(rs.Shared.Quests.QuestUtility)
-local Replion = require(rs.Packages.Replion)
+local Shared = rs:WaitForChild("Shared")
+local QuestListModule = Shared:FindFirstChild("QuestList")
+local QuestUtilityModule = Shared:FindFirstChild("QuestUtility")
 
-local repl = nil
-task.spawn(function()
-    repl = Replion.Client:WaitReplion("Data")
-end)
-
-local function GetEJ()
-    if not repl then return nil end
-    return repl:Get(QuestList.ElementJungle.ReplionPath)
-end
-
-local function GetDeepSea()
-    if not repl then return nil end
-    return repl:Get(QuestList.DeepSea.ReplionPath)
-end
-
-_G.CheckEJ = function()
-    local data = GetEJ()
-    if not data or not data.Available or not data.Available.Forever then
-        WindUI:Notify({Title="Element Jungle",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
-        return
-    end
-    
-    local quests = data.Available.Forever.Quests
-    local total = #quests
-    local done = 0
-    local list = ""
-
-    for _,q in ipairs(quests) do
-        local info = QuestUtility:GetQuestData("ElementJungle","Forever",q.QuestId)
-        if info then
-            local maxVal = QuestUtility.GetQuestValue(repl,info)
-            local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
-            if percent>=100 then done+=1 end
-            list = list..info.DisplayName.." - "..percent.."%\n"
-        end
-    end
-
-    local totalPercent = math.floor((done/total)*100)
+if not QuestListModule or not QuestUtilityModule then
     WindUI:Notify({
-        Title="Element Jungle Progress",
-        Content="Total: "..totalPercent.."%\n\n"..list,
-        Duration=7,
-        Icon="leaf"
+        Title = "Quest",
+        Content = "Quest module not found",
+        Duration = 4,
+        Icon = "alert-circle"
     })
-end
+else
+    local QuestList = require(QuestListModule)
+    local QuestUtility = require(QuestUtilityModule)
+    local Replion = require(rs.Packages.Replion)
 
-_G.CheckQuestProgress = function()
-    local data = GetDeepSea()
-    if not data or not data.Available or not data.Available.Forever then
-        WindUI:Notify({Title="Deep Sea Quest",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
-        return
+    local repl = nil
+    task.spawn(function()
+        repl = Replion.Client:WaitReplion("Data")
+    end)
+
+    local function GetQuest(path)
+        if not repl then return nil end
+        return repl:Get(path)
     end
 
-    local quests = data.Available.Forever.Quests
-    local total = #quests
-    local done = 0
-    local list = ""
+    _G.CheckEJ = function()
+        local q = QuestList.ElementJungle
+        if not q then return end
 
-    for _,q in ipairs(quests) do
-        local info = QuestUtility:GetQuestData("DeepSea","Forever",q.QuestId)
-        if info then
-            local maxVal = QuestUtility.GetQuestValue(repl,info)
-            local percent = math.floor(math.clamp(q.Progress/maxVal,0,1)*100)
-            if percent>=100 then done+=1 end
-            list = list..info.DisplayName.." - "..percent.."%\n"
+        local data = GetQuest(q.ReplionPath)
+        if not data or not data.Available or not data.Available.Forever then
+            WindUI:Notify({Title="Element Jungle",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
+            return
         end
+
+        local quests = data.Available.Forever.Quests
+        local total, done, list = #quests, 0, ""
+
+        for _,v in ipairs(quests) do
+            local info = QuestUtility:GetQuestData("ElementJungle","Forever",v.QuestId)
+            if info then
+                local maxVal = QuestUtility.GetQuestValue(repl,info)
+                local p = math.floor(math.clamp(v.Progress/maxVal,0,1)*100)
+                if p >= 100 then done += 1 end
+                list ..= info.DisplayName.." - "..p.."%\n"
+            end
+        end
+
+        WindUI:Notify({
+            Title="Element Jungle Progress",
+            Content="Total: "..math.floor((done/total)*100).."%\n\n"..list,
+            Duration=7,
+            Icon="leaf"
+        })
     end
 
-    local totalPercent = math.floor((done/total)*100)
-    WindUI:Notify({
-        Title="Deep Sea Progress",
-        Content="Total: "..totalPercent.."%\n\n"..list,
-        Duration=7,
-        Icon="check-circle"
-    })
+    _G.CheckQuestProgress = function()
+        local q = QuestList.DeepSea
+        if not q then return end
+
+        local data = GetQuest(q.ReplionPath)
+        if not data or not data.Available or not data.Available.Forever then
+            WindUI:Notify({Title="Deep Sea Quest",Content="Quest tidak ditemukan",Duration=4,Icon="alert-circle"})
+            return
+        end
+
+        local quests = data.Available.Forever.Quests
+        local total, done, list = #quests, 0, ""
+
+        for _,v in ipairs(quests) do
+            local info = QuestUtility:GetQuestData("DeepSea","Forever",v.QuestId)
+            if info then
+                local maxVal = QuestUtility.GetQuestValue(repl,info)
+                local p = math.floor(math.clamp(v.Progress/maxVal,0,1)*100)
+                if p >= 100 then done += 1 end
+                list ..= info.DisplayName.." - "..p.."%\n"
+            end
+        end
+
+        WindUI:Notify({
+            Title="Deep Sea Progress",
+            Content="Total: "..math.floor((done/total)*100).."%\n\n"..list,
+            Duration=7,
+            Icon="check-circle"
+        })
+    end
 end
-
-task.spawn(function()
-    while task.wait(5) do
-        if _G.AutoNotifyEJ then _G.CheckEJ() end
-        if _G.AutoNotifyQuest then _G.CheckQuestProgress() end
-    end
-end)
 
 Tab3:Section({
     Title="Quest",
@@ -776,7 +777,9 @@ Tab3:Button({
     Title="Element Jungle Quest",
     Desc="Check Progres Progres Element Junggle",
     Callback=function()
-        _G.CheckEJ()
+        if _G.CheckEJ then
+            _G.CheckEJ()
+        end
     end
 })
 
@@ -784,9 +787,69 @@ Tab3:Button({
     Title="Deep Sea Quest",
     Desc="Check Progres Deep Sea",
     Callback=function()
-        _G.CheckQuestProgress()
+        if _G.CheckQuestProgress then
+            _G.CheckQuestProgress()
+        end
     end
 })
+
+Tab3:Paragraph({
+    Title = "Quest Progress",
+    Desc = "Loading...",
+    RichText = true
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local txt = ""
+
+        if _G.CheckEJ and repl then
+            local q = QuestList.ElementJungle
+            if q then
+                local d = repl:Get(q.ReplionPath)
+                if d and d.Available and d.Available.Forever then
+                    local done,total = 0,#d.Available.Forever.Quests
+                    for _,v in ipairs(d.Available.Forever.Quests) do
+                        local info = QuestUtility:GetQuestData("ElementJungle","Forever",v.QuestId)
+                        if info then
+                            local maxVal = QuestUtility.GetQuestValue(repl,info)
+                            local p = math.floor(math.clamp(v.Progress/maxVal,0,1)*100)
+                            if p >= 100 then done += 1 end
+                            txt ..= "🌿 "..info.DisplayName.." : "..p.."%\n"
+                        end
+                    end
+                    txt ..= "\nElement Jungle Total : "..math.floor((done/total)*100).."%\n\n"
+                end
+            end
+        end
+
+        if _G.CheckQuestProgress and repl then
+            local q = QuestList.DeepSea
+            if q then
+                local d = repl:Get(q.ReplionPath)
+                if d and d.Available and d.Available.Forever then
+                    local done,total = 0,#d.Available.Forever.Quests
+                    for _,v in ipairs(d.Available.Forever.Quests) do
+                        local info = QuestUtility:GetQuestData("DeepSea","Forever",v.QuestId)
+                        if info then
+                            local maxVal = QuestUtility.GetQuestValue(repl,info)
+                            local p = math.floor(math.clamp(v.Progress/maxVal,0,1)*100)
+                            if p >= 100 then done += 1 end
+                            txt ..= "🌊 "..info.DisplayName.." : "..p.."%\n"
+                        end
+                    end
+                    txt ..= "\nDeep Sea Total : "..math.floor((done/total)*100).."%"
+                end
+            end
+        end
+
+        if txt == "" then
+            txt = "Quest data not available"
+        end
+
+        QuestParagraph:SetDesc(txt)
+    end
+end)
 
 Tab3:Section({     
     Title = "Gameplay",
@@ -806,7 +869,6 @@ Tab3:Toggle({
     Callback = function(state)
         _G.FPSBoost = state
         local Lighting = game:GetService("Lighting")
-        local Terrain = workspace:FindFirstChildOfClass("Terrain")
 
         if state then
             if not _G.OldSettings then
@@ -816,42 +878,29 @@ Tab3:Toggle({
                     Brightness = Lighting.Brightness,
                     Ambient = Lighting.Ambient,
                     OutdoorAmbient = Lighting.OutdoorAmbient,
-                    WaterReflectance = Lighting.WaterReflectance,
-                    WaterTransparency = Lighting.WaterTransparency,
-                    WaterWaveSize = Lighting.WaterWaveSize,
-                    WaterWaveSpeed = Lighting.WaterWaveSpeed,
+                    ColorShift_Top = Lighting.ColorShift_Top,
+                    ColorShift_Bottom = Lighting.ColorShift_Bottom
                 }
             end
 
             Lighting.GlobalShadows = false
             Lighting.FogEnd = 1e10
-            Lighting.Brightness = 1
-            Lighting.Ambient = Color3.new(1, 1, 1)
-            Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
-            Lighting.WaterReflectance = 0
-            Lighting.WaterTransparency = 1
-            Lighting.WaterWaveSize = 0
-            Lighting.WaterWaveSpeed = 0
+            Lighting.Brightness = 0
+            Lighting.Ambient = Color3.new(1,1,1)
+            Lighting.OutdoorAmbient = Color3.new(1,1,1)
+            Lighting.ColorShift_Top = Color3.new(0,0,0)
+            Lighting.ColorShift_Bottom = Color3.new(0,0,0)
 
-            if Terrain then
-                Terrain.WaterReflectance = 0
-                Terrain.WaterTransparency = 1
-                Terrain.WaterWaveSize = 0
-                Terrain.WaterWaveSpeed = 0
-            end
-
-            for _, v in ipairs(workspace:GetDescendants()) do
+            for _,v in ipairs(workspace:GetDescendants()) do
                 if v:IsA("BasePart") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    v.Color = Color3.new(1,1,1)
                     v.CastShadow = false
-                    if v.Material == Enum.Material.Glass or v.Material == Enum.Material.SmoothPlastic then
-                        v.Reflectance = 0
-                    end
+                    v.Reflectance = 0
+                elseif v:IsA("Light") then
+                    v.Enabled = false
                 elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
                     v.Enabled = false
-                elseif v:IsA("Explosion") then
-                    v.Visible = false
-                    v.BlastPressure = 0
-                    v.BlastRadius = 0
                 end
             end
         else
@@ -861,14 +910,14 @@ Tab3:Toggle({
                 Lighting.Brightness = _G.OldSettings.Brightness
                 Lighting.Ambient = _G.OldSettings.Ambient
                 Lighting.OutdoorAmbient = _G.OldSettings.OutdoorAmbient
-                Lighting.WaterReflectance = _G.OldSettings.WaterReflectance
-                Lighting.WaterTransparency = _G.OldSettings.WaterTransparency
-                Lighting.WaterWaveSize = _G.OldSettings.WaterWaveSize
-                Lighting.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
+                Lighting.ColorShift_Top = _G.OldSettings.ColorShift_Top
+                Lighting.ColorShift_Bottom = _G.OldSettings.ColorShift_Bottom
             end
 
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            for _,v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("Light") then
+                    v.Enabled = true
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
                     v.Enabled = true
                 elseif v:IsA("BasePart") then
                     v.CastShadow = true
@@ -2653,6 +2702,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
