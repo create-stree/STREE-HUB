@@ -1311,6 +1311,59 @@ Tab3:Button({
     Callback = sendTestWebhook
 })
 
+Tab3:Section({
+    Title = "Event",
+    Icon = "candy-cane",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+Tab3:Divider()
+
+local RS = game:GetService("ReplicatedStorage")
+local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
+
+local NPCs = {
+    "Alien Merchant",
+    "Billy Bob",
+    "Seth",
+    "Joe",
+    "Aura Kid",
+    "Boat Expert",
+    "Scott",
+    "Ron",
+    "Jeffery",
+    "McBoatson",
+    "Scientist",
+    "Silly Fisherman",
+    "Tim",
+    "Santa"
+}
+
+_G.AutoClaimChristmas = false
+
+Tab3:Toggle({
+    Title = "Auto Claim",
+    Desc = "Auto Claim Christmas Presents",
+    Value = false,
+    Callback = function(state)
+        _G.AutoClaimChristmas = state
+
+        task.spawn(function()
+            while _G.AutoClaimChristmas do
+                for _, npc in ipairs(NPCs) do
+                    if not _G.AutoClaimChristmas then break end
+                    pcall(function()
+                        Remote:InvokeServer(npc, "ChristmasPresents")
+                    end)
+                    task.wait(0.15)
+                end
+                task.wait(2)
+            end
+        end)
+    end
+})
+
 local Tab4 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
@@ -2284,6 +2337,7 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
