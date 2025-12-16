@@ -671,8 +671,11 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.FPSBoost = state
+
         local Lighting = game:GetService("Lighting")
         local Terrain = workspace:FindFirstChildOfClass("Terrain")
+
+        _G._FPSObjects = _G._FPSObjects or {}
 
         if state then
             if not _G.OldSettings then
@@ -682,42 +685,50 @@ Tab3:Toggle({
                     Brightness = Lighting.Brightness,
                     Ambient = Lighting.Ambient,
                     OutdoorAmbient = Lighting.OutdoorAmbient,
-                    WaterReflectance = Lighting.WaterReflectance,
-                    WaterTransparency = Lighting.WaterTransparency,
-                    WaterWaveSize = Lighting.WaterWaveSize,
-                    WaterWaveSpeed = Lighting.WaterWaveSpeed,
+                    ColorShift_Top = Lighting.ColorShift_Top,
+                    ColorShift_Bottom = Lighting.ColorShift_Bottom,
+                    WaterTransparency = Terrain and Terrain.WaterTransparency,
+                    WaterReflectance = Terrain and Terrain.WaterReflectance,
+                    WaterWaveSize = Terrain and Terrain.WaterWaveSize,
+                    WaterWaveSpeed = Terrain and Terrain.WaterWaveSpeed
                 }
             end
 
             Lighting.GlobalShadows = false
             Lighting.FogEnd = 1e10
-            Lighting.Brightness = 1
-            Lighting.Ambient = Color3.new(1, 1, 1)
-            Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
-            Lighting.WaterReflectance = 0
-            Lighting.WaterTransparency = 1
-            Lighting.WaterWaveSize = 0
-            Lighting.WaterWaveSpeed = 0
+            Lighting.Brightness = 0
+            Lighting.Ambient = Color3.new(1,1,1)
+            Lighting.OutdoorAmbient = Color3.new(1,1,1)
+            Lighting.ColorShift_Top = Color3.new(0,0,0)
+            Lighting.ColorShift_Bottom = Color3.new(0,0,0)
 
             if Terrain then
-                Terrain.WaterReflectance = 0
                 Terrain.WaterTransparency = 1
+                Terrain.WaterReflectance = 0
                 Terrain.WaterWaveSize = 0
                 Terrain.WaterWaveSpeed = 0
             end
 
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CastShadow = false
-                    if v.Material == Enum.Material.Glass or v.Material == Enum.Material.SmoothPlastic then
+            for _,v in ipairs(workspace:GetDescendants()) do
+                if not _G._FPSObjects[v] then
+                    if v:IsA("BasePart") then
+                        _G._FPSObjects[v] = {
+                            Material = v.Material,
+                            Color = v.Color,
+                            CastShadow = v.CastShadow,
+                            Reflectance = v.Reflectance
+                        }
+                        v.Material = Enum.Material.SmoothPlastic
+                        v.Color = Color3.new(1,1,1)
+                        v.CastShadow = false
                         v.Reflectance = 0
+                    elseif v:IsA("Light") then
+                        _G._FPSObjects[v] = {Enabled = v.Enabled}
+                        v.Enabled = false
+                    elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                        _G._FPSObjects[v] = {Enabled = v.Enabled}
+                        v.Enabled = false
                     end
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = false
-                elseif v:IsA("Explosion") then
-                    v.Visible = false
-                    v.BlastPressure = 0
-                    v.BlastRadius = 0
                 end
             end
         else
@@ -727,19 +738,31 @@ Tab3:Toggle({
                 Lighting.Brightness = _G.OldSettings.Brightness
                 Lighting.Ambient = _G.OldSettings.Ambient
                 Lighting.OutdoorAmbient = _G.OldSettings.OutdoorAmbient
-                Lighting.WaterReflectance = _G.OldSettings.WaterReflectance
-                Lighting.WaterTransparency = _G.OldSettings.WaterTransparency
-                Lighting.WaterWaveSize = _G.OldSettings.WaterWaveSize
-                Lighting.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
-            end
+                Lighting.ColorShift_Top = _G.OldSettings.ColorShift_Top
+                Lighting.ColorShift_Bottom = _G.OldSettings.ColorShift_Bottom
 
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = true
-                elseif v:IsA("BasePart") then
-                    v.CastShadow = true
+                if Terrain then
+                    Terrain.WaterTransparency = _G.OldSettings.WaterTransparency
+                    Terrain.WaterReflectance = _G.OldSettings.WaterReflectance
+                    Terrain.WaterWaveSize = _G.OldSettings.WaterWaveSize
+                    Terrain.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
                 end
             end
+
+            for obj,data in pairs(_G._FPSObjects) do
+                if obj and obj.Parent then
+                    if obj:IsA("BasePart") then
+                        obj.Material = data.Material
+                        obj.Color = data.Color
+                        obj.CastShadow = data.CastShadow
+                        obj.Reflectance = data.Reflectance
+                    elseif obj:IsA("Light") or obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                        obj.Enabled = data.Enabled
+                    end
+                end
+            end
+
+            table.clear(_G._FPSObjects)
         end
     end
 })
@@ -2522,8 +2545,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
-
