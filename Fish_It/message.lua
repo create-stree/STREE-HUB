@@ -933,6 +933,8 @@ Tab3:Section({
     TextSize = 17,
 })
 
+Tab3:Divider()
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Data = require(ReplicatedStorage.Packages.Replion).Client:WaitReplion("Data")
 local ItemUtility = require(ReplicatedStorage.Shared.ItemUtility)
@@ -1210,6 +1212,8 @@ Tab4:Section({
 	TextXAlignment = "Left",
 	TextSize = 17 
 })
+
+Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
@@ -2514,6 +2518,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
