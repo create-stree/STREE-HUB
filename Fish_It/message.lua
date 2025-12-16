@@ -29,6 +29,10 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+Window:EditOpenButton({
+    Enabled = false,
+})
+
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local G2L = {}
@@ -2518,6 +2522,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
