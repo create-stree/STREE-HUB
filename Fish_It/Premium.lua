@@ -1235,6 +1235,8 @@ Tab3:Section({
     TextSize = 17
 })
 
+Tab3:Divider()
+
 local RS = game:GetService("ReplicatedStorage")
 local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
 
@@ -2598,6 +2600,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
