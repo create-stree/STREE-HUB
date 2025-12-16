@@ -940,7 +940,7 @@ function getCurrentRodEnchant()
     return nil
 end
 
-Tab3:Paragraph({
+local Paragraph = Tab3:Paragraph({
     Title = "Enchanting Features",
     Desc = "Loading...",
     RichText = true
@@ -1108,6 +1108,7 @@ Tab3:Button({
     end
 })
 
+
 Tab3:Section({ 
 	Title = "Webhook Fish Caught",
 	Icon = "webhook",
@@ -1201,7 +1202,7 @@ function sendTestWebhook()
 
     local payload = {
         username = "StreeHub Webhook",
-        avatar_url = "https://cdn.discordapp.com/attachments/1449595260656287867/1450267367991935181/Tak_berjudul71_20251212095602.png?ex=6941ea3d&is=694098bd&hm=2b814db98a402c7be890ae80fc23499abe95bcc2c209abbdc8871c5601295136&",
+        avatar_url = "https://cdn.discordapp.com/attachments/1430527420468953159/1450326233844940904/1752815705447-1000034555-1.png?ex=6942210f&is=6940cf8f&hm=582f526e0391329af202628cfbb3d17780626252e107defd4a5421573d3b7b4b",
         embeds = {{
             title = "Test Webhook Connected",
             description = "Webhook connection successful!",
@@ -1256,7 +1257,7 @@ function sendNewFishWebhook(newlyCaughtFish)
             },
             footer = {
                 text = "StreeHub Webhook",
-                icon_url = "https://cdn.discordapp.com/attachments/1449595260656287867/1450267367991935181/Tak_berjudul71_20251212095602.png?ex=6941ea3d&is=694098bd&hm=2b814db98a402c7be890ae80fc23499abe95bcc2c209abbdc8871c5601295136&"
+                icon_url = "https://cdn.discordapp.com/attachments/1430527420468953159/1450326233844940904/1752815705447-1000034555-1.png?ex=6942210f&is=6940cf8f&hm=582f526e0391329af202628cfbb3d17780626252e107defd4a5421573d3b7b4b"
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z"),
             thumbnail = {
@@ -1264,7 +1265,7 @@ function sendNewFishWebhook(newlyCaughtFish)
             }
         }},
         username = "StreeHub Webhook",
-        avatar_url = "https://cdn.discordapp.com/attachments/1449595260656287867/1450267367991935181/Tak_berjudul71_20251212095602.png?ex=6941ea3d&is=694098bd&hm=2b814db98a402c7be890ae80fc23499abe95bcc2c209abbdc8871c5601295136&",
+        avatar_url = "https://cdn.discordapp.com/attachments/1430527420468953159/1450326233844940904/1752815705447-1000034555-1.png?ex=6942210f&is=6940cf8f&hm=582f526e0391329af202628cfbb3d17780626252e107defd4a5421573d3b7b4b",
         attachments = {}
     }
 
@@ -1310,6 +1311,32 @@ Tab3:Button({
     Title = "Test Webhook",
     Callback = sendTestWebhook
 })
+
+buildFishDatabase()
+
+spawn( LPH_NO_VIRTUALIZE( function()
+    local initialFishList = getInventoryFish()
+    for _, fish in ipairs(initialFishList) do
+        if fish and fish.UUID then
+            knownFishUUIDs[fish.UUID] = true
+        end
+    end
+end))
+
+spawn( LPH_NO_VIRTUALIZE( function()
+    while wait(0.1) do
+        if _G.DetectNewFishActive then
+            local currentFishList = getInventoryFish()
+            for _, fish in ipairs(currentFishList) do
+                if fish and fish.UUID and not knownFishUUIDs[fish.UUID] then
+                    knownFishUUIDs[fish.UUID] = true
+                    sendNewFishWebhook(fish)
+                end
+            end
+        end
+        wait(3)
+    end
+end))
 
 Tab3:Section({
     Title = "Event",
@@ -2339,6 +2366,7 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
