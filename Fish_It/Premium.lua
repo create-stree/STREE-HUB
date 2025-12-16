@@ -1228,6 +1228,57 @@ Tab3:Button({
     end
 })
 
+Tab3:Section({
+    Title = "Event",
+    Icon = "candy-cane",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+local RS = game:GetService("ReplicatedStorage")
+local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
+
+local NPCs = {
+    "Alien Merchant",
+    "Billy Bob",
+    "Seth",
+    "Joe",
+    "Aura Kid",
+    "Boat Expert",
+    "Scott",
+    "Ron",
+    "Jeffery",
+    "McBoatson",
+    "Scientist",
+    "Silly Fisherman",
+    "Tim",
+    "Santa"
+}
+
+_G.AutoClaimChristmas = false
+
+Tab3:Toggle({
+    Title = "Auto Claim",
+    Desc = "Auto Claim Christmas Presents",
+    Value = false,
+    Callback = function(state)
+        _G.AutoClaimChristmas = state
+
+        task.spawn(function()
+            while _G.AutoClaimChristmas do
+                for _, npc in ipairs(NPCs) do
+                    if not _G.AutoClaimChristmas then break end
+                    pcall(function()
+                        Remote:InvokeServer(npc, "ChristmasPresents")
+                    end)
+                    task.wait(0.15)
+                end
+                task.wait(2)
+            end
+        end)
+    end
+})
+
 local Tab4 = Window:Tab({
 	Title = "Exclusive",
 	Icon = "star"
@@ -1834,6 +1885,7 @@ Tab6:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
+	["Christmas Island"] = Vector3.new(708.17, 16.08, 1567.35),
 	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
@@ -1842,7 +1894,7 @@ local IslandLocations = {
 	["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
@@ -1886,9 +1938,10 @@ Tab6:Divider()
 
 local FishingLocations = {
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
+	["Christmas Lake"] = Vector3.new(1136.29, 23.72, 1562.07),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
-    ["Konoha"] = Vector3.new(-603, 3, 719),
+    ["Kohana"] = Vector3.new(-603, 3, 719),
 	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
 	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
     ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
@@ -2545,3 +2598,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
