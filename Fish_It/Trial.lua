@@ -83,7 +83,7 @@ Window:Tag({
 })
 
 Window:Tag({
-    Title = "Premium",
+    Title = "Premium (Trial)",
     Color = Color3.fromRGB(138, 43, 226),
     Radius = 17,
 })
@@ -2626,4 +2626,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
