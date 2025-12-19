@@ -1281,57 +1281,6 @@ Tab3:Toggle({
     end
 })
 
-local RS = game:GetService("ReplicatedStorage")
-local Remote = RS.Packages._Index
-    :FindFirstChild("sleitnick_net@0.2.0")
-    .net:FindFirstChild("RF/SpecialDialogueEvent")
-
-local NPCs = {
-    "Alien Merchant",
-    "Billy Bob",
-    "Seth",
-    "Joe",
-    "Aura Kid",
-    "Boat Expert",
-    "Scott",
-    "Ron",
-    "Jeffery",
-    "McBoatson",
-    "Scientist",
-    "Silly Fisherman",
-    "Tim",
-    "Santa",
-    "Shedletsky",
-    "Merely",
-    "Guest",
-    "Builderman",
-    "John Doe",
-    "Stickmasterluke"
-}
-
-_G.InfCandy = false
-
-Tab3:Toggle({
-    Title = "Inf Candy",
-    Desc = "Loop Christmas Candy",
-    Value = false,
-    Callback = function(state)
-        _G.InfCandy = state
-
-        task.spawn(function()
-            while _G.InfCandy do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.InfCandy then break end
-                    pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
-                    end)
-                    task.wait(0.1)
-                end
-            end
-        end)
-    end
-})
-
 local Tab4 = Window:Tab({
 	Title = "Exclusive",
 	Icon = "star"
@@ -2677,6 +2626,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
