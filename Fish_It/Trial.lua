@@ -384,6 +384,59 @@ player.CharacterAdded:Connect(function(char)
     end
 end)
 
+local stopAnimConnections = {}
+
+local function setGameAnimationsEnabled(state)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    for _, conn in pairs(stopAnimConnections) do
+        conn:Disconnect()
+    end
+
+    stopAnimConnections = {}
+    if state then
+        for _, track in ipairs(humanoid:FindFirstChildOfClass("Animator"):GetPlayingAnimationTracks()) do
+            track:Stop(0)
+        end
+
+        local conn = humanoid:FindFirstChildOfClass("Animator").AnimationPlayed:Connect(function(track)
+            task.defer(function()
+                track:Stop(0)
+            end)
+        end)
+
+        table.insert(stopAnimConnections, conn)
+        WindUI:Notify({
+            Title = "Animation Disabled",
+            Content = "All animations from the game have been disabled..",
+            Duration = 4,
+            Icon = "pause-circle"
+        })
+    else
+        for _, conn in pairs(stopAnimConnections) do
+            conn:Disconnect()
+        end
+        stopAnimConnections = {}
+        WindUI:Notify({
+            Title = "Animation Enabled",
+            Content = "Animations from the game are reactivated.",
+            Duration = 4,
+            Icon = "play-circle"
+        })
+    end
+end
+
+Tab2:Toggle({
+    Title = "No Animation",
+    Desc = "Stop all animations from the game.",
+    Value = false,
+    Callback = function(v)
+        setGameAnimationsEnabled(v)
+    end
+})
+
 _G.AutoFishing = false
 _G.AutoEquipRod = false
 _G.AutoSell = false
@@ -2626,5 +2679,6 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
