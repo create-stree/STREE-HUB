@@ -1432,6 +1432,55 @@ local z6 = Tab4:Input({
 })
 
 local Section = Tab4:Section({
+	Title = "Premium",
+	Icon = "gem",
+	TextXAlignment = "Left",
+	TextSize = 17
+})
+
+local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
+
+local ORI = {
+    H = VFX.Handle,
+    P = VFX.RenderAtPoint,
+    I = VFX.RenderInstance
+}
+
+graphic:Toggle({
+    Title = "Remove Skin Effect",
+    Desc = "Remove Your Skin Effect",
+    Default = false,
+    Callback = function(state)
+        if state then
+            VFX.Handle = function() end
+            VFX.RenderAtPoint = function() end
+            VFX.RenderInstance = function() end
+
+            local f = workspace:FindFirstChild("CosmeticFolder")
+            if f then
+                pcall(f.ClearAllChildren, f)
+            end
+
+            WindUI:Notify({
+                Title = "Skin Effect Disabled",
+                Duration = 3,
+                Icon = "eye-off"
+            })
+        else
+            VFX.Handle = ORI.H
+            VFX.RenderAtPoint = ORI.P
+            VFX.RenderInstance = ORI.I
+
+            WindUI:Notify({
+                Title = "Skin Effect Enabled",
+                Duration = 3,
+                Icon = "eye"
+            })
+        end
+    end
+})
+
+local Section = Tab4:Section({
 	Title = "Gift",
 	Icon = "gift",
 	TextXAlignment = "Left",
@@ -2591,6 +2640,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
