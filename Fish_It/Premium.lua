@@ -1516,67 +1516,6 @@ Tab4:Button({
     end
 })
 
-local Section = Tab4:Section({
-	Title = "Totem",
-	Icon = "atom",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local PlaceTotem = Net["RE/PlaceCavernTotemItem"]
-local SpawnTotem = Net["RE/SpawnTotem"]
-
-_G.AutoSpawnTotem = false
-_G.SelectedTotem = "Lucky"
-
-local TotemMap = {
-    Lucky = 1,
-    Mutation = 2,
-    Shiny = 3
-}
-
-Tab4:Dropdown({
-    Title = "Select Totem",
-    Desc = "Types of totems : Lucky, Mutation, Shiny",
-    Values = { "Lucky", "Mutation", "Shiny" },
-    Value = "Lucky",
-    Callback = function(option)
-        _G.SelectedTotem = option
-    end
-})
-
-Tab4:Toggle({
-    Title = "Auto Spawn Totem",
-    Desc = "Equip and spawn selected totem",
-    Value = false,
-    Callback = function(state)
-        _G.AutoSpawnTotem = state
-        if state then
-            task.spawn(function()
-                while _G.AutoSpawnTotem do
-                    task.wait(1)
-                    local char = LocalPlayer.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        local id = TotemMap[_G.SelectedTotem]
-                        if id then
-                            pcall(function()
-                                PlaceTotem:FireServer(id)
-                                SpawnTotem:FireServer(hrp.CFrame)
-                            end)
-                        end
-                    end
-                end
-            end)
-        end
-    end
-})
-
 local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
@@ -2640,8 +2579,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
-
