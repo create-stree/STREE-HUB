@@ -107,7 +107,7 @@ player.CharacterAdded:Connect(function()
 end)
 
 Window:Tag({
-    Title = "v0.0.3.0",
+    Title = "v0.0.3.1",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1920,6 +1920,7 @@ Tab6:Divider()
 
 local FishingLocations = {
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
+	["Christmas Cave"] = Vector3.new(538.17, -580.58, 8898.02),
 	["Christmas Lake"] = Vector3.new(1136.29, 23.72, 1562.07),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
@@ -2662,4 +2663,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
