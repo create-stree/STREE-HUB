@@ -13,6 +13,21 @@ else
     print("✓ UI loaded successfully!")
 end
 
+local player = game.Players.LocalPlayer
+player:WaitForChild("PlayerGui")
+
+local function GetRemote(folder, name)
+    if typeof(folder) ~= "Instance" then return nil end
+    for _, obj in ipairs(folder:GetDescendants()) do
+        if obj.Name == name then
+            return obj
+        end
+    end
+    return nil
+end
+
+local RPath = game:GetService("ReplicatedStorage")
+
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
     Icon = "rbxassetid://122683047852451",
@@ -74,16 +89,60 @@ end)
 
 G2L["ButtonRezise_2"].Visible = false
 
-G2L["ButtonRezise_2"].Visible = false
+G2L["MobileToggleButton"] = Instance.new("TextButton")
+G2L["MobileToggleButton"].Parent = G2L["ScreenGui_1"]
+G2L["MobileToggleButton"].Name = "MobileToggleButton"
+G2L["MobileToggleButton"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+G2L["MobileToggleButton"].BorderSizePixel = 0
+G2L["MobileToggleButton"].Position = UDim2.new(0.01, 0, 0.01, 0)
+G2L["MobileToggleButton"].Size = UDim2.new(0, 40, 0, 40)
+G2L["MobileToggleButton"].Font = Enum.Font.GothamBold
+G2L["MobileToggleButton"].Text = "☰"
+G2L["MobileToggleButton"].TextColor3 = Color3.fromRGB(0, 255, 0)
+G2L["MobileToggleButton"].TextSize = 18
+G2L["MobileToggleButton"].Visible = false
+
+local mobileCorner = Instance.new("UICorner", G2L["MobileToggleButton"])
+mobileCorner.CornerRadius = UDim.new(0, 8)
+
+local mobileStroke = Instance.new("UIStroke", G2L["MobileToggleButton"])
+mobileStroke.Thickness = 2
+mobileStroke.Color = Color3.fromRGB(0, 255, 0)
+mobileStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+G2L["MobileToggleButton"].MouseButton1Click:Connect(function()
+    if Window.IsOpen then
+        Window:Close()
+    else
+        Window:Open()
+        G2L["ButtonRezise_2"].Visible = false
+    end
+end)
+
+Window:OnOpen(function()
+    G2L["MobileToggleButton"].Visible = false
+end)
+
+Window:OnClose(function()
+    G2L["ButtonRezise_2"].Visible = true
+    if game:GetService("UserInputService").TouchEnabled then
+        G2L["MobileToggleButton"].Visible = true
+    end
+end)
+
+if game:GetService("UserInputService").TouchEnabled then
+    G2L["MobileToggleButton"].Visible = true
+    G2L["ButtonRezise_2"].Visible = false
+end
 
 Window:Tag({
-    Title = "v0.0.2.8",
+    Title = "v0.0.2.9",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Premium (Trial)",
+    Title = "Premium",
     Color = Color3.fromRGB(138, 43, 226),
     Radius = 17,
 })
@@ -384,59 +443,6 @@ player.CharacterAdded:Connect(function(char)
     end
 end)
 
-local stopAnimConnections = {}
-
-local function setGameAnimationsEnabled(state)
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-
-    for _, conn in pairs(stopAnimConnections) do
-        conn:Disconnect()
-    end
-
-    stopAnimConnections = {}
-    if state then
-        for _, track in ipairs(humanoid:FindFirstChildOfClass("Animator"):GetPlayingAnimationTracks()) do
-            track:Stop(0)
-        end
-
-        local conn = humanoid:FindFirstChildOfClass("Animator").AnimationPlayed:Connect(function(track)
-            task.defer(function()
-                track:Stop(0)
-            end)
-        end)
-
-        table.insert(stopAnimConnections, conn)
-        WindUI:Notify({
-            Title = "Animation Disabled",
-            Content = "All animations from the game have been disabled..",
-            Duration = 4,
-            Icon = "pause-circle"
-        })
-    else
-        for _, conn in pairs(stopAnimConnections) do
-            conn:Disconnect()
-        end
-        stopAnimConnections = {}
-        WindUI:Notify({
-            Title = "Animation Enabled",
-            Content = "Animations from the game are reactivated.",
-            Duration = 4,
-            Icon = "play-circle"
-        })
-    end
-end
-
-Tab2:Toggle({
-    Title = "No Animation",
-    Desc = "Stop all animations from the game.",
-    Value = false,
-    Callback = function(v)
-        setGameAnimationsEnabled(v)
-    end
-})
-
 _G.AutoFishing = false
 _G.AutoEquipRod = false
 _G.AutoSell = false
@@ -657,21 +663,17 @@ Tab3:Toggle({
         local Lighting = game:GetService("Lighting")
         local Replion = require(RS.Packages.Replion).Client:GetReplion("Data")
         local NetFunction = require(RS.Packages.Net):RemoteFunction("UpdateFishingRadar")
-
         if Replion and NetFunction:InvokeServer(state) then
             local sound = require(RS.Shared.Soundbook).Sounds.RadarToggle:Play()
             sound.PlaybackSpeed = 1 + math.random() * 0.3
-
             local c = Lighting:FindFirstChildWhichIsA("ColorCorrectionEffect")
             if c then
                 require(RS.Packages.spr).stop(c)
-
                 local time = require(RS.Controllers.ClientTimeController)
                 local profile = time._getLightingProfile and time:_getLightingProfile() or {}
                 local correction = profile.ColorCorrection or {}
                 correction.Brightness = correction.Brightness or 0.04
                 correction.TintColor = correction.TintColor or Color3.fromRGB(255,255,255)
-
                 if state then
                     c.TintColor = Color3.fromRGB(42, 226, 118)
                     c.Brightness = 0.4
@@ -679,10 +681,8 @@ Tab3:Toggle({
                     c.TintColor = Color3.fromRGB(255, 0, 0)
                     c.Brightness = 0.2
                 end
-
                 require(RS.Packages.spr).target(c, 1, 1, correction)
             end
-
             require(RS.Packages.spr).stop(Lighting)
             Lighting.ExposureCompensation = 1
             require(RS.Packages.spr).target(Lighting, 1, 2, {ExposureCompensation = 0})
@@ -724,12 +724,9 @@ Tab3:Toggle({
     Default = false,
     Callback = function(state)
         _G.FPSBoost = state
-
         local Lighting = game:GetService("Lighting")
         local Terrain = workspace:FindFirstChildOfClass("Terrain")
-
         _G._FPSObjects = _G._FPSObjects or {}
-
         if state then
             if not _G.OldSettings then
                 _G.OldSettings = {
@@ -746,7 +743,6 @@ Tab3:Toggle({
                     WaterWaveSpeed = Terrain and Terrain.WaterWaveSpeed
                 }
             end
-
             Lighting.GlobalShadows = false
             Lighting.FogEnd = 1e10
             Lighting.Brightness = 0
@@ -754,14 +750,12 @@ Tab3:Toggle({
             Lighting.OutdoorAmbient = Color3.new(1,1,1)
             Lighting.ColorShift_Top = Color3.new(0,0,0)
             Lighting.ColorShift_Bottom = Color3.new(0,0,0)
-
             if Terrain then
                 Terrain.WaterTransparency = 1
                 Terrain.WaterReflectance = 0
                 Terrain.WaterWaveSize = 0
                 Terrain.WaterWaveSpeed = 0
             end
-
             for _,v in ipairs(workspace:GetDescendants()) do
                 if not _G._FPSObjects[v] then
                     if v:IsA("BasePart") then
@@ -801,7 +795,6 @@ Tab3:Toggle({
                     Terrain.WaterWaveSpeed = _G.OldSettings.WaterWaveSpeed
                 end
             end
-
             for obj,data in pairs(_G._FPSObjects) do
                 if obj and obj.Parent then
                     if obj:IsA("BasePart") then
@@ -814,7 +807,6 @@ Tab3:Toggle({
                     end
                 end
             end
-
             table.clear(_G._FPSObjects)
         end
     end
@@ -880,135 +872,9 @@ Tab3:Toggle({
     end
 })
 
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
-local camera = Workspace.CurrentCamera
-
-local REEquipToolFromHotbar = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
-local REFishingCompleted = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
-
-_G.AutoFishingEnabled = false
-_G.AutoSellFish = true
-_G.FishingDelay = 0.5
-
-local ScreenGui, Background, Saturn, SpaceSound
-
-local function CreateBackground()
-	if ScreenGui then ScreenGui:Destroy() end
-	ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.IgnoreGuiInset = true
-	ScreenGui.ResetOnSpawn = false
-	ScreenGui.Name = "STREE_FISHING_BACKGROUND"
-	ScreenGui.Parent = CoreGui
-
-	Background = Instance.new("Frame")
-	Background.BackgroundColor3 = Color3.new(0, 0, 0)
-	Background.BackgroundTransparency = 0.5
-	Background.Size = UDim2.new(1, 0, 1, 0)
-	Background.ZIndex = 0
-	Background.Parent = ScreenGui
-
-	for i = 1, 80 do
-		local star = Instance.new("Frame")
-		star.Size = UDim2.new(0, math.random(3, 5), 0, math.random(3, 5))
-		star.Position = UDim2.new(math.random(), 0, math.random(), 0)
-		star.BackgroundTransparency = 1
-		star.ZIndex = 0
-		star.Parent = Background
-
-		local circle = Instance.new("UICorner", star)
-		circle.CornerRadius = UDim.new(1, 0)
-
-		local glow = Instance.new("UIStroke", star)
-		glow.Thickness = 1
-		glow.Color = Color3.fromRGB(0, 255, 0)
-		glow.Transparency = math.random(40, 80) / 100
-
-		task.spawn(function()
-			local tweenInfo = TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-			TweenService:Create(glow, tweenInfo, {Transparency = math.random(0, 60) / 100}):Play()
-		end)
-	end
-
-	Saturn = Instance.new("ImageLabel")
-	Saturn.Image = "rbxassetid://122683047852451"
-	Saturn.BackgroundTransparency = 1
-	Saturn.Size = UDim2.new(0, 320, 0, 320)
-	Saturn.Position = UDim2.new(0.7, 0, 0.15, 0)
-	Saturn.ImageTransparency = 0.05
-	Saturn.ZIndex = 0
-	Saturn.Parent = Background
-
-	task.spawn(function()
-		while ScreenGui and _G.AutoFishingEnabled do
-			for i = 0, 180, 2 do
-				if not ScreenGui then break end
-				Saturn.Rotation = i
-				task.wait(0.02)
-			end
-			for i = 180, 0, -2 do
-				if not ScreenGui then break end
-				Saturn.Rotation = i
-				task.wait(0.02)
-			end
-		end
-	end)
-
-	SpaceSound = Instance.new("Sound")
-	SpaceSound.SoundId = "rbxassetid://1846351427"
-	SpaceSound.Volume = 0.2
-	SpaceSound.Looped = true
-	SpaceSound.Parent = SoundService
-	SpaceSound:Play()
-end
-
-local function RemoveBackground()
-	if SpaceSound then
-		SpaceSound:Stop()
-		SpaceSound:Destroy()
-		SpaceSound = nil
-	end
-	if ScreenGui then
-		TweenService:Create(Background, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-		task.wait(1)
-		ScreenGui:Destroy()
-		ScreenGui = nil
-	end
-end
-
-local function StartAutoFishing()
-	task.spawn(function()
-		while _G.AutoFishingEnabled do
-			pcall(function()
-				REEquipToolFromHotbar:FireServer(1)
-				local clickX = 5
-				local clickY = camera.ViewportSize.Y - 5
-				VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-				task.wait(_G.FishingDelay)
-				VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-				REFishingCompleted:FireServer()
-				if _G.AutoSellFish then
-					for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-						if v:IsA("RemoteEvent") and v.Name:lower():find("sell") then
-							pcall(function() v:FireServer() end)
-						end
-					end
-				end
-			end)
-			task.wait(_G.FishingDelay)
-			RunService.Heartbeat:Wait()
-		end
-	end)
-end
-
 Tab3:Section({
     Title = "Enchant Features",
-	Icon = "flask-conical",
+    Icon = "flask-conical",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1335,15 +1201,15 @@ Tab3:Toggle({
 })
 
 local Tab4 = Window:Tab({
-	Title = "Exclusive",
-	Icon = "star"
+    Title = "Exclusive",
+    Icon = "star"
 })
 
 Tab4:Section({ 
-	Title = "Webhook Fish Caught",
-	Icon = "webhook",
-	TextXAlignment = "Left",
-	TextSize = 17 
+    Title = "Webhook Fish Caught",
+    Icon = "webhook",
+    TextXAlignment = "Left",
+    TextSize = 17 
 })
 
 Tab4:Divider()
@@ -1569,66 +1435,10 @@ spawn( LPH_NO_VIRTUALIZE( function()
 end))
 
 local Section = Tab4:Section({
-	Title = "Kaitun System",
-	Icon = "antenna",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-Tab4:Toggle({
-	Title = "Enable Kaitun",
-	Desc = "Automatic fishing system",
-	Default = false,
-	Callback = function(state)
-		_G.AutoFishingEnabled = state
-		if state then
-			CreateBackground()
-			WindUI:Notify({Title = "Auto Fishing", Content = "Activated!", Duration = 3})
-			StartAutoFishing()
-		else
-			RemoveBackground()
-			WindUI:Notify({Title = "Auto Fishing", Content = "Stopped.", Duration = 3})
-		end
-	end
-})
-
-Tab4:Toggle({
-	Title = "Auto Sell Fish",
-	Desc = "Automatically sell caught fish",
-	Default = true,
-	Callback = function(state)
-		_G.AutoSellFish = state
-		WindUI:Notify({
-			Title = "Auto Sell",
-			Content = state and "Enabled" or "Disabled",
-			Duration = 2
-		})
-	end
-})
-
-Tab4:Slider({
-	Title = "Fishing Delay",
-	Desc = "Adjust cast/reel timing (seconds)",
-	Min = 0.2,
-	Max = 2,
-	Default = 0.5,
-	Callback = function(value)
-		_G.FishingDelay = value
-		WindUI:Notify({
-			Title = "Fishing Delay",
-			Content = "Delay set to " .. tostring(value) .. "s",
-			Duration = 2
-		})
-	end
-})
-
-local Section = Tab4:Section({
-	Title = "Blantant Fishing",
-	Icon = "fish",
-	TextXAlignment = "Left",
-	TextSize = 17
+    Title = "Blantant Fishing",
+    Icon = "fish",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
 Tab4:Divider()
@@ -1666,10 +1476,10 @@ local z6 = Tab4:Input({
 })
 
 local Section = Tab4:Section({
-	Title = "Gift",
-	Icon = "gift",
-	TextXAlignment = "Left",
-	TextSize = 17
+    Title = "Gift",
+    Icon = "gift",
+    TextXAlignment = "Left",
+    TextSize = 17
 })
 
 Tab4:Divider()
@@ -1697,6 +1507,67 @@ Tab4:Button({
                 Duration = 3,
                 Icon = "x"
             })
+        end
+    end
+})
+
+local Section = Tab4:Section({
+    Title = "Totem",
+    Icon = "atom",
+    TextXAlignment = "Left",
+    TextSize = 17
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+local PlaceTotem = Net["RE/PlaceCavernTotemItem"]
+local SpawnTotem = Net["RE/SpawnTotem"]
+
+_G.AutoSpawnTotem = false
+_G.SelectedTotem = "Lucky"
+
+local TotemMap = {
+    Lucky = 1,
+    Mutation = 2,
+    Shiny = 3
+}
+
+Tab4:Dropdown({
+    Title = "Select Totem",
+    Desc = "Types of totems : Lucky, Mutation, Shiny",
+    Values = { "Lucky", "Mutation", "Shiny" },
+    Value = "Lucky",
+    Callback = function(option)
+        _G.SelectedTotem = option
+    end
+})
+
+Tab4:Toggle({
+    Title = "Auto Spawn Totem",
+    Desc = "Equip and spawn selected totem",
+    Value = false,
+    Callback = function(state)
+        _G.AutoSpawnTotem = state
+        if state then
+            task.spawn(function()
+                while _G.AutoSpawnTotem do
+                    task.wait(1)
+                    local char = LocalPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        local id = TotemMap[_G.SelectedTotem]
+                        if id then
+                            pcall(function()
+                                PlaceTotem:FireServer(id)
+                                SpawnTotem:FireServer(hrp.CFrame)
+                            end)
+                        end
+                    end
+                end
+            end)
         end
     end
 })
@@ -1966,13 +1837,13 @@ Tab6:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
-	["Christmas Island"] = Vector3.new(708.17, 16.08, 1567.35),
-	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
+    ["Christmas Island"] = Vector3.new(708.17, 16.08, 1567.35),
+    ["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
-	["Enchant2"] = Vector3.new(1480, 126, -585),
+    ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
     ["Kohana"] = Vector3.new(-603, 3, 719),
@@ -2018,13 +1889,13 @@ Tab6:Section({
 Tab6:Divider()
 
 local FishingLocations = {
-	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
-	["Christmas Lake"] = Vector3.new(1136.29, 23.72, 1562.07),
+    ["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
+    ["Christmas Lake"] = Vector3.new(1136.29, 23.72, 1562.07),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Kohana"] = Vector3.new(-603, 3, 719),
-	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
-	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
+    ["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
+    ["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
     ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
     ["Levers 1"] = Vector3.new(1475, 4, -847),
     ["Levers 2"] = Vector3.new(882, 5, -321),
@@ -2206,8 +2077,8 @@ local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 
 player.CharacterAdded:Connect(function(c)
-	character = c
-	hrp = c:WaitForChild("HumanoidRootPart")
+    character = c
+    hrp = c:WaitForChild("HumanoidRootPart")
 end)
 
 local megCheckRadius = 150
@@ -2217,166 +2088,174 @@ local selectedEvents = {}
 local createdEventPlatform = nil
 
 local eventData = {
-	["Worm Hunt"] = {
-		TargetName = "Model",
-		Locations = {
-			Vector3.new(2190.85, -1.4, 97.575), 
-			Vector3.new(-2450.679, -1.4, 139.731), 
-			Vector3.new(-267.479, -1.4, 5188.531),
-			Vector3.new(-327, -1.4, 2422)
-		},
-		PlatformY = 107,
-		Priority = 1,
-		Icon = "fish"
-	},
-	["Megalodon Hunt"] = {
-		TargetName = "Megalodon Hunt",
-		Locations = {
-			Vector3.new(-1076.3, -1.4, 1676.2),
-			Vector3.new(-1191.8, -1.4, 3597.3),
-			Vector3.new(412.7, -1.4, 4134.4),
-		},
-		PlatformY = 107,
-		Priority = 2,
-		Icon = "anchor"
-	},
-	["Ghost Shark Hunt"] = {
-		TargetName = "Ghost Shark Hunt",
-		Locations = {
-			Vector3.new(489.559, -1.35, 25.406), 
-			Vector3.new(-1358.216, -1.35, 4100.556), 
-			Vector3.new(627.859, -1.35, 3798.081)
-		},
-		PlatformY = 107,
-		Priority = 3,
-		Icon = "fish"
-	},
-	["Shark Hunt"] = {
-		TargetName = "Shark Hunt",
-		Locations = {
-			Vector3.new(1.65, -1.35, 2095.725),
-			Vector3.new(1369.95, -1.35, 930.125),
-			Vector3.new(-1585.5, -1.35, 1242.875),
-			Vector3.new(-1896.8, -1.35, 2634.375)
-		},
-		PlatformY = 107,
-		Priority = 4,
-		Icon = "fish"
-	},
+    ["Worm Hunt"] = {
+        TargetName = "Model",
+        Locations = {
+            Vector3.new(2190.85, -1.4, 97.575), 
+            Vector3.new(-2450.679, -1.4, 139.731), 
+            Vector3.new(-267.479, -1.4, 5188.531),
+            Vector3.new(-327, -1.4, 2422)
+        },
+        PlatformY = 107,
+        Priority = 1,
+        Icon = "fish"
+    },
+    ["Megalodon Hunt"] = {
+        TargetName = "Megalodon Hunt",
+        Locations = {
+            Vector3.new(-1076.3, -1.4, 1676.2),
+            Vector3.new(-1191.8, -1.4, 3597.3),
+            Vector3.new(412.7, -1.4, 4134.4),
+        },
+        PlatformY = 107,
+        Priority = 2,
+        Icon = "anchor"
+    },
+    ["Ghost Shark Hunt"] = {
+        TargetName = "Ghost Shark Hunt",
+        Locations = {
+            Vector3.new(489.559, -1.35, 25.406), 
+            Vector3.new(-1358.216, -1.35, 4100.556), 
+            Vector3.new(627.859, -1.35, 3798.081)
+        },
+        PlatformY = 107,
+        Priority = 3,
+        Icon = "fish"
+    },
+    ["Shark Hunt"] = {
+        TargetName = "Shark Hunt",
+        Locations = {
+            Vector3.new(1.65, -1.35, 2095.725),
+            Vector3.new(1369.95, -1.35, 930.125),
+            Vector3.new(-1585.5, -1.35, 1242.875),
+            Vector3.new(-1896.8, -1.35, 2634.375)
+        },
+        PlatformY = 107,
+        Priority = 4,
+        Icon = "fish"
+    },
 }
 
 local eventNames = {}
 for name in pairs(eventData) do
-	table.insert(eventNames, name)
+    table.insert(eventNames, name)
 end
 
 local function destroyEventPlatform()
-	if createdEventPlatform and createdEventPlatform.Parent then
-		createdEventPlatform:Destroy()
-		createdEventPlatform = nil
-	end
+    if createdEventPlatform and createdEventPlatform.Parent then
+        createdEventPlatform:Destroy()
+        createdEventPlatform = nil
+    end
 end
 
 local function createAndTeleportToPlatform(targetPos, y)
-	destroyEventPlatform()
+    destroyEventPlatform()
 
-	local platform = Instance.new("Part")
-	platform.Size = Vector3.new(5, 1, 5)
-	platform.Position = Vector3.new(targetPos.X, y, targetPos.Z)
-	platform.Anchored = true
-	platform.Transparency = 1
-	platform.CanCollide = true
-	platform.Name = "EventPlatform"
-	platform.Parent = Workspace
-	createdEventPlatform = platform
+    local platform = Instance.new("Part")
+    platform.Size = Vector3.new(5, 1, 5)
+    platform.Position = Vector3.new(targetPos.X, y, targetPos.Z)
+    platform.Anchored = true
+    platform.Transparency = 1
+    platform.CanCollide = true
+    platform.Name = "EventPlatform"
+    platform.Parent = Workspace
+    createdEventPlatform = platform
 
-	hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
+    hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
 end
 
 local function runMultiEventTP()
-	while autoEventTPEnabled do
-		local sorted = {}
-		for _, e in ipairs(selectedEvents) do
-			if eventData[e] then
-				table.insert(sorted, eventData[e])
-			end
-		end
-		table.sort(sorted, function(a, b) return a.Priority < b.Priority end)
+    while autoEventTPEnabled do
+        local sorted = {}
+        for _, e in ipairs(selectedEvents) do
+            if eventData[e] then
+                table.insert(sorted, eventData[e])
+            end
+        end
+        table.sort(sorted, function(a, b) return a.Priority < b.Priority end)
 
-		for _, config in ipairs(sorted) do
-			local foundTarget, foundPos = nil, nil
+        for _, config in ipairs(sorted) do
+            local foundTarget, foundPos = nil, nil
 
-			if config.TargetName == "Model" then
-				local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
-				if menuRings then
-					for _, props in ipairs(menuRings:GetChildren()) do
-						if props.Name == "Props" then
-							local model = props:FindFirstChild("Model")
-							if model and model.PrimaryPart then
-								for _, loc in ipairs(config.Locations) do
-									if (model.PrimaryPart.Position - loc).Magnitude <= megCheckRadius then
-										foundTarget = model
-										foundPos = model.PrimaryPart.Position
-										break
-									end
-								end
-							end
-						end
-						if foundTarget then break end
-					end
-				end
-			else
-				for _, loc in ipairs(config.Locations) do
-					for _, d in ipairs(Workspace:GetDescendants()) do
-						if d.Name == config.TargetName then
-							local pos = d:IsA("BasePart") and d.Position or (d.PrimaryPart and d.PrimaryPart.Position)
-							if pos and (pos - loc).Magnitude <= megCheckRadius then
-								foundTarget = d
-								foundPos = pos
-								break
-							end
-						end
-					end
-					if foundTarget then break end
-				end
-			end
-
-			if foundTarget and foundPos then
-				createAndTeleportToPlatform(foundPos, config.PlatformY)
-			end
-		end
-		task.wait(0.05)
-	end
-	destroyEventPlatform()
+            if config.TargetName == "Model" then
+                local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
+                if menuRings then
+                    for _, props in ipairs(menuRings:GetChildren()) do
+                        if props.Name == "Props" then
+                            local model = props:FindFirstChild("Model")
+                            if model and model.PrimaryPart then
+                                for _, loc in ipairs(config.Locations) do
+                                    if (model.PrimaryPart.Position - loc).Magnitude <= megCheckRadius then
+                                        foundTarget = model
+                                        foundPos = model.PrimaryPart.Position
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                        if foundTarget then break end
+                    end
+                end
+            else
+                for _, loc in ipairs(config.Locations) do
+                    for _, d in ipairs(Workspace:GetDescendants()) do
+                        if d.Name == config.TargetName then
+                            local pos = d:IsA("BasePart") and d.Position or (d.PrimaryPart and d.PrimaryPart.Position)
+                            if pos and (pos - loc).Magnitude <= megCheckRadius then
+                                foundTarget = d
+                                foundPos = pos
+                                break
+                            end
+                        end
+                    end
+                    if foundTarget then break end
+                end
+            end
+            if foundTarget and foundPos then
+                createAndTeleportToPlatform(foundPos, config.PlatformY)
+            end
+        end
+        task.wait(0.05)
+    end
+    destroyEventPlatform()
 end
 
 Tab6:Dropdown({
-	Title = "Select Events",
-	Values = eventNames,
-	Multi = true,
-	AllowNone = true,
-	Callback = function(values)
-		selectedEvents = values
-	end
+    Title = "Select Events",
+    Values = eventNames,
+    Multi = true,
+    AllowNone = true,
+    Callback = function(values)
+        selectedEvents = values
+    end
 })
 
 Tab6:Toggle({
-	Title = "Auto Event",
-	Icon = false,
-	Type = false,
-	Value = false,
-	Callback = function(state)
-		autoEventTPEnabled = state
-		if state then
-			task.spawn(runMultiEventTP)
-		end
-	end
+    Title = "Auto Event",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        autoEventTPEnabled = state
+        if state then
+            task.spawn(runMultiEventTP)
+        end
+    end
 })
 
 local Tab7 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
+
+Tab7:Section({ 
+    Title = "Character",
+    Icon = "square-user",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab7:Divider()
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -2422,6 +2301,111 @@ Tab7:Toggle({
     end
 })
 
+Tab7:Section({ 
+    Title = "UI",
+    Icon = "scan-eye",
+    TextXAlignment = "Left",
+    TextSize = 17,
+})
+
+Tab7:Divider()
+
+local stopAnimConnections = {}
+
+local function setGameAnimationsEnabled(state)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    for _, conn in pairs(stopAnimConnections) do
+        conn:Disconnect()
+    end
+    stopAnimConnections = {}
+    if state then
+        for _, track in ipairs(humanoid:FindFirstChildOfClass("Animator"):GetPlayingAnimationTracks()) do
+            track:Stop(0)
+        end
+        local conn = humanoid:FindFirstChildOfClass("Animator").AnimationPlayed:Connect(function(track)
+            task.defer(function()
+                track:Stop(0)
+            end)
+        end)
+        table.insert(stopAnimConnections, conn)
+        WindUI:Notify({
+            Title = "Animation Disabled",
+            Content = "All animations from the game have been disabled..",
+            Duration = 4,
+            Icon = "pause-circle"
+        })
+    else
+        for _, conn in pairs(stopAnimConnections) do
+            conn:Disconnect()
+        end
+        stopAnimConnections = {}
+        WindUI:Notify({
+            Title = "Animation Enabled",
+            Content = "Animations from the game are reactivated.",
+            Duration = 4,
+            Icon = "play-circle"
+        })
+    end
+end
+
+Tab7:Toggle({
+    Title = "No Animation",
+    Desc = "Stop all animations from the game.",
+    Value = false,
+    Callback = function(v)
+        setGameAnimationsEnabled(v)
+    end
+})
+
+local RunService = game:GetService("RunService")
+local DisableNotificationConnection
+
+Tab7:Toggle({
+    Title = "Disable Notify",
+    Value = false,
+    Icon = "slash",
+    Callback = function(state)
+        local PlayerGui = player:WaitForChild("PlayerGui")
+        local SmallNotification = PlayerGui:FindFirstChild("Small Notification")
+
+        if not SmallNotification then
+            SmallNotification = PlayerGui:WaitForChild("Small Notification", 5)
+            if not SmallNotification then
+                WindUI:Notify({ Title = "Error", Duration = 3, Icon = "x" })
+                return
+            end
+        end
+
+        if state then
+            DisableNotificationConnection = RunService.RenderStepped:Connect(function()
+                SmallNotification.Enabled = false
+            end)
+
+            WindUI:Notify({
+                Title = "Pop-up Diblokir",
+                Duration = 3,
+                Icon = "check"
+            })
+        else
+            if DisableNotificationConnection then
+                DisableNotificationConnection:Disconnect()
+                DisableNotificationConnection = nil
+            end
+
+            SmallNotification.Enabled = true
+                
+            WindUI:Notify({
+                Title = "Pop-up Diaktifkan",
+                Content = "Notifikasi kembali normal.",
+                Duration = 3,
+                Icon = "x"
+            })
+        end
+    end
+})
+
 Tab7:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
@@ -2431,7 +2415,6 @@ Tab7:Toggle({
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
-
         if state then
             task.spawn(function()
                 while _G.AntiAFK do
@@ -2442,7 +2425,6 @@ Tab7:Toggle({
                     end)
                 end
             end)
-
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "AntiAFK loaded!",
                 Text = "Coded By Kirsiasc",
@@ -2487,29 +2469,6 @@ Tab7:Toggle({
     end
 })
 
-local RS = game:GetService("ReplicatedStorage")
-local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
-local RE_Notify = Net:FindFirstChild("RE/ObtainedNewFishNotification")
-
-_G.DisableNotify = false
-
-Tab7:Toggle({
-    Title = "Disable Notify",
-    Desc = "No notification",
-    Default = false,
-    Callback = function(state)
-        _G.DisableNotify = state
-    end
-})
-
-if RE_Notify then
-    RE_Notify.OnClientEvent:Connect(function(...)
-        if _G.DisableNotify then
-            return
-        end
-    end)
-end
-
 Tab7:Section({ 
     Title = "Server",
     Icon = "server",
@@ -2533,13 +2492,11 @@ Tab7:Button({
     Callback = function()
         local HttpService = game:GetService("HttpService")
         local TeleportService = game:GetService("TeleportService")
-        
         local function GetServers()
             local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"
             local response = HttpService:JSONDecode(game:HttpGet(url))
             return response.data
         end
-
         local function FindBestServer(servers)
             for _, server in ipairs(servers) do
                 if server.playing < server.maxPlayers and server.id ~= game.JobId then
@@ -2548,10 +2505,8 @@ Tab7:Button({
             end
             return nil
         end
-
         local servers = GetServers()
         local serverId = FindBestServer(servers)
-
         if serverId then
             TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, game.Players.LocalPlayer)
         end
@@ -2634,6 +2589,7 @@ Tab7:Button({
         end
     end
 })
+
 Tab7:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
@@ -2679,6 +2635,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
