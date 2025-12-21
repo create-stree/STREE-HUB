@@ -50,49 +50,64 @@ Window:EditOpenButton({
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 local G2L = {}
 
-G2L["ScreenGui_1"] = Instance.new("ScreenGui")
-G2L["ScreenGui_1"].Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-CollectionService:AddTag(G2L["ScreenGui_1"], "main")
+local function setupToggle()
+    if G2L["ScreenGui_1"] and G2L["ScreenGui_1"].Parent then return end
 
-G2L["ButtonRezise_2"] = Instance.new("ImageButton")
-G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
-G2L["ButtonRezise_2"].BorderSizePixel = 0
-G2L["ButtonRezise_2"].Draggable = true
-G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
-G2L["ButtonRezise_2"].Size = UDim2.new(0, 45, 0, 45)
-G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
+    G2L["ScreenGui_1"] = Instance.new("ScreenGui")
+    G2L["ScreenGui_1"].ResetOnSpawn = false
+    G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    G2L["ScreenGui_1"].Parent = player:WaitForChild("PlayerGui")
+    CollectionService:AddTag(G2L["ScreenGui_1"], "main")
 
-local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
-corner.CornerRadius = UDim.new(0, 8)
-
-local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
-neon.Thickness = 2
-neon.Color = Color3.fromRGB(0, 255, 0)
-neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
+    G2L["ButtonRezise_2"] = Instance.new("ImageButton")
+    G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
+    G2L["ButtonRezise_2"].BorderSizePixel = 0
+    G2L["ButtonRezise_2"].Draggable = true
+    G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0,0,0)
+    G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+    G2L["ButtonRezise_2"].Size = UDim2.new(0,45,0,45)
+    G2L["ButtonRezise_2"].Position = UDim2.new(0.13,0,0.03,0)
     G2L["ButtonRezise_2"].Visible = false
-    Window:Open()
+
+    local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
+    corner.CornerRadius = UDim.new(0,8)
+
+    local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
+    neon.Thickness = 2
+    neon.Color = Color3.fromRGB(0,255,0)
+    neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
+        G2L["ButtonRezise_2"].Visible = false
+        Window:Open()
+    end)
+
+    Window:OnClose(function()
+        if G2L["ButtonRezise_2"] then
+            G2L["ButtonRezise_2"].Visible = true
+        end
+    end)
+end
+
+setupToggle()
+
+player.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    if not G2L["ScreenGui_1"] or not G2L["ScreenGui_1"].Parent then
+        setupToggle()
+    else
+        G2L["ScreenGui_1"].Parent = player:WaitForChild("PlayerGui")
+        if not Window:IsOpen() then
+            G2L["ButtonRezise_2"].Visible = true
+        end
+    end
 end)
-
-Window:OnClose(function()
-    G2L["ButtonRezise_2"].Visible = true
-end)
-
-Window:OnDestroy(function()
-    G2L["ButtonRezise_2"].Visible = false
-end)
-
-G2L["ButtonRezise_2"].Visible = false
-
-G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
-    Title = "v0.0.2.9",
+    Title = "v0.0.3.0",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1516,6 +1531,78 @@ Tab4:Button({
     end
 })
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
+local EquipItem = Net["RE/EquipItem"]
+local SpawnTotem = Net["RE/SpawnTotem"]
+
+_G.AutoSpawnTotem = false
+_G.SelectedTotem = "Lucky"
+_G.TotemUUID = nil
+
+local TotemNames = {
+    Lucky = "Lucky Totem",
+    Mutation = "Mutation Totem",
+    Shiny = "Shiny Totem"
+}
+
+local function getTotemUUID()
+    local inv = LocalPlayer:FindFirstChild("Inventory")
+        or LocalPlayer:FindFirstChild("Data")
+        or LocalPlayer:FindFirstChild("PlayerData")
+
+    if not inv then return nil end
+
+    for _,v in pairs(inv:GetDescendants()) do
+        if v:IsA("StringValue") and v.Name == "ItemId" then
+            local parent = v.Parent
+            if parent and parent:FindFirstChild("Name") then
+                if string.find(parent.Name.Value, TotemNames[_G.SelectedTotem]) then
+                    return v.Value
+                end
+            end
+        end
+    end
+end
+
+Tab4:Dropdown({
+    Title = "Select Totem",
+    Desc = "Types of totems : Lucky, Mutation, Shiny",
+    Values = { "Lucky", "Mutation", "Shiny" },
+    Value = "Lucky",
+    Callback = function(option)
+        _G.SelectedTotem = option
+    end
+})
+
+Tab4:Toggle({
+    Title = "Auto Spawn Totem",
+    Desc = "Equip & spawn selected totem",
+    Value = false,
+    Callback = function(state)
+        _G.AutoSpawnTotem = state
+        if state then
+            task.spawn(function()
+                while _G.AutoSpawnTotem do
+                    task.wait(1)
+                    local uuid = getTotemUUID()
+                    if uuid then
+                        _G.TotemUUID = uuid
+                        pcall(function()
+                            EquipItem:FireServer(uuid, "Totems")
+                            task.wait(0.3)
+                            SpawnTotem:FireServer(uuid)
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+})
+
 local Tab5 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
@@ -1782,7 +1869,6 @@ Tab6:Divider()
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
 	["Christmas Island"] = Vector3.new(708.17, 16.08, 1567.35),
-	["Classic Island"] = Vector3.new(1175.5, 3.99, 2777.24),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
@@ -1838,9 +1924,6 @@ local FishingLocations = {
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Kohana"] = Vector3.new(-603, 3, 719),
-	["Iron Cavern"] = Vector3.new(-8993.36, -581.76, 156.13),
-	["Iron Cafe"] = Vector3.new(-8642.71, -547.51, 161.2),
-    ["Lake (Classic)"] = Vector3.new(1435.9, 45.99, 2779.67),
     ["Levers 1"] = Vector3.new(1475, 4, -847),
     ["Levers 2"] = Vector3.new(882, 5, -321),
     ["levers 3"] = Vector3.new(1425, 6,126),
@@ -2579,3 +2662,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
