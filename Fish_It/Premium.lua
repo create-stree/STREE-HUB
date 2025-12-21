@@ -1446,7 +1446,7 @@ local ORI = {
     I = VFX.RenderInstance
 }
 
-graphic:Toggle({
+Tab4:Toggle({
     Title = "Remove Skin Effect",
     Desc = "Remove Your Skin Effect",
     Default = false,
@@ -2640,6 +2640,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
