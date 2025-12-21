@@ -1145,6 +1145,15 @@ local NPCs = {
     "Silly Fisherman",
     "Tim",
     "Santa"
+	"Santa Doge",
+	"Stickmasterluke",
+	"Merely",
+	"Shendletsky",
+	"BrightEyes",
+	"Guest",
+	"Builderman",
+	"Noob",
+	"John Doe",
 }
 
 _G.AutoClaimChristmas = false
@@ -2663,5 +2672,6 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
