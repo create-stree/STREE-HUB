@@ -50,59 +50,46 @@ Window:EditOpenButton({
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local G2L = {}
 
-local function setupToggle()
-    if G2L["ScreenGui_1"] then
-        G2L["ScreenGui_1"]:Destroy()
-    end
+G2L["ScreenGui_1"] = Instance.new("ScreenGui")
+G2L["ScreenGui_1"].Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+CollectionService:AddTag(G2L["ScreenGui_1"], "main")
 
-    G2L["ScreenGui_1"] = Instance.new("ScreenGui")
-    G2L["ScreenGui_1"].Name = "STREE_TOGGLE"
-    G2L["ScreenGui_1"].ResetOnSpawn = false
-    G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    G2L["ScreenGui_1"].Parent = player:WaitForChild("PlayerGui")
-    CollectionService:AddTag(G2L["ScreenGui_1"], "main")
+G2L["ButtonRezise_2"] = Instance.new("ImageButton")
+G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
+G2L["ButtonRezise_2"].BorderSizePixel = 0
+G2L["ButtonRezise_2"].Draggable = true
+G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+G2L["ButtonRezise_2"].Size = UDim2.new(0, 47, 0, 47)
+G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
 
-    G2L["ButtonRezise_2"] = Instance.new("ImageButton")
-    G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
-    G2L["ButtonRezise_2"].BorderSizePixel = 0
-    G2L["ButtonRezise_2"].Draggable = true
-    G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0,0,0)
-    G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
-    G2L["ButtonRezise_2"].Size = UDim2.new(0,45,0,45)
-    G2L["ButtonRezise_2"].Position = UDim2.new(0.13,0,0.03,0)
-    G2L["ButtonRezise_2"].Visible = not Window:IsOpen()
+local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
+corner.CornerRadius = UDim.new(0, 8)
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0,8)
-    corner.Parent = G2L["ButtonRezise_2"]
+local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
+neon.Thickness = 2
+neon.Color = Color3.fromRGB(0, 255, 0)
+neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    local neon = Instance.new("UIStroke")
-    neon.Thickness = 2
-    neon.Color = Color3.fromRGB(0,255,0)
-    neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    neon.Parent = G2L["ButtonRezise_2"]
-
-    G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
-        G2L["ButtonRezise_2"].Visible = false
-        Window:Open()
-    end)
-
-    Window:OnClose(function()
-        if G2L["ButtonRezise_2"] and G2L["ButtonRezise_2"].Parent then
-            G2L["ButtonRezise_2"].Visible = true
-        end
-    end)
-end
-
-setupToggle()
-
-player.CharacterAdded:Connect(function()
-    task.wait(0.25)
-    setupToggle()
+G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
+    G2L["ButtonRezise_2"].Visible = false
+    Window:Open()
 end)
+
+Window:OnClose(function()
+    G2L["ButtonRezise_2"].Visible = true
+end)
+
+Window:OnDestroy(function()
+    G2L["ButtonRezise_2"].Visible = false
+end)
+
+G2L["ButtonRezise_2"].Visible = false
+
+G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
     Title = "v0.0.3.2",
@@ -2670,4 +2657,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
