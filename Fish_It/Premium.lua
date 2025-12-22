@@ -107,7 +107,7 @@ player.CharacterAdded:Connect(function()
 end)
 
 Window:Tag({
-    Title = "v0.0.3.1",
+    Title = "v0.0.3.2",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
