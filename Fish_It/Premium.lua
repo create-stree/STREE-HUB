@@ -53,6 +53,15 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local G2L = {}
 local UI_OPEN = true
+local rawClose = Window.Close
+
+function Window:Close()
+    UI_OPEN = false
+    if G2L["ButtonRezise_2"] then
+        G2L["ButtonRezise_2"].Visible = true
+    end
+    rawClose(self)
+end
 
 local function setupToggle()
     if G2L["ScreenGui_1"] then
@@ -90,13 +99,6 @@ local function setupToggle()
         UI_OPEN = true
         G2L["ButtonRezise_2"].Visible = false
         Window:Open()
-    end)
-
-    Window:OnClose(function()
-        UI_OPEN = false
-        if G2L["ButtonRezise_2"] then
-            G2L["ButtonRezise_2"].Visible = true
-        end
     end)
 end
 
@@ -2673,4 +2675,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
