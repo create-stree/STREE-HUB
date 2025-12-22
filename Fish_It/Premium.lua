@@ -1562,6 +1562,13 @@ local function getTotemUUID()
     end
 end
 
+local Section = Tab4:Section({
+	Title = "Totem [Beta]",
+	Icon = "atom",
+	TextXAlignment = "Left",
+	TextSize = 17
+})
+
 Tab4:Dropdown({
     Title = "Select Totem",
     Desc = "Types of totems : Lucky, Mutation, Shiny",
@@ -2657,7 +2664,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
