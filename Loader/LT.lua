@@ -3,7 +3,7 @@ local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local placeId = game.PlaceId
 
-_G.scripts_key = _G.scripts_key or scripts_key or "FREE_USER"
+_G.scripts_key = _G.scripts_key or "FREE_USER"
 local streeLogo = "rbxassetid://122683047852451"
 
 local premiumKeys = {
@@ -18,7 +18,17 @@ local premiumKeys = {
     "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuN",
     "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsM",
     "rYpXvQzNaHkBtMfLcWgJoSdEuPiVnT",
-    "developer_access"
+    "aBcDeFgHiJkLmNoPqRsTuVwXyZ12345",
+    "mNoPqRsTuVwXyZAbCdEfGhIjKlMnOpQ",
+    "tUvWxYzAbCdEfGhIjKlMnOpQrStUvWx",
+    "bCdEfGhIjKlMnOpQrStUvWxYzAbCdEf",
+    "kLmNoPqRsTuVwXyZAbCdEfGhIjKlMnO",
+    "pQrStUvWxYzAbCdEfGhIjKlMnOpQrSt",
+    "wXyZAbCdEfGhIjKlMnOpQrStUvWxYzA",
+    "dEfGhIjKlMnOpQrStUvWxYzAbCdEfGh",
+    "jKlMnOpQrStUvWxYzAbCdEfGhIjKlMn",
+    "developer_access",
+    "team_access"
 }
 
 local function isPremiumKey(key)
@@ -50,8 +60,8 @@ local gameScripts = {
     },
     [18687417158] = {
         name = "Forsaken",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua"
+        free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c",
+        premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
     }
 }
 
@@ -107,64 +117,48 @@ Bar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 Bar.BorderSizePixel = 0
 Bar.Parent = Loading
 
-local tween = TweenService:Create(Bar, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
-tween:Play()
-tween.Completed:Wait()
-task.wait(0.3)
+TweenService:Create(
+    Bar,
+    TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    { Size = UDim2.new(1, 0, 1, 0) }
+):Play()
+
+task.wait(2.3)
 ScreenGui:Destroy()
 
 local gameData = gameScripts[placeId]
 local gameName = gameData and gameData.name or "Unknown Game"
 
-StarterGui:SetCore("SendNotification", {
-    Title = "STREE HUB",
-    Text = "Detected game: " .. gameName,
-    Icon = streeLogo,
-    Duration = 3
-})
-StarterGui:SetCore("SendNotification", {
-    Title = "STREE HUB",
-    Text = "User Type: " .. userType,
-    Icon = streeLogo,
-    Duration = 3
-})
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "STREE HUB",
+        Text = "Detected game: " .. gameName,
+        Icon = streeLogo,
+        Duration = 3
+    })
+    StarterGui:SetCore("SendNotification", {
+        Title = "STREE HUB",
+        Text = "User Type: " .. userType,
+        Icon = streeLogo,
+        Duration = 3
+    })
+end)
 
 task.wait(2)
 
 if gameData then
-    local scriptUrl = userType == "Premium" and gameData.premium or gameData.free
-    StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB",
-        Text = "Loading " .. userType .. " version for " .. gameName .. "...",
-        Icon = streeLogo,
-        Duration = 3
-    })
-    local scriptContent = game:HttpGet(scriptUrl)
-    if scriptContent and scriptContent ~= "" then
-        local loadedFunction, errorMessage = loadstring(scriptContent)
-        if loadedFunction then
-            loadedFunction()
-        else
-            StarterGui:SetCore("SendNotification", {
-                Title = "STREE HUB",
-                Text = "Error loading script: " .. (errorMessage or "Unknown"),
-                Icon = streeLogo,
-                Duration = 4
-            })
-        end
+    if userType == "Premium" then
+        loadstring(game:HttpGet(gameData.premium))()
     else
+        loadstring(game:HttpGet(gameData.free))()
+    end
+else
+    pcall(function()
         StarterGui:SetCore("SendNotification", {
             Title = "STREE HUB",
-            Text = "Failed to load script for " .. gameName .. "! Check URL or connection.",
+            Text = "Game not supported!",
             Icon = streeLogo,
             Duration = 4
         })
-    end
-else
-    StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB",
-        Text = "Game not supported!",
-        Icon = streeLogo,
-        Duration = 4
-    })
+    end)
 end
