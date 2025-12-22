@@ -92,14 +92,14 @@ G2L["ButtonRezise_2"].Visible = false
 G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
-    Title = "v0.0.3.2",
+    Title = "v0.0.3.6",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Premium",
-    Color = Color3.fromRGB(138, 43, 226),
+    Title = "Freemium",
+    Color = Color3.fromRGB(205, 127, 50),
     Radius = 17,
 })
 
