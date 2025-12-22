@@ -1399,217 +1399,23 @@ spawn( LPH_NO_VIRTUALIZE( function()
     end
 end))
 
-local Section = Tab4:Section({
-	Title = "Blantant Fishing",
-	Icon = "fish",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-local z1 = Tab4:Toggle({
-    Title = "Blantant",
-    Value = c.d,
-    Callback = function(z2)
-        x(z2)
-    end
-})
-
-local z3 = Tab4:Input({
-    Title = "Cancel Delay",
-    Placeholder = "1.7",
-    Default = tostring(c.e),
-    Callback = function(z4)
-        local z5 = tonumber(z4)
-        if z5 and z5 > 0 then
-            c.e = z5
-        end
-    end
-})
-
-local z6 = Tab4:Input({
-    Title = "Complete Delay",
-    Placeholder = "1.4",
-    Default = tostring(c.f),
-    Callback = function(z7)
-        local z8 = tonumber(z7)
-        if z8 and z8 > 0 then
-            c.f = z8 + 0.5
-        end
-    end
-})
-
-local Section = Tab4:Section({
-	Title = "Premium",
-	Icon = "gem",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
-
-local ORI = {
-    H = VFX.Handle,
-    P = VFX.RenderAtPoint,
-    I = VFX.RenderInstance
-}
-
-Tab4:Toggle({
-    Title = "Remove Skin Effect",
-    Desc = "Remove Your Skin Effect",
-    Default = false,
-    Callback = function(state)
-        if state then
-            VFX.Handle = function() end
-            VFX.RenderAtPoint = function() end
-            VFX.RenderInstance = function() end
-
-            local f = workspace:FindFirstChild("CosmeticFolder")
-            if f then
-                pcall(f.ClearAllChildren, f)
-            end
-
-            WindUI:Notify({
-                Title = "Skin Effect Disabled",
-                Duration = 3,
-                Icon = "eye-off"
-            })
-        else
-            VFX.Handle = ORI.H
-            VFX.RenderAtPoint = ORI.P
-            VFX.RenderInstance = ORI.I
-
-            WindUI:Notify({
-                Title = "Skin Effect Enabled",
-                Duration = 3,
-                Icon = "eye"
-            })
-        end
-    end
-})
-
-local Section = Tab4:Section({
-	Title = "Gift",
-	Icon = "gift",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
 
-Tab4:Button({
-    Title = "Gift Skin Soul Scythe",
-    Locked = false,
-    Callback = function()
-        if GiftingController and GiftingController.Open then
-            GiftingController:Open("Soul Scythe")
 
-            WindUI:Notify({
-                Title = "Gift Open",
-                Content = "Soul Scythe Gift Opened Successfully",
-                Duration = 3,
-                Icon = "check"
-            })
-        else
-            WindUI:Notify({
-                Title = "Failed!!",
-                Content = "Patched",
-                Duration = 3,
-                Icon = "x"
-            })
-        end
-    end
-})
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local EquipItem = Net["RE/EquipItem"]
-local SpawnTotem = Net["RE/SpawnTotem"]
-
-_G.AutoSpawnTotem = false
-_G.SelectedTotem = "Lucky"
-_G.TotemUUID = nil
-
-local TotemNames = {
-    Lucky = "Lucky Totem",
-    Mutation = "Mutation Totem",
-    Shiny = "Shiny Totem"
-}
-
-local function getTotemUUID()
-    local inv = LocalPlayer:FindFirstChild("Inventory")
-        or LocalPlayer:FindFirstChild("Data")
-        or LocalPlayer:FindFirstChild("PlayerData")
-
-    if not inv then return nil end
-
-    for _,v in pairs(inv:GetDescendants()) do
-        if v:IsA("StringValue") and v.Name == "ItemId" then
-            local parent = v.Parent
-            if parent and parent:FindFirstChild("Name") then
-                if string.find(parent.Name.Value, TotemNames[_G.SelectedTotem]) then
-                    return v.Value
-                end
-            end
-        end
-    end
-end
-
-Tab4:Dropdown({
-    Title = "Select Totem",
-    Desc = "Types of totems : Lucky, Mutation, Shiny",
-    Values = { "Lucky", "Mutation", "Shiny" },
-    Value = "Lucky",
-    Callback = function(option)
-        _G.SelectedTotem = option
-    end
-})
-
-Tab4:Toggle({
-    Title = "Auto Spawn Totem",
-    Desc = "Equip & spawn selected totem",
-    Value = false,
-    Callback = function(state)
-        _G.AutoSpawnTotem = state
-        if state then
-            task.spawn(function()
-                while _G.AutoSpawnTotem do
-                    task.wait(1)
-                    local uuid = getTotemUUID()
-                    if uuid then
-                        _G.TotemUUID = uuid
-                        pcall(function()
-                            EquipItem:FireServer(uuid, "Totems")
-                            task.wait(0.3)
-                            SpawnTotem:FireServer(uuid)
-                        end)
-                    end
-                end
-            end)
-        end
-    end
-})
-
-local Tab5 = Window:Tab({
+local Tab4 = Window:Tab({
     Title = "Shop",
     Icon = "badge-dollar-sign",
 })
 
-Tab5:Section({ 
+Tab4:Section({ 
     Title = "Buy Rod",
     Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab5:Divider()
+Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]
@@ -1655,7 +1461,7 @@ local rodKeyMap = {
 
 local selectedRod = rodNames[1]
 
-Tab5:Dropdown({
+Tab4:Dropdown({
     Title = "Select Rod",
     Values = rodNames,
     Value = selectedRod,
@@ -1665,7 +1471,7 @@ Tab5:Dropdown({
     end
 })
 
-Tab5:Button({
+Tab4:Button({
     Title="Buy Rod",
     Callback=function()
         local key = rodKeyMap[selectedRod]
@@ -1682,14 +1488,14 @@ Tab5:Button({
     end
 })
 
-Tab5:Section({
+Tab4:Section({
     Title = "Buy Baits",
     Icon = "compass",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab5:Divider()
+Tab4:Divider()
 
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
@@ -1723,7 +1529,7 @@ local baitKeyMap = {
 
 local selectedBait = baitNames[1]  
 
-Tab5:Dropdown({  
+Tab4:Dropdown({  
     Title = "Select Bait",  
     Values = baitNames,  
     Value = selectedBait,  
@@ -1732,7 +1538,7 @@ Tab5:Dropdown({
     end  
 })  
 
-Tab5:Button({  
+Tab4:Button({  
     Title = "Buy Bait",  
     Callback = function()  
         local key = baitKeyMap[selectedBait]  
@@ -1749,14 +1555,14 @@ Tab5:Button({
     end  
 })
 
-Tab5:Section({ 
+Tab4:Section({ 
     Title = "Buy Weathers",
     Icon = "shrimp",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab5:Divider()
+Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
@@ -1779,7 +1585,7 @@ local selectedWeathers = {}
 local autoBuyEnabled = false
 local buyDelay = 540
 
-Tab5:Dropdown({
+Tab4:Dropdown({
     Title = "Select Weather",
     Values = weatherNames,
     Multi = true,
@@ -1788,7 +1594,7 @@ Tab5:Dropdown({
     end
 })
 
-Tab5:Input({
+Tab4:Input({
     Title = "Buy Delay (minutes)",
     Placeholder = "9",
     Callback = function(input)
@@ -1824,7 +1630,7 @@ local function startAutoBuy()
     end)
 end
 
-Tab5:Toggle({
+Tab4:Toggle({
     Title = "Buy Weather",
     Value = false,
     Callback = function(state)
@@ -1846,19 +1652,19 @@ Tab5:Toggle({
     end
 })
 
-local Tab6 = Window:Tab({
+local Tab5 = Window:Tab({
     Title = "Teleport",
     Icon = "map-pin",
 })
 
-Tab6:Section({ 
+Tab5:Section({ 
     Title = "Island",
     Icon = "tree-palm",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
@@ -1879,7 +1685,7 @@ local IslandLocations = {
 
 local SelectedIsland = nil
 
-local IslandDropdown = Tab6:Dropdown({
+local IslandDropdown = Tab5:Dropdown({
     Title = "Select Island",
     Values = (function()
         local keys = {}
@@ -1894,7 +1700,7 @@ local IslandDropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Island",
     Callback = function()
         if SelectedIsland and IslandLocations[SelectedIsland] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1903,14 +1709,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({ 
+Tab5:Section({ 
     Title = "Fishing Spot",
     Icon = "spotlight",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local FishingLocations = {
 	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
@@ -1932,7 +1738,7 @@ local FishingLocations = {
 
 local SelectedFishing = nil
 
-Tab6:Dropdown({
+Tab5:Dropdown({
     Title = "Select Spot",
     Values = (function()
         local keys = {}
@@ -1947,7 +1753,7 @@ Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Fishing Spot",
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1956,14 +1762,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Location NPC",
     Icon = "bot",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local NPC_Locations = {
     ["Alex"] = Vector3.new(43,17,2876),
@@ -1987,7 +1793,7 @@ local NPC_Locations = {
 
 local SelectedNPC = nil
 
-Tab6:Dropdown({
+Tab5:Dropdown({
     Title = "Select NPC",
     Values = (function()
         local keys = {}
@@ -2002,7 +1808,7 @@ Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to NPC",
     Callback = function()
         if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
@@ -2011,14 +1817,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Teleport Player",
     Icon = "person-standing",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -2036,7 +1842,7 @@ end
 local SelectedPlayer = nil
 local Dropdown
 
-Dropdown = Tab6:Dropdown({
+Dropdown = Tab5:Dropdown({
     Title = "List Player",
     Values = GetPlayerList(),
     Value = GetPlayerList()[1],
@@ -2045,7 +1851,7 @@ Dropdown = Tab6:Dropdown({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Teleport to Player (Target)",
     Locked = false,
     Callback = function()
@@ -2060,7 +1866,7 @@ Tab6:Button({
     end
 })
 
-Tab6:Button({
+Tab5:Button({
     Title = "Refresh Player List",
     Locked = false,
     Callback = function()
@@ -2083,14 +1889,14 @@ Tab6:Button({
     end
 })
 
-Tab6:Section({
+Tab5:Section({
     Title = "Event Teleporter",
     Icon = "calendar",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab6:Divider()
+Tab5:Divider()
 
 local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
@@ -2242,7 +2048,7 @@ local function runMultiEventTP()
 	destroyEventPlatform()
 end
 
-Tab6:Dropdown({
+Tab5:Dropdown({
 	Title = "Select Events",
 	Values = eventNames,
 	Multi = true,
@@ -2252,7 +2058,7 @@ Tab6:Dropdown({
 	end
 })
 
-Tab6:Toggle({
+Tab5:Toggle({
 	Title = "Auto Event",
 	Icon = false,
 	Type = false,
@@ -2265,19 +2071,19 @@ Tab6:Toggle({
 	end
 })
 
-local Tab7 = Window:Tab({
+local Tab6 = Window:Tab({
     Title = "Settings",
     Icon = "settings",
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Character",
     Icon = "square-user",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -2300,7 +2106,7 @@ local customLevel = defaultLevel
 local keepHidden = false
 local rgbThread = nil
 
-Tab7:Input({
+Tab6:Input({
     Title = "Hide Name",
     Placeholder = "Input Name",
     Default = defaultHeader,
@@ -2312,7 +2118,7 @@ Tab7:Input({
     end
 })
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "Hide Identity",
     Default = false,
     Callback = function(state)
@@ -2323,14 +2129,14 @@ Tab7:Toggle({
     end
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "UI",
     Icon = "scan-eye",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
 local stopAnimConnections = {}
 
@@ -2372,7 +2178,7 @@ local function setGameAnimationsEnabled(state)
     end
 end
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "No Animation",
     Desc = "Stop all animations from the game.",
     Value = false,
@@ -2384,7 +2190,7 @@ Tab7:Toggle({
 local RunService = game:GetService("RunService")
 local DisableNotificationConnection
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "Disable Notify",
     Value = false,
     Icon = "slash",
@@ -2428,7 +2234,7 @@ Tab7:Toggle({
     end
 })
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "AntiAFK",
     Desc = "Prevent Roblox from kicking you when idle",
     Icon = false,
@@ -2463,7 +2269,7 @@ Tab7:Toggle({
     end
 })
 
-Tab7:Toggle({
+Tab6:Toggle({
     Title = "Auto Reconnect",
     Desc = "Automatic reconnect if disconnected",
     Icon = false,
@@ -2491,16 +2297,16 @@ Tab7:Toggle({
     end
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Server",
     Icon = "server",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
-Tab7:Button({
+Tab6:Button({
     Title = "Rejoin Server",
     Desc = "Reconnect to current server",
     Callback = function()
@@ -2508,7 +2314,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Server Hop",
     Desc = "Switch to another server",
     Callback = function()
@@ -2535,14 +2341,14 @@ Tab7:Button({
     end
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Config",
     Icon = "folder-open",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
 local ConfigFolder = "STREE_HUB/Configs"
 if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
@@ -2591,7 +2397,7 @@ local function ApplyConfig(data)
     end
 end
 
-Tab7:Button({
+Tab6:Button({
     Title = "Save Config",
     Desc = "Save all settings",
     Callback = function()
@@ -2600,7 +2406,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Load Config",
     Desc = "Use saved config",
     Callback = function()
@@ -2612,7 +2418,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Delete Config",
     Desc = "Delete saved config",
     Callback = function()
@@ -2622,16 +2428,16 @@ Tab7:Button({
     end
 })
 
-Tab7:Section({ 
+Tab6:Section({ 
     Title = "Other Scripts",
     Icon = "file-code-corner",
     TextXAlignment = "Left",
     TextSize = 17,
 })
 
-Tab7:Divider()
+Tab6:Divider()
 
-Tab7:Button({
+Tab6:Button({
     Title = "FLY",
     Desc = "Scripts Fly Gui",
     Locked = false,
@@ -2640,7 +2446,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Simple Shader",
     Desc = "Shader",
     Locked = false,
@@ -2649,7 +2455,7 @@ Tab7:Button({
     end
 })
 
-Tab7:Button({
+Tab6:Button({
     Title = "Infinite Yield",
     Desc = "Other Scripts",
     Locked = false,
@@ -2657,7 +2463,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
