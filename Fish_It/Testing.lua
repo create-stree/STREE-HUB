@@ -1,6 +1,10 @@
-loadstring([[
-    function LPH_NO_VIRTUALIZE(f) return f end;
-]])();
+if loadstring then
+    loadstring([[
+        function LPH_NO_VIRTUALIZE(f) return f end;
+    ]])()
+else
+    function LPH_NO_VIRTUALIZE(f) return f end
+end
 
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
@@ -2463,3 +2467,4 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
