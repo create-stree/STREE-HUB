@@ -75,7 +75,7 @@ end)
 G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
-    Title = "0.0.3.5",
+    Title = "0.0.3.4",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1027,14 +1027,20 @@ Tab3:Button({
                     if id == uuids[1] then slot = sl end
                 end
                 if slot then break end
-                equipItemRemote:FireServer(uuids[1], "EnchantStones")
+                if RE.EquipItem then
+                    RE.EquipItem:FireServer(uuids[1], "EnchantStones")
+                end
                 task.wait(0.3)
             end
             if not slot then return end
 
-            equipToolRemote:FireServer(slot)
+            if RE.EquipTool then
+                RE.EquipTool:FireServer(slot)
+            end
             task.wait(0.2)
-            activateAltarRemote2:FireServer()
+            if RE.ActivateAltar then
+                RE.ActivateAltar:FireServer()
+            end
         end)
     end
 })
@@ -1054,9 +1060,11 @@ spawn( LPH_NO_VIRTUALIZE( function()
             if #enchantStones > 0 then
                 local enchantStone = enchantStones[1]
                 local args = { enchantStone.UUID, "Enchant Stones" }
-                pcall(function()
-                    equipItemRemote:FireServer(unpack(args))
-                end)
+                if RE.EquipItem then
+                    pcall(function()
+                        RE.EquipItem:FireServer(unpack(args))
+                    end)
+                end
 
                 task.wait(1)
 
@@ -1064,15 +1072,19 @@ spawn( LPH_NO_VIRTUALIZE( function()
                 local slotNumber = imageButtonCount - 2
                 if slotNumber < 1 then slotNumber = 1 end
 
-                pcall(function()
-                    equipToolRemote:FireServer(slotNumber)
-                end)
+                if RE.EquipTool then
+                    pcall(function()
+                        RE.EquipTool:FireServer(slotNumber)
+                    end)
+                end
 
                 task.wait(1)
 
-                pcall(function()
-                    activateAltarRemote:FireServer()
-                end)
+                if RE.ActivateAltar then
+                    pcall(function()
+                        RE.ActivateAltar:FireServer()
+                    end)
+                end
             end
 
             task.wait(5)
