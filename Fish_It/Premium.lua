@@ -53,15 +53,6 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local G2L = {}
 local UI_OPEN = true
-local rawClose = Window.Close
-
-function Window:Close()
-    UI_OPEN = false
-    if G2L["ButtonRezise_2"] then
-        G2L["ButtonRezise_2"].Visible = true
-    end
-    rawClose(self)
-end
 
 local function setupToggle()
     if G2L["ScreenGui_1"] then
@@ -105,6 +96,7 @@ end
 setupToggle()
 
 player.CharacterAdded:Connect(function()
+    UI_OPEN = false
     task.wait(0.25)
     setupToggle()
 end)
@@ -153,11 +145,11 @@ Tab1:Button({
 })
 
 Tab1:Button({
-    Title = "Website",
+    Title = "WhatsApp",
     Desc = "click to copy link",
     Callback = function()
         if setclipboard then
-            setclipboard("https://stree-hub-nexus.lovable.app/")
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
         end
     end
 })
@@ -2675,5 +2667,6 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
