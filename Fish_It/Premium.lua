@@ -89,8 +89,6 @@ end)
 
 G2L["ButtonRezise_2"].Visible = false
 
-G2L["ButtonRezise_2"].Visible = false
-
 Window:Tag({
     Title = "v0.0.3.2",
     Color = Color3.fromRGB(0, 255, 0),
@@ -262,7 +260,12 @@ Tab2:Slider({
         Default = 18,
     },
     Callback = function(Value)
-        game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").WalkSpeed = Value
+        if game.Players.LocalPlayer.Character then
+            local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = Value
+            end
+        end
     end
 })
 
@@ -276,7 +279,14 @@ Tab2:Slider({
         Default = 50,
     },
     Callback = function(Value)
-        game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").JumpPower = Value
+        _G.CustomJumpPower = Value
+        if game.Players.LocalPlayer.Character then
+            local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = Value
+            end
+        end
     end
 })
 
@@ -305,7 +315,9 @@ Tab2:Button({
     Title = "Reset Speed",
     Desc = "Return speed to normal (18)",
     Callback = function()
-        Humanoid.WalkSpeed = 18
+        if Humanoid then
+            Humanoid.WalkSpeed = 18
+        end
     end
 })
 
@@ -844,11 +856,10 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 
-local RE = {
-    EquipItem = Net:FindFirstChild("RE/EquipItem"),
-    ActivateAltar = Net:FindFirstChild("RE/ActivateEnchantingAltar"),
-    EquipTool = Net:FindFirstChild("RE/EquipToolFromHotbar"),
-}
+local equipItemRemote = Net:FindFirstChild("RE/EquipItem")
+local activateAltarRemote = Net:FindFirstChild("RE/ActivateEnchantingAltar")
+local equipToolRemote = Net:FindFirstChild("RE/EquipToolFromHotbar")
+local activateAltarRemote2 = Net:FindFirstChild("RE/ActivateEnchantingAltar")
 
 function gStone()
     local it = Data:GetExpect({ "Inventory", "Items" })
@@ -1129,7 +1140,7 @@ local NPCs = {
     "Scientist",
     "Silly Fisherman",
     "Tim",
-    "Santa"
+    "Santa",
 	"Santa Doge",
 	"Stickmasterluke",
 	"Merely",
@@ -1340,7 +1351,7 @@ function sendNewFishWebhook(newlyCaughtFish)
     end)
 end
 
-U = Tab4:Input({
+local U = Tab4:Input({
     Title = "URL Webhook",
     Placeholder = "Paste your Discord Webhook URL here",
     Value = _G.WebhookURL or "",
@@ -1349,7 +1360,7 @@ U = Tab4:Input({
     end
 })
 
-V = Tab4:Dropdown({
+local V = Tab4:Dropdown({
     Title = "Rarity Filter",
     Values = rarityList,
     Multi = true,
@@ -1360,7 +1371,7 @@ V = Tab4:Dropdown({
     end
 })
 
-WU = Tab4:Toggle({
+local WU = Tab4:Toggle({
     Title = "Send Webhook",
     Value = _G.DetectNewFishActive or false,
     Callback = function(state)
@@ -1561,13 +1572,6 @@ local function getTotemUUID()
         end
     end
 end
-
-local Section = Tab4:Section({
-	Title = "Totem [Beta]",
-	Icon = "atom",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
 
 Tab4:Dropdown({
     Title = "Select Totem",
