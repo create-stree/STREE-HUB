@@ -54,9 +54,12 @@ local player = Players.LocalPlayer
 local G2L = {}
 
 local function setupToggle()
-    if G2L["ScreenGui_1"] and G2L["ScreenGui_1"].Parent then return end
+    if G2L["ScreenGui_1"] then
+        G2L["ScreenGui_1"]:Destroy()
+    end
 
     G2L["ScreenGui_1"] = Instance.new("ScreenGui")
+    G2L["ScreenGui_1"].Name = "STREE_TOGGLE"
     G2L["ScreenGui_1"].ResetOnSpawn = false
     G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     G2L["ScreenGui_1"].Parent = player:WaitForChild("PlayerGui")
@@ -70,15 +73,17 @@ local function setupToggle()
     G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
     G2L["ButtonRezise_2"].Size = UDim2.new(0,45,0,45)
     G2L["ButtonRezise_2"].Position = UDim2.new(0.13,0,0.03,0)
-    G2L["ButtonRezise_2"].Visible = false
+    G2L["ButtonRezise_2"].Visible = not Window:IsOpen()
 
-    local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
+    local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0,8)
+    corner.Parent = G2L["ButtonRezise_2"]
 
-    local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
+    local neon = Instance.new("UIStroke")
     neon.Thickness = 2
     neon.Color = Color3.fromRGB(0,255,0)
     neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    neon.Parent = G2L["ButtonRezise_2"]
 
     G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
         G2L["ButtonRezise_2"].Visible = false
@@ -86,7 +91,7 @@ local function setupToggle()
     end)
 
     Window:OnClose(function()
-        if G2L["ButtonRezise_2"] then
+        if G2L["ButtonRezise_2"] and G2L["ButtonRezise_2"].Parent then
             G2L["ButtonRezise_2"].Visible = true
         end
     end)
@@ -95,15 +100,8 @@ end
 setupToggle()
 
 player.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    if not G2L["ScreenGui_1"] or not G2L["ScreenGui_1"].Parent then
-        setupToggle()
-    else
-        G2L["ScreenGui_1"].Parent = player:WaitForChild("PlayerGui")
-        if not Window:IsOpen() then
-            G2L["ButtonRezise_2"].Visible = true
-        end
-    end
+    task.wait(0.25)
+    setupToggle()
 end)
 
 Window:Tag({
@@ -2672,3 +2670,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
