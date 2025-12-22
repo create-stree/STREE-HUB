@@ -1163,12 +1163,7 @@ Tab3:Toggle({
     end
 })
 
-local Tab4 = Window:Tab({
-	Title = "Exclusive",
-	Icon = "star"
-})
-
-Tab4:Section({ 
+Tab3:Section({ 
 	Title = "Webhook Fish Caught",
 	Icon = "webhook",
 	TextXAlignment = "Left",
@@ -1339,7 +1334,7 @@ function sendNewFishWebhook(newlyCaughtFish)
     end)
 end
 
-U = Tab4:Input({
+U = Tab3:Input({
     Title = "URL Webhook",
     Placeholder = "Paste your Discord Webhook URL here",
     Value = _G.WebhookURL or "",
@@ -1348,7 +1343,7 @@ U = Tab4:Input({
     end
 })
 
-V = Tab4:Dropdown({
+V = Tab3:Dropdown({
     Title = "Rarity Filter",
     Values = rarityList,
     Multi = true,
@@ -1359,7 +1354,7 @@ V = Tab4:Dropdown({
     end
 })
 
-WU = Tab4:Toggle({
+WU = Tab3:Toggle({
     Title = "Send Webhook",
     Value = _G.DetectNewFishActive or false,
     Callback = function(state)
@@ -1367,7 +1362,7 @@ WU = Tab4:Toggle({
     end
 })
 
-Tab4:Button({
+Tab3:Button({
     Title = "Test Webhook",
     Callback = sendTestWebhook
 })
