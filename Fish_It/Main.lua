@@ -74,8 +74,6 @@ end)
 
 G2L["ButtonRezise_2"].Visible = false
 
-G2L["ButtonRezise_2"].Visible = false
-
 Window:Tag({
     Title = "0.0.3.4",
     Color = Color3.fromRGB(0, 255, 0),
@@ -659,7 +657,6 @@ Tab3:Toggle({
     end
 })
 
-
 Tab3:Section({     
     Title = "Gameplay",
     Icon = "gamepad",
@@ -1107,7 +1104,6 @@ Tab3:Button({
         end
     end
 })
-
 
 Tab3:Section({ 
 	Title = "Webhook Fish Caught",
@@ -2376,15 +2372,3 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
-
-
-
-
-
-
-
-
