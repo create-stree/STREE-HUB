@@ -1536,6 +1536,13 @@ Tab4:Button({
     end
 })
 
+local Section = Tab4:Section({
+	Title = "Totem",
+	Icon = "atom",
+	TextXAlignment = "Left",
+	TextSize = 17
+})
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
