@@ -1218,6 +1218,7 @@ end)
 
 Tab4:Toggle({
     Title = "Teleport Christmas Cave",
+	Value = false,
     Callback = function()
         local s = pcall(tp)
         if s then
@@ -2727,5 +2728,6 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
