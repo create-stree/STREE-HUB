@@ -1216,7 +1216,7 @@ task.spawn(function()
     end
 end)
 
-Tab4:Toggle({
+Tab3:Toggle({
     Title = "Teleport Christmas Cave",
 	Value = false,
     Callback = function()
@@ -1511,6 +1511,8 @@ local Section = Tab4:Section({
 	TextSize = 17
 })
 
+Tab4:Divider()
+
 local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
 
 local ORI = {
@@ -1595,6 +1597,8 @@ local Section = Tab4:Section({
 	TextXAlignment = "Left",
 	TextSize = 17
 })
+
+Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -2728,6 +2732,7 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
 
 
