@@ -1176,59 +1176,6 @@ Tab3:Toggle({
     end
 })
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local function tp()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-
-    local target = workspace:FindFirstChild("Christmas Cave") 
-        or workspace:FindFirstChild("ChristmasCave") 
-        or workspace:FindFirstChild("Xmas Cave") 
-        or workspace:FindFirstChild("Christmas_Cave")
-        or workspace:FindFirstChild("CaveEntrance")
-
-    if target and target:IsA("BasePart") then
-        root.CFrame = target.CFrame + Vector3.new(0, 5, 0)
-        return true
-    end
-
-    for _,v in pairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") and (string.find(v.Name:lower(), "christmas") or string.find(v.Name:lower(), "xmas")) then
-            root.CFrame = v.CFrame + Vector3.new(0, 5, 0)
-            return true
-        end
-    end
-    return false
-end
-
-task.spawn(function()
-    while true do
-        local ok = pcall(function()
-            if not tp() then
-                task.wait(0.2)
-            else
-                task.wait(2)
-            end
-        end)
-        if not ok then task.wait(1) end
-    end
-end)
-
-Tab3:Toggle({
-    Title = "Teleport Christmas Cave",
-	Value = false,
-    Callback = function()
-        local s = pcall(tp)
-        if s then
-            print("✓ Teleport Success")
-        else
-            warn("⚠️ Teleport Failed")
-		end
-    end
-})
-
 local Tab4 = Window:Tab({
 	Title = "Exclusive",
 	Icon = "star"
@@ -2732,7 +2679,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
-
-
-
