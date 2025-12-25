@@ -2521,35 +2521,36 @@ Tab7:Toggle({
 
 Tab7:Toggle({
     Title = "AntiAFK",
-    Desc = "Prevent Roblox from kicking you when idle",
+    Desc = "Prevent Roblox from kicking you when idle 24 hours",
     Icon = false,
     Type = false,
     Default = false,
     Callback = function(state)
         _G.AntiAFK = state
         local VirtualUser = game:GetService("VirtualUser")
+        local Players = game:GetService("Players")
+
         if state then
             task.spawn(function()
                 while _G.AntiAFK do
-                    task.wait(60)
+                    task.wait(50)
                     pcall(function()
                         VirtualUser:CaptureController()
-                        VirtualUser:ClickButton2(Vector2.new())
+                        VirtualUser:ClickButton2(Vector2.new(0,0))
                     end)
                 end
             end)
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "AntiAFK loaded!",
-                Text = "Coded By Kirsiasc",
-                Button1 = "Okey",
-                Duration = 5
-            })
+
+            task.spawn(function()
+                while _G.AntiAFK do
+                    task.wait(300)
+                    pcall(function()
+                        Players.LocalPlayer.Idled:Fire()
+                    end)
+                end
+            end)
         else
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "AntiAFK Disabled",
-                Text = "Stopped AntiAFK",
-                Duration = 3
-            })
+            _G.AntiAFK = false
         end
     end
 })
@@ -2748,4 +2749,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
