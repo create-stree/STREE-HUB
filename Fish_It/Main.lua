@@ -1163,6 +1163,27 @@ Tab3:Toggle({
     end
 })
 
+local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
+    :FindFirstChild("sleitnick_net@0.2.0").net
+    :FindFirstChild("RF/RedeemGift")
+
+Tab3:Toggle({
+    Title = "Auto Present Factory",
+    Desc = "Automatically open Present Factory",
+    Value = false,
+    Callback = function(state)
+        _G.AutoPresentFactory = state
+        task.spawn(function()
+            while _G.AutoPresentFactory do
+                pcall(function()
+                    giftRemote:InvokeServer()
+                end)
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
 Tab3:Section({ 
 	Title = "Webhook Fish Caught",
 	Icon = "webhook",
@@ -2453,3 +2474,4 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
