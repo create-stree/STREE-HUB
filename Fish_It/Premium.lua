@@ -1594,45 +1594,58 @@ Tab4:Divider()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
-local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
-local EquipItem = Net["RE/EquipItem"]
-local SpawnTotem = Net["RE/SpawnTotem"]
+local Net = ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+local EquipItem = Net:FindFirstChild("RE/EquipItem")
+local SpawnTotem = Net:FindFirstChild("RE/SpawnTotem")
 
 _G.AutoSpawnTotem = false
 _G.SelectedTotem = "Lucky"
 _G.TotemUUID = nil
 
-local TotemNames = {
-    Lucky = "Lucky Totem",
-    Mutation = "Mutation Totem",
-    Shiny = "Shiny Totem"
+local TotemDisplay = {
+	"Lucky",
+	"Mutation",
+	"Shiny"
 }
 
-local function getTotemUUID()
-    local containers = {
-        "Inventory",
-        "Data",
-        "PlayerData",
-        "Player_Data",
-        "ProfileData",
-        "Backpack",
-    }
+local function findTotemsFolder()
+    for _, v in pairs(LocalPlayer:GetChildren()) do
+        if string.lower(v.Name) == "totems" then
+            return v
+        end
+    end
+    return nil
+end
 
-    for _, name in pairs(containers) do
-        local inv = LocalPlayer:FindFirstChild(name)
-        if inv then
-            for _, v in pairs(inv:GetDescendants()) do
-                if v.Name == "ItemId" and v:IsA("ValueBase") then
-                    local holder = v.Parent
-                    if holder then
-                        for _, n in pairs(holder:GetChildren()) do
-                            if n:IsA("ValueBase") and string.find(string.lower(tostring(n.Value)), string.lower(TotemNames[_G.SelectedTotem])) then
-                                return v.Value
-                            end
-                        end
+local function findUUIDFromGame(selected)
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v:IsA("Model") then
+            local n = string.lower(v.Name)
+            if string.find(n, "lucky") or string.find(n, "mutation") or string.find(n, "shiny") then
+                if string.find(n, string.lower(selected)) then
+                    local uuid = v:FindFirstChild("ItemId") or v:FindFirstChild("ItemUUID")
+                    if uuid and uuid:IsA("ValueBase") then
+                        return uuid.Value
                     end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function getUUIDFromInventory(selected)
+    local folder = findTotemsFolder()
+    if not folder then return nil end
+    for _, v in pairs(folder:GetDescendants()) do
+        if v:IsA("ValueBase") and string.lower(v.Name) == "name" then
+            if string.find(string.lower(tostring(v.Value)), string.lower(selected)) then
+                local uuid = v.Parent:FindFirstChild("ItemId") or v.Parent:FindFirstChild("ItemUUID")
+                if uuid and uuid:IsA("ValueBase") then
+                    return uuid.Value
                 end
             end
         end
@@ -1642,11 +1655,12 @@ end
 
 Tab4:Dropdown({
     Title = "Select Totem",
-    Desc = "Types of totems : Lucky, Mutation, Shiny",
-    Values = { "Lucky", "Mutation", "Shiny" },
+    Desc = "Choose which totem to spawn",
+    Values = TotemDisplay,
     Value = "Lucky",
     Callback = function(option)
         _G.SelectedTotem = option
+        _G.TotemUUID = getUUIDFromInventory(option) or findUUIDFromGame(option)
     end
 })
 
@@ -1657,11 +1671,10 @@ Tab4:Toggle({
     Callback = function(state)
         _G.AutoSpawnTotem = state
         if not state then return end
-
         task.spawn(function()
             while _G.AutoSpawnTotem do
                 task.wait(1)
-                local uuid = getTotemUUID()
+                local uuid = _G.TotemUUID or getUUIDFromInventory(_G.SelectedTotem) or findUUIDFromGame(_G.SelectedTotem)
                 if uuid then
                     _G.TotemUUID = uuid
                     pcall(function()
