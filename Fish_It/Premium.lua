@@ -1176,6 +1176,51 @@ Tab3:Toggle({
     end
 })
 
+_G.AutoClaimChristmas = false
+
+Tab3:Toggle({
+    Title = "Auto Claim",
+    Desc = "Auto Claim Christmas Presents",
+    Value = false,
+    Callback = function(state)
+        _G.AutoClaimChristmas = state
+
+        task.spawn(function()
+            while _G.AutoClaimChristmas do
+                for _, npc in ipairs(NPCs) do
+                    if not _G.AutoClaimChristmas then break end
+                    pcall(function()
+                        Remote:InvokeServer(npc, "ChristmasPresents")
+                    end)
+                    task.wait(0.15)
+                end
+                task.wait(2)
+            end
+        end)
+    end
+})
+
+local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
+    :FindFirstChild("sleitnick_net@0.2.0").net
+    :FindFirstChild("RF/RedeemGift")
+
+Tab3:Toggle({
+    Title = "Auto Present Factory",
+    Desc = "Automatically open Present Factory",
+    Value = false,
+    Callback = function(state)
+        _G.AutoPresentFactory = state
+        task.spawn(function()
+            while _G.AutoPresentFactory do
+                pcall(function()
+                    giftRemote:InvokeServer()
+                end)
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
 local Tab4 = Window:Tab({
 	Title = "Exclusive",
 	Icon = "star"
