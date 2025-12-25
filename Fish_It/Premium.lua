@@ -1617,16 +1617,23 @@ local function getTotemUUID()
 
     if not inv then return nil end
 
-    for _,v in pairs(inv:GetDescendants()) do
+    for _, v in pairs(inv:GetDescendants()) do
         if v:IsA("StringValue") and v.Name == "ItemId" then
             local parent = v.Parent
-            if parent and parent:FindFirstChild("Name") then
-                if string.find(parent.Name.Value, TotemNames[_G.SelectedTotem]) then
+            local nameVal = parent and parent:FindFirstChild("Name")
+            if nameVal and nameVal:IsA("StringValue") or nameVal:IsA("StringValue") then
+                if string.find(nameVal.Value, TotemNames[_G.SelectedTotem]) then
+                    return v.Value
+                end
+            elseif nameVal and nameVal:IsA("StringValue") then
+                if string.find(nameVal.Value, TotemNames[_G.SelectedTotem]) then
                     return v.Value
                 end
             end
         end
     end
+
+    return nil
 end
 
 Tab4:Dropdown({
@@ -1645,22 +1652,22 @@ Tab4:Toggle({
     Value = false,
     Callback = function(state)
         _G.AutoSpawnTotem = state
-        if state then
-            task.spawn(function()
-                while _G.AutoSpawnTotem do
-                    task.wait(1)
-                    local uuid = getTotemUUID()
-                    if uuid then
-                        _G.TotemUUID = uuid
-                        pcall(function()
-                            EquipItem:FireServer(uuid, "Totems")
-                            task.wait(0.3)
-                            SpawnTotem:FireServer(uuid)
-                        end)
-                    end
+        if not state then return end
+
+        task.spawn(function()
+            while _G.AutoSpawnTotem do
+                task.wait(1)
+                local uuid = getTotemUUID()
+                if uuid then
+                    _G.TotemUUID = uuid
+                    pcall(function()
+                        EquipItem:FireServer(uuid, "Totems")
+                        task.wait(0.25)
+                        SpawnTotem:FireServer(uuid)
+                    end)
                 end
-            end)
-        end
+            end
+        end)
     end
 })
 
