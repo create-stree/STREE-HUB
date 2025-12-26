@@ -47,6 +47,16 @@ local premiumKeys = {
     "SdFgHjKlMnBvCxZqWeRtYuIoPaSdFgHjK",
     "LkJhGfDsAqWeRtYuIoPaSdFgHjKlMnBvC",
     "PaSdFgHjKlMnBvCxZqWeRtYuIoPaSdFgH", -- 40
+    "xQmZbTnLcVrWpKyJdHsUfGaEiLoPnYtR",
+    "BnVcXzQpLmYtRwQkJhGfDsAzXbNmLpOt",
+    "YkLmNbVcXzAsDfGhJkLpOiUyTrEwQmNy",
+    "tRqWpLnMxKvBsGfHeJzDuQiYcPaLmNkQ",
+    "JmQnLpRtYxKvBsGhEfZaWiCuTdOyQnLu",
+    "kVxYoPaSdFgHjKlMnBvCxZqWeRtYuIoT",
+    "pLnMxKvBsGhEfZaWiCuTdOyQnLkVxYon",
+    "XcVbNmLpQrTyUiOpAsDfGhJkLmNbVcXs",
+    "sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig",
+    "HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp", -- 50
     "developer_access",
     "team_access",
 }
