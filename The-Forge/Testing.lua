@@ -41,7 +41,7 @@ G2L["ButtonRezise_2"] = Instance.new("ImageButton")
 G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
 G2L["ButtonRezise_2"].BorderSizePixel = 0
 G2L["ButtonRezise_2"].Draggable = true
-G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Diubah ke hijau
 G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
 G2L["ButtonRezise_2"].Size = UDim2.new(0, 47, 0, 47)
 G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
@@ -52,7 +52,7 @@ corner.CornerRadius = UDim.new(0, 8)
 
 local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
 neon.Thickness = 2
-neon.Color = Color3.fromRGB(0, 170, 255)
+neon.Color = Color3.fromRGB(0, 255, 0)
 neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 local windowVisible = true
