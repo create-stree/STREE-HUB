@@ -1176,30 +1176,6 @@ Tab3:Toggle({
     end
 })
 
-_G.AutoClaimChristmas = false
-
-Tab3:Toggle({
-    Title = "Auto Claim",
-    Desc = "Auto Claim Christmas Presents",
-    Value = false,
-    Callback = function(state)
-        _G.AutoClaimChristmas = state
-
-        task.spawn(function()
-            while _G.AutoClaimChristmas do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.AutoClaimChristmas then break end
-                    pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
-                    end)
-                    task.wait(0.15)
-                end
-                task.wait(2)
-            end
-        end)
-    end
-})
-
 local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
     :FindFirstChild("sleitnick_net@0.2.0").net
     :FindFirstChild("RF/RedeemGift")
@@ -1639,6 +1615,50 @@ local Section = Tab4:Section({
 	TextSize = 17
 })
 
+Tab4:Divider()
+
+local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
+
+local ORI = {
+    H = VFX.Handle,
+    P = VFX.RenderAtPoint,
+    I = VFX.RenderInstance
+}
+
+Tab4:Toggle({
+    Title = "Remove Skin Effect",
+    Desc = "Remove Your Skin Effect",
+    Default = false,
+    Callback = function(state)
+        if state then
+            VFX.Handle = function() end
+            VFX.RenderAtPoint = function() end
+            VFX.RenderInstance = function() end
+
+            local f = workspace:FindFirstChild("CosmeticFolder")
+            if f then
+                pcall(f.ClearAllChildren, f)
+            end
+
+            WindUI:Notify({
+                Title = "Skin Effect Disabled",
+                Duration = 3,
+                Icon = "eye-off"
+            })
+        else
+            VFX.Handle = ORI.H
+            VFX.RenderAtPoint = ORI.P
+            VFX.RenderInstance = ORI.I
+
+            WindUI:Notify({
+                Title = "Skin Effect Enabled",
+                Duration = 3,
+                Icon = "eye"
+            })
+        end
+    end
+})
+
 RE = {
     FavoriteItem = Net:FindFirstChild("RE/FavoriteItem"),
     FavoriteStateChanged = Net:FindFirstChild("RE/FavoriteStateChanged"),
@@ -1782,50 +1802,6 @@ Tab4:Button({
                 RE.FavoriteItem:FireServer(item.UUID, false)
                 favState[item.UUID] = false
             end
-        end
-    end
-})
-
-Tab4:Divider()
-
-local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
-
-local ORI = {
-    H = VFX.Handle,
-    P = VFX.RenderAtPoint,
-    I = VFX.RenderInstance
-}
-
-Tab4:Toggle({
-    Title = "Remove Skin Effect",
-    Desc = "Remove Your Skin Effect",
-    Default = false,
-    Callback = function(state)
-        if state then
-            VFX.Handle = function() end
-            VFX.RenderAtPoint = function() end
-            VFX.RenderInstance = function() end
-
-            local f = workspace:FindFirstChild("CosmeticFolder")
-            if f then
-                pcall(f.ClearAllChildren, f)
-            end
-
-            WindUI:Notify({
-                Title = "Skin Effect Disabled",
-                Duration = 3,
-                Icon = "eye-off"
-            })
-        else
-            VFX.Handle = ORI.H
-            VFX.RenderAtPoint = ORI.P
-            VFX.RenderInstance = ORI.I
-
-            WindUI:Notify({
-                Title = "Skin Effect Enabled",
-                Duration = 3,
-                Icon = "eye"
-            })
         end
     end
 })
