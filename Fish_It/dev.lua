@@ -44,8 +44,6 @@ local Window = WindUI:CreateWindow({
     },
 })
 
-Items = ReplicatedStorage:WaitForChild("Items")
-
 Window:EditOpenButton({
     Enabled = false,
 })
@@ -1653,6 +1651,8 @@ Tab4:Section({
     TextSize = 17,
 })
 
+Tab4:Divider()
+
 local REFishCaught = RE.FishCaught or Net:WaitForChild("RE/FishCaught")
 local REFishingCompleted = RE.FishingCompleted or Net:WaitForChild("RE/FishingCompleted")
 
@@ -1667,6 +1667,8 @@ if REFishingCompleted then
         st.canFish = true
     end)
 end
+
+Items = ReplicatedStorage:WaitForChild("Items")
 
 tierToRarity = {
     [1] = "Uncommon",
@@ -3030,3 +3032,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
