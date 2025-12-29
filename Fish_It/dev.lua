@@ -1668,8 +1668,6 @@ if REFishingCompleted then
     end)
 end
 
-Items = ReplicatedStorage:WaitForChild("Items")
-
 tierToRarity = {
     [1] = "Uncommon",
     [2] = "Common",
@@ -1679,6 +1677,8 @@ tierToRarity = {
     [6] = "Mythic",
     [7] = "Secret"
 }
+
+Items = ReplicatedStorage:WaitForChild("Items")
 
 fishNames = {}
 for _, module in ipairs(Items:GetChildren()) do
@@ -3032,4 +3032,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
