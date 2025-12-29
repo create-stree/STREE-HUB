@@ -44,8 +44,6 @@ local Window = WindUI:CreateWindow({
     },
 })
 
-Items = ReplicatedStorage:WaitForChild("Items")
-
 Window:EditOpenButton({
     Enabled = false,
 })
@@ -90,6 +88,8 @@ Window:OnDestroy(function()
 end)
 
 G2L["ButtonRezise_2"].Visible = false
+
+Items = ReplicatedStorage:WaitForChild("Items")
 
 Window:Tag({
     Title = "v0.0.3.5",
@@ -3030,3 +3030,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
