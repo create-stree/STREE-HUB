@@ -1807,42 +1807,6 @@ Tab4:Button({
 })
 
 local Section = Tab4:Section({
-	Title = "Gift",
-	Icon = "gift",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
-
-Tab4:Button({
-    Title = "Gift Skin Soul Scythe",
-    Locked = false,
-    Callback = function()
-        if GiftingController and GiftingController.Open then
-            GiftingController:Open("Soul Scythe")
-
-            WindUI:Notify({
-                Title = "Gift Open",
-                Content = "Soul Scythe Gift Opened Successfully",
-                Duration = 3,
-                Icon = "check"
-            })
-        else
-            WindUI:Notify({
-                Title = "Failed!!",
-                Content = "Patched",
-                Duration = 3,
-                Icon = "x"
-            })
-        end
-    end
-})
-
-local Section = Tab4:Section({
 	Title = "Totem",
 	Icon = "atom",
 	TextXAlignment = "Left",
