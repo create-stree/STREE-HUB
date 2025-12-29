@@ -1127,29 +1127,8 @@ local RS = game:GetService("ReplicatedStorage")
 local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
 
 local NPCs = {
-    "Alien Merchant",
-    "Billy Bob",
-    "Seth",
-    "Joe",
-    "Aura Kid",
-    "Boat Expert",
-    "Scott",
-    "Ron",
-    "Jeffery",
-    "McBoatson",
-    "Scientist",
-    "Silly Fisherman",
-    "Tim",
-    "Santa",
-	"Santa Doge",
-	"Stickmasterluke",
-	"Merely",
-	"Shendletsky",
-	"BrightEyes",
-	"Guest",
-	"Builderman",
-	"Noob",
-	"John Doe",
+    "Alien Merchant", "Billy Bob", "Seth", "Joe", "Aura Kid", "Boat Expert", "Scott", "Ron", "Jeffery", "McBoatson", "Scientist",
+    "Silly Fisherman","Tim", "Santa", "Santa Doge", "Stickmasterluke", "Merely", "Shendletsky", "BrightEyes", "Guest", "Builderman", "Noob", "John Doe"
 }
 
 _G.AutoClaimChristmas = false
