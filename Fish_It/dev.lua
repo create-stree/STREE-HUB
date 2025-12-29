@@ -44,6 +44,8 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+Items = ReplicatedStorage:WaitForChild("Items")
+
 Window:EditOpenButton({
     Enabled = false,
 })
@@ -1474,7 +1476,6 @@ local Config = {
     complete = 100
 }
 
--- === NET ===
 local Net = ReplicatedStorage
     :WaitForChild("Packages")
     :WaitForChild("_Index")
@@ -3029,4 +3030,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
