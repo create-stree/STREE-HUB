@@ -90,14 +90,14 @@ end)
 G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
-    Title = "v0.0.3.5",
+    Title = "Version",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
 
 Window:Tag({
-    Title = "Premium",
-    Color = Color3.fromRGB(138, 43, 226),
+    Title = "Dev",
+    Color = Color3.fromRGB(0, 0, 0),
     Radius = 17,
 })
 
@@ -3029,4 +3029,5 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
