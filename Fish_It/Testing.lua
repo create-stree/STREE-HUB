@@ -366,8 +366,8 @@ Tab2:Toggle({
                     end
                 end
             end
-        end
-    end)
+        end)
+    end
 })
 
 local player = game:GetService("Players").LocalPlayer
