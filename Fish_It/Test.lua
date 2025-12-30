@@ -84,11 +84,6 @@ local Tab1 = Window:CreateTab({
 
 local Section1 = Tab1:AddSection("Community Support")
 
-Section1:AddParagraph({
-    Title = "Support",
-    Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
-})
-
 Section1:AddButton({
     Title = "Discord",
     Content = "click to copy link",
@@ -107,6 +102,11 @@ Section1:AddButton({
             setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
         end
     end
+})
+
+Section1:AddParagraph({
+    Title = "Support",
+    Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
 local Tab2 = Window:CreateTab({
