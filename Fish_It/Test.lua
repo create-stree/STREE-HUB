@@ -30,7 +30,7 @@ local RPath = game:GetService("ReplicatedStorage")
 
 local Window = Library:MakeGui({
     NameHub = "STREE HUB",
-    Description = "KirsiaSC | Fish It",
+    Description = "| Fish It",
     Color = Color3.fromRGB(0, 255, 0)
 })
 
@@ -82,14 +82,14 @@ local Tab1 = Window:CreateTab({
     Icon = "rbxassetid://16932740082"
 })
 
-local Section1_1 = Tab1:AddSection("Community Support")
+local Section1 = Tab1:AddSection("Community Support")
 
-Section1_1:AddParagraph({
+Section1:AddParagraph({
     Title = "Support",
     Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
-Section1_1:AddButton({
+Section1:AddButton({
     Title = "Discord",
     Content = "click to copy link",
     Callback = function()
@@ -99,7 +99,7 @@ Section1_1:AddButton({
     end
 })
 
-Section1_1:AddButton({
+Section1:AddButton({
     Title = "WhatsApp",
     Content = "click to copy link",
     Callback = function()
@@ -109,19 +109,14 @@ Section1_1:AddButton({
     end
 })
 
-Section1_1:AddParagraph({
-    Title = "UI Toggle Key",
-    Content = "Press 'G' to open/close the UI"
-})
-
 local Tab2 = Window:CreateTab({
     Name = "Players",
     Icon = "rbxassetid://16932740082"
 })
 
-local Section2_1 = Tab2:AddSection("Movement")
+local Section2 = Tab2:AddSection("Movement")
 
-Section2_1:AddSlider({
+Section2:AddSlider({
     Title = "Speed",
     Content = "Adjust walk speed",
     Min = 18,
@@ -137,7 +132,7 @@ Section2_1:AddSlider({
     end
 })
 
-Section2_1:AddSlider({
+Section2:AddSlider({
     Title = "Jump",
     Content = "Adjust jump power",
     Min = 50,
@@ -155,7 +150,7 @@ Section2_1:AddSlider({
     end
 })
 
-Section2_1:AddButton({
+Section2:AddButton({
     Title = "Reset Jump Power",
     Content = "Return Jump Power to normal (50)",
     Callback = function()
@@ -168,7 +163,7 @@ Section2_1:AddButton({
     end
 })
 
-Section2_1:AddButton({
+Section2:AddButton({
     Title = "Reset Speed",
     Content = "Return speed to normal (18)",
     Callback = function()
@@ -179,9 +174,9 @@ Section2_1:AddButton({
     end
 })
 
-local Section2_2 = Tab2:AddSection("Abilities")
+local Section3 = Tab2:AddSection("Abilities")
 
-Section2_2:AddToggle({
+Section3:AddToggle({
     Title = "Infinite Jump",
     Content = "activate to use infinite jump",
     Default = false,
@@ -200,7 +195,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-Section2_2:AddToggle({
+Section3:AddToggle({
     Title = "Noclip",
     Content = "Walk through walls",
     Default = false,
@@ -225,7 +220,7 @@ Section2_2:AddToggle({
 local freezeConnection
 local originalCFrame
 
-Section2_2:AddToggle({
+Section3:AddToggle({
     Title = "Freeze Character",
     Content = "Freeze your character in place",
     Default = false,
@@ -442,7 +437,7 @@ local function instant_cycle()
     catch()
 end
 
-Section3_1:AddToggle({
+Section4:AddToggle({
     Title = "Auto Equip Rod",
     Content = "Automatically equip fishing rod",
     Default = false,
@@ -456,7 +451,7 @@ local mode = "Instant"
 local fishThread
 local sellThread
 
-Section3_1:AddDropdown({
+Section4:AddDropdown({
     Title = "Mode",
     Content = "Select fishing mode",
     Multi = false,
@@ -467,7 +462,7 @@ Section3_1:AddDropdown({
     end
 })
 
-Section3_1:AddToggle({
+Section4:AddToggle({
     Title = "Auto Fishing",
     Content = "Automatically fish",
     Default = false,
@@ -501,7 +496,7 @@ Section3_1:AddToggle({
     end
 })
 
-Section3_1:AddSlider({
+Section4:AddSlider({
     Title = "Instant Fishing Delay",
     Content = "Delay between catches",
     Min = 0.05,
@@ -512,9 +507,9 @@ Section3_1:AddSlider({
     end
 })
 
-local Section3_2 = Tab3:AddSection("Auto Sell")
+local Section5 = Tab3:AddSection("Auto Sell")
 
-Section3_2:AddToggle({
+Section5:AddToggle({
     Title = "Auto Sell",
     Content = "Automatically sell items",
     Default = false,
@@ -531,7 +526,7 @@ Section3_2:AddToggle({
     end
 })
 
-Section3_2:AddSlider({
+Section5:AddSlider({
     Title = "Sell Delay",
     Content = "Delay between auto sells (seconds)",
     Min = 1,
@@ -542,9 +537,9 @@ Section3_2:AddSlider({
     end
 })
 
-local Section3_3 = Tab3:AddSection("Item")
+local Section6 = Tab3:AddSection("Item")
 
-Section3_3:AddToggle({
+Section6:AddToggle({
     Title = "Radar",
     Content = "Enable fishing radar",
     Default = false,
@@ -579,7 +574,7 @@ Section3_3:AddToggle({
     end
 })
 
-Section3_3:AddToggle({
+Section6:AddToggle({
     Title = "Diving Gear",
     Content = "Oxygen Tank",
     Default = false,
@@ -594,9 +589,9 @@ Section3_3:AddToggle({
     end
 })
 
-local Section3_4 = Tab3:AddSection("Gameplay")
+local Section7 = Tab3:AddSection("Gameplay")
 
-Section3_4:AddToggle({
+Section7:AddToggle({
     Title = "FPS Boost",
     Content = "Optimizes performance for smooth gameplay",
     Default = false,
@@ -690,7 +685,7 @@ Section3_4:AddToggle({
     end
 })
 
-Section3_4:AddToggle({
+Section7:AddToggle({
     Title = "Black Screen",
     Content = "Show STREE HUB black screen",
     Default = false,
@@ -748,7 +743,7 @@ Section3_4:AddToggle({
     end
 })
 
-local Section3_5 = Tab3:AddSection("Enchant Features")
+local Section8 = Tab3:AddSection("Enchant Features")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Data = require(ReplicatedStorage.Packages.Replion).Client:WaitReplion("Data")
@@ -847,7 +842,7 @@ function getCurrentRodEnchant()
     return nil
 end
 
-Section3_5:AddParagraph({
+Section8:AddParagraph({
     Title = "Enchanting Features",
     Content = "Loading..."
 })
@@ -877,7 +872,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
     end
 end))
 
-Section3_5:AddDropdown({
+Section8:AddDropdown({
     Title = "Target Enchant",
     Content = "Select enchant to target",
     Multi = false,
@@ -888,7 +883,7 @@ Section3_5:AddDropdown({
     end
 })
 
-Section3_5:AddToggle({
+Section8:AddToggle({
     Title = "Auto Enchant",
     Content = "Automatically enchant rods",
     Default = false,
@@ -925,7 +920,7 @@ function getData(stoneId)
     return rod, ench, stones, uuids
 end
 
-Section3_5:AddButton({
+Section8:AddButton({
     Title = "Start Double Enchant",
     Content = "Enchant with double stones",
     Callback = function()
@@ -992,7 +987,7 @@ spawn( LPH_NO_VIRTUALIZE( function()
     end
 end))
 
-Section3_5:AddButton({
+Section8:AddButton({
     Title = "Teleport to Altar",
     Content = "Teleport to enchanting altar",
     Callback = function()
@@ -1007,7 +1002,7 @@ Section3_5:AddButton({
     end
 })
 
-Section3_5:AddButton({
+Section8:AddButton({
     Title = "Teleport to Second Altar",
     Content = "Teleport to second enchanting altar",
     Callback = function()
@@ -1019,14 +1014,14 @@ Section3_5:AddButton({
     end
 })
 
-local Section3_6 = Tab3:AddSection("Event")
+local Section9 = Tab3:AddSection("Event")
 
 local RS = game:GetService("ReplicatedStorage")
 local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
 
 _G.AutoClaimChristmas = false
 
-Section3_6:AddToggle({
+Section9:AddToggle({
     Title = "Auto Claim",
     Content = "Auto Claim Christmas Presents",
     Default = false,
@@ -1057,7 +1052,7 @@ local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
     :FindFirstChild("sleitnick_net@0.2.0").net
     :FindFirstChild("RF/RedeemGift")
 
-Section3_6:AddToggle({
+Section9:AddToggle({
     Title = "Auto Present Factory",
     Content = "Automatically open Present Factory",
     Default = false,
@@ -1079,7 +1074,7 @@ local Tab4 = Window:CreateTab({
     Icon = "rbxassetid://16932740082"
 })
 
-local Section4_1 = Tab4:AddSection("Webhook Fish Caught")
+local Section10 = Tab4:AddSection("Webhook Fish Caught")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
@@ -1241,7 +1236,7 @@ function sendNewFishWebhook(newlyCaughtFish)
     end)
 end
 
-Section4_1:AddInput({
+Section10:AddInput({
     Title = "URL Webhook",
     Content = "Paste your Discord Webhook URL here",
     Placeholder = "Webhook URL",
@@ -1250,7 +1245,7 @@ Section4_1:AddInput({
     end
 })
 
-Section4_1:AddDropdown({
+Section10:AddDropdown({
     Title = "Rarity Filter",
     Content = "Select rarities to notify",
     Multi = true,
@@ -1261,7 +1256,7 @@ Section4_1:AddDropdown({
     end
 })
 
-Section4_1:AddToggle({
+Section10:AddToggle({
     Title = "Send Webhook",
     Content = "Enable webhook notifications",
     Default = false,
@@ -1270,7 +1265,7 @@ Section4_1:AddToggle({
     end
 })
 
-Section4_1:AddButton({
+Section10:AddButton({
     Title = "Test Webhook",
     Content = "Test webhook connection",
     Callback = sendTestWebhook
@@ -1302,7 +1297,7 @@ spawn( LPH_NO_VIRTUALIZE( function()
     end
 end))
 
-local Section4_2 = Tab4:AddSection("Blantant Fishing")
+local Section11 = Tab4:AddSection("Blantant Fishing")
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1444,14 +1439,14 @@ local function Toggle(state)
     end
 end
 
-Section4_2:AddToggle({
+Section11:AddToggle({
     Title = "Blantant",
     Content = "Enable blatant fishing",
     Default = false,
     Callback = Toggle
 })
 
-Section4_2:AddInput({
+Section11:AddInput({
     Title = "Delay Bait",
     Content = "Bait delay in seconds",
     Placeholder = "100",
@@ -1463,7 +1458,7 @@ Section4_2:AddInput({
     end
 })
 
-Section4_2:AddInput({
+Section11:AddInput({
     Title = "Delay Reel",
     Content = "Reel delay in seconds",
     Placeholder = "100",
@@ -1475,7 +1470,7 @@ Section4_2:AddInput({
     end
 })
 
-local Section4_3 = Tab4:AddSection("Premium")
+local Section12 = Tab4:AddSection("Premium")
 
 local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
 
@@ -1485,7 +1480,7 @@ local ORI = {
     I = VFX.RenderInstance
 }
 
-Section4_3:AddToggle({
+Section12:AddToggle({
     Title = "Remove Skin Effect",
     Content = "Remove Your Skin Effect",
     Default = false,
@@ -1512,7 +1507,7 @@ RE = {
     FavoriteStateChanged = Net:FindFirstChild("RE/FavoriteStateChanged"),
 }
 
-local Section4_4 = Tab4:AddSection("Auto Favorite")
+local Section13 = Tab4:AddSection("Auto Favorite")
 
 local REFishCaught = RE.FishCaught or Net:WaitForChild("RE/FishCaught")
 local REFishingCompleted = RE.FishingCompleted or Net:WaitForChild("RE/FishingCompleted")
@@ -1588,7 +1583,7 @@ Data:OnChange({ "Inventory", "Items" }, function()
     if st.autoFavEnabled then scanInventory() end
 end)
 
-Section4_4:AddDropdown({
+Section13:AddDropdown({
     Title = "Favorite by Name",
     Content = "Select fish names to auto-favorite",
     Multi = true,
@@ -1600,7 +1595,7 @@ Section4_4:AddDropdown({
     end
 })
 
-Section4_4:AddDropdown({
+Section13:AddDropdown({
     Title = "Favorite by Rarity",
     Content = "Select rarities to auto-favorite",
     Multi = true,
@@ -1612,7 +1607,7 @@ Section4_4:AddDropdown({
     end
 })
 
-Section4_4:AddToggle({
+Section13:AddToggle({
     Title = "Start Auto Favorite",
     Content = "Enable auto favorite",
     Default = false,
@@ -1623,7 +1618,7 @@ Section4_4:AddToggle({
     end
 })
 
-Section4_4:AddButton({
+Section13:AddButton({
     Title = "Unfavorite All",
     Content = "Remove all favorites",
     Callback = function()
@@ -1638,7 +1633,7 @@ Section4_4:AddButton({
     end
 })
 
-local Section4_5 = Tab4:AddSection("Totem")
+local Section14 = Tab4:AddSection("Totem")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -1701,7 +1696,7 @@ local function getUUIDFromInventory(selected)
     return nil
 end
 
-Section4_5:AddDropdown({
+Section14:AddDropdown({
     Title = "Select Totem",
     Content = "Choose which totem to spawn",
     Multi = false,
@@ -1713,7 +1708,7 @@ Section4_5:AddDropdown({
     end
 })
 
-Section4_5:AddToggle({
+Section14:AddToggle({
     Title = "Auto Spawn Totem",
     Content = "Equip & spawn selected totem",
     Default = false,
@@ -1742,7 +1737,7 @@ local Tab5 = Window:CreateTab({
     Icon = "rbxassetid://16932740082"
 })
 
-local Section5_1 = Tab5:AddSection("Buy Rod")
+local Section15 = Tab5:AddSection("Buy Rod")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RFPurchaseFishingRod = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseFishingRod"]
@@ -1771,7 +1766,7 @@ table.sort(rodOptions)
 
 local selectedRod = rodOptions[1]
 
-Section5_1:AddDropdown({
+Section15:AddDropdown({
     Title = "Select Rod",
     Content = "Choose a fishing rod to buy",
     Multi = false,
@@ -1782,7 +1777,7 @@ Section5_1:AddDropdown({
     end
 })
 
-Section5_1:AddButton({
+Section15:AddButton({
     Title = "Buy Rod",
     Content = "Purchase selected rod",
     Callback = function()
@@ -1795,7 +1790,7 @@ Section5_1:AddButton({
     end
 })
 
-local Section5_2 = Tab5:AddSection("Buy Baits")
+local Section16 = Tab5:AddSection("Buy Baits")
 
 local RFPurchaseBait = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseBait"]  
 
@@ -1818,7 +1813,7 @@ table.sort(baitOptions)
 
 local selectedBait = baitOptions[1]  
 
-Section5_2:AddDropdown({  
+Section16:AddDropdown({  
     Title = "Select Bait",  
     Content = "Choose bait to buy",
     Multi = false,  
@@ -1829,7 +1824,7 @@ Section5_2:AddDropdown({
     end  
 })  
 
-Section5_2:AddButton({  
+Section16:AddButton({  
     Title = "Buy Bait",  
     Content = "Purchase selected bait",
     Callback = function()  
@@ -1842,7 +1837,7 @@ Section5_2:AddButton({
     end  
 })
 
-local Section5_3 = Tab5:AddSection("Buy Weathers")
+local Section17 = Tab5:AddSection("Buy Weathers")
 
 local RFPurchaseWeatherEvent = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/PurchaseWeatherEvent"]
 
@@ -1865,7 +1860,7 @@ local selectedWeathers = {}
 local autoBuyEnabled = false
 local buyDelay = 540
 
-Section5_3:AddDropdown({
+Section17:AddDropdown({
     Title = "Select Weather",
     Content = "Choose weather events to buy",
     Multi = true,
@@ -1876,7 +1871,7 @@ Section5_3:AddDropdown({
     end
 })
 
-Section5_3:AddInput({
+Section17:AddInput({
     Title = "Buy Delay (minutes)",
     Content = "Delay between purchases",
     Placeholder = "9",
@@ -1888,7 +1883,7 @@ Section5_3:AddInput({
     end
 })
 
-Section5_3:AddToggle({
+Section17:AddToggle({
     Title = "Auto Buy Weather",
     Content = "Automatically buy selected weathers",
     Default = false,
@@ -1917,7 +1912,7 @@ local Tab6 = Window:CreateTab({
     Icon = "rbxassetid://16932740082"
 })
 
-local Section6_1 = Tab6:AddSection("Island")
+local Section18 = Tab6:AddSection("Island")
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
@@ -1944,7 +1939,7 @@ table.sort(islandOptions)
 
 local selectedIsland = islandOptions[1]
 
-Section6_1:AddDropdown({
+Section18:AddDropdown({
     Title = "Select Island",
     Content = "Choose an island to teleport to",
     Multi = false,
@@ -1955,7 +1950,7 @@ Section6_1:AddDropdown({
     end
 })
 
-Section6_1:AddButton({
+Section18:AddButton({
     Title = "Teleport to Island",
     Content = "Teleport to selected island",
     Callback = function()
@@ -1965,7 +1960,7 @@ Section6_1:AddButton({
     end
 })
 
-local Section6_2 = Tab6:AddSection("Fishing Spot")
+local Section19 = Tab6:AddSection("Fishing Spot")
 
 local FishingLocations = {
     ["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
@@ -1993,7 +1988,7 @@ table.sort(fishingOptions)
 
 local selectedFishing = fishingOptions[1]
 
-Section6_2:AddDropdown({
+Section19:AddDropdown({
     Title = "Select Spot",
     Content = "Choose fishing spot to teleport to",
     Multi = false,
@@ -2004,7 +1999,7 @@ Section6_2:AddDropdown({
     end
 })
 
-Section6_2:AddButton({
+Section19:AddButton({
     Title = "Teleport to Fishing Spot",
     Content = "Teleport to selected fishing spot",
     Callback = function()
@@ -2014,7 +2009,7 @@ Section6_2:AddButton({
     end
 })
 
-local Section6_3 = Tab6:AddSection("Location NPC")
+local Section20 = Tab6:AddSection("Location NPC")
 
 local NPC_Locations = {
     ["Alex"] = Vector3.new(43,17,2876),
@@ -2044,7 +2039,7 @@ table.sort(npcOptions)
 
 local selectedNPC = npcOptions[1]
 
-Section6_3:AddDropdown({
+Section20:AddDropdown({
     Title = "Select NPC",
     Content = "Choose NPC to teleport to",
     Multi = false,
@@ -2055,7 +2050,7 @@ Section6_3:AddDropdown({
     end
 })
 
-Section6_3:AddButton({
+Section20:AddButton({
     Title = "Teleport to NPC",
     Content = "Teleport to selected NPC",
     Callback = function()
@@ -2065,7 +2060,7 @@ Section6_3:AddButton({
     end
 })
 
-local Section6_4 = Tab6:AddSection("Teleport Player")
+local Section21 = Tab6:AddSection("Teleport Player")
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -2082,7 +2077,7 @@ end
 
 local SelectedPlayer = nil
 
-Section6_4:AddDropdown({
+Section21:AddDropdown({
     Title = "List Player",
     Content = "Select player to teleport to",
     Multi = false,
@@ -2093,7 +2088,7 @@ Section6_4:AddDropdown({
     end
 })
 
-Section6_4:AddButton({
+Section21:AddButton({
     Title = "Teleport to Player (Target)",
     Content = "Teleport to selected player",
     Callback = function()
@@ -2108,7 +2103,7 @@ Section6_4:AddButton({
     end
 })
 
-Section6_4:AddButton({
+Section21:AddButton({
     Title = "Refresh Player List",
     Content = "Refresh list of online players",
     Callback = function()
@@ -2116,7 +2111,7 @@ Section6_4:AddButton({
     end
 })
 
-local Section6_5 = Tab6:AddSection("Event Teleporter")
+local Section22 = Tab6:AddSection("Event Teleporter")
 
 local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
@@ -2269,7 +2264,7 @@ local function runMultiEventTP()
     destroyEventPlatform()
 end
 
-Section6_5:AddDropdown({
+Section22:AddDropdown({
     Title = "Select Events",
     Content = "Choose events to auto-teleport to",
     Multi = true,
@@ -2280,7 +2275,7 @@ Section6_5:AddDropdown({
     end
 })
 
-Section6_5:AddToggle({
+Section22:AddToggle({
     Title = "Auto Event",
     Content = "Auto teleport to selected events",
     Default = false,
@@ -2297,7 +2292,7 @@ local Tab7 = Window:CreateTab({
     Icon = "rbxassetid://16932740082"
 })
 
-local Section7_1 = Tab7:AddSection("Character")
+local Section23 = Tab7:AddSection("Character")
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -2320,7 +2315,7 @@ local customLevel = defaultLevel
 local keepHidden = false
 local rgbThread = nil
 
-Section7_1:AddInput({
+Section23:AddInput({
     Title = "Hide Name",
     Content = "Input custom display name",
     Placeholder = "Enter name",
@@ -2332,7 +2327,7 @@ Section7_1:AddInput({
     end
 })
 
-Section7_1:AddToggle({
+Section23:AddToggle({
     Title = "Hide Identity",
     Content = "Use custom display name",
     Default = false,
@@ -2344,7 +2339,7 @@ Section7_1:AddToggle({
     end
 })
 
-local Section7_2 = Tab7:AddSection("UI")
+local Section24 = Tab7:AddSection("UI")
 
 local stopAnimConnections = {}
 
@@ -2374,7 +2369,7 @@ local function setGameAnimationsEnabled(state)
     end
 end
 
-Section7_2:AddToggle({
+Section24:AddToggle({
     Title = "No Animation",
     Content = "Stop all animations from the game",
     Default = false,
@@ -2386,7 +2381,7 @@ Section7_2:AddToggle({
 local RunService = game:GetService("RunService")
 local DisableNotificationConnection
 
-Section7_2:AddToggle({
+Section24:AddToggle({
     Title = "Disable Notify",
     Content = "Disable game notifications",
     Default = false,
@@ -2415,7 +2410,7 @@ Section7_2:AddToggle({
     end
 })
 
-Section7_2:AddToggle({
+Section24:AddToggle({
     Title = "AntiAFK",
     Content = "Prevent Roblox from kicking you when idle",
     Default = false,
@@ -2449,7 +2444,7 @@ Section7_2:AddToggle({
     end
 })
 
-Section7_2:AddToggle({
+Section24:AddToggle({
     Title = "Auto Reconnect",
     Content = "Automatic reconnect if disconnected",
     Default = false,
@@ -2476,9 +2471,9 @@ Section7_2:AddToggle({
     end
 })
 
-local Section7_3 = Tab7:AddSection("Server")
+local Section25 = Tab7:AddSection("Server")
 
-Section7_3:AddButton({
+Section25:AddButton({
     Title = "Rejoin Server",
     Content = "Reconnect to current server",
     Callback = function()
@@ -2486,7 +2481,7 @@ Section7_3:AddButton({
     end
 })
 
-Section7_3:AddButton({
+Section25:AddButton({
     Title = "Server Hop",
     Content = "Switch to another server",
     Callback = function()
@@ -2513,7 +2508,7 @@ Section7_3:AddButton({
     end
 })
 
-local Section7_4 = Tab7:AddSection("Config")
+local Section26 = Tab7:AddSection("Config")
 
 local ConfigFolder = "STREE_HUB/Configs"
 if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
@@ -2562,7 +2557,7 @@ local function ApplyConfig(data)
     end
 end
 
-Section7_4:AddButton({
+Section26:AddButton({
     Title = "Save Config",
     Content = "Save all settings",
     Callback = function()
@@ -2571,7 +2566,7 @@ Section7_4:AddButton({
     end
 })
 
-Section7_4:AddButton({
+Section26:AddButton({
     Title = "Load Config",
     Content = "Use saved config",
     Callback = function()
@@ -2583,7 +2578,7 @@ Section7_4:AddButton({
     end
 })
 
-Section7_4:AddButton({
+Section26:AddButton({
     Title = "Delete Config",
     Content = "Delete saved config",
     Callback = function()
@@ -2593,9 +2588,9 @@ Section7_4:AddButton({
     end
 })
 
-local Section7_5 = Tab7:AddSection("Other Scripts")
+local Section27 = Tab7:AddSection("Other Scripts")
 
-Section7_5:AddButton({
+Section27:AddButton({
     Title = "FLY",
     Content = "Scripts Fly Gui",
     Callback = function()
@@ -2603,7 +2598,7 @@ Section7_5:AddButton({
     end
 })
 
-Section7_5:AddButton({
+Section27:AddButton({
     Title = "Simple Shader",
     Content = "Shader effects",
     Callback = function()
@@ -2611,7 +2606,7 @@ Section7_5:AddButton({
     end
 })
 
-Section7_5:AddButton({
+Section27:AddButton({
     Title = "Infinite Yield",
     Content = "Admin commands",
     Callback = function()
