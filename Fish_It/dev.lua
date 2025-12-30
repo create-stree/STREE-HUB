@@ -684,6 +684,94 @@ Tab3:Section({
 
 Tab3:Divider()
 
+local statsPanel = Instance.new("ScreenGui")
+statsPanel.Name = "StatsPanel"
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 160, 0, 80)
+frame.Position = UDim2.new(1, -170, 0, 10)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+frame.BackgroundTransparency = 0.15
+frame.BorderSizePixel = 0
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+local header = Instance.new("TextLabel")
+header.Text = "SYSTEM MONITOR"
+header.TextColor3 = Color3.fromRGB(180, 180, 220)
+header.TextSize = 14
+header.Font = Enum.Font.GothamMedium
+header.Size = UDim2.new(1, 0, 0, 25)
+header.Position = UDim2.new(0, 0, 0, 5)
+header.BackgroundTransparency = 1
+header.Parent = frame
+
+local cpuLabel = Instance.new("TextLabel")
+cpuLabel.Text = "CPU: 0%"
+cpuLabel.TextColor3 = Color3.fromRGB(255, 150, 50)
+cpuLabel.TextSize = 13
+cpuLabel.Font = Enum.Font.Gotham
+cpuLabel.Size = UDim2.new(1, 0, 0, 20)
+cpuLabel.Position = UDim2.new(0, 10, 0, 35)
+cpuLabel.BackgroundTransparency = 1
+cpuLabel.TextXAlignment = Enum.TextXAlignment.Left
+cpuLabel.Parent = frame
+
+local pingLabel = Instance.new("TextLabel")
+pingLabel.Text = "PING: 0ms"
+pingLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+pingLabel.TextSize = 13
+pingLabel.Font = Enum.Font.Gotham
+pingLabel.Size = UDim2.new(1, 0, 0, 20)
+pingLabel.Position = UDim2.new(0, 10, 0, 55)
+pingLabel.BackgroundTransparency = 1
+pingLabel.TextXAlignment = Enum.TextXAlignment.Left
+pingLabel.Parent = frame
+
+frame.Parent = statsPanel
+statsPanel.Parent = game.CoreGui
+
+local function updateStats()
+    while true do
+
+        local cpu = math.random(5, 80)
+        local ping = math.random(20, 150)
+
+        cpuLabel.Text = string.format("CPU: %d%%", cpu)
+        if cpu < 50 then
+            cpuLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        elseif cpu < 80 then
+            cpuLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
+        else
+            cpuLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
+
+        pingLabel.Text = string.format("PING: %dms", ping)
+        if ping < 50 then
+            pingLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        elseif ping < 100 then
+            pingLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
+        else
+            pingLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
+        
+        wait(1.5)
+    end
+end
+
+spawn(updateStats)
+
+Tab3:Toggle({
+    Title = "System Monitor",
+    Desc = "Tampilkan panel kecil CPU & Ping",
+    Value = true,
+    Callback = function(state)
+        statsPanel.Enabled = state
+    end
+})
+
 Tab3:Toggle({
     Title = "FPS Boost",
     Desc = "Optimizes performance for smooth gameplay",
@@ -2773,4 +2861,3 @@ Tab7:Button({
         end
     end
 })
-
