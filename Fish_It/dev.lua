@@ -2250,61 +2250,6 @@ Tab6:Button({
 })
 
 Tab6:Section({
-    Title = "Location NPC",
-    Icon = "bot",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab6:Divider()
-
-local NPC_Locations = {
-    ["Alex"] = Vector3.new(43,17,2876),
-    ["Aura kid"] = Vector3.new(70,17,2835),
-    ["Billy Bob"] = Vector3.new(84,17,2876),
-    ["Boat Expert"] = Vector3.new(32,9,2789),
-    ["Esoteric Gatekeeper"] = Vector3.new(2101,-30,1350),
-    ["Jeffery"] = Vector3.new(-2771,4,2132),
-    ["Joe"] = Vector3.new(144,20,2856),
-    ["Jones"] = Vector3.new(-671,16,596),
-    ["Lava Fisherman"] = Vector3.new(-593,59,130),
-    ["McBoatson"] = Vector3.new(-623,3,719),
-    ["Ram"] = Vector3.new(-2838,47,1962),
-    ["Ron"] = Vector3.new(-48,17,2856),
-    ["Scott"] = Vector3.new(-19,9,2709),
-    ["Scientist"] = Vector3.new(-6,17,2881),
-    ["Seth"] = Vector3.new(107,17,2877),
-    ["Silly Fisherman"] = Vector3.new(97,9,2694),
-    ["Tim"] = Vector3.new(-604,16,609),
-}
-
-local SelectedNPC = nil
-
-Tab6:Dropdown({
-    Title = "Select NPC",
-    Values = (function()
-        local keys = {}
-        for name in pairs(NPC_Locations) do
-            table.insert(keys, name)
-        end
-        table.sort(keys)
-        return keys
-    end)(),
-    Callback = function(Value)
-        SelectedNPC = Value
-    end
-})
-
-Tab6:Button({
-    Title = "Teleport to NPC",
-    Callback = function()
-        if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(NPC_Locations[SelectedNPC])
-        end
-    end
-})
-
-Tab6:Section({
     Title = "Teleport Player",
     Icon = "person-standing",
     TextXAlignment = "Left",
@@ -2528,7 +2473,7 @@ local function runMultiEventTP()
 			end
 			if foundTarget and foundPos then
 				createAndTeleportToPlatform(foundPos, config.PlatformY)
-			end
+		 end
 		end
 		task.wait(0.05)
 	end
@@ -2826,128 +2771,5 @@ Tab7:Button({
         if serverId then
             TeleportService:TeleportToPlaceInstance(game.PlaceId, serverId, game.Players.LocalPlayer)
         end
-    end
-})
-
-Tab7:Section({ 
-    Title = "Config",
-    Icon = "folder-open",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab7:Divider()
-
-local ConfigFolder = "STREE_HUB/Configs"
-if not isfolder("STREE_HUB") then makefolder("STREE_HUB") end
-if not isfolder(ConfigFolder) then makefolder(ConfigFolder) end
-
-local ConfigName = "default.json"
-
-local function GetConfig()
-    return {
-        WalkSpeed = Humanoid.WalkSpeed,
-        JumpPower = _G.CustomJumpPower or 50,
-        InfiniteJump = _G.InfiniteJump or false,
-        AutoSell = _G.AutoSell or false,
-        InstantCatch = _G.InstantCatch or false,
-        AntiAFK = _G.AntiAFK or false,
-        AutoReconnect = _G.AutoReconnect or false,
-    }
-end
-
-local function ApplyConfig(data)
-    if data.WalkSpeed then 
-        Humanoid.WalkSpeed = data.WalkSpeed 
-    end
-    if data.JumpPower then
-        _G.CustomJumpPower = data.JumpPower
-        local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.UseJumpPower = true
-            humanoid.JumpPower = data.JumpPower
-        end
-    end
-    if data.InfiniteJump ~= nil then
-        _G.InfiniteJump = data.InfiniteJump
-    end
-    if data.AutoSell ~= nil then
-        _G.AutoSell = data.AutoSell
-    end
-    if data.InstantCatch ~= nil then
-        _G.InstantCatch = data.InstantCatch
-    end
-    if data.AntiAFK ~= nil then
-        _G.AntiAFK = data.AntiAFK
-    end
-    if data.AutoReconnect ~= nil then
-        _G.AutoReconnect = data.AutoReconnect
-    end
-end
-
-Tab7:Button({
-    Title = "Save Config",
-    Desc = "Save all settings",
-    Callback = function()
-        local data = GetConfig()
-        writefile(ConfigFolder.."/"..ConfigName, game:GetService("HttpService"):JSONEncode(data))
-    end
-})
-
-Tab7:Button({
-    Title = "Load Config",
-    Desc = "Use saved config",
-    Callback = function()
-        if isfile(ConfigFolder.."/"..ConfigName) then
-            local data = readfile(ConfigFolder.."/"..ConfigName)
-            local decoded = game:GetService("HttpService"):JSONDecode(data)
-            ApplyConfig(decoded)
-        end
-    end
-})
-
-Tab7:Button({
-    Title = "Delete Config",
-    Desc = "Delete saved config",
-    Callback = function()
-        if isfile(ConfigFolder.."/"..ConfigName) then
-            delfile(ConfigFolder.."/"..ConfigName)
-        end
-    end
-})
-
-Tab7:Section({ 
-    Title = "Other Scripts",
-    Icon = "file-code-corner",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab7:Divider()
-
-Tab7:Button({
-    Title = "FLY",
-    Desc = "Scripts Fly Gui",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
-    end
-})
-
-Tab7:Button({
-    Title = "Simple Shader",
-    Desc = "Shader",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/p0e1/1/refs/heads/main/SimpleShader.lua"))()
-    end
-})
-
-Tab7:Button({
-    Title = "Infinite Yield",
-    Desc = "Other Scripts",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
