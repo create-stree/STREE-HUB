@@ -1633,13 +1633,6 @@ Tab4:Input({
     end
 })
 
-local Section = Tab4:Section({
-	Title = "Premium",
-	Icon = "gem",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
 RE = {
     FavoriteItem = Net:FindFirstChild("RE/FavoriteItem"),
     FavoriteStateChanged = Net:FindFirstChild("RE/FavoriteStateChanged"),
@@ -1676,6 +1669,8 @@ tierToRarity = {
     [6] = "Mythic",
     [7] = "Secret"
 }
+
+Items = ReplicatedStorage:WaitForChild("Items")
 
 fishNames = {}
 for _, module in ipairs(Items:GetChildren()) do
@@ -1781,6 +1776,13 @@ Tab4:Button({
             end
         end
     end
+})
+
+local Section = Tab4:Section({
+	Title = "Premium",
+	Icon = "gem",
+	TextXAlignment = "Left",
+	TextSize = 17
 })
 
 Tab4:Divider()
@@ -2323,61 +2325,6 @@ Tab6:Button({
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             Player.Character.HumanoidRootPart.CFrame = CFrame.new(FishingLocations[SelectedFishing])
-        end
-    end
-})
-
-Tab6:Section({
-    Title = "Location NPC",
-    Icon = "bot",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab6:Divider()
-
-local NPC_Locations = {
-    ["Alex"] = Vector3.new(43,17,2876),
-    ["Aura kid"] = Vector3.new(70,17,2835),
-    ["Billy Bob"] = Vector3.new(84,17,2876),
-    ["Boat Expert"] = Vector3.new(32,9,2789),
-    ["Esoteric Gatekeeper"] = Vector3.new(2101,-30,1350),
-    ["Jeffery"] = Vector3.new(-2771,4,2132),
-    ["Joe"] = Vector3.new(144,20,2856),
-    ["Jones"] = Vector3.new(-671,16,596),
-    ["Lava Fisherman"] = Vector3.new(-593,59,130),
-    ["McBoatson"] = Vector3.new(-623,3,719),
-    ["Ram"] = Vector3.new(-2838,47,1962),
-    ["Ron"] = Vector3.new(-48,17,2856),
-    ["Scott"] = Vector3.new(-19,9,2709),
-    ["Scientist"] = Vector3.new(-6,17,2881),
-    ["Seth"] = Vector3.new(107,17,2877),
-    ["Silly Fisherman"] = Vector3.new(97,9,2694),
-    ["Tim"] = Vector3.new(-604,16,609),
-}
-
-local SelectedNPC = nil
-
-Tab6:Dropdown({
-    Title = "Select NPC",
-    Values = (function()
-        local keys = {}
-        for name in pairs(NPC_Locations) do
-            table.insert(keys, name)
-        end
-        table.sort(keys)
-        return keys
-    end)(),
-    Callback = function(Value)
-        SelectedNPC = Value
-    end
-})
-
-Tab6:Button({
-    Title = "Teleport to NPC",
-    Callback = function()
-        if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(NPC_Locations[SelectedNPC])
         end
     end
 })
@@ -3029,4 +2976,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
