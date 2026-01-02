@@ -25,13 +25,13 @@ else
 end
 
 local Window = Library:MakeGui({
-    NameHub = "The Forge Automation",
-    Description = "By Nisulrocks | V1.0",
+    NameHub = "Stree Hub",
+    Description = "| The Forge",
     Color = Color3.fromRGB(0, 255, 200)
 })
 
 local Tab1 = Window:CreateTab({
-    Name = "Main Farm",
+    Name = "Information",
     Icon = "rbxassetid://16932740082"
 })
 
@@ -493,8 +493,8 @@ Section3:AddToggle({
 })
 
 local Tab2 = Window:CreateTab({
-    Name = "Auto Forge",
-    Icon = "rbxassetid://16932740082"
+    Name = "Main",
+    Icon = "rbxassetid://139262888943265"
 })
 
 local Section4 = Tab2:AddSection("Status")
@@ -805,7 +805,7 @@ Section6:AddToggle({
 
 local Tab4 = Window:CreateTab({
     Name = "Auto Sell",
-    Icon = "rbxassetid://16932740082"
+    Icon = "rbxassetid://127582965656940"
 })
 
 local Section7 = Tab4:AddSection("Auto Sell Settings")
@@ -930,11 +930,3 @@ spawn(function()
         task.wait(5)
     end
 end)
-
-Library:MakeNotify({
-    Title = "The Forge Automation",
-    Description = "Loaded successfully!",
-    Content = "Welcome to The Forge Auto Farm V1.0 by Nisulrocks",
-    Color = Color3.fromRGB(0, 255, 200),
-    Delay = 5
-})
