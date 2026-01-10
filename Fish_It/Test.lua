@@ -343,7 +343,7 @@ local Tab3 = Window:CreateTab({
     Icon = "rbxassetid://16932740082"
 })
 
-local Section3_1 = Tab3:AddSection("Fishing")
+local Section4 = Tab3:AddSection("Fishing")
 
 _G.AutoFishing = false
 _G.AutoEquipRod = false
