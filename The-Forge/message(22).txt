@@ -1,0 +1,971 @@
+--[[
+THE FORGE | ADVANCED MINER (NO-IDLE + ANTI-KNOCKBACK ED.)
+UI Library: Fluent
+
+UPDATES:
+- ANTI-KNOCKBACK: BodyVelocity set to math.huge to ignore mob hits.
+- NO IDLE: Fixed logic where script waited too long to clear ignored rocks.
+- FLIGHT TIMEOUT: Prevents getting stuck on walls/geometry.
+- MINING TIMEOUT: Reduced max mine time from 500s -> 25s to prevent stalling on bugged rocks.
+]]
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Window = Fluent:CreateWindow({
+    Title = "The Forge | Miner",
+    SubTitle = "No-Idle Fix",
+    TabWidth = 110,
+    Size = UDim2.fromOffset(480, 420),
+    Acrylic = false,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.K
+})
+
+-- // SERVICES //
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- // REMOTES //
+local KnitServices = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services")
+local ToolServiceRF = KnitServices:WaitForChild("ToolService"):WaitForChild("RF")
+local ToolActivated = ToolServiceRF:WaitForChild("ToolActivated")
+local ProximityServiceRF = KnitServices:WaitForChild("ProximityService"):WaitForChild("RF")
+local PurchaseRemote = ProximityServiceRF:WaitForChild("Purchase")
+local CharacterServiceRF = KnitServices:WaitForChild("CharacterService"):WaitForChild("RF")
+local ResetRemote = CharacterServiceRF:WaitForChild("Reset")
+
+-- // VARIABLES //
+local MiningActive = false
+local CurrentRunID = 0
+local WebhookDebounce = false
+local IgnoredRocks = {}
+local ConfigFileName = "TheForgeMiner_Config.json"
+local AntiAfkConnection = nil
+local HealthConnection = nil
+
+-- // DEATH RETURN DATA //
+local DeathState = {
+    Position = nil,
+    Time = 0
+}
+
+-- // POTION DATA //
+local PotionState = {
+    Luck = {Name = "LuckPotion1", LastUsed = 0},
+    Miner = {Name = "MinerPotion1", LastUsed = 0},
+    Health = {Name = "HealthPotion2", LastUsed = 0} 
+}
+local MariaLocation = Workspace:WaitForChild("Proximity"):WaitForChild("Maria"):WaitForChild("HumanoidRootPart").Position
+
+-- // FIND FOLDER //
+local RocksFolder = Workspace:FindFirstChild("Rocks")
+if not RocksFolder then
+    RocksFolder = Workspace:WaitForChild("Rocks", 5)
+end
+
+-- // ORE LIST //
+local OreList = {
+    "Stone", "Sand Stone", "Copper", "Iron", "Tin", "Silver", "Gold",
+    "Mushroomite", "Platinum", "Bananite", "Cardboardite", "Aite", "Poopite", "Fichillium",
+    "Cobalt", "Titanium", "Volcanic Rock", "Lapis Lazuli", "Quartz", "Amethyst", 
+    "Topaz", "Diamond", "Sapphire", "Cuprite", "Obsidian", "Emerald", "Ruby", 
+    "Rivalite", "Uranium", "Mythril", "Eye Ore", "Fireite", "Magmaite", 
+    "Lightite", "Demonite", "Darkryte",
+    "Blue Crystal", "Orange Crystal", "Green Crystal", "Magenta Crystal", 
+    "Crimson Crystal", "Rainbow Crystal", "Arcane Crystal"
+}
+
+-- // GET AVAILABLE AREAS //
+local AreaList = {"All Areas"}
+if RocksFolder then
+    for _, folder in pairs(RocksFolder:GetChildren()) do
+        table.insert(AreaList, folder.Name)
+    end
+end
+
+-- // UI TABS //
+local Tabs = {
+    Main = Window:AddTab({ Title = "Mining", Icon = "pickaxe" }),
+    Potion = Window:AddTab({ Title = "Potions", Icon = "flask" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+local Options = Fluent.Options
+
+-- // MINING SETTINGS //
+local ToggleMining = Tabs.Main:AddToggle("ToggleMining", {Title = "Enable Auto Miner", Default = false })
+
+local ToggleVolcanic = Tabs.Main:AddToggle("VolcanicFarm", {
+    Title = "Volcanic Farm Mode",
+    Description = "Ensures at least 2 Volcanic Rocks exist. Clears debris if < 2.",
+    Default = false
+})
+
+local DropdownArea = Tabs.Main:AddDropdown("SelectArea", {
+    Title = "Mining Area",
+    Values = AreaList,
+    Multi = false,
+    Default = 1,
+})
+
+local DropdownOres = Tabs.Main:AddDropdown("SelectOres", {
+    Title = "Target Ores (Whitelist)",
+    Description = "Select ores to KEEP/SHARE. (Normal Mode Only)",
+    Values = OreList,
+    Multi = true,
+    Default = {},
+})
+
+local ToggleUnder = Tabs.Main:AddToggle("MineUnder", {
+    Title = "Safe Mode (Mine Under)",
+    Description = "Positions BELOW rock. AVOIDS mobs in 'Living' folder.",
+    Default = true
+})
+
+local ToggleShare = Tabs.Main:AddToggle("ShareRares", {
+    Title = "Stall Rares (Perm-Hold)",
+    Description = "Hits rare rocks once every 24s. DOES NOT LEAVE when players arrive.",
+    Default = false
+})
+
+-- // POTION SETTINGS //
+local ToggleAutoPotion = Tabs.Potion:AddToggle("AutoPotion", {
+    Title = "Enable Auto Potion",
+    Description = "Automatically buys and uses selected potions.",
+    Default = false
+})
+
+local DropdownPotions = Tabs.Potion:AddDropdown("SelectPotions", {
+    Title = "Select Potions",
+    Values = {"Luck", "Miner", "Health"},
+    Multi = true,
+    Default = {},
+})
+
+-- // SETTINGS TAB //
+local ToggleAntiAFK = Tabs.Settings:AddToggle("AntiAFK", {
+    Title = "Anti-AFK",
+    Description = "Prevents idling disconnection.",
+    Default = true
+})
+
+local ToggleFastTP = Tabs.Settings:AddToggle("FastTP", {
+    Title = "Long Distance Fast TP (Reset)",
+    Description = "Resets character if target is > 350 studs away.",
+    Default = true
+})
+
+local SliderShareRange = Tabs.Main:AddSlider("ShareRange", {
+    Title = "Player Detection Range",
+    Description = "Visual range only (Script no longer leaves).",
+    Default = 50,
+    Min = 10,
+    Max = 150,
+    Rounding = 5,
+})
+
+local SliderSpeed = Tabs.Main:AddSlider("MoveSpeed", {
+    Title = "Flight Speed",
+    Description = "Physics velocity.",
+    Default = 50,
+    Min = 20,
+    Max = 100,
+    Rounding = 1,
+})
+
+local SliderDist = Tabs.Main:AddSlider("MaxDist", {
+    Title = "Scan Radius",
+    Description = "Only mine rocks within this range",
+    Default = 1500,
+    Min = 50,
+    Max = 5000,
+    Rounding = 100,
+})
+
+local SliderReach = Tabs.Main:AddSlider("Reach", {
+    Title = "Mining Reach",
+    Description = "Distance to stop from rock (Standard Mode only)",
+    Default = 6,
+    Min = 4,
+    Max = 15,
+    Rounding = 1,
+})
+
+local InputWebhook = Tabs.Settings:AddInput("WebhookURL", {Title = "Discord Webhook URL", Default = "" })
+local TogglePing = Tabs.Settings:AddToggle("PingUser", {Title = "Ping @everyone on Drop", Default = true })
+
+-- // ANTI AFK LOGIC //
+ToggleAntiAFK:OnChanged(function()
+    if ToggleAntiAFK.Value then
+        if AntiAfkConnection then AntiAfkConnection:Disconnect() end
+        AntiAfkConnection = LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+            task.wait(2)
+        end)
+    else
+        if AntiAfkConnection then
+            AntiAfkConnection:Disconnect()
+            AntiAfkConnection = nil
+        end
+    end
+end)
+
+-- // SAVE/LOAD SYSTEM //
+local function SaveSettings()
+    local config = {
+        VolcanicFarm = Options.VolcanicFarm.Value,
+        SelectArea = Options.SelectArea.Value,
+        SelectOres = Options.SelectOres.Value,
+        MineUnder = Options.MineUnder.Value,
+        ShareRares = Options.ShareRares.Value,
+        AutoPotion = Options.AutoPotion.Value,
+        SelectPotions = Options.SelectPotions.Value,
+        AntiAFK = Options.AntiAFK.Value,
+        FastTP = Options.FastTP.Value,
+        ShareRange = Options.ShareRange.Value,
+        MoveSpeed = Options.MoveSpeed.Value,
+        MaxDist = Options.MaxDist.Value,
+        Reach = Options.Reach.Value,
+        WebhookURL = Options.WebhookURL.Value,
+        PingUser = Options.PingUser.Value
+    }
+    pcall(function() writefile(ConfigFileName, HttpService:JSONEncode(config)) end)
+end
+
+local function LoadSettings()
+    if isfile(ConfigFileName) then
+        local success, result = pcall(function() return HttpService:JSONDecode(readfile(ConfigFileName)) end)
+        if success and result then
+            if Options.VolcanicFarm and result.VolcanicFarm ~= nil then Options.VolcanicFarm:SetValue(result.VolcanicFarm) end
+            if Options.SelectArea and result.SelectArea then
+                local valid = false
+                for _, v in pairs(AreaList) do if v == result.SelectArea then valid = true break end end
+                if valid then Options.SelectArea:SetValue(result.SelectArea) end
+            end
+            if Options.SelectOres and result.SelectOres then Options.SelectOres:SetValue(result.SelectOres) end
+            if Options.MineUnder and result.MineUnder ~= nil then Options.MineUnder:SetValue(result.MineUnder) end
+            if Options.ShareRares and result.ShareRares ~= nil then Options.ShareRares:SetValue(result.ShareRares) end
+            if Options.AutoPotion and result.AutoPotion ~= nil then Options.AutoPotion:SetValue(result.AutoPotion) end
+            if Options.SelectPotions and result.SelectPotions then Options.SelectPotions:SetValue(result.SelectPotions) end
+            if Options.AntiAFK and result.AntiAFK ~= nil then Options.AntiAFK:SetValue(result.AntiAFK) end
+            if Options.FastTP and result.FastTP ~= nil then Options.FastTP:SetValue(result.FastTP) end
+            if Options.ShareRange and result.ShareRange then Options.ShareRange:SetValue(result.ShareRange) end
+            if Options.MoveSpeed and result.MoveSpeed then Options.MoveSpeed:SetValue(result.MoveSpeed) end
+            if Options.MaxDist and result.MaxDist then Options.MaxDist:SetValue(result.MaxDist) end
+            if Options.Reach and result.Reach then Options.Reach:SetValue(result.Reach) end
+            if Options.WebhookURL and result.WebhookURL then Options.WebhookURL:SetValue(result.WebhookURL) end
+            if Options.PingUser and result.PingUser ~= nil then Options.PingUser:SetValue(result.PingUser) end
+            print("[The Forge Miner] Settings Applied.")
+        end
+    end
+end
+
+task.spawn(function()
+    task.wait(1.5)
+    LoadSettings()
+    Options.VolcanicFarm:OnChanged(SaveSettings)
+    Options.SelectArea:OnChanged(SaveSettings)
+    Options.SelectOres:OnChanged(SaveSettings)
+    Options.MineUnder:OnChanged(SaveSettings)
+    Options.ShareRares:OnChanged(SaveSettings)
+    Options.AutoPotion:OnChanged(SaveSettings)
+    Options.SelectPotions:OnChanged(SaveSettings)
+    Options.AntiAFK:OnChanged(SaveSettings)
+    Options.FastTP:OnChanged(SaveSettings)
+    Options.ShareRange:OnChanged(SaveSettings)
+    Options.MoveSpeed:OnChanged(SaveSettings)
+    Options.MaxDist:OnChanged(SaveSettings)
+    Options.Reach:OnChanged(SaveSettings)
+    Options.WebhookURL:OnChanged(SaveSettings)
+    Options.PingUser:OnChanged(SaveSettings)
+end)
+
+-- // HELPER FUNCTIONS //
+local function EquipPickaxe()
+    local Char = LocalPlayer.Character
+    if not Char then return end
+    if Char:FindFirstChild("Pickaxe") then return end
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    if Backpack then
+        local Tool = Backpack:FindFirstChild("Pickaxe")
+        if Tool then
+            Tool.Parent = Char
+            task.wait(0.2)
+        end
+    end
+end
+
+local function SendWebhook(oreName, location)
+    local url = Options.WebhookURL.Value
+    if url == "" or WebhookDebounce then return end
+    WebhookDebounce = true
+    task.delay(5, function() WebhookDebounce = false end)
+    
+    local data = {
+        ["content"] = Options.PingUser.Value and "@everyone" or "",
+        ["embeds"] = {{
+            ["title"] = "💎 RARE DROP: " .. oreName,
+            ["description"] = "Found in " .. (Options.VolcanicFarm.Value and "Volcanic Depths" or Options.SelectArea.Value),
+            ["color"] = 16766720,
+        }}
+    }
+    local req = http_request or request or HttpPost or syn.request
+    if req then req({Url = url, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(data)}) end
+end
+
+local function CheckAttributes(model)
+    if not model or (not model:IsA("Model") and not model:IsA("BasePart")) then return "Unknown" end
+    if model:GetAttribute("CheckedByMiner") then return "Unknown" end
+    
+    for attrName, attrValue in pairs(model:GetAttributes()) do
+        local strValue = tostring(attrValue)
+        local isOre = false
+        for _, v in pairs(OreList) do
+            if strValue == v then isOre = true break end
+        end
+        
+        if isOre then
+            local selected = Options.SelectOres.Value
+            local isTarget = false
+            local hasSelection = false
+            for _, active in pairs(selected) do if active then hasSelection = true break end end
+            if not hasSelection then isTarget = true end
+            if selected[strValue] then isTarget = true end
+            
+            if isTarget then 
+                print("[DEBUG] KEEPING DROP: " .. strValue)
+                return "Keep", strValue 
+            else 
+                print("[DEBUG] SKIPPING DROP: " .. strValue .. " (Not in Whitelist)")
+                return "Skip", strValue 
+            end
+        end
+    end
+    return "Unknown"
+end
+
+-- // DEATH LISTENER //
+local function SetupDeathListener(char)
+    if not char then return end
+    local hum = char:WaitForChild("Humanoid", 10)
+    if hum then
+        hum.Died:Connect(function()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                DeathState.Position = root.CFrame
+                DeathState.Time = tick()
+                print("[The Forge Miner] Died! Position saved. Will return in 5s.")
+            end
+        end)
+    end
+end
+if LocalPlayer.Character then SetupDeathListener(LocalPlayer.Character) end
+LocalPlayer.CharacterAdded:Connect(SetupDeathListener)
+
+-- // MULTI-CLIENT CHECK //
+local function IsRockOccupied(pos)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local dist = (root.Position - pos).Magnitude
+                if dist <= 15 then 
+                    return true 
+                end
+            end
+        end
+    end
+    return false
+end
+
+local function IsMobNearby(pos, range)
+    local Living = Workspace:FindFirstChild("Living")
+    if not Living then return false end
+    
+    for _, mob in pairs(Living:GetChildren()) do
+        if mob:IsA("Model") then
+            local root = mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart
+            local hum = mob:FindFirstChild("Humanoid")
+            if root and hum and hum.Health > 0 then
+                local dist = (root.Position - pos).Magnitude
+                if dist <= range then
+                    return true 
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- // POTIONS //
+local function GetPotionCount(pName)
+    local count = 0
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    if bp then
+        local item = bp:FindFirstChild(pName)
+        if item then count = count + (item:GetAttribute("Count") or 0) end
+    end
+    local char = LocalPlayer.Character
+    if char then
+        local item = char:FindFirstChild(pName)
+        if item then count = count + (item:GetAttribute("Count") or 0) end
+    end
+    return count
+end
+
+local function UsePotion(pName)
+    local args = { pName }
+    ToolActivated:InvokeServer(unpack(args))
+end
+
+-- // PHYSICS //
+local function FlyTo(targetPos, MyRunID)
+    local Char = LocalPlayer.Character
+    if not Char or not Char:FindFirstChild("HumanoidRootPart") then return false end
+    local Root = Char.HumanoidRootPart
+    local Humanoid = Char:FindFirstChild("Humanoid")
+
+    local dist = (Root.Position - targetPos).Magnitude
+
+    if Options.FastTP.Value and dist > 350 then
+        ResetRemote:InvokeServer()
+        task.wait(5)
+        Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local newRoot = Char:WaitForChild("HumanoidRootPart")
+        if newRoot then
+            newRoot.CFrame = CFrame.new(targetPos)
+        end
+        return true 
+    end
+
+    local BV = Instance.new("BodyVelocity")
+    BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge) -- FIXED: Infinite force prevents mob knockback
+    BV.P = 50000
+    BV.Velocity = Vector3.new(0, 0, 0)
+    BV.Parent = Root
+
+    local BG = Instance.new("BodyGyro")
+    BG.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+    BG.P = 10000
+    BG.CFrame = Root.CFrame
+    BG.Parent = Root
+
+    local noclip
+    noclip = RunService.Stepped:Connect(function()
+        if Char then
+            for _, v in pairs(Char:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+            if Humanoid then 
+                Humanoid:ChangeState(Enum.HumanoidStateType.Physics) 
+                Humanoid.PlatformStand = true -- FIXED: Prevents animation interruptions
+            end
+        end
+    end)
+
+    local flyStart = tick()
+    local success = false
+
+    while MiningActive and CurrentRunID == MyRunID and Char.Parent do
+        local currentPos = Root.Position
+        local d = (currentPos - targetPos).Magnitude
+        
+        -- FIXED: Timeout if stuck flying for > 10 seconds
+        if (tick() - flyStart) > 10 then 
+            print("[The Forge Miner] FlyTo Timeout (Stuck?). Aborting.")
+            break 
+        end
+
+        if d < 4 then 
+            success = true
+            break 
+        end
+        if not MiningActive then break end
+        
+        local dir = (targetPos - currentPos).Unit
+        local speed = tonumber(Options.MoveSpeed.Value) or 50
+        
+        BV.Velocity = dir * speed
+        BG.CFrame = CFrame.lookAt(currentPos, targetPos)
+        
+        task.wait()
+    end
+
+    BV:Destroy()
+    BG:Destroy()
+    if noclip then noclip:Disconnect() end
+    if Humanoid then 
+        Humanoid:ChangeState(Enum.HumanoidStateType.Running) 
+        Humanoid.PlatformStand = false
+    end
+    Root.Velocity = Vector3.new(0,0,0)
+    Root.AssemblyLinearVelocity = Vector3.new(0,0,0)
+    
+    return success
+end
+
+-- // POTION MANAGER //
+local function ManagePotions(MyRunID)
+    if not Options.AutoPotion.Value then return end
+    
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not Backpack or #Backpack:GetChildren() == 0 then
+        task.wait(2)
+    end
+    
+    local selected = Options.SelectPotions.Value
+    local needsRefill = false
+    local buyList = {}
+
+    for pType, pInfo in pairs(PotionState) do
+        if selected[pType] then
+            local count = GetPotionCount(pInfo.Name)
+            if count == 0 then
+                needsRefill = true
+                table.insert(buyList, pInfo.Name)
+            else
+                if pType ~= "Health" then
+                    if (tick() - pInfo.LastUsed) > 300 then
+                        print("[The Forge Miner] Using " .. pType .. " Potion.")
+                        UsePotion(pInfo.Name)
+                        pInfo.LastUsed = tick()
+                    end
+                end
+            end
+        end
+    end
+
+    if needsRefill and #buyList > 0 then
+        print("[The Forge Miner] Potions empty. Refilling...")
+        local Char = LocalPlayer.Character
+        if not Char or not Char:FindFirstChild("HumanoidRootPart") then return end
+        local oldPos = Char.HumanoidRootPart.Position
+
+        FlyTo(MariaLocation, MyRunID)
+        task.wait(0.5)
+        
+        for _, pName in pairs(buyList) do
+            for i = 1, 5 do
+                PurchaseRemote:InvokeServer(pName, 1)
+                task.wait(0.25)
+            end
+        end
+        print("[The Forge Miner] Restocked. Returning...")
+        FlyTo(oldPos, MyRunID)
+    end
+end
+
+-- // GLOBAL HEALTH CHECK //
+if HealthConnection then HealthConnection:Disconnect() end
+HealthConnection = RunService.Heartbeat:Connect(function()
+    if Options.AutoPotion.Value and Options.SelectPotions.Value["Health"] then
+        local Char = LocalPlayer.Character
+        if Char and Char:FindFirstChild("Humanoid") then
+            local Hum = Char.Humanoid
+            if Hum.Health > 0 and (Hum.Health / Hum.MaxHealth) <= 0.40 then
+                if GetPotionCount("HealthPotion2") > 0 then
+                    if (tick() - PotionState.Health.LastUsed) > 2 then
+                         print("[The Forge Miner] CRITICAL HEALTH! Using Potion.")
+                         UsePotion("HealthPotion2")
+                         PotionState.Health.LastUsed = tick()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- // GHOST MODE //
+local VisualConnection = nil
+local MiningHoldBV = nil
+
+local function SetMiningState(cluster, enabled)
+    local Char = LocalPlayer.Character
+    local Root = Char and Char:FindFirstChild("HumanoidRootPart")
+
+    if enabled then
+        for _, model in pairs(cluster) do
+            if model then
+                for _, part in pairs(model:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        if not part:GetAttribute("OrigTrans") then part:SetAttribute("OrigTrans", part.Transparency) end
+                        part.Transparency = 0.6 
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end
+
+        if Root and not MiningHoldBV then
+            MiningHoldBV = Instance.new("BodyVelocity")
+            MiningHoldBV.Velocity = Vector3.new(0, 0, 0)
+            MiningHoldBV.MaxForce = Vector3.new(math.huge, math.huge, math.huge) -- Anti-Knockback during mining
+            MiningHoldBV.P = 10000
+            MiningHoldBV.Parent = Root
+        end
+        if not VisualConnection then
+            VisualConnection = RunService.Stepped:Connect(function()
+                if LocalPlayer.Character then
+                    for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                        if v:IsA("BasePart") then v.CanCollide = false end
+                    end
+                end
+            end)
+        end
+    else
+        for _, model in pairs(cluster) do
+            if model then
+                for _, part in pairs(model:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        local orig = part:GetAttribute("OrigTrans")
+                        if orig then part.Transparency = orig end
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+
+        if MiningHoldBV then
+            MiningHoldBV:Destroy()
+            MiningHoldBV = nil
+        end
+        if VisualConnection then
+            VisualConnection:Disconnect()
+            VisualConnection = nil
+        end
+        if Char then
+            for _, v in pairs(Char:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = true end
+            end
+        end
+    end
+end
+
+-- [[ CLUSTER LOGIC ]] --
+local function GetRockCluster(mainRock, radius)
+    local cluster = {}
+    if not mainRock or not mainRock.Parent then return {mainRock} end
+
+    local mainPart = mainRock:FindFirstChild("Hitbox") or mainRock.PrimaryPart
+    if not mainPart then return {mainRock} end
+
+    local searchRoot = mainRock.Parent
+    if searchRoot.Name == "SpawnLocation" or searchRoot:IsA("Part") or searchRoot:IsA("BasePart") then
+        if searchRoot.Parent then searchRoot = searchRoot.Parent end
+    end
+
+    for _, obj in pairs(searchRoot:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= mainRock then
+            local name = obj.Name
+            if (name:find("Rock") or name:find("Vein") or name:find("Ore") or name:find("Basalt")) and name ~= "Ore" then
+                local root = obj:FindFirstChild("Hitbox") or obj.PrimaryPart
+                if root and (root.Position - mainPart.Position).Magnitude <= radius then
+                    table.insert(cluster, obj)
+                end
+            end
+        end
+    end
+    table.insert(cluster, mainRock)
+    return cluster
+end
+
+local function GetTargets()
+    if not RocksFolder then return {} end
+    local areaName = Options.SelectArea.Value
+    local searchFolder = (areaName == "All Areas") and RocksFolder or RocksFolder:FindFirstChild(areaName)
+    if not searchFolder then return {} end
+    return searchFolder:GetDescendants()
+end
+
+-- // MAIN MINING LOOP //
+ToggleMining:OnChanged(function()
+    MiningActive = ToggleMining.Value
+
+    if MiningActive then
+        CurrentRunID = CurrentRunID + 1
+        local MyRunID = CurrentRunID
+        print("[DEBUG] Miner Started (ID: " .. MyRunID .. ")")
+        
+        task.spawn(function()
+            while MiningActive and CurrentRunID == MyRunID do
+                local success, err = pcall(function()
+                    local Char = LocalPlayer.Character
+                    if not Char or not Char.Parent or not Char:FindFirstChild("HumanoidRootPart") or not Char:FindFirstChild("Humanoid") then
+                        task.wait(0.5) 
+                        return 
+                    end
+                    
+                    if Char.Humanoid.Health <= 0 then
+                        task.wait(1)
+                        return
+                    end
+
+                    -- [[ DEATH RETURN LOGIC ]] --
+                    if DeathState.Position then
+                        local elapsed = tick() - DeathState.Time
+                        local remaining = 5 - elapsed
+                        if remaining > 0 then
+                            print("[The Forge Miner] Waiting "..math.floor(remaining).."s before returning...")
+                            task.wait(remaining)
+                        end
+                        if Char and Char:FindFirstChild("HumanoidRootPart") then
+                            Char.HumanoidRootPart.CFrame = DeathState.Position
+                            print("[The Forge Miner] Returning to death location (Protect/Mine).")
+                        end
+                        DeathState.Position = nil
+                        task.wait(0.5) -- Stabilize
+                    end
+
+                    -- [[ AUTO POTION CHECK (Runs after TP so we know where to return) ]]
+                    ManagePotions(MyRunID)
+                    
+                    EquipPickaxe()
+                    
+                    local MyPos = Char.HumanoidRootPart.Position
+                    local Nearest = nil
+                    local MinDist = 999999
+                    local MaxScanDist = tonumber(Options.MaxDist.Value) or 1500
+                    
+                    local candidates = {}
+                    local isClearingMode = false 
+
+                    -- [[ VOLCANIC SPAWN LOGIC ]] --
+                    if Options.VolcanicFarm.Value then
+                        local volcFolder = RocksFolder:FindFirstChild("Island2VolcanicDepths")
+                        if volcFolder then
+                            local allVolcanicDescendants = volcFolder:GetDescendants()
+                            local volcanicRocks = {}
+                            local allRocks = {}
+                            
+                            for _, v in pairs(allVolcanicDescendants) do
+                                if v:IsA("Model") then
+                                    if v.Name:find("Volcanic") then
+                                        table.insert(volcanicRocks, v)
+                                    elseif (v.Name:find("Rock") or v.Name:find("Vein")) and v.Name ~= "Ore" then
+                                        table.insert(allRocks, v)
+                                    end
+                                end
+                            end
+
+                            if #volcanicRocks >= 2 then
+                                candidates = volcanicRocks
+                                isClearingMode = false
+                            else
+                                print("[The Forge Miner] Low Volcanic Count ("..#volcanicRocks.."). Clearing debris...")
+                                candidates = allRocks
+                                if #candidates == 0 then candidates = GetTargets() end
+                                isClearingMode = true
+                            end
+                        end
+                    else
+                        candidates = GetTargets()
+                    end
+                    
+                    for _, obj in pairs(candidates) do
+                        if obj:IsA("Model") then
+                            if IgnoredRocks[obj] then continue end
+                            local name = obj.Name
+                            
+                            if (name:find("Rock") or name:find("Vein") or name:find("Ore") or name:find("Basalt")) and name ~= "Ore" then
+                                local root = obj:FindFirstChild("Hitbox")
+                                if not root then root = obj.PrimaryPart end
+                                if not root then root = obj:FindFirstChild("HumanoidRootPart") end
+
+                                if root and root:IsA("BasePart") then
+                                    local rockPos = root.Position
+                                    
+                                    -- [[ MULTI-CLIENT CHECK ]] --
+                                    if IsRockOccupied(rockPos) then
+                                        continue 
+                                    end
+
+                                    local dist = (rockPos - MyPos).Magnitude
+                                    if dist <= MaxScanDist then
+                                        local weightedDist = dist
+                                        if Options.MineUnder.Value and IsMobNearby(rockPos, 35) then
+                                            weightedDist = dist + 50000 
+                                        end
+                                        if weightedDist < MinDist then
+                                            MinDist = weightedDist
+                                            Nearest = obj
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    
+                    if not Nearest and isClearingMode then
+                        print("[The Forge Miner] Clearing Mode Stuck! Wiping IgnoredRocks.")
+                        IgnoredRocks = {}
+                        task.wait(0.2)
+                        return
+                    end
+
+                    if Nearest and MiningActive and CurrentRunID == MyRunID then
+                        local targetPart = Nearest:FindFirstChild("Hitbox") or Nearest.PrimaryPart
+                        local targetPos = targetPart.Position
+                        
+                        CurrentTarget = Nearest
+                        local activeCluster = GetRockCluster(Nearest, 60)
+
+                        local Root = Char.HumanoidRootPart
+                        local direction = (Root.Position - targetPos).Unit
+                        local reachVal = tonumber(Options.Reach.Value) or 6
+                        local offsetPos = Vector3.new(0,0,0)
+                        
+                        if Options.MineUnder.Value then
+                            offsetPos = Vector3.new(targetPos.X, targetPos.Y - 6, targetPos.Z)
+                        else
+                            offsetPos = targetPos + (direction * reachVal)
+                            offsetPos = Vector3.new(offsetPos.X, targetPos.Y + 3, offsetPos.Z)
+                        end
+
+                        if (Root.Position - offsetPos).Magnitude > 4 then
+                            if FlyTo(offsetPos, MyRunID) then
+                                Char = LocalPlayer.Character
+                            end
+                        end
+                        
+                        if not MiningActive or CurrentRunID ~= MyRunID then return end
+                        SetMiningState(activeCluster, true)
+                        
+                        local timer = 0
+                        local maxTime = 9999 -- FIXED: Reduced from 500 to 25 to prevent idling on bugged rocks
+                        
+                        while Nearest and Nearest.Parent and MiningActive and CurrentRunID == MyRunID and timer < maxTime do
+                            if not Char or not Char.Parent or Char.Humanoid.Health <= 0 then break end
+
+                            if Nearest.Name:find("Volcanic") then isClearingMode = false end
+
+                            if (Char.HumanoidRootPart.Position - targetPos).Magnitude > 30 then 
+                                print("[The Forge Miner] Drifted too far (>30 studs). Resetting.")
+                                break 
+                            end
+
+                            if isClearingMode then
+                                local volcFolder = RocksFolder:FindFirstChild("Island2VolcanicDepths")
+                                if volcFolder then
+                                    local currentVolcCount = 0
+                                    for _, v in pairs(volcFolder:GetDescendants()) do
+                                        if v:IsA("Model") and v.Name:find("Volcanic") then
+                                            currentVolcCount = currentVolcCount + 1
+                                        end
+                                    end
+                                    if currentVolcCount >= 2 then
+                                        IgnoredRocks[Nearest] = true 
+                                        break 
+                                    end
+                                end
+                            end
+                            if IgnoredRocks[Nearest] then break end
+
+                            local tool = Char:FindFirstChild("Pickaxe")
+                            if not tool then EquipPickaxe() tool = Char:FindFirstChild("Pickaxe") end
+                            if not tool then task.wait(0.1) continue end
+
+                            if Options.MineUnder.Value then
+                                Char.HumanoidRootPart.CFrame = CFrame.lookAt(Char.HumanoidRootPart.Position, targetPos)
+                            else
+                                Char.HumanoidRootPart.CFrame = CFrame.lookAt(Char.HumanoidRootPart.Position, Vector3.new(targetPos.X, Char.HumanoidRootPart.Position.Y, targetPos.Z))
+                            end
+
+                            if Char.Humanoid.Health > 0 and Char:FindFirstChild("Pickaxe") then
+                                ToolActivated:InvokeServer("Pickaxe")
+                            else
+                                break
+                            end
+
+                            task.wait() 
+                            
+                            local foundGoodDrop = false
+                            local foundBadDrop = false
+                            
+                            local scanObjects = {Nearest}
+                            for _, v in pairs(activeCluster) do table.insert(scanObjects, v) end
+
+                            for _, rock in pairs(scanObjects) do
+                                if rock and rock.Parent then
+                                    local rAction, rOre = CheckAttributes(rock)
+                                    if rAction == "Keep" then foundGoodDrop = true 
+                                    elseif rAction == "Skip" then foundBadDrop = true end
+                                    
+                                    for _, child in pairs(rock:GetDescendants()) do 
+                                        if child:IsA("Model") or child:IsA("BasePart") then
+                                            local cAction, cOre = CheckAttributes(child)
+                                            if cAction == "Keep" then 
+                                                foundGoodDrop = true
+                                                if not child:GetAttribute("WebhookSent") then
+                                                    child:SetAttribute("WebhookSent", true)
+                                                    local hl = Instance.new("Highlight", child)
+                                                    hl.FillColor = Color3.fromRGB(255, 215, 0)
+                                                    SendWebhook(cOre, targetPos)
+                                                end
+                                            elseif cAction == "Skip" then 
+                                                foundBadDrop = true 
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+
+                            if foundGoodDrop or foundBadDrop then timer = 0 end
+
+                            if not isClearingMode then
+                                if foundBadDrop and not foundGoodDrop then
+                                    IgnoredRocks[Nearest] = true
+                                    break 
+                                end
+                                
+                                if foundGoodDrop and Options.ShareRares.Value then
+                                    timer = 0 
+                                    maxTime = 9999 
+                                    local hl = Instance.new("Highlight", Nearest)
+                                    hl.FillColor = Color3.fromRGB(0, 255, 0)
+                                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                    print("[The Forge Miner] Rare found! Holding rock (Perm-Stall).")
+                                    local waited = 0
+                                    while waited < 23 do
+                                        if not MiningActive or not Nearest.Parent then break end
+                                        task.wait(1)
+                                        waited = waited + 1
+                                    end
+                                end
+                            end
+
+                            task.wait(0.6)
+                            timer = timer + 0.6
+                        end
+                        SetMiningState(activeCluster, false)
+                    else
+                        -- FIXED: Immediate reset if no rocks found, prevents idling
+                        if Nearest == nil and next(IgnoredRocks) ~= nil then
+                            print("[The Forge Miner] No valid rocks found. Resetting memory to re-scan.")
+                            IgnoredRocks = {}
+                        elseif math.random(1, 100) == 1 then 
+                             IgnoredRocks = {} 
+                        end
+                        task.wait(0.2) 
+                    end
+                end)
+                if not success then
+                    warn("[Error]: " .. tostring(err))
+                    SetMiningState({}, false) 
+                    task.wait(1)
+                end
+            end
+        end)
+    else
+        CurrentRunID = CurrentRunID + 1 
+        SetMiningState({}, false)
+        print("[DEBUG] Miner Stopped")
+    end
+end)
+
+LoadSettings()
+Window:SelectTab(1)
+Fluent:Notify({Title = "Script Loaded", Content = "Anti-Idle + Knockback Fix Active", Duration = 8})
