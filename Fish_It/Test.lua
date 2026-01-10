@@ -3,7 +3,7 @@ loadstring([[
 ]])();
 
 local success, Library = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/Example.lua"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/main/Example.lua"))()
 end)
 
 if not success or not Library then
