@@ -44,53 +44,50 @@ local Window = WindUI:CreateWindow({
     },
 })
 
-Window:EditOpenButton({
-    Enabled = false,
-})
+Window:EditOpenButton({Enabled = false})
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 local G2L = {}
 
 G2L["ScreenGui_1"] = Instance.new("ScreenGui")
-G2L["ScreenGui_1"].Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+G2L["ScreenGui_1"].Parent = game:GetService("CoreGui")
 G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+G2L["ScreenGui_1"].ResetOnSpawn = false
 CollectionService:AddTag(G2L["ScreenGui_1"], "main")
 
 G2L["ButtonRezise_2"] = Instance.new("ImageButton")
 G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
 G2L["ButtonRezise_2"].BorderSizePixel = 0
 G2L["ButtonRezise_2"].Draggable = true
-G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
 G2L["ButtonRezise_2"].Size = UDim2.new(0, 47, 0, 47)
 G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
+G2L["ButtonRezise_2"].Visible = true
 
 local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
 corner.CornerRadius = UDim.new(0, 8)
 
 local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
 neon.Thickness = 2
-neon.Color = Color3.fromRGB(0, 255, 0)
+neon.Color = Color3.fromRGB(0, 255, 120)
 neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+local windowVisible = true
+
 G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
-    G2L["ButtonRezise_2"].Visible = false
-    Window:Open()
+	if windowVisible then
+		Window:Close()
+	else
+		Window:Open()
+	end
+	windowVisible = not windowVisible
 end)
-
-Window:OnClose(function()
-    G2L["ButtonRezise_2"].Visible = true
-end)
-
-Window:OnDestroy(function()
-    G2L["ButtonRezise_2"].Visible = false
-end)
-
-G2L["ButtonRezise_2"].Visible = false
 
 Window:Tag({
-    Title = "v0.0.3.7",
+    Title = "v0.0.3.8",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
