@@ -1110,73 +1110,23 @@ Tab3:Section({
 
 Tab3:Divider()
 
-local RS = game:GetService("ReplicatedStorage")
-local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
-
-local NPCs = {
-    "Alien Merchant",
-    "Billy Bob",
-    "Seth",
-    "Joe",
-    "Aura Kid",
-    "Boat Expert",
-    "Scott",
-    "Ron",
-    "Jeffery",
-    "McBoatson",
-    "Scientist",
-    "Silly Fisherman",
-    "Tim",
-    "Santa",
-    "Santa Doge",
-    "Stickmasterluke",
-    "Merely",
-    "Shendletsky",
-    "BrightEyes",
-    "Guest",
-    "Builderman",
-    "Noob",
-    "John Doe",
-}
-
-_G.AutoClaimChristmas = false
+local chestRemote = game:GetService("ReplicatedStorage")
+    :WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
+    :WaitForChild("RE/ClaimPirateChest")
 
 Tab3:Toggle({
-    Title = "Auto Claim",
-    Desc = "Auto Claim Christmas Presents",
+    Title = "Auto Claim Chest",
+    Desc = "Automatically claim pirate chest",
     Value = false,
     Callback = function(state)
-        _G.AutoClaimChristmas = state
-
+        _G.AutoClaimChest = state
         task.spawn(function()
-            while _G.AutoClaimChristmas do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.AutoClaimChristmas then break end
-                    pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
-                    end)
-                    task.wait(0.15)
-                end
-                task.wait(2)
-            end
-        end)
-    end
-})
-
-local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
-    :FindFirstChild("sleitnick_net@0.2.0").net
-    :FindFirstChild("RF/RedeemGift")
-
-Tab3:Toggle({
-    Title = "Auto Present Factory",
-    Desc = "Automatically open Present Factory",
-    Value = false,
-    Callback = function(state)
-        _G.AutoPresentFactory = state
-        task.spawn(function()
-            while _G.AutoPresentFactory do
+            while _G.AutoClaimChest do
                 pcall(function()
-                    giftRemote:InvokeServer()
+                    chestRemote:FireServer()
                 end)
                 task.wait(0.5)
             end
@@ -1679,7 +1629,6 @@ Tab5:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
-	["Christmas Island"] = Vector3.new(708.17, 16.08, 1567.35),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
@@ -1730,12 +1679,11 @@ Tab5:Section({
 Tab5:Divider()
 
 local FishingLocations = {
-	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
-	["Christmas Cave"] = Vector3.new(538.17, -580.58, 8898.02),
-	["Christmas Lake"] = Vector3.new(1136.29, 23.72, 1562.07),
+    ["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Kohana"] = Vector3.new(-603, 3, 719),
+    ["Leviathan"] = Vector3.new(3474.01, -287.84, 3470.26),
     ["Levers 1"] = Vector3.new(1475, 4, -847),
     ["Levers 2"] = Vector3.new(882, 5, -321),
     ["levers 3"] = Vector3.new(1425, 6,126),
@@ -1743,8 +1691,9 @@ local FishingLocations = {
     ["Sacred Temple"] = Vector3.new(1475, -22, -632),
     ["Sysyphus Statue"] = Vector3.new(-3693,-136, -1045),
     ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
+    ["Treasure Room Pirate"] = Vector3.new(3331, -297, 3099),
     ["Underground Cellar"] = Vector3.new(2135, -92, -695),
-    ["Volcano"] = Vector3.new(-632, 55, 197),
+    ["Volcano"] = Vector3.new(-632, 55, 197)
 }
 
 local SelectedFishing = nil
