@@ -1635,6 +1635,7 @@ local IslandLocations = {
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
     ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
+	["Pirate Cove"] = Vector3.new(3172.28, 9.10, 3541.11),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
@@ -1678,6 +1679,7 @@ Tab5:Divider()
 local FishingLocations = {
     ["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+	["Crystal Depths"] = Vector3.new(5747.22, -904.65, 15385.46),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Leviathan"] = Vector3.new(3474.01, -287.84, 3470.26),
@@ -2420,3 +2422,4 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
