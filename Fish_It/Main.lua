@@ -87,7 +87,7 @@ G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
 end)
 
 Window:Tag({
-    Title = "v0.0.3.8",
+    Title = "v0.0.3.9",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -1100,7 +1100,7 @@ Tab3:Button({
 
 Tab3:Section({
     Title = "Event",
-    Icon = "candy-cane",
+    Icon = "calendar-days",
     TextXAlignment = "Left",
     TextSize = 17
 })
@@ -1114,20 +1114,34 @@ local chestRemote = game:GetService("ReplicatedStorage")
     :WaitForChild("net")
     :WaitForChild("RE/ClaimPirateChest")
 
-Tab3:Toggle({
+local chestThread
+
+MainTab:Toggle({
     Title = "Auto Claim Chest",
     Desc = "Automatically claim pirate chest",
     Value = false,
     Callback = function(state)
         _G.AutoClaimChest = state
-        task.spawn(function()
-            while _G.AutoClaimChest do
-                pcall(function()
-                    chestRemote:FireServer()
-                end)
-                task.wait(0.5)
+
+        if state then
+            if chestThread then
+                task.cancel(chestThread)
             end
-        end)
+
+            chestThread = task.spawn(function()
+                while _G.AutoClaimChest do
+                    pcall(function()
+                        chestRemote:FireServer()
+                    end)
+                    task.wait(0.5)
+                end
+            end)
+        else
+            if chestThread then
+                task.cancel(chestThread)
+                chestThread = nil
+            end
+        end
     end
 })
 
@@ -2422,4 +2436,5 @@ Tab6:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
 
