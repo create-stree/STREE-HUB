@@ -2,6 +2,8 @@ loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
 
+local RunService = game:GetService("RunService")
+
 local cloneref = (cloneref or clonereference or function(instance) return instance end)
 local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
 
