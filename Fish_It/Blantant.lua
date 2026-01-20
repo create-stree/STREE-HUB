@@ -1,4 +1,7 @@
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+end)
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = game.Players.LocalPlayer
 
