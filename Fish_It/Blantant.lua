@@ -72,7 +72,7 @@ end
 local Window = Library:MakeGui({
     NameHub = "StreeHub",
     Description = "| Blatant",
-    Color = Color3.fromRGB(255, 0, 255)
+    Color = Color3.fromRGB(57, 255, 20)
 })
 
 local mainTab = Window:CreateTab({ Name = "Main" })
@@ -94,8 +94,10 @@ Section:AddToggle({
     end
 })
 
-mainTab:AddInput({
-    Title = "Cancel Delay",
+Section:AddInput({
+    Title = "Reel Delay",
+    Content = "Cancel Delay",
+    Placeholder = "write number"
     Default = tostring(Config.InstantCancelDelay),
     Callback = function(v)
         local n = tonumber(v)
@@ -105,8 +107,10 @@ mainTab:AddInput({
     end
 })
 
-mainTab:AddInput({
-    Title = "Complete Delay",
+Section:AddInput({
+    Title = "Bait Delay",
+    Content = "Completed Delay",
+    Placeholder = "write number"
     Default = tostring(Config.InstantCompleteDelay),
     Callback = function(v)
         local n = tonumber(v)
@@ -146,14 +150,14 @@ local function setNoAnim(state)
     end
 end
 
-mainTab:AddToggle({
+Section:AddToggle({
     Title = "No Animation",
     Value = false,
     Callback = setNoAnim
 })
 
 local notifConn
-mainTab:AddToggle({
+Section:AddToggle({
     Title = "Remove Fish Notification Pop-up",
     Value = false,
     Callback = function(state)
