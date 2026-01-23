@@ -52,7 +52,7 @@ local function fishingThread()
                 end
             end)
             
-            task.wait(0.75)
+            task.wait(0.075)
         end
         
         -- Cancel di akhir thread
