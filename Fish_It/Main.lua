@@ -83,7 +83,7 @@ G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
 end)
 
 Window:Tag({
-    Title = "v0.0.4.0",
+    Title = "v0.0.3.9",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -726,7 +726,7 @@ Tab3:Toggle({
                 end
             end
         else
-            ifif _G.OldSettings then
+            if _G.OldSettings then
                 Lighting.GlobalShadows = _G.OldSettings.GlobalShadows
                 Lighting.FogEnd = _G.OldSettings.FogEnd
                 Lighting.Brightness = _G.OldSettings.Brightness
