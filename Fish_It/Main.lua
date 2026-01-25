@@ -726,7 +726,7 @@ Tab3:Toggle({
                 end
             end
         else
-            ifif _G.OldSettings then
+            if _G.OldSettings then
                 Lighting.GlobalShadows = _G.OldSettings.GlobalShadows
                 Lighting.FogEnd = _G.OldSettings.FogEnd
                 Lighting.Brightness = _G.OldSettings.Brightness
@@ -1806,7 +1806,7 @@ local function GetPlayerList()
         end
     end
     return list
-end
+}
 
 local SelectedPlayer = nil
 local Dropdown
