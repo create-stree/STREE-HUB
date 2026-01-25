@@ -74,12 +74,12 @@ neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 local windowVisible = true
 
 G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
-	if windowVisible then
-		Window:Close()
-	else
-		Window:Open()
-	end
-	windowVisible = not windowVisible
+    if windowVisible then
+        Window:Close()
+    else
+        Window:Open()
+    end
+    windowVisible = not windowVisible
 end)
 
 Window:Tag({
@@ -726,7 +726,7 @@ Tab3:Toggle({
                 end
             end
         else
-            if _G.OldSettings then
+            ifif _G.OldSettings then
                 Lighting.GlobalShadows = _G.OldSettings.GlobalShadows
                 Lighting.FogEnd = _G.OldSettings.FogEnd
                 Lighting.Brightness = _G.OldSettings.Brightness
@@ -821,7 +821,7 @@ Tab3:Toggle({
 
 Tab3:Section({
     Title = "Enchant Features",
-	Icon = "flask-conical",
+    Icon = "flask-conical",
     TextXAlignment = "Left",
     TextSize = 17,
 })
@@ -1112,7 +1112,7 @@ local chestRemote = game:GetService("ReplicatedStorage")
 
 local chestThread
 
-MainTab:Toggle({
+Tab3:Toggle({
     Title = "Auto Claim Chest",
     Desc = "Automatically claim pirate chest",
     Value = false,
@@ -1142,10 +1142,10 @@ MainTab:Toggle({
 })
 
 Tab3:Section({ 
-	Title = "Webhook Fish Caught",
-	Icon = "webhook",
-	TextXAlignment = "Left",
-	TextSize = 17 
+    Title = "Webhook Fish Caught",
+    Icon = "webhook",
+    TextXAlignment = "Left",
+    TextSize = 17 
 })
 
 Tab3:Divider()
@@ -1640,12 +1640,12 @@ local IslandLocations = {
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
-	["Enchant2"] = Vector3.new(1480, 126, -585),
+    ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
     ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
-	["Pirate Cove"] = Vector3.new(3172.28, 9.10, 3541.11),
+    ["Pirate Cove"] = Vector3.new(3172.28, 9.10, 3541.11),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
@@ -1689,7 +1689,7 @@ Tab5:Divider()
 local FishingLocations = {
     ["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
-	["Crystal Depths"] = Vector3.new(5747.22, -904.65, 15385.46),
+    ["Crystal Depths"] = Vector3.new(5747.22, -904.65, 15385.46),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Leviathan"] = Vector3.new(3474.01, -287.84, 3470.26),
@@ -1874,8 +1874,8 @@ local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 
 player.CharacterAdded:Connect(function(c)
-	character = c
-	hrp = c:WaitForChild("HumanoidRootPart")
+    character = c
+    hrp = c:WaitForChild("HumanoidRootPart")
 end)
 
 local megCheckRadius = 150
@@ -1885,159 +1885,159 @@ local selectedEvents = {}
 local createdEventPlatform = nil
 
 local eventData = {
-	["Worm Hunt"] = {
-		TargetName = "Model",
-		Locations = {
-			Vector3.new(2190.85, -1.4, 97.575), 
-			Vector3.new(-2450.679, -1.4, 139.731), 
-			Vector3.new(-267.479, -1.4, 5188.531),
-			Vector3.new(-327, -1.4, 2422)
-		},
-		PlatformY = 107,
-		Priority = 1,
-		Icon = "fish"
-	},
-	["Megalodon Hunt"] = {
-		TargetName = "Megalodon Hunt",
-		Locations = {
-			Vector3.new(-1076.3, -1.4, 1676.2),
-			Vector3.new(-1191.8, -1.4, 3597.3),
-			Vector3.new(412.7, -1.4, 4134.4),
-		},
-		PlatformY = 107,
-		Priority = 2,
-		Icon = "anchor"
-	},
-	["Ghost Shark Hunt"] = {
-		TargetName = "Ghost Shark Hunt",
-		Locations = {
-			Vector3.new(489.559, -1.35, 25.406), 
-			Vector3.new(-1358.216, -1.35, 4100.556), 
-			Vector3.new(627.859, -1.35, 3798.081)
-		},
-		PlatformY = 107,
-		Priority = 3,
-		Icon = "fish"
-	},
-	["Shark Hunt"] = {
-		TargetName = "Shark Hunt",
-		Locations = {
-			Vector3.new(1.65, -1.35, 2095.725),
-			Vector3.new(1369.95, -1.35, 930.125),
-			Vector3.new(-1585.5, -1.35, 1242.875),
-			Vector3.new(-1896.8, -1.35, 2634.375)
-		},
-		PlatformY = 107,
-		Priority = 4,
-		Icon = "fish"
-	},
+    ["Worm Hunt"] = {
+        TargetName = "Model",
+        Locations = {
+            Vector3.new(2190.85, -1.4, 97.575), 
+            Vector3.new(-2450.679, -1.4, 139.731), 
+            Vector3.new(-267.479, -1.4, 5188.531),
+            Vector3.new(-327, -1.4, 2422)
+        },
+        PlatformY = 107,
+        Priority = 1,
+        Icon = "fish"
+    },
+    ["Megalodon Hunt"] = {
+        TargetName = "Megalodon Hunt",
+        Locations = {
+            Vector3.new(-1076.3, -1.4, 1676.2),
+            Vector3.new(-1191.8, -1.4, 3597.3),
+            Vector3.new(412.7, -1.4, 4134.4),
+        },
+        PlatformY = 107,
+        Priority = 2,
+        Icon = "anchor"
+    },
+    ["Ghost Shark Hunt"] = {
+        TargetName = "Ghost Shark Hunt",
+        Locations = {
+            Vector3.new(489.559, -1.35, 25.406), 
+            Vector3.new(-1358.216, -1.35, 4100.556), 
+            Vector3.new(627.859, -1.35, 3798.081)
+        },
+        PlatformY = 107,
+        Priority = 3,
+        Icon = "fish"
+    },
+    ["Shark Hunt"] = {
+        TargetName = "Shark Hunt",
+        Locations = {
+            Vector3.new(1.65, -1.35, 2095.725),
+            Vector3.new(1369.95, -1.35, 930.125),
+            Vector3.new(-1585.5, -1.35, 1242.875),
+            Vector3.new(-1896.8, -1.35, 2634.375)
+        },
+        PlatformY = 107,
+        Priority = 4,
+        Icon = "fish"
+    },
 }
 
 local eventNames = {}
 for name in pairs(eventData) do
-	table.insert(eventNames, name)
+    table.insert(eventNames, name)
 end
 
 local function destroyEventPlatform()
-	if createdEventPlatform and createdEventPlatform.Parent then
-		createdEventPlatform:Destroy()
-		createdEventPlatform = nil
-	end
+    if createdEventPlatform and createdEventPlatform.Parent then
+        createdEventPlatform:Destroy()
+        createdEventPlatform = nil
+    end
 end
 
 local function createAndTeleportToPlatform(targetPos, y)
-	destroyEventPlatform()
+    destroyEventPlatform()
 
-	local platform = Instance.new("Part")
-	platform.Size = Vector3.new(5, 1, 5)
-	platform.Position = Vector3.new(targetPos.X, y, targetPos.Z)
-	platform.Anchored = true
-	platform.Transparency = 1
-	platform.CanCollide = true
-	platform.Name = "EventPlatform"
-	platform.Parent = Workspace
-	createdEventPlatform = platform
+    local platform = Instance.new("Part")
+    platform.Size = Vector3.new(5, 1, 5)
+    platform.Position = Vector3.new(targetPos.X, y, targetPos.Z)
+    platform.Anchored = true
+    platform.Transparency = 1
+    platform.CanCollide = true
+    platform.Name = "EventPlatform"
+    platform.Parent = Workspace
+    createdEventPlatform = platform
 
-	hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
+    hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
 end
 
 local function runMultiEventTP()
-	while autoEventTPEnabled do
-		local sorted = {}
-		for _, e in ipairs(selectedEvents) do
-			if eventData[e] then
-				table.insert(sorted, eventData[e])
-			end
-		end
-		table.sort(sorted, function(a, b) return a.Priority < b.Priority end)
+    while autoEventTPEnabled do
+        local sorted = {}
+        for _, e in ipairs(selectedEvents) do
+            if eventData[e] then
+                table.insert(sorted, eventData[e])
+            end
+        end
+        table.sort(sorted, function(a, b) return a.Priority < b.Priority end)
 
-		for _, config in ipairs(sorted) do
-			local foundTarget, foundPos = nil, nil
+        for _, config in ipairs(sorted) do
+            local foundTarget, foundPos = nil, nil
 
-			if config.TargetName == "Model" then
-				local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
-				if menuRings then
-					for _, props in ipairs(menuRings:GetChildren()) do
-						if props.Name == "Props" then
-							local model = props:FindFirstChild("Model")
-							if model and model.PrimaryPart then
-								for _, loc in ipairs(config.Locations) do
-									if (model.PrimaryPart.Position - loc).Magnitude <= megCheckRadius then
-										foundTarget = model
-										foundPos = model.PrimaryPart.Position
-										break
-									end
-								end
-							end
-						end
-						if foundTarget then break end
-					end
-				end
-			else
-				for _, loc in ipairs(config.Locations) do
-					for _, d in ipairs(Workspace:GetDescendants()) do
-						if d.Name == config.TargetName then
-							local pos = d:IsA("BasePart") and d.Position or (d.PrimaryPart and d.PrimaryPart.Position)
-							if pos and (pos - loc).Magnitude <= megCheckRadius then
-								foundTarget = d
-								foundPos = pos
-								break
-							end
-						end
-					end
-					if foundTarget then break end
-				end
-			end
-			if foundTarget and foundPos then
-				createAndTeleportToPlatform(foundPos, config.PlatformY)
-			end
-		end
-		task.wait(0.05)
-	end
-	destroyEventPlatform()
+            if config.TargetName == "Model" then
+                local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
+                if menuRings then
+                    for _, props in ipairs(menuRings:GetChildren()) do
+                        if props.Name == "Props" then
+                            local model = props:FindFirstChild("Model")
+                            if model and model.PrimaryPart then
+                                for _, loc in ipairs(config.Locations) do
+                                    if (model.PrimaryPart.Position - loc).Magnitude <= megCheckRadius then
+                                        foundTarget = model
+                                        foundPos = model.PrimaryPart.Position
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                        if foundTarget then break end
+                    end
+                end
+            else
+                for _, loc in ipairs(config.Locations) do
+                    for _, d in ipairs(Workspace:GetDescendants()) do
+                        if d.Name == config.TargetName then
+                            local pos = d:IsA("BasePart") and d.Position or (d.PrimaryPart and d.PrimaryPart.Position)
+                            if pos and (pos - loc).Magnitude <= megCheckRadius then
+                                foundTarget = d
+                                foundPos = pos
+                                break
+                            end
+                        end
+                    end
+                    if foundTarget then break end
+                end
+            end
+            if foundTarget and foundPos then
+                createAndTeleportToPlatform(foundPos, config.PlatformY)
+            end
+        end
+        task.wait(0.05)
+    end
+    destroyEventPlatform()
 end
 
 Tab5:Dropdown({
-	Title = "Select Events",
-	Values = eventNames,
-	Multi = true,
-	AllowNone = true,
-	Callback = function(values)
-		selectedEvents = values
-	end
+    Title = "Select Events",
+    Values = eventNames,
+    Multi = true,
+    AllowNone = true,
+    Callback = function(values)
+        selectedEvents = values
+    end
 })
 
 Tab5:Toggle({
-	Title = "Auto Event",
-	Icon = false,
-	Type = false,
-	Value = false,
-	Callback = function(state)
-		autoEventTPEnabled = state
-		if state then
-			task.spawn(runMultiEventTP)
-		end
-	end
+    Title = "Auto Event",
+    Icon = false,
+    Type = false,
+    Value = false,
+    Callback = function(state)
+        autoEventTPEnabled = state
+        if state then
+            task.spawn(runMultiEventTP)
+        end
+    end
 })
 
 local Tab6 = Window:Tab({
@@ -2153,7 +2153,7 @@ Tab6:Toggle({
     Value = false,
     Callback = function(v)
         setGameAnimationsEnabled(v)
-	end
+    end
 })
 
 local RunService = game:GetService("RunService")
@@ -2192,7 +2192,7 @@ Tab6:Toggle({
             end
 
             SmallNotification.Enabled = true
-				
+            
             WindUI:Notify({
                 Title = "Pop-up Diaktifkan",
                 Content = "Notifikasi kembali normal.",
