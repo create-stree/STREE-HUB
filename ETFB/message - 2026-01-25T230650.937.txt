@@ -1,0 +1,442 @@
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local godMode = false
+local flyMode = false
+local flyBodyVelocity = nil
+local flyConnection = nil
+local noclipConnection = nil
+local originalGravity = workspace.Gravity
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "OceanX"
+gui.ResetOnSpawn = false
+gui.Parent = player.PlayerGui
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 300, 0, 220)
+main.Position = UDim2.new(0.5, -150, 0.5, -110)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = main
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(0, 200, 255)
+stroke.Thickness = 2
+stroke.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Text = "🌊 OCEAN X by 1w69 🌊"
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(25, 35, 55)
+title.TextColor3 = Color3.fromRGB(0, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Parent = main
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12, 0, 0)
+titleCorner.Parent = title
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Text = "X"
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.GothamBlack
+closeBtn.TextSize = 18
+closeBtn.Parent = title
+
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, -20, 0, 160)
+content.Position = UDim2.new(0, 10, 0, 50)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+local function createButton(text, yPos, color)
+    local btnFrame = Instance.new("Frame")
+    btnFrame.Size = UDim2.new(1, 0, 0, 45)
+    btnFrame.Position = UDim2.new(0, 0, 0, yPos)
+    btnFrame.BackgroundTransparency = 1
+    btnFrame.Parent = content
+    
+    local btn = Instance.new("TextButton")
+    btn.Text = text
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.Parent = btnFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = btn
+    
+    return btn
+end
+
+local godBtn = createButton("God Mode beta: OFF", 0, Color3.fromRGB(255, 60, 60))
+local flyBtn = createButton("Fly+NoClip: OFF", 50, Color3.fromRGB(60, 150, 255))
+
+local tsunamiBox = Instance.new("Frame")
+tsunamiBox.Size = UDim2.new(1, 0, 0, 45)
+tsunamiBox.Position = UDim2.new(0, 0, 0, 100)
+tsunamiBox.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+tsunamiBox.Parent = content
+
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 8)
+boxCorner.Parent = tsunamiBox
+
+local tsunamiText = Instance.new("TextLabel")
+tsunamiText.Text = "Tsunami: Checking..."
+tsunamiText.Size = UDim2.new(1, -20, 1, 0)
+tsunamiText.Position = UDim2.new(0, 10, 0, 0)
+tsunamiText.BackgroundTransparency = 1
+tsunamiText.TextColor3 = Color3.new(1, 1, 1)
+tsunamiText.Font = Enum.Font.GothamBold
+tsunamiText.TextSize = 14
+tsunamiText.Parent = tsunamiBox
+
+local status = Instance.new("TextLabel")
+status.Text = "Status: Ready"
+status.Size = UDim2.new(1, -20, 0, 25)
+status.Position = UDim2.new(0, 10, 1, -30)
+status.BackgroundTransparency = 1
+status.TextColor3 = Color3.fromRGB(180, 180, 255)
+status.Font = Enum.Font.GothamMedium
+status.TextSize = 12
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Parent = main
+
+local function teleportToGround()
+    local character = player.Character
+    if not character then return end
+    
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    local ground = Workspace:FindFirstChild("Misc")
+    if ground then
+        ground = ground:FindFirstChild("Ground")
+        if ground and ground:IsA("BasePart") then
+            local target = ground.Position + Vector3.new(0, 5, 0)
+            root.CFrame = CFrame.new(target)
+        end
+    end
+end
+
+local function setupAutoTeleport()
+    player.CharacterAdded:Connect(function(char)
+        task.wait(1)
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.Died:Connect(function()
+                task.wait(0.5)
+                if player.Character then
+                    teleportToGround()
+                end
+            end)
+        end
+    end)
+    
+    local currentChar = player.Character
+    if currentChar then
+        local humanoid = currentChar:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.Died:Connect(function()
+                task.wait(0.5)
+                if player.Character then
+                    teleportToGround()
+                end
+            end)
+        end
+    end
+end
+
+setupAutoTeleport()
+
+local function applyGodMode(character)
+    if not character then return end
+    
+    task.wait(0.5)
+    local humanoid = character:FindFirstChild("Humanoid")
+    local root = character:FindFirstChild("HumanoidRootPart")
+    
+    if humanoid then
+        humanoid.MaxHealth = math.huge
+        humanoid.Health = math.huge
+        
+        humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+            if humanoid.Health < 1000000 then
+                humanoid.Health = 1000000
+            end
+        end)
+        
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0.3
+                part.CanTouch = false
+            end
+        end
+    end
+    
+    if root then
+        RunService.Heartbeat:Connect(function()
+            root.Velocity = Vector3.new(0,0,0)
+            root.AssemblyLinearVelocity = Vector3.new(0,0,0)
+        end)
+    end
+end
+
+local function removeGodMode(character)
+    if not character then return end
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.MaxHealth = 100
+        humanoid.Health = 100
+        
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+                part.CanTouch = true
+            end
+        end
+    end
+end
+
+local function toggleGodMode()
+    godMode = not godMode
+    
+    if godMode then
+        godBtn.Text = "God Mode beta: ON"
+        godBtn.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
+        status.Text = "God Mode beta: Active"
+        
+        local character = player.Character
+        if character then
+            applyGodMode(character)
+        end
+        
+        workspace.Gravity = 0
+        
+        player.CharacterAdded:Connect(function(newChar)
+            task.wait(0.5)
+            if godMode then
+                applyGodMode(newChar)
+            end
+        end)
+    else
+        godBtn.Text = "God Mode beta: OFF"
+        godBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+        status.Text = "God Mode beta: Inactive"
+        
+        workspace.Gravity = originalGravity
+        
+        local character = player.Character
+        if character then
+            removeGodMode(character)
+        end
+    end
+end
+
+local function toggleFly()
+    flyMode = not flyMode
+    
+    if flyMode then
+        flyBtn.Text = "Fly+NoClip: ON"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+        status.Text = "Fly+NoClip: Active"
+        
+        local character = player.Character
+        if not character then return end
+        
+        local root = character:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+        
+        if flyBodyVelocity then
+            flyBodyVelocity:Destroy()
+        end
+        
+        flyBodyVelocity = Instance.new("BodyVelocity")
+        flyBodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        flyBodyVelocity.Parent = root
+        
+        if flyConnection then
+            flyConnection:Disconnect()
+        end
+        
+        flyConnection = RunService.Heartbeat:Connect(function()
+            if not root or not flyBodyVelocity then return end
+            
+            local camera = workspace.CurrentCamera
+            local moveDir = Vector3.new(0, 0, 0)
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                moveDir = moveDir + camera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                moveDir = moveDir - camera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                moveDir = moveDir - camera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                moveDir = moveDir + camera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                moveDir = moveDir + Vector3.new(0, 1, 0)
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                moveDir = moveDir - Vector3.new(0, 1, 0)
+            end
+            
+            if moveDir.Magnitude > 0 then
+                flyBodyVelocity.Velocity = moveDir.Unit * 50
+            else
+                flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            end
+        end)
+        
+        if noclipConnection then
+            noclipConnection:Disconnect()
+        end
+        
+        noclipConnection = RunService.Stepped:Connect(function()
+            if player.Character then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        flyBtn.Text = "Fly+NoClip: OFF"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 255)
+        status.Text = "Fly+NoClip: Inactive"
+        
+        if flyConnection then
+            flyConnection:Disconnect()
+            flyConnection = nil
+        end
+        
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
+        
+        if flyBodyVelocity then
+            flyBodyVelocity:Destroy()
+            flyBodyVelocity = nil
+        end
+        
+        local character = player.Character
+        if character then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+end
+
+local function getTsunamiDistance()
+    local character = player.Character
+    if not character then return math.huge end
+    
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return math.huge end
+    
+    local closest = math.huge
+    
+    local activeTsunamis = Workspace:FindFirstChild("ActiveTsunamis")
+    if activeTsunamis then
+        for i = 1, 6 do
+            local wave = activeTsunamis:FindFirstChild("Wave" .. i)
+            if wave then
+                local hitbox = wave:FindFirstChild("Hitbox")
+                if hitbox and hitbox:IsA("BasePart") then
+                    local dist = (hitbox.Position - root.Position).Magnitude
+                    if dist < closest then
+                        closest = dist
+                    end
+                end
+            end
+        end
+    end
+    
+    if closest == math.huge then
+        for _, obj in pairs(Workspace:GetChildren()) do
+            if obj:IsA("Model") then
+                if obj.Name:lower():find("tsunami") or obj.Name:lower():find("wave") then
+                    for _, part in pairs(obj:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            local dist = (part.Position - root.Position).Magnitude
+                            if dist < closest then
+                                closest = dist
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return closest
+end
+
+RunService.Heartbeat:Connect(function()
+    local dist = getTsunamiDistance()
+    
+    if dist < 1500 then
+        if dist <= 500 then
+            tsunamiBox.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+            tsunamiText.TextColor3 = Color3.new(1, 1, 1)
+            tsunamiText.Text = "⚠️ Tsunami: " .. math.floor(dist) .. "m (DANGER)"
+        elseif dist <= 1000 then
+            tsunamiBox.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
+            tsunamiText.TextColor3 = Color3.new(0, 0, 0)
+            tsunamiText.Text = "Tsunami: " .. math.floor(dist) .. "m (WARNING)"
+        else
+            tsunamiBox.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+            tsunamiText.TextColor3 = Color3.new(0, 0, 0)
+            tsunamiText.Text = "Tsunami: " .. math.floor(dist) .. "m (SAFE)"
+        end
+    else
+        tsunamiBox.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+        tsunamiText.TextColor3 = Color3.new(1, 1, 1)
+        tsunamiText.Text = "Tsunami: Safe (>1500m)"
+    end
+end)
+
+godBtn.MouseButton1Click:Connect(toggleGodMode)
+flyBtn.MouseButton1Click:Connect(toggleFly)
+
+closeBtn.MouseButton1Click:Connect(function()
+    if godMode then toggleGodMode() end
+    if flyMode then toggleFly() end
+    gui:Destroy()
+end)
+
+closeBtn.MouseEnter:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+end)
+
+closeBtn.MouseLeave:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+end)
