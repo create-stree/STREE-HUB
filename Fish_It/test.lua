@@ -1116,108 +1116,48 @@ Tab3:Button({
 
 Tab3:Section({
     Title = "Event",
-    Icon = "candy-cane",
+    Icon = "calendar-days",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
 Tab3:Divider()
 
-local RS = game:GetService("ReplicatedStorage")
-local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
+local chestRemote = game:GetService("ReplicatedStorage")
+    :WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
+    :WaitForChild("RE/ClaimPirateChest")
 
-local NPCs = {
-    "Alien Merchant",
-    "Billy Bob",
-    "Seth",
-    "Joe",
-    "Aura Kid",
-    "Boat Expert",
-    "Scott",
-    "Ron",
-    "Jeffery",
-    "McBoatson",
-    "Scientist",
-    "Silly Fisherman",
-    "Tim",
-    "Santa",
-	"Santa Doge",
-	"Stickmasterluke",
-	"Merely",
-	"Shendletsky",
-	"BrightEyes",
-	"Guest",
-	"Builderman",
-	"Noob",
-	"John Doe",
-}
-
-_G.AutoClaimChristmas = false
+local chestThread
 
 Tab3:Toggle({
-    Title = "Auto Claim",
-    Desc = "Auto Claim Christmas Presents",
+    Title = "Auto Claim Chest",
+    Desc = "Automatically claim pirate chest",
     Value = false,
     Callback = function(state)
-        _G.AutoClaimChristmas = state
+        _G.AutoClaimChest = state
 
-        task.spawn(function()
-            while _G.AutoClaimChristmas do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.AutoClaimChristmas then break end
+        if state then
+            if chestThread then
+                task.cancel(chestThread)
+            end
+
+            chestThread = task.spawn(function()
+                while _G.AutoClaimChest do
                     pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
+                        chestRemote:FireServer()
                     end)
-                    task.wait(0.15)
+                    task.wait(0.5)
                 end
-                task.wait(2)
+            end)
+        else
+            if chestThread then
+                task.cancel(chestThread)
+                chestThread = nil
             end
-        end)
-    end
-})
-
-_G.AutoClaimChristmas = false
-
-Tab3:Toggle({
-    Title = "Auto Claim",
-    Desc = "Auto Claim Christmas Presents",
-    Value = false,
-    Callback = function(state)
-        _G.AutoClaimChristmas = state
-
-        task.spawn(function()
-            while _G.AutoClaimChristmas do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.AutoClaimChristmas then break end
-                    pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
-                    end)
-                    task.wait(0.15)
-                end
-                task.wait(2)
-            end
-        end)
-    end
-})
-
-local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
-    :FindFirstChild("sleitnick_net@0.2.0").net
-    :FindFirstChild("RF/RedeemGift")
-
-Tab3:Toggle({
-    Title = "Auto Present Factory",
-    Desc = "Automatically open Present Factory",
-    Value = false,
-    Callback = function(state)
-        _G.AutoPresentFactory = state
-        task.spawn(function()
-            while _G.AutoPresentFactory do
-                pcall(function()
-                    giftRemote:InvokeServer()
-                end)
-                task.wait(0.5)
-            end
-        end)
+        end
     end
 })
 
@@ -1474,7 +1414,6 @@ local Config = {
     complete = 100
 }
 
--- === NET ===
 local Net = ReplicatedStorage
     :WaitForChild("Packages")
     :WaitForChild("_Index")
