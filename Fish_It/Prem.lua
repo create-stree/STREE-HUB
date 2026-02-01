@@ -1709,7 +1709,7 @@ local panelGui
 
 Tab4:Toggle({
     Title = "Panel Check",
-    Desc = "Check CPU,Ping, FPS",
+    Desc = "Check CPU,Ping,FPS",
     Value = false,
     Callback = function(state)
         if state then
@@ -2091,111 +2091,6 @@ Tab4:Button({
                 Icon = "x"
             })
         end
-    end
-})
-
-local Section = Tab4:Section({
-	Title = "Totem",
-	Icon = "atom",
-	TextXAlignment = "Left",
-	TextSize = 17
-})
-
-Tab4:Divider()
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
-
-local Net = ReplicatedStorage.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
-local EquipItem = Net:FindFirstChild("RE/EquipItem")
-local SpawnTotem = Net:FindFirstChild("RE/SpawnTotem")
-
-_G.AutoSpawnTotem = false
-_G.SelectedTotem = "Lucky"
-_G.TotemUUID = nil
-
-local TotemDisplay = {
-	"Lucky",
-	"Mutation",
-	"Shiny"
-}
-
-local function findTotemsFolder()
-    for _, v in pairs(LocalPlayer:GetChildren()) do
-        if string.lower(v.Name) == "totems" then
-            return v
-        end
-    end
-    return nil
-end
-
-local function findUUIDFromGame(selected)
-    for _, v in pairs(Workspace:GetDescendants()) do
-        if v:IsA("Model") then
-            local n = string.lower(v.Name)
-            if string.find(n, "lucky") or string.find(n, "mutation") or string.find(n, "shiny") then
-                if string.find(n, string.lower(selected)) then
-                    local uuid = v:FindFirstChild("ItemId") or v:FindFirstChild("ItemUUID")
-                    if uuid and uuid:IsA("ValueBase") then
-                        return uuid.Value
-                    end
-                end
-            end
-        end
-    end
-    return nil
-end
-
-local function getUUIDFromInventory(selected)
-    local folder = findTotemsFolder()
-    if not folder then return nil end
-    for _, v in pairs(folder:GetDescendants()) do
-        if v:IsA("ValueBase") and string.lower(v.Name) == "name" then
-            if string.find(string.lower(tostring(v.Value)), string.lower(selected)) then
-                local uuid = v.Parent:FindFirstChild("ItemId") or v.Parent:FindFirstChild("ItemUUID")
-                if uuid and uuid:IsA("ValueBase") then
-                    return uuid.Value
-                end
-            end
-        end
-    end
-    return nil
-end
-
-Tab4:Dropdown({
-    Title = "Select Totem",
-    Desc = "Choose which totem to spawn",
-    Values = TotemDisplay,
-    Value = "Lucky",
-    Callback = function(option)
-        _G.SelectedTotem = option
-        _G.TotemUUID = getUUIDFromInventory(option) or findUUIDFromGame(option)
-    end
-})
-
-Tab4:Toggle({
-    Title = "Auto Spawn Totem",
-    Desc = "Equip & spawn selected totem",
-    Value = false,
-    Callback = function(state)
-        _G.AutoSpawnTotem = state
-        if not state then return end
-        task.spawn(function()
-            while _G.AutoSpawnTotem do
-                task.wait(1)
-                local uuid = _G.TotemUUID or getUUIDFromInventory(_G.SelectedTotem) or findUUIDFromGame(_G.SelectedTotem)
-                if uuid then
-                    _G.TotemUUID = uuid
-                    pcall(function()
-                        EquipItem:FireServer(uuid, "Totems")
-                        task.wait(0.2)
-                        SpawnTotem:FireServer(uuid)
-                    end)
-                end
-            end
-        end)
     end
 })
 
