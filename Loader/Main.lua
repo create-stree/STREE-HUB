@@ -73,6 +73,11 @@ end
 local userType = isPremiumKey(_G.scripts_key) and "Premium" or "Freemium"
 
 local gameScripts = {
+    [124311897657957] = {
+        name = "Break A Lucky Block",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
+    },
     [2753915549] = {
         name = "Blox Fruit",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua",
