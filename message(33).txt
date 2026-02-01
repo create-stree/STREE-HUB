@@ -1,0 +1,733 @@
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+end)
+
+if not success or not WindUI then
+    warn("⚠️ UI failed to load!")
+    return
+else
+    print("✓ UI loaded successfully!")
+end
+
+local Window = WindUI:CreateWindow({
+    Title = "STREE HUB",
+    Icon = "rbxassetid://122683047852451",
+    Author = "Lexs | Break A Lucky Block",
+    Folder = "STREE_HUB",
+    Size = UDim2.fromOffset(260, 290),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 170,
+    HasOutline = true,
+    User = {
+        Enabled = true,
+        Anonymous = true
+    },
+})
+
+Window:EditOpenButton({Enabled = false})
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local G2L = {}
+
+G2L["ScreenGui_1"] = Instance.new("ScreenGui")
+G2L["ScreenGui_1"].Parent = game:GetService("CoreGui")
+G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+G2L["ScreenGui_1"].ResetOnSpawn = false
+CollectionService:AddTag(G2L["ScreenGui_1"], "main")
+
+G2L["ButtonRezise_2"] = Instance.new("ImageButton")
+G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
+G2L["ButtonRezise_2"].BorderSizePixel = 0
+G2L["ButtonRezise_2"].Draggable = true
+G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+G2L["ButtonRezise_2"].Size = UDim2.new(0, 47, 0, 47)
+G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
+G2L["ButtonRezise_2"].Visible = true
+
+local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
+corner.CornerRadius = UDim.new(0, 8)
+
+local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
+neon.Thickness = 2
+neon.Color = Color3.fromRGB(0, 255, 120)
+neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local windowVisible = true
+
+G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
+	if windowVisible then
+		Window:Close()
+	else
+		Window:Open()
+	end
+	windowVisible = not windowVisible
+end)
+
+Window:Tag({
+    Title = "v0.0.0.1",
+    Color = Color3.fromRGB(0, 255, 0),
+    Radius = 17,
+})
+
+Window:Tag({
+    Title = "Dev",
+    Color = Color3.fromRGB(0, 0, 0),
+    Radius = 17,
+})
+
+WindUI:Notify({
+    Title = "STREE HUB Loaded",
+    Content = "UI loaded successfully!",
+    Duration = 3,
+    Icon = "bell",
+})
+
+local Tab1 = Window:Tab({
+    Title = "Information",
+    Icon = "info",
+})
+
+local Tab2 = Window:Tab({
+    Title = "Player",
+    Icon = "user",
+})
+
+local Tab3 = Window:Tab({
+    Title = "Main",
+    Icon = "landmark",
+})
+
+local Tab4 = Window:Tab({
+    Title = "Shop",
+    Icon = "shopping-cart",
+})
+
+local Tab5 = Window:Tab({
+    Title = "Setting",
+    Icon = "settings",
+})
+
+local Section1 = Tab1:Section({ 
+    Title = "Information",
+    Box = true,
+    BoxBorder = true,
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = true,
+})
+
+Section1:Button({
+    Title = "Discord",
+    Desc = "click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/jdmX43t5mY")
+        end
+    end
+})
+
+Section1:Button({
+    Title = "WhatsApp",
+    Desc = "click to copy link",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
+        end
+    end
+})
+
+Section1:Paragraph({
+    Title = "Information",
+    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+})
+
+Section1:Keybind({
+    Title = "Close/Open UI",
+    Desc = "Keybind to Close/Open UI",
+    Value = "G",
+    Callback = function(v)
+        Window:SetToggleKey(Enum.KeyCode[v])
+    end
+})
+
+local Section2 = Tab2:Section({ 
+    Title = "Player",
+    Box = true,
+    BoxBorder = true,
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = false,
+})
+
+-- SERVICES
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+-- STATE
+local WalkSpeedEnabled = false
+local WalkSpeedValue = 16
+local DEFAULT_SPEED = 16
+
+-- APPLY FUNCTION
+local function applyWalkSpeed()
+	local char = Player.Character
+	if not char then return end
+
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+
+	hum.WalkSpeed = WalkSpeedEnabled and WalkSpeedValue or DEFAULT_SPEED
+end
+
+-- CHARACTER RESPAWN FIX
+Player.CharacterAdded:Connect(function()
+	task.wait(0.3)
+	applyWalkSpeed()
+end)
+
+Section2:Input({
+	Title = "Walk Speed",
+	Desc = "(default 16).",
+	Value = "16",
+	Callback = function(value)
+		local num = tonumber(value)
+		if num and num >= 1 and num <= 500 then
+			WalkSpeedValue = num
+			if WalkSpeedEnabled then
+				applyWalkSpeed()
+			end
+            WindUI:Notify({
+                Title = "Stree Hub",
+                Content = "WalkSpeed diset ke: " .. num,
+                Duration = 2,
+                Icon = "user",
+            })
+		else
+            WindUI:Notify({
+                Title = "Stree Hub",
+                Content = "WalkSpeed Invalid",
+                Duration = 2,
+                Icon = "user",
+            })
+		end
+	end
+})
+
+Section2:Toggle({
+	Title = "Enable WalkSpeed",
+	Value = false,
+	Callback = function(state)
+		WalkSpeedEnabled = state
+		applyWalkSpeed()
+
+		if state then
+            WindUI:Notify({
+                Title = "Stree Hub",
+                Content = "WalkSpeed ON",
+                Duration = 2,
+                Icon = "user",
+            })
+		else
+            WindUI:Notify({
+                Title = "Stree Hub",
+                Content = "WalkSpeed Off",
+                Duration = 2,
+                Icon = "user",
+            })
+		end
+	end
+})
+
+local P = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+_G.InfiniteJump = false
+
+Section2:Toggle({
+    Title = "Infinite Jump",
+    Desc = "Makes you jump without limits",
+    Value = false,
+    Callback = function(state)
+        _G.InfiniteJump = state
+    end
+})
+
+UIS.JumpRequest:Connect(function()
+    if _G.InfiniteJump then
+        local h = P.Character and P.Character:FindFirstChildOfClass("Humanoid")
+        if h then
+            h:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+local Section3 = Tab3:Section({ 
+    Title = "Auto Farm",
+    Box = true,
+    BoxBorder = true,
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = false,
+})
+
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Player = Players.LocalPlayer
+local Remote = RS.Remotes.DamageBlockEvent
+
+local AUTO = false
+local RANGE = 30
+local SelectedBlock = nil
+
+local BlockList = {
+    "Rare Block",
+    "Epic Block",
+    "Legendary Block",
+    "Basic Block",
+    "Galaxy Block",
+    "Air Block",
+    "Angel Block",
+    "BLOCK GOD",
+    "Chicleteira Block",
+    "Diamond Block",
+    "Gold Block",
+    "Lava Block",
+    "Mythic Block",
+    "Pakrahmatmamat Block",
+    "Rainbow Block",
+    "Secret Block",
+    "Six Seven Block",
+    "Tralalero Block",
+    "Water Block",
+}
+
+local function getHRP()
+    local c = Player.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function getPart(obj)
+    if obj:IsA("BasePart") then
+        return obj
+    elseif obj:IsA("Model") then
+        return obj:FindFirstChildWhichIsA("BasePart", true)
+    end
+end
+
+local function getNearest()
+    local hrp = getHRP()
+    if not hrp or not SelectedBlock then return end
+
+    local nearest, dist = nil, math.huge
+    for _, b in ipairs(workspace.LuckyBlocks:GetChildren()) do
+        if b.Name == SelectedBlock then
+            local p = getPart(b)
+            if p then
+                local d = (p.Position - hrp.Position).Magnitude
+                if d < dist and d <= RANGE then
+                    dist = d
+                    nearest = b
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+RunService.Heartbeat:Connect(function()
+    if not AUTO then return end
+
+    local block = getNearest()
+    if block then
+        -- spam HARD per frame
+        for i = 1, 10 do
+            Remote:FireServer(block)
+        end
+    end
+end)
+
+Section3:Dropdown({
+    Title = "Select Block (Single)",
+    SearchBarEnabled = true,
+    Values = BlockList,
+    Value = BlockList[1],
+    Callback = function(v)
+        SelectedBlock = v
+    end
+})
+
+Section3:Toggle({
+    Title = "Auto Damage (Single)",
+    Value = false,
+    Callback = function(v)
+        AUTO = v
+    end
+})
+
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Player = Players.LocalPlayer
+local Remote = RS.Remotes.DamageBlockEvent
+
+local AUTO = false
+local RANGE = 30
+
+local SelectedBlocks = {}
+
+local BlockList = {
+    "Rare Block",
+    "Epic Block",
+    "Legendary Block",
+    "Basic Block",
+    "Galaxy Block",
+    "Air Block",
+    "Angel Block",
+    "BLOCK GOD",
+    "Chicleteira Block",
+    "Diamond Block",
+    "Gold Block",
+    "Lava Block",
+    "Mythic Block",
+    "Pakrahmatmamat Block",
+    "Rainbow Block",
+    "Secret Block",
+    "Six Seven Block",
+    "Tralalero Block",
+    "Water Block",
+}
+
+local function getHRP()
+    local c = Player.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function getPart(obj)
+    if obj:IsA("BasePart") then
+        return obj
+    elseif obj:IsA("Model") then
+        return obj:FindFirstChildWhichIsA("BasePart", true)
+    end
+end
+
+local function isSelected(name)
+    for _, v in ipairs(SelectedBlocks) do
+        if v == name then
+            return true
+        end
+    end
+    return false
+end
+
+local function getNearest()
+    local hrp = getHRP()
+    if not hrp then return end
+
+    local nearest, dist = nil, math.huge
+
+    for _, b in ipairs(workspace.LuckyBlocks:GetChildren()) do
+        if isSelected(b.Name) then
+            local p = getPart(b)
+            if p then
+                local d = (p.Position - hrp.Position).Magnitude
+                if d < dist and d <= RANGE then
+                    dist = d
+                    nearest = b
+                end
+            end
+        end
+    end
+
+    return nearest
+end
+
+RunService.Heartbeat:Connect(function()
+    if not AUTO then return end
+
+    local block = getNearest()
+    if block then
+        for i = 1, 10 do
+            Remote:FireServer(block)
+        end
+    end
+end)
+
+Section3:Dropdown({
+    Title = "Select Blocks (Multi)",
+    SearchBarEnabled = true,
+    Values = BlockList,
+    Multi = true,
+    Value = {},
+    Callback = function(values)
+        SelectedBlocks = values
+    end
+})
+
+Section3:Toggle({
+    Title = "Auto Damage (Multi)",
+    Value = false,
+    Callback = function(v)
+        AUTO = v
+    end
+})
+
+local Section4 = Tab4:Section({ 
+    Title = "Shop Pickaxes",
+    Box = true,
+    BoxBorder = true,
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = false,
+})
+
+local RS = game:GetService("ReplicatedStorage")
+local BuyRemote = RS:WaitForChild("Remotes"):WaitForChild("BuyPickaxeEvent")
+
+local PickaxeDisplay = {
+    "Wood (25)",
+    "Stone (500)",
+    "Iron (1,500)",
+    "Gold (5,000)",
+    "Diamond (15,000)",
+    "Rainbow (35,000)",
+    "Beanstal (85,000)",
+    "Candy (250,000)",
+    "Radioactive (600,000)",
+    "Molten (1,200,000)",
+    "Blood Moon (2,500,000)",
+    "Galaxy (5,000,000)",
+    "Fireworks (10,000,000)",
+    "Yin Yang (25,000,000)",
+    "Ice (50,000,000)",
+    "Ancient (100,000,000)",
+    "Lightning (185,000,000)",
+    "Angel (350,000,000)",
+    "Six Seven (670,000,000)",
+    "Glitch (1,000,000,000)",
+    "Holiday (1,500,000,000)",
+    "Disco (2,500,000,000)",
+    "UFO (3,700,000,000)",
+    "Sea (6,000,000,000)",
+    "Volcano (10,000,000,000)"
+}
+
+local PickaxeMap = {
+    ["Wood (25)"] = "Wood",
+    ["Stone (500)"] = "Stone",
+    ["Iron (1,500)"] = "Iron",
+    ["Gold (5,000)"] = "Gold",
+    ["Diamond (15,000)"] = "Diamond",
+    ["Rainbow (35,000)"] = "Rainbow",
+    ["Beanstal (85,000)"] = "Beanstal",
+    ["Candy (250,000)"] = "Candy",
+    ["Radioactive (600,000)"] = "Radioactive",
+    ["Molten (1,200,000)"] = "Molten",
+    ["Blood Moon (2,500,000)"] = "Blood Moon",
+    ["Galaxy (5,000,000)"] = "Galaxy",
+    ["Fireworks (10,000,000)"] = "Fireworks",
+    ["Yin Yang (25,000,000)"] = "Yin Yang",
+    ["Ice (50,000,000)"] = "Ice",
+    ["Ancient (100,000,000)"] = "Ancient",
+    ["Lightning (185,000,000)"] = "Lightning",
+    ["Angel (350,000,000)"] = "Angel",
+    ["Six Seven (670,000,000)"] = "Six Seven",
+    ["Glitch (1,000,000,000)"] = "Glitch",
+    ["Holiday (1,500,000,000)"] = "Holiday",
+    ["Disco (2,500,000,000)"] = "Disco",
+    ["UFO (3,700,000,000)"] = "UFO",
+    ["Sea (6,000,000,000)"] = "Sea",
+    ["Volcano (10,000,000,000)"] = "Volcano"
+}
+
+local SelectedDisplay = PickaxeDisplay[1]
+
+Section4:Dropdown({
+    Title = "Select Pickaxe",
+    SearchBarEnabled = true,
+    Values = PickaxeDisplay,
+    Value = SelectedDisplay,
+    Callback = function(v)
+        SelectedDisplay = v
+    end
+})
+
+Section4:Button({
+    Title = "Buy Pickaxe",
+    Callback = function()
+        local realPickaxe = PickaxeMap[SelectedDisplay]
+        if realPickaxe then
+            BuyRemote:FireServer(realPickaxe)
+        end
+    end
+})
+
+local Section4 = Tab4:Section({ 
+    Title = "Shop Gear",
+    Box = true,
+    BoxBorder = true,
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = false,
+})
+
+local RS = game:GetService("ReplicatedStorage")
+local BuyRemote = RS:WaitForChild("Remotes"):WaitForChild("BuyGearEvent") 
+
+local GearDisplay = {
+    "Tung Bat (500)",
+    "Speed Coil (1,000)",
+    "Freeze Ray (2,500)",
+    "Gravity Coil (7,500)",
+    "Trap (15,000)",
+    "Gold Slap (25,000)",
+    "Fusion Coil (50,000)",
+    "Grapple Hook (100,000)",
+    "Diamond Slap (250,000)",
+    "Invisibility Cloak (500,000)",
+    "Magic Carpet (1,000,000)",
+    "Taser (5,000,000)",
+    "Boogie Bomb (15,000,000)",
+    "Heart Balloon (35,000,000)",
+    "Body Swap Potion (75,000,000)",
+}
+
+local GearMap = {
+    ["Tung Bat (500)"] = "Tung Bat",
+    ["Speed Coil (1,000)"] = "Speed Coil",
+    ["Freeze Ray (2,500)"] = "Freeze Ray",
+    ["Gravity Coil (7,500)"] = "Gravity Coil",
+    ["Trap (15,000)"] = "Trap",
+    ["Gold Slap (25,000)"] = "Gold Slap",
+    ["Fusion Coil (50,000)"] = "Fusion Coil",
+    ["Grapple Hook (100,000)"] = "Grapple Hook",
+    ["Diamond Slap (250,000)"] = "Diamond Slap",
+    ["Invisibility Cloak (500,000)"] = "Invisibility Cloak",
+    ["Magic Carpet (1,000,000)"] = "Magic Carpet",
+    ["Taser (5,000,000)"] = "Taser",
+    ["Boogie Bomb (15,000,000)"] = "Boogie Bomb",
+    ["Heart Balloon (35,000,000)"] = "Heart Balloon",
+    ["Body Swap Potion (75,000,000)"] = "Body Swap Potion",
+}
+
+local SelectedGear = GearDisplay[1]
+
+Section4:Dropdown({
+    Title = "Select Gear",
+    SearchBarEnabled = true,
+    Values = GearDisplay,
+    Value = SelectedGear,
+    Callback = function(v)
+        SelectedGear = v
+    end
+})
+
+Section4:Button({
+    Title = "Buy Gear",
+    Callback = function()
+        local realGear = GearMap[SelectedGear]
+        if realGear then
+            BuyRemote:FireServer(realGear)
+        end
+    end
+})
+
+-- ANTI AFK 
+local VIM=game:GetService("VirtualInputManager")
+task.spawn(function()
+ while true do
+  task.wait(math.random(600,700))
+  local k={{Enum.KeyCode.LeftShift,Enum.KeyCode.E},{Enum.KeyCode.LeftControl,Enum.KeyCode.F},{Enum.KeyCode.LeftShift,Enum.KeyCode.Q},{Enum.KeyCode.E,Enum.KeyCode.F}}
+  local c=k[math.random(#k)]
+  pcall(function()
+   for _,x in pairs(c)do VIM:SendKeyEvent(true,x,false,nil)end
+   task.wait(.1)
+   for _,x in pairs(c)do VIM:SendKeyEvent(false,x,false,nil)end
+  end)
+ end
+end)
+
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local VirtualUser = game:GetService("VirtualUser")
+
+local AntiAFK = false
+
+local function Rejoin()
+    TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+end
+
+local function ServerHop()
+    local PlaceId = game.PlaceId
+    local Servers = {}
+    local req = game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+    local body = HttpService:JSONDecode(req)
+
+    for _,v in pairs(body.data) do
+        if v.playing < v.maxPlayers then
+            table.insert(Servers, v.id)
+        end
+    end
+
+    if #Servers > 0 then
+        TeleportService:TeleportToPlaceInstance(
+            PlaceId,
+            Servers[math.random(1, #Servers)],
+            Players.LocalPlayer
+        )
+    end
+end
+
+Players.LocalPlayer.Idled:Connect(function()
+    if AntiAFK then
+        VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    end
+end)
+
+local Section5 = Tab5:Section({ 
+    Title = "Server",
+    Box = true,
+    BoxBorder = true,
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = false,
+})
+
+Section5:Button({
+    Title = "Rejoin Server",
+    Desc = "Rejoin current server",
+    Callback = function()
+        Rejoin()
+    end
+})
+
+Section5:Button({
+    Title = "Server Hop",
+    Desc = "Join another server",
+    Callback = function()
+        ServerHop()
+    end
+})
+
+Section5:Toggle({
+    Title = "Anti AFK",
+    Desc = "Prevent AFK kick",
+    Value = false,
+    Callback = function(state)
+        AntiAFK = state
+    end
+})
