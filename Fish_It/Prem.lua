@@ -1205,7 +1205,7 @@ local RE_DialogueEnded = Net:WaitForChild("RE/DialogueEnded")
 local RE_PickupItem = Net:WaitForChild("RE/SearchItemPickedUp")
 local RE_OpenMaze = Net:WaitForChild("RE/GainAccessToMaze")
 
-Tab3:AddButton({
+Tab3:Button({
     Title = "Auto Collect TNT + Open Maze",
     Callback = function()
         task.spawn(function()
