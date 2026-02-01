@@ -1735,6 +1735,8 @@ tierToRarity = {
     [7] = "Secret"
 }
 
+Items = ReplicatedStorage:WaitForChild("Items")
+
 fishNames = {}
 for _, module in ipairs(Items:GetChildren()) do
     if module:IsA("ModuleScript") then
@@ -3029,4 +3031,4 @@ Tab7:Button({
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
-  })
+})
