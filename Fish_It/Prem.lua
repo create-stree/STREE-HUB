@@ -613,7 +613,7 @@ Tab3:Slider({
 })
 
 Tab3:Section({
-    Title = "Item",
+    Title = "Utility",
     Icon = "grid-2x2-check",
     TextXAlignment = "Left",
     TextSize = 17
@@ -666,6 +666,23 @@ Tab3:Toggle({
         local RemoteFolder = RS.Packages._Index["sleitnick_net@0.2.0"].net
         if state then
             RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(105)
+        else
+            RemoteFolder["RF/UnequipOxygenTank"]:InvokeServer()
+        end
+    end
+})
+
+Tab3:Toggle({
+    Title = "Advanced Diving Gear",
+    Desc = "Oxygen Tank",
+    Icon = false,
+    Type = false,
+    Default = false,
+    Callback = function(state)
+        _G.DivingGear = state
+        local RemoteFolder = RS.Packages._Index["sleitnick_net@0.2.0"].net
+        if state then
+            RemoteFolder["RF/EquipOxygenTank"]:InvokeServer(575)
         else
             RemoteFolder["RF/UnequipOxygenTank"]:InvokeServer()
         end
@@ -1131,107 +1148,90 @@ Tab3:Button({
 
 Tab3:Section({
     Title = "Event",
-    Icon = "candy-cane",
+    Icon = "calendar-days",
     TextXAlignment = "Left",
     TextSize = 17
 })
 
 Tab3:Divider()
 
+local chestRemote = game:GetService("ReplicatedStorage")
+    :WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
+    :WaitForChild("RE/ClaimPirateChest")
+
+local chestThread
+
+Tab3:Toggle({
+    Title = "Auto Claim Chest",
+    Desc = "Automatically claim pirate chest",
+    Value = false,
+    Callback = function(state)
+        _G.AutoClaimChest = state
+
+        if state then
+            if chestThread then
+                task.cancel(chestThread)
+            end
+
+            chestThread = task.spawn(function()
+                while _G.AutoClaimChest do
+                    pcall(function()
+                        chestRemote:FireServer()
+                    end)
+                    task.wait(0.5)
+                end
+            end)
+        else
+            if chestThread then
+                task.cancel(chestThread)
+                chestThread = nil
+            end
+        end
+    end
+})
+
 local RS = game:GetService("ReplicatedStorage")
-local Remote = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net:FindFirstChild("RF/SpecialDialogueEvent")
 
-local NPCs = {
-    "Alien Merchant",
-    "Billy Bob",
-    "Seth",
-    "Joe",
-    "Aura Kid",
-    "Boat Expert",
-    "Scott",
-    "Ron",
-    "Jeffery",
-    "McBoatson",
-    "Scientist",
-    "Silly Fisherman",
-    "Tim",
-    "Santa",
-	"Santa Doge",
-	"Stickmasterluke",
-	"Merely",
-	"Shendletsky",
-	"BrightEyes",
-	"Guest",
-	"Builderman",
-	"Noob",
-	"John Doe",
-}
+local Net = RS
+    :WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
 
-_G.AutoClaimChristmas = false
+local RE_DialogueEnded = Net:WaitForChild("RE/DialogueEnded")
+local RE_PickupItem = Net:WaitForChild("RE/SearchItemPickedUp")
+local RE_OpenMaze = Net:WaitForChild("RE/GainAccessToMaze")
 
-Tab3:Toggle({
-    Title = "Auto Claim",
-    Desc = "Auto Claim Christmas Presents",
-    Value = false,
-    Callback = function(state)
-        _G.AutoClaimChristmas = state
-
+Tab3:AddButton({
+    Title = "Auto Collect TNT + Open Maze",
+    Callback = function()
         task.spawn(function()
-            while _G.AutoClaimChristmas do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.AutoClaimChristmas then break end
-                    pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
-                    end)
-                    task.wait(0.15)
-                end
-                task.wait(2)
-            end
-        end)
-    end
-})
 
-_G.AutoClaimChristmas = false
+            local questArgs = {
+                [1] = "Carpenter",
+                [2] = 2,
+                [3] = 1
+            }
+            RE_DialogueEnded:FireServer(unpack(questArgs))
 
-Tab3:Toggle({
-    Title = "Auto Claim",
-    Desc = "Auto Claim Christmas Presents",
-    Value = false,
-    Callback = function(state)
-        _G.AutoClaimChristmas = state
+            task.wait(1)
 
-        task.spawn(function()
-            while _G.AutoClaimChristmas do
-                for _, npc in ipairs(NPCs) do
-                    if not _G.AutoClaimChristmas then break end
-                    pcall(function()
-                        Remote:InvokeServer(npc, "ChristmasPresents")
-                    end)
-                    task.wait(0.15)
-                end
-                task.wait(2)
-            end
-        end)
-    end
-})
+            local tntArgs = {
+                [1] = "TNT"
+            }
 
-local giftRemote = game:GetService("ReplicatedStorage").Packages._Index
-    :FindFirstChild("sleitnick_net@0.2.0").net
-    :FindFirstChild("RF/RedeemGift")
-
-Tab3:Toggle({
-    Title = "Auto Present Factory",
-    Desc = "Automatically open Present Factory",
-    Value = false,
-    Callback = function(state)
-        _G.AutoPresentFactory = state
-        task.spawn(function()
-            while _G.AutoPresentFactory do
-                pcall(function()
-                    giftRemote:InvokeServer()
-                end)
+            for i = 1, 4 do
+                RE_PickupItem:FireServer(unpack(tntArgs))
                 task.wait(0.5)
             end
+
+            task.wait(1)
+
+            RE_OpenMaze:FireServer()
+
         end)
     end
 })
@@ -1654,6 +1654,8 @@ local Section = Tab4:Section({
 	TextSize = 17
 })
 
+Tab4:Divider()
+
 RE = {
     FavoriteItem = Net:FindFirstChild("RE/FavoriteItem"),
     FavoriteStateChanged = Net:FindFirstChild("RE/FavoriteStateChanged"),
@@ -1703,12 +1705,184 @@ Tab4:Toggle({
     end
 })
 
+local panelGui
+
+Tab4:Toggle({
+    Title = "Panel Check",
+    Desc = "Check CPU,Ping, FPS",
+    Value = false,
+    Callback = function(state)
+        if state then
+            if panelGui then return end
+
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+            local Stats = game:GetService("Stats")
+            local UserInputService = game:GetService("UserInputService")
+            local CoreGui = game:GetService("CoreGui")
+
+            panelGui = Instance.new("ScreenGui")
+            panelGui.Name = "StreeMiniPanel"
+            panelGui.IgnoreGuiInset = true
+            panelGui.ResetOnSpawn = false
+            panelGui.Parent = CoreGui
+
+            local main = Instance.new("Frame", panelGui)
+            main.Size = UDim2.new(0, 230, 0, 78)
+            main.Position = UDim2.new(0.5, -115, 1, -120)
+            main.BackgroundColor3 = Color3.fromRGB(0,0,0)
+            main.BackgroundTransparency = 0.25
+            main.BorderSizePixel = 0
+            main.Active = true
+            Instance.new("UICorner", main).CornerRadius = UDim.new(0,16)
+
+            local stroke = Instance.new("UIStroke", main)
+            stroke.Color = Color3.fromRGB(0,255,0)
+            stroke.Thickness = 2
+
+            local logo = Instance.new("ImageLabel", main)
+            logo.Image = "rbxassetid://122683047852451"
+            logo.Size = UDim2.new(0,28,0,28)
+            logo.Position = UDim2.new(0,10,0.5,-14)
+            logo.BackgroundTransparency = 1
+
+            local rightSide = Instance.new("Frame", main)
+            rightSide.Position = UDim2.new(0,48,0,6)
+            rightSide.Size = UDim2.new(1,-54,1,-12)
+            rightSide.BackgroundTransparency = 1
+
+            local title = Instance.new("TextLabel", rightSide)
+            title.Size = UDim2.new(1,0,0,22)
+            title.BackgroundTransparency = 1
+            title.Font = Enum.Font.GothamBold
+            title.TextSize = 13
+            title.TextXAlignment = Enum.TextXAlignment.Left
+            title.Text = "STREE HUB PANEL"
+            title.TextColor3 = Color3.fromRGB(0,255,120)
+
+            local statsFrame = Instance.new("Frame", rightSide)
+            statsFrame.Position = UDim2.new(0,0,0,24)
+            statsFrame.Size = UDim2.new(1,0,0,26)
+            statsFrame.BackgroundTransparency = 1
+
+            local layout = Instance.new("UIListLayout", statsFrame)
+            layout.FillDirection = Enum.FillDirection.Horizontal
+            layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+            layout.VerticalAlignment = Enum.VerticalAlignment.Center
+            layout.Padding = UDim.new(0,10)
+
+            local function makeStat()
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(0,70,1,0)
+                label.BackgroundTransparency = 1
+                label.Font = Enum.Font.GothamBold
+                label.TextSize = 12
+                label.TextColor3 = Color3.new(1,1,1)
+                label.Parent = statsFrame
+                return label
+            end
+
+            local cpuLabel = makeStat()
+            local pingLabel = makeStat()
+            local fpsLabel = makeStat()
+
+            local dragging = false
+            local dragStart, startPos
+
+            main.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    dragStart = input.Position
+                    startPos = main.Position
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end)
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    local delta = input.Position - dragStart
+                    main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+                end
+            end)
+
+            local frames, fps = 0, 0
+            local last = tick()
+
+            RunService.RenderStepped:Connect(function()
+                frames += 1
+                if tick() - last >= 1 then
+                    fps = frames
+                    frames = 0
+                    last = tick()
+                end
+            end)
+
+            local function getPing()
+                local net = Stats:FindFirstChild("Network")
+                if net and net:FindFirstChild("ServerStatsItem") then
+                    local item = net.ServerStatsItem:FindFirstChild("Data Ping")
+                    if item then return math.floor(item:GetValue()) end
+                end
+                return 0
+            end
+
+            local function getCPU()
+                local perf = Stats:FindFirstChild("PerformanceStats")
+                if perf then
+                    local cpu = perf:FindFirstChild("CPU")
+                    if cpu then return math.floor(cpu:GetValue()) end
+                end
+                return 0
+            end
+
+            local function color(label, v, y, r)
+                if v >= r then
+                    label.TextColor3 = Color3.fromRGB(255,80,80)
+                elseif v >= y then
+                    label.TextColor3 = Color3.fromRGB(255,220,0)
+                else
+                    label.TextColor3 = Color3.fromRGB(0,255,120)
+                end
+            end
+
+            task.spawn(function()
+                while panelGui do
+                    local ping = getPing()
+                    local cpu = getCPU()
+
+                    cpuLabel.Text = "CPU: "..cpu.."%"
+                    pingLabel.Text = "Ping: "..ping.."ms"
+                    fpsLabel.Text = "FPS: "..fps
+
+                    color(cpuLabel, cpu, 60, 85)
+                    color(pingLabel, ping, 120, 200)
+                    color(fpsLabel, fps, 40, 90)
+
+                    task.wait(1)
+                end
+            end)
+
+        else
+            if panelGui then
+                panelGui:Destroy()
+                panelGui = nil
+            end
+        end
+    end
+})
+
 Tab4:Section({
     Title = "Auto Favorite",
     Icon = "star",
     TextXAlignment = "Left",
     TextSize = 17,
 })
+
+Tab4:Divider()
 
 local REFishCaught = RE.FishCaught or Net:WaitForChild("RE/FishCaught")
 local REFishingCompleted = RE.FishingCompleted or Net:WaitForChild("RE/FishingCompleted")
@@ -1843,15 +2017,69 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
 
 Tab4:Button({
-    Title = "Gift Skin Soul Scythe",
+    Title = "Gift Skin Holy Trindent",
     Locked = false,
     Callback = function()
         if GiftingController and GiftingController.Open then
-            GiftingController:Open("Soul Scythe")
+            GiftingController:Open("Holy Trindent")
 
             WindUI:Notify({
                 Title = "Gift Open",
-                Content = "Soul Scythe Gift Opened Successfully",
+                Content = "Holy Trindent Gift Opened Successfully",
+                Duration = 3,
+                Icon = "check"
+            })
+        else
+            WindUI:Notify({
+                Title = "Failed!!",
+                Content = "Patched",
+                Duration = 3,
+                Icon = "x"
+            })
+        end
+    end
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
+
+Tab4:Button({
+    Title = "Gift Skin Ethereal Sword",
+    Locked = false,
+    Callback = function()
+        if GiftingController and GiftingController.Open then
+            GiftingController:Open("Ethereal Sword")
+
+            WindUI:Notify({
+                Title = "Gift Open",
+                Content = "Ethereal Sword Gift Opened Successfully",
+                Duration = 3,
+                Icon = "check"
+            })
+        else
+            WindUI:Notify({
+                Title = "Failed!!",
+                Content = "Patched",
+                Duration = 3,
+                Icon = "x"
+            })
+        end
+    end
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GiftingController = require(ReplicatedStorage:WaitForChild("Controllers"):WaitForChild("GiftingController"))
+
+Tab4:Button({
+    Title = "Gift Skin Crescendo Scythe",
+    Locked = false,
+    Callback = function()
+        if GiftingController and GiftingController.Open then
+            GiftingController:Open("Crescendo Scythe")
+
+            WindUI:Notify({
+                Title = "Gift Open",
+                Content = "Crescendo Scythe Gift Opened Successfully",
                 Duration = 3,
                 Icon = "check"
             })
@@ -2236,16 +2464,16 @@ Tab6:Divider()
 
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186),
-	["Christmas Island"] = Vector3.new(708.17, 16.08, 1567.35),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
     ["Crater Island"] = Vector3.new(997, 1, 5012),
     ["Crystal Cavern"] = Vector3.new(-1841, -456, 7186),
     ["Enchant Room"] = Vector3.new(3221, -1303, 1406),
-	["Enchant2"] = Vector3.new(1480, 126, -585),
+    ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Esoteric Island"] = Vector3.new(1990, 5, 1398),
     ["Fisherman Island"] = Vector3.new(-175, 3, 2772),
     ["Kohana"] = Vector3.new(-603, 3, 719),
     ["Lost Isle"] = Vector3.new(-3643, 1, -1061),
+    ["Pirate Cove"] = Vector3.new(3172.28, 9.10, 3541.11),
     ["Sysyphus Statue"] = Vector3.new(-3783.26807, -135.073914, -949.946289),
     ["Tropical Grove"] = Vector3.new(-2091, 6, 3703),
     ["Weather Machine"] = Vector3.new(-1508, 6, 1895),
@@ -2287,12 +2515,12 @@ Tab6:Section({
 Tab6:Divider()
 
 local FishingLocations = {
-	["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
-	["Christmas Cave"] = Vector3.new(538.17, -580.58, 8898.02),
-	["Christmas Lake"] = Vector3.new(1136.29, 23.72, 1562.07),
+    ["Actient Ruin"] = Vector3.new(6046.67, -588.61, 4608.87),
     ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
+    ["Crystal Depths"] = Vector3.new(5747.22, -904.65, 15385.46),
     ["Enchant2"] = Vector3.new(1480, 126, -585),
     ["Kohana"] = Vector3.new(-603, 3, 719),
+    ["Leviathan"] = Vector3.new(3474.01, -287.84, 3470.26),
     ["Levers 1"] = Vector3.new(1475, 4, -847),
     ["Levers 2"] = Vector3.new(882, 5, -321),
     ["levers 3"] = Vector3.new(1425, 6,126),
@@ -2300,8 +2528,9 @@ local FishingLocations = {
     ["Sacred Temple"] = Vector3.new(1475, -22, -632),
     ["Sysyphus Statue"] = Vector3.new(-3693,-136, -1045),
     ["Treasure Room"] = Vector3.new(-3600, -267, -1575),
+    ["Treasure Room Pirate"] = Vector3.new(3331, -297, 3099),
     ["Underground Cellar"] = Vector3.new(2135, -92, -695),
-    ["Volcano"] = Vector3.new(-632, 55, 197),
+    ["Volcano"] = Vector3.new(-588.84, 48.85, 212.35)
 }
 
 local SelectedFishing = nil
@@ -2326,61 +2555,6 @@ Tab6:Button({
     Callback = function()
         if SelectedFishing and FishingLocations[SelectedFishing] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             Player.Character.HumanoidRootPart.CFrame = CFrame.new(FishingLocations[SelectedFishing])
-        end
-    end
-})
-
-Tab6:Section({
-    Title = "Location NPC",
-    Icon = "bot",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab6:Divider()
-
-local NPC_Locations = {
-    ["Alex"] = Vector3.new(43,17,2876),
-    ["Aura kid"] = Vector3.new(70,17,2835),
-    ["Billy Bob"] = Vector3.new(84,17,2876),
-    ["Boat Expert"] = Vector3.new(32,9,2789),
-    ["Esoteric Gatekeeper"] = Vector3.new(2101,-30,1350),
-    ["Jeffery"] = Vector3.new(-2771,4,2132),
-    ["Joe"] = Vector3.new(144,20,2856),
-    ["Jones"] = Vector3.new(-671,16,596),
-    ["Lava Fisherman"] = Vector3.new(-593,59,130),
-    ["McBoatson"] = Vector3.new(-623,3,719),
-    ["Ram"] = Vector3.new(-2838,47,1962),
-    ["Ron"] = Vector3.new(-48,17,2856),
-    ["Scott"] = Vector3.new(-19,9,2709),
-    ["Scientist"] = Vector3.new(-6,17,2881),
-    ["Seth"] = Vector3.new(107,17,2877),
-    ["Silly Fisherman"] = Vector3.new(97,9,2694),
-    ["Tim"] = Vector3.new(-604,16,609),
-}
-
-local SelectedNPC = nil
-
-Tab6:Dropdown({
-    Title = "Select NPC",
-    Values = (function()
-        local keys = {}
-        for name in pairs(NPC_Locations) do
-            table.insert(keys, name)
-        end
-        table.sort(keys)
-        return keys
-    end)(),
-    Callback = function(Value)
-        SelectedNPC = Value
-    end
-})
-
-Tab6:Button({
-    Title = "Teleport to NPC",
-    Callback = function()
-        if SelectedNPC and NPC_Locations[SelectedNPC] and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = CFrame.new(NPC_Locations[SelectedNPC])
         end
     end
 })
