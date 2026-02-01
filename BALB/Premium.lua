@@ -74,8 +74,8 @@ Window:Tag({
 })
 
 Window:Tag({
-    Title = "Dev",
-    Color = Color3.fromRGB(0, 0, 0),
+    Title = "Premium",
+    Color = Color3.fromRGB(138, 43, 226),
     Radius = 17,
 })
 
