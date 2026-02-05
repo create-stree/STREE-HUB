@@ -62,7 +62,7 @@ G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
 G2L["ButtonRezise_2"].BorderSizePixel = 0
 G2L["ButtonRezise_2"].Draggable = true
 G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 255, 120)
-G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+G2L["ButtonRezise_2"].Image = "rbxassetid://128806139932217"
 G2L["ButtonRezise_2"].Size = UDim2.new(0, 47, 0, 47)
 G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
 G2L["ButtonRezise_2"].Visible = true
@@ -168,7 +168,7 @@ local h,i,j,k,l
 pcall(function()
     h=g:WaitForChild("RF/ChargeFishingRod")
     i=g:WaitForChild("RF/RequestFishingMinigameStarted")
-    j=g:WaitForChild("RE/FishingCompleted")
+    j=g:WaitForChild("RF/CatchFishCompleted")
     k=g:WaitForChild("RE/EquipToolFromHotbar")
     l=g:WaitForChild("RF/CancelFishingInputs")
 end)
