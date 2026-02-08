@@ -16,7 +16,7 @@ local NetService = ReplicatedStorage
     
 local chargeRod        = NetService:WaitForChild("RF/ChargeFishingRod")
 local startMinigame    = NetService:WaitForChild("RF/RequestFishingMinigameStarted")
-local completeFishing  = NetService:WaitForChild("RE/FishingCompleted")
+local completeFishing  = NetService:WaitForChild("RF/CatchFishCompleted")
 local cancelFishing    = NetService:WaitForChild("RF/CancelFishingInputs")
 
 local autoFishThread
