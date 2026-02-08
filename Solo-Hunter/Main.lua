@@ -2,7 +2,7 @@ local StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/crea
 
 local Window = StreeHub:Window({
     Title   = "StreeHub |",
-    Footer  = "Solo Hunter",
+    Footer  = "Solo Hunter | Premium",
     Images  = "128806139932217",
     Color   = Color3.fromRGB(57, 255, 20),
     Theme   = 122376116281975,
