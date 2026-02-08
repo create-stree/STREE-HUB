@@ -26,7 +26,7 @@ InfoSection:AddParagraph({
     Icon = "discord",
     ButtonText = "Copy Discord Link",
     ButtonCallback = function()
-        local link = "https://discord.gg/lexshub"
+        local link = "https://discord.gg/jdmX43t5mY"
         if setclipboard then
             setclipboard(link)
         end
