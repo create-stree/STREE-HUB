@@ -1,31 +1,35 @@
-local Chloex = loadstring(game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/4mVaA8QEMe/refs/heads/main/.lua"))()
+local StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/StreeHub.lua"))()
 
-local Window = Chloex:Window({
-    Title = "Nat Hub |",
-    Footer = "Premium | v0.0.0.1",
-    Image = "99764942615873",
-    Color = Color3.fromRGB(0,208,255),
-    Theme = 9542022979,
-    Version = 1
+local Window = StreeHub:Window({
+    Title   = "StreeHub |",
+    Footer  = "Solo Hunter",
+    Images  = "128806139932217",
+    Color   = Color3.fromRGB(57, 255, 20),
+    Theme   = 122376116281975,
+    ThemeTransparency = 0.15,
+    ["Tab Width"] = 120,
+    Version = 1,
 })
 
 local Tabs = {
     Main = Window:AddTab({ Name = "Main", Icon = "menu" }),
     Automatic = Window:AddTab({ Name = "Automatic", Icon = "star" }),
     Farm = Window:AddTab({ Name = "Farm", Icon = "compas"}),
-    Visual = Window:AddTab({ Name = "Visual", Icon = "eyes" }),
     Misc = Window:AddTab({ Name = "Misc", Icon = "settings" })
 }
 
 local InfoSection = Tabs.Main:AddSection("Information")
 
 InfoSection:AddParagraph({
-    Title = "NatHub Discord",
-    Content = "Join our discord server!",
+    Title = "Join Our Discord",
+    Content = "Join Us!",
     Icon = "discord",
     ButtonText = "Copy Discord Link",
     ButtonCallback = function()
-        if setclipboard then setclipboard("https://discord.gg/nathub") end
+        local link = "https://discord.gg/lexshub"
+        if setclipboard then
+            setclipboard(link)
+        end
     end
 })
 
@@ -46,8 +50,6 @@ _G.Automatic = {
 
 _G.ESP = {
     Mob = false,
-    Chest = false,
-    Drop = false,
     Player = false
 }
 
@@ -102,6 +104,34 @@ local function WalkTo(pos)
 end
 
 local AutoSection = Tabs.Automatic:AddSection("Automatic")
+
+AutoSection:AddToggle({
+    Title = "Auto Farm",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.AutoAttack = v
+        task.spawn(function()
+            while _G.Automatic.AutoAttack do
+                pcall(function()
+                    local char = getChar()
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    local mob = getMob()
+                    if hrp and mob then
+                        local mobPos = mob.HumanoidRootPart.Position
+                        local offset = Vector3.new(0, 10, 0)
+                        local distance = 3
+                        local mobCFrame = mob.HumanoidRootPart.CFrame
+                        local behindPosition = mobCFrame.Position - (mobCFrame.LookVector * distance) + offset
+                        hrp.CFrame = CFrame.new(behindPosition, mobPos)
+                        mob.__comm__.RP.IsAttacking:FireServer(true)
+                        mob.__comm__.RP.EntityTarget:FireServer(mob)
+                    end
+                end)
+                task.wait(0.03)
+            end
+        end)
+    end
+})
 
 AutoSection:AddToggle({
     Title = "Auto Collect Drop",
@@ -245,36 +275,6 @@ local function getMob()
     return target
 end
 
-local FarmSection = Tabs.Farm:AddSection("Farming")
-
-FarmSection:AddToggle({
-    Title = "Auto Farm",
-    Default = false,
-    Callback = function(v)
-        _G.Automatic.AutoAttack = v
-        task.spawn(function()
-            while _G.Automatic.AutoAttack do
-                pcall(function()
-                    local char = getChar()
-                    local hrp = char:FindFirstChild("HumanoidRootPart")
-                    local mob = getMob()
-                    if hrp and mob then
-                        local mobPos = mob.HumanoidRootPart.Position
-                        local offset = Vector3.new(0, 10, 0)
-                        local distance = 3
-                        local mobCFrame = mob.HumanoidRootPart.CFrame
-                        local behindPosition = mobCFrame.Position - (mobCFrame.LookVector * distance) + offset
-                        hrp.CFrame = CFrame.new(behindPosition, mobPos)
-                        mob.__comm__.RP.IsAttacking:FireServer(true)
-                        mob.__comm__.RP.EntityTarget:FireServer(mob)
-                    end
-                end)
-                task.wait(0.03)
-            end
-        end)
-    end
-})
-
 local ESPSection = Tabs.Visual:AddSection("ESP")
 
 local function ApplyESP(obj, color)
@@ -313,50 +313,6 @@ ESPSection:AddToggle({
             end
             local m = workspace:FindFirstChild("Mobs")
             if m then ClearESP(m) end
-        end)
-    end
-})
-
-ESPSection:AddToggle({
-    Title = "ESP Chest",
-    Default = false,
-    Callback = function(v)
-        _G.ESP.Chest = v
-        task.spawn(function()
-            while _G.ESP.Chest do
-                pcall(function()
-                    for _, f in pairs({"Chests","DungeonChests","BossChests"}) do
-                        local c = workspace:FindFirstChild(f)
-                        if c then
-                            for _, v in pairs(c:GetChildren()) do
-                                ApplyESP(v, Color3.fromRGB(255,215,0))
-                            end
-                        end
-                    end
-                end)
-                task.wait(2)
-            end
-        end)
-    end
-})
-
-ESPSection:AddToggle({
-    Title = "ESP Drop",
-    Default = false,
-    Callback = function(v)
-        _G.ESP.Drop = v
-        task.spawn(function()
-            while _G.ESP.Drop do
-                pcall(function()
-                    local d = workspace:FindFirstChild("Drops")
-                    if d then
-                        for _, v in pairs(d:GetChildren()) do
-                            ApplyESP(v, Color3.fromRGB(0,255,120))
-                        end
-                    end
-                end)
-                task.wait(1)
-            end
         end)
     end
 })
@@ -403,7 +359,9 @@ end
 PlayersSection:AddToggle({
     Title = "Infinite Jump",
     Default = false,
-    Callback = function(v) _G.Player.InfiniteJump = v end
+    Callback = function(v) 
+        _G.Player.InfiniteJump = v 
+    end
 })
 
 UIS.JumpRequest:Connect(function()
@@ -414,7 +372,7 @@ UIS.JumpRequest:Connect(function()
 end)
 
 PlayersSection:AddToggle({
-    Title = "No Clip",
+    Title = "NoClip",
     Default = false,
     Callback = function(v)
         _G.Player.NoClip = v
