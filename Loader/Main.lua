@@ -102,6 +102,11 @@ local gameScripts = {
         name = "Forsaken",
         free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c",
         premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
+    },
+    [17290147275] = {
+        name = "Solo Hunter",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Main.lua",
+        premium "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
     }
 }
 
