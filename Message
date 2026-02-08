@@ -2,7 +2,7 @@ local Chloex = loadstring(game:HttpGet("https://raw.githubusercontent.com/dy1zn4
 
 local Window = Chloex:Window({
     Title = "Nat Hub |",
-    Footer = "Solo Hunter | v0.0.0.1",
+    Footer = "Premium | v0.0.0.1",
     Image = "99764942615873",
     Color = Color3.fromRGB(0,208,255),
     Theme = 9542022979,
