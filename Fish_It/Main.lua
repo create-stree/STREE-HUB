@@ -87,7 +87,7 @@ G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
 end)
 
 Window:Tag({
-    Title = "v0.0.4.0",
+    Title = "v0.0.4.1",
     Color = Color3.fromRGB(0, 255, 0),
     Radius = 17,
 })
@@ -448,7 +448,7 @@ end
 
 local function catch()
     safeCall("catch", function()
-        net["RE/FishingCompleted"]:FireServer()
+        net["RF/CatchFishCompleted"]:FireServer()
     end)
 end
 
