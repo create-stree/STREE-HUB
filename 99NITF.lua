@@ -49,7 +49,7 @@ local me = {"Bunny", "Wolf", "Alpha Wolf", "Bear", "Cultist", "Crossbow Cultist"
 
 -- bring
 
- local junkItems = {"Tyre", "Bolt", "Broken Fan", "Broken Microwave", "Sheet Metal", "Old Radio", "Washing Machine", "Old Car Engine"}
+local junkItems = {"Tyre", "Bolt", "Broken Fan", "Broken Microwave", "Sheet Metal", "Old Radio", "Washing Machine", "Old Car Engine"}
 local selectedJunkItems = {}
 local fuelItems = {"Log", "Chair", "Coal", "Fuel Canister", "Oil Barrel"}
 local selectedFuelItems = {}
