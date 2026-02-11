@@ -590,9 +590,9 @@ local Window = VoraLib:CreateWindow({
 local Tabs = {
     Info = Window:CreateTab({ Name = "Info", Icon = "alert" }),
     Combat = Window:CreateTab({ Name = "Combat", Icon = "sword" }),
-    next = Window:CreateTab({ Name = "Auto", Icon = "zap" }),
+    next = Window:CreateTab({ Name = "Auto", Icon = "next" }),
     esp = Window:CreateTab({ Name = "ESP", Icon = "eyes" }),
-    tp = Window:CreateTab({ Name = "Teleport", Icon = "map-pin" })
+    tp = Window:CreateTab({ Name = "Teleport", Icon = "gps" })
 }
 
 -- Info Tab
@@ -664,7 +664,7 @@ Tabs.Combat:CreateToggle({
 })
 
 -- Auto Tab
-Tabs.Auto:CreateLabel("Junk Items")
+Tabs.Auto:CreateSection({ Name = "Junk Items" })
 
 Tabs.Auto:CreateMultiDropdown({
     Name = "Select Junk Items",
