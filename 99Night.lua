@@ -1156,6 +1156,8 @@ Tabs.tp:CreateButton({
     end
 })
 
+-- Misc Tab
+
 Window:Notify({
     Title = "VoraHub",
     Content = "99 Night In The Forest Script loaded successfully!",
