@@ -664,7 +664,7 @@ Tabs.Combat:CreateToggle({
 })
 
 -- Auto Tab
-Tabs.Auto:CreateSection({ Name = "Junk Items" })
+Tabs.Auto:CreateLabel("Junk Items")
 
 Tabs.Auto:CreateMultiDropdown({
     Name = "Select Junk Items",
