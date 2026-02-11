@@ -578,18 +578,43 @@ local selectedMob = currentMobNames[1]
 
 -- Create Window
 local Window = VoraLib:CreateWindow({
-    Name = "Seraphin Hub",
-    Theme = "Dark"
+    Name = "VoraHub | 99 Nights In The Forest",
+    Intro = true,
+    Theme = {
+        Background = Color3.fromRGB(10, 12, 25),
+        Accent = Color3.fromRGB(0, 140, 210)
+    }
 })
 
 -- Create Tabs
 local Tabs = {
+    Info = Window:CreateTab({ Name = "Info", Icon = "alert" }),
     Combat = Window:CreateTab({ Name = "Combat", Icon = "sword" }),
-    Bring = Window:CreateTab({ Name = "Auto Bring", Icon = "package" }),
-    Auto = Window:CreateTab({ Name = "Auto", Icon = "zap" }),
-    esp = Window:CreateTab({ Name = "ESP", Icon = "eye" }),
+    next = Window:CreateTab({ Name = "Auto", Icon = "zap" }),
+    esp = Window:CreateTab({ Name = "ESP", Icon = "eyes" }),
     tp = Window:CreateTab({ Name = "Teleport", Icon = "map-pin" })
 }
+
+-- Info Tab
+Tabs.Info:CreateSection({ Name = "Community Support" })
+
+Tabs.Info:CreateButton({
+    Name = "Discord Server",
+    SubText = "Click to copy link",
+    Callback = function()
+        setclipboard("https://discord.gg/vorahub")
+        Window:Notify({
+            Title = "Copied!",
+            Content = "Discord link copied to clipboard",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.Info:CreateParagraph({
+    Title = "Support",
+    Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+})
 
 -- Combat Tab
 Tabs.Combat:CreateSection({ Name = "Kill Aura" })
@@ -638,10 +663,10 @@ Tabs.Combat:CreateToggle({
     end
 })
 
--- Auto Bring Tab
-Tabs.Bring:CreateSection({ Name = "Junk Items" })
+-- Auto Tab
+Tabs.Auto:CreateSection({ Name = "Junk Items" })
 
-Tabs.Bring:CreateMultiDropdown({
+Tabs.Auto:CreateMultiDropdown({
     Name = "Select Junk Items",
     Items = junkItems,
     Default = {},
@@ -650,7 +675,7 @@ Tabs.Bring:CreateMultiDropdown({
     end
 })
 
-Tabs.Bring:CreateToggle({
+Tabs.Auto:CreateToggle({
     Name = "Auto Bring Junk",
     Default = false,
     Callback = function(value)
@@ -663,9 +688,9 @@ Tabs.Bring:CreateToggle({
     end
 })
 
-Tabs.Bring:CreateSection({ Name = "Fuel Items" })
+Tabs.Auto:CreateSection({ Name = "Fuel Items" })
 
-Tabs.Bring:CreateMultiDropdown({
+Tabs.Auto:CreateMultiDropdown({
     Name = "Select Fuel Items",
     Items = fuelItems,
     Default = {},
@@ -674,7 +699,7 @@ Tabs.Bring:CreateMultiDropdown({
     end
 })
 
-Tabs.Bring:CreateToggle({
+Tabs.Auto:CreateToggle({
     Name = "Auto Bring Fuel",
     Default = false,
     Callback = function(value)
@@ -687,9 +712,9 @@ Tabs.Bring:CreateToggle({
     end
 })
 
-Tabs.Bring:CreateSection({ Name = "Food Items" })
+Tabs.Auto:CreateSection({ Name = "Food Items" })
 
-Tabs.Bring:CreateMultiDropdown({
+Tabs.Auto:CreateMultiDropdown({
     Name = "Select Food Items",
     Items = foodItems,
     Default = {},
@@ -698,7 +723,7 @@ Tabs.Bring:CreateMultiDropdown({
     end
 })
 
-Tabs.Bring:CreateToggle({
+Tabs.Auto:CreateToggle({
     Name = "Auto Bring Food",
     Default = false,
     Callback = function(value)
@@ -711,9 +736,9 @@ Tabs.Bring:CreateToggle({
     end
 })
 
-Tabs.Bring:CreateSection({ Name = "Medical Items" })
+Tabs.Auto:CreateSection({ Name = "Medical Items" })
 
-Tabs.Bring:CreateMultiDropdown({
+Tabs.Auto:CreateMultiDropdown({
     Name = "Select Medical Items",
     Items = medicalItems,
     Default = {},
@@ -722,7 +747,7 @@ Tabs.Bring:CreateMultiDropdown({
     end
 })
 
-Tabs.Bring:CreateToggle({
+Tabs.Auto:CreateToggle({
     Name = "Auto Bring Medical",
     Default = false,
     Callback = function(value)
@@ -735,9 +760,9 @@ Tabs.Bring:CreateToggle({
     end
 })
 
-Tabs.Bring:CreateSection({ Name = "Equipment Items" })
+Tabs.Auto:CreateSection({ Name = "Equipment Items" })
 
-Tabs.Bring:CreateMultiDropdown({
+Tabs.Auto:CreateMultiDropdown({
     Name = "Select Equipment Items",
     Items = equipmentItems,
     Default = {},
@@ -746,7 +771,7 @@ Tabs.Bring:CreateMultiDropdown({
     end
 })
 
-Tabs.Bring:CreateToggle({
+Tabs.Auto:CreateToggle({
     Name = "Auto Bring Equipment",
     Default = false,
     Callback = function(value)
@@ -955,11 +980,32 @@ Tabs.tp:CreateButton({
     Name = "Refresh List",
     Callback = function()
         currentChests, currentChestNames = getChests()
+        
         if #currentChestNames > 0 then
             selectedChest = currentChestNames[1]
-            -- Update dropdown (VoraLib doesn't have Refresh method, recreate if needed)
+            
+            Library:Notification({
+                Title = "Refresh Berhasil",
+                Content = "Ditemukan " .. #currentChestNames .. " chest",
+                Duration = 3,
+                Image = "rbxassetid://4483345998"
+            })
         else
             selectedChest = nil
+            
+            Library:Notification({
+                Title = "Tidak Ada Chest",
+                Content = "Tidak ditemukan chest di workspace",
+                Duration = 3,
+                Image = "rbxassetid://4483345998"
+            })
+        end
+        
+        if chestDropdown then
+            chestDropdown:UpdateList(currentChestNames)
+            if #currentChestNames > 0 then
+                chestDropdown:SetValue(currentChestNames[1])
+            end
         end
     end
 })
@@ -1095,7 +1141,7 @@ Tabs.Auto:CreateToggle({
 })
 
 Window:Notify({
-    Title = "Seraphin Hub",
-    Content = "Script loaded successfully with VoraLib!",
+    Title = "VoraHub",
+    Content = "99 Night In The Forest Script loaded successfully!",
     Duration = 5
 })
