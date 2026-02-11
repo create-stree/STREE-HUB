@@ -599,7 +599,8 @@ local Tabs = {
     Combat = Window:CreateTab({ Name = "Combat", Icon = "sword" }),
     next = Window:CreateTab({ Name = "Auto", Icon = "next" }),
     esp = Window:CreateTab({ Name = "ESP", Icon = "eyes" }),
-    tp = Window:CreateTab({ Name = "Teleport", Icon = "gps" })
+    tp = Window:CreateTab({ Name = "Teleport", Icon = "gps" }),
+    Misc = Window:CreateTab({ Name = "Misc", Icon = "settings" })
 }
 
 -- Info Tab
@@ -1157,9 +1158,74 @@ Tabs.tp:CreateButton({
 })
 
 -- Misc Tab
+Tabs.Misc:CreateSection({ Name = "Misc" })
+
+Tabs.Misc:CreateToggle({
+    Name = "Instant Interact",
+    SubText = "Makes ProximityPrompts instant",
+    Default = false,
+    Callback = function(value)
+        InstantInteractEnabled = value
+        if value then
+            ProximityPromptCache = {}
+            InstantInteractTask = task.spawn(function()
+                while InstantInteractEnabled do
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") then
+                            if ProximityPromptCache[obj] == nil then
+                                ProximityPromptCache[obj] = obj.HoldDuration
+                            end
+                            obj.HoldDuration = 0
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        else
+            if InstantInteractTask then
+                InstantInteractEnabled = false
+            end
+            for prompt, originalDuration in pairs(ProximityPromptCache) do
+                if prompt and prompt:IsA("ProximityPrompt") then
+                    prompt.HoldDuration = originalDuration
+                end
+            end
+            ProximityPromptCache = {}
+        end
+    end
+})
+
+Tabs.Misc:CreateToggle({
+    Name = "Auto Stun Deer",
+    SubText = "Automatically stuns deer",
+    Default = false,
+    Callback = function(value)
+        if value then
+            AutoStunDeerConnection = RunService.RenderStepped:Connect(function()
+                pcall(function()
+                    local deerEvent = ReplicatedStorage:FindFirstChild("RemoteEvents")
+                    if deerEvent then
+                        deerEvent = ReplicatedStorage.RemoteEvents:FindFirstChild("DeerHitByTorch")
+                    end
+                    local deer = Workspace:FindFirstChild("Characters")
+                    if deer then
+                        deer = Workspace.Characters:FindFirstChild("Deer")
+                    end
+                    if deerEvent and deer then
+                        deerEvent:InvokeServer(deer)
+                    end
+                end)
+                task.wait(0.1)
+            end)
+        elseif AutoStunDeerConnection then
+            AutoStunDeerConnection:Disconnect()
+            AutoStunDeerConnection = nil
+        end
+    end
+})
 
 Window:Notify({
-    Title = "VoraHub",
-    Content = "99 Night In The Forest Script loaded successfully!",
+    Title = "VoraHub Loaded",
+    Content = "99 Nights In The Forest script loaded successfully!",
     Duration = 5
 })
