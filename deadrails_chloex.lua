@@ -22,7 +22,7 @@ local HttpService = game:GetService("HttpService")
 local VirtualUser = game:GetService("VirtualUser")
 
 -- Load Chloe X UI
-local Chloex = loadstring(game:HttpGet("RAW"))()
+local Chloex = loadstring(game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/4mVaA8QEMe/refs/heads/main/.lua"))()
 
 -- Create Window
 local Window = Chloex:Window({
