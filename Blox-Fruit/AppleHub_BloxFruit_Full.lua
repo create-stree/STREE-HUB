@@ -3,30 +3,22 @@ local success, StreeHub = pcall(function()
 end)
 
 if not success or not StreeHub then
-    warn("UI failed to load!")
+    warn("⚠️ UI failed to load!")
     return
+else
+    print("✓ UI loaded successfully!")
 end
 
 local Window = StreeHub:Window({
-    Title             = "APPLE HUB |",
-    Footer            = "Blox Fruit",
-    Images            = "128806139932217",
-    Color             = Color3.fromRGB(88, 101, 242),
-    Theme             = 122376116281975,
+    Title   = "StreeHub |",
+    Footer  = "Blox Fruit",
+    Images  = "128806139932217",
+    Color   = Color3.fromRGB(57, 255, 20),
+    Theme   = 122376116281975,
     ThemeTransparency = 0.15,
-    ["Tab Width"]     = 120,
-    Version           = 1,
+    ["Tab Width"] = 120,
+    Version = 1,
 })
-
-local function notify(msg, delay, color, title, desc)
-    return StreeHub:MakeNotify({
-        Title       = title or "APPLE HUB",
-        Description = desc or "Notification",
-        Content     = msg or "Content",
-        Color       = color or Color3.fromRGB(88, 101, 242),
-        Delay       = delay or 4
-    })
-end
 
 local Players        = game:GetService("Players")
 local RunService     = game:GetService("RunService")
