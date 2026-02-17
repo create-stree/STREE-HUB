@@ -1535,7 +1535,6 @@ if Window then
     notify("Thanks For Using Premium StreeHub!")
 end
 
---// ANTI AFK 
 local VIM=game:GetService("VirtualInputManager")
 task.spawn(function()
  while true do
