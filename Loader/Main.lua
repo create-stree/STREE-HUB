@@ -83,7 +83,7 @@ local gameScripts = {
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Premium.lua"
     },
-    [1239215938] = {
+    [123921593837160] = {
         name = "Climb and Jump Tower",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
@@ -103,7 +103,7 @@ local gameScripts = {
         free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c",
         premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
     },
-    [17290147275] = {
+    [136599248168660] = {
         name = "Solo Hunter",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Main.lua",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
