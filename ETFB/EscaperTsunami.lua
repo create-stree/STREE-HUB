@@ -1,16 +1,14 @@
-local success, StreeHub = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/StreeHub.lua"))()
-end)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/StreeHub.lua"))()
 
 local Window = StreeHub:Window({
-    Title   = "StreeHub | ",                --- title
-    Footer  = "Escape Tsunami For Brainrot",                   --- in right after title
+    Title   = "StreeHub | ",                 --- title
+    Footer  = "Escape Tsunami For Brainrot", --- in right after title
     Images  = "128806139932217",
     Color   = Color3.fromRGB(57, 255, 20),   --- default Hijau Neom Color3.fromRGB(57, 255, 20)
-    Theme   = 122376116281975,                  ---- background for theme ui (rbxassetid) - optional
-    ThemeTransparency = 0.15,              --- transparency of theme image - optional
-    ["Tab Width"] = 120,                   --- width of tabs section - optional
-    Version = 1,                           --- version config set as default 1 if u remake / rewrite / big update and change name name in your hub change it to 2 and config will reset
+    Theme   = 9542022979,                    --- background for theme ui (rbxassetid) - optional
+    ThemeTransparency = 0.15,                --- transparency of theme image - optional
+    ["Tab Width"] = 120,                     --- width of tabs section - optional
+    Version = 1,                             --- version config set as default 1 if u remake / rewrite / big update and change name name in your hub change it to 2 and config will reset
 })
 
 local function notify(msg, delay, color, title, desc)
@@ -21,11 +19,6 @@ local function notify(msg, delay, color, title, desc)
         Color = color or Color3.fromRGB(57, 255, 20),
         Delay = delay or 4
     })
-end
-
---- [[ Notify ]]
-if Window then
-    notify("Window loaded!")
 end
 
 local Tabs = {
