@@ -1,0 +1,478 @@
+local success, StreeHub = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/StreeHub.lua"))()
+end)
+
+if not success or not StreeHub then
+    warn("⚠️ UI failed to load!")
+    return
+else
+    print("✓ UI loaded successfully!")
+end
+
+local Window = StreeHub:Window({
+    Title   = "StreeHub |",
+    Footer  = "Solo Hunter",
+    Images  = "128806139932217",
+    Color   = Color3.fromRGB(57, 255, 20),
+    Theme   = 122376116281975,
+    ThemeTransparency = 0.1,
+    ["Tab Width"] = 120,
+    Version = 1,
+})
+
+local Tabs = {
+    Info = Window:AddTab({ Name = "Info", Icon = "info" }),
+    Main = Window:AddTab({ Name = "Main", Icon = "landmark" }),
+    Visual = Window:AddTab({ Name = "Visual", Icon = "eyes" }),
+    Misc = Window:AddTab({ Name = "Misc", Icon = "settings" })
+}
+
+local InfoSection = Tabs.Info:AddSection("Information")
+
+InfoSection:AddParagraph({
+    Title = "Join Our Discord",
+    Content = "Join Us!",
+    Icon = "discord",
+    ButtonText = "Copy Discord Link",
+    ButtonCallback = function()
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
+    end
+})
+
+InfoSection:AddParagraph({
+    Title = "Information",
+    Content = "This game script is still in beta. If you encounter any issues or problems with it, please report them immediately on Discord.",
+    Icon = "star",
+})
+
+_G.Automatic = {
+    AutoAttack = false,
+    AutoCollectDrop = false,
+    AutoOpenChest = false,
+    AutoPortal = false,
+    StartDungeon = false,
+    GetMobsLeft = false
+}
+
+_G.ESP = {
+    Mob = false,
+    Drop = false,
+    Player = false
+}
+
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+local LP = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+
+local function Char()
+    return LP.Character or LP.CharacterAdded:Wait()
+end
+
+local function HRP()
+    return Char():WaitForChild("HumanoidRootPart")
+end
+
+local function Hum()
+    return Char():WaitForChild("Humanoid")
+end
+
+local function AliveMobs()
+    local t = {}
+    local m = workspace:FindFirstChild("Mobs")
+    if m then
+        for _, v in pairs(m:GetChildren()) do
+            local h = v:FindFirstChild("Humanoid")
+            local r = v:FindFirstChild("HumanoidRootPart")
+            if h and r and h.Health > 0 then table.insert(t, v) end
+        end
+    end
+    return t
+end
+
+local function ClosestMob()
+    local hrp = HRP()
+    local dist, mob = math.huge, nil
+    for _, v in pairs(AliveMobs()) do
+        local d = (v.HumanoidRootPart.Position - hrp.Position).Magnitude
+        if d < dist then
+            dist = d
+            mob = v
+        end
+    end
+    return mob
+end
+
+local function WalkTo(pos)
+    local hrp = HRP()
+    TweenService:Create(hrp, TweenInfo.new(0.35, Enum.EasingStyle.Linear),{CFrame = CFrame.new(pos)}):Play()
+end
+
+local MainSection = Tabs.Automatic:AddSection("Automatic")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function getChar()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+end
+
+local function getMob()
+    local char = getChar()
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local target, dist = nil, math.huge
+    for _, v in pairs(workspace.Mobs:GetChildren()) do
+        if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+            local d = (v.HumanoidRootPart.Position - hrp.Position).Magnitude
+            if d < dist then
+                dist = d
+                target = v
+            end
+        end
+    end
+    return target
+end
+
+MainSection:AddToggle({
+    Title = "Auto Farm",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.AutoAttack = v
+        task.spawn(function()
+            while _G.Automatic.AutoAttack do
+                pcall(function()
+                    local char = getChar()
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    local mob = getMob()
+                    if hrp and mob then
+                        local mobPos = mob.HumanoidRootPart.Position
+                        local offset = Vector3.new(0, 10, 0)
+                        local distance = 3
+                        local mobCFrame = mob.HumanoidRootPart.CFrame
+                        local behindPosition = mobCFrame.Position - (mobCFrame.LookVector * distance) + offset
+                        hrp.CFrame = CFrame.new(behindPosition, mobPos)
+                        mob.__comm__.RP.IsAttacking:FireServer(true)
+                        mob.__comm__.RP.EntityTarget:FireServer(mob)
+                    end
+                end)
+                task.wait(0.03)
+            end
+        end)
+    end
+})
+
+MainSection:AddToggle({
+    Title = "Auto Collect Drop",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.AutoCollectDrop = v
+        task.spawn(function()
+            while _G.Automatic.AutoCollectDrop do
+                pcall(function()
+                    local d = workspace:FindFirstChild("Drops")
+                    if d then
+                        for _, drop in pairs(d:GetChildren()) do
+                            local uuid = drop:GetAttribute("UUID") or drop:GetAttribute("Id") or drop.Name
+                            RS.RemoteServices.DropsService.RF.CollectDrop:InvokeServer(uuid)
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+AutoSection:AddToggle({
+    Title = "Auto Open Chest",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.AutoOpenChest = v
+        task.spawn(function()
+            while _G.Automatic.AutoOpenChest do
+                pcall(function()
+                    for _, folder in pairs({"Chests","DungeonChests","BossChests"}) do
+                        local f = workspace:FindFirstChild(folder)
+                        if f then
+                            for _, chest in pairs(f:GetChildren()) do
+                                local uuid = chest:GetAttribute("UUID") or chest:GetAttribute("Id") or chest.Name
+                                RS.RemoteServices.DungeonService.RF.OpenChest:InvokeServer(uuid)
+                            end
+                        end
+                    end
+                end)
+                task.wait(2)
+            end
+        end)
+    end
+})
+
+local LobbySection = Tabs.Automatic:AddSection("Lobby")
+
+LobbySection:AddToggle({
+    Title = "Auto Portal",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.AutoPortal = v
+        task.spawn(function()
+            while _G.Automatic.AutoPortal do
+                pcall(function()
+                    local success1 = pcall(function()
+                        RS.RemoteServices.PortalService.RF.QueuePortal:InvokeServer("N_Subway-53")
+                        task.wait(1)
+                        RS.RemoteServices.PortalService.RF.EnterPortal:InvokeServer("N_Subway-53")
+                    end)
+                    
+                    if not success1 then
+                        pcall(function()
+                            RS.RemoteServices.PortalService.RF.QueuePortal:InvokeServer()
+                            task.wait(1)
+                            RS.RemoteServices.PortalService.RF.EnterPortal:InvokeServer()
+                        end)
+                    end
+                end)
+                task.wait(6)
+            end
+        end)
+    end
+})
+
+LobbySection:AddToggle({
+    Title = "Auto Start Dungeon",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.StartDungeon = v
+        task.spawn(function()
+            while _G.Automatic.StartDungeon do
+                pcall(function()
+                    RS.RemoteServices.DungeonService.RF.StartDungeon:InvokeServer()
+                end)
+                task.wait(5)
+            end
+        end)
+    end
+})
+
+LobbySection:AddToggle({
+    Title = "Auto Get Mobs Left",
+    Default = false,
+    Callback = function(v)
+        _G.Automatic.GetMobsLeft = v
+        task.spawn(function()
+            while _G.Automatic.GetMobsLeft do
+                pcall(function()
+                    RS.RemoteServices.DungeonService.RF.GetMobsLeftData:InvokeServer()
+                end)
+                task.wait(2)
+            end
+        end)
+    end
+})
+
+LobbySection:AddButton({
+    Title = "Teleport to Lobby",
+    Callback = function()
+        pcall(function()
+            RS.RemoteServices.DungeonService.RF.TeleportToLobby:InvokeServer()
+        end)
+    end
+})
+
+local ESPSection = Tabs.Visual:AddSection("ESP")
+
+local function ApplyESP(obj, color)
+    if obj and not obj:FindFirstChild("ESP") then
+        local h = Instance.new("Highlight")
+        h.Name = "ESP"
+        h.FillColor = color
+        h.OutlineColor = color
+        h.FillTransparency = 0.5
+        h.Parent = obj
+    end
+end
+
+local function ClearESP(container)
+    for _, v in pairs(container:GetDescendants()) do
+        if v:IsA("Highlight") and v.Name == "ESP" then v:Destroy() end
+    end
+end
+
+ESPSection:AddToggle({
+    Title = "ESP Mob",
+    Default = false,
+    Callback = function(v)
+        _G.ESP.Mob = v
+        task.spawn(function()
+            while _G.ESP.Mob do
+                pcall(function()
+                    local m = workspace:FindFirstChild("Mobs")
+                    if m then
+                        for _, v in pairs(m:GetChildren()) do
+                            ApplyESP(v, Color3.fromRGB(255,80,80))
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+            local m = workspace:FindFirstChild("Mobs")
+            if m then ClearESP(m) end
+        end)
+    end
+})
+
+ESPSection:AddToggle({
+    Title = "ESP Drop",
+    Default = false,
+    Callback = function(v)
+        _G.ESP.Drop = v
+        task.spawn(function()
+            while _G.ESP.Drop do
+                pcall(function()
+                    local d = workspace:FindFirstChild("Drops")
+                    if d then
+                        for _, v in pairs(d:GetChildren()) do
+                            ApplyESP(v, Color3.fromRGB(0,255,120))
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+ESPSection:AddToggle({
+    Title = "ESP Player",
+    Default = false,
+    Callback = function(v)
+        _G.ESP.Player = v
+        task.spawn(function()
+            while _G.ESP.Player do
+                pcall(function()
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= LP and p.Character then
+                            ApplyESP(p.Character, Color3.fromRGB(0,170,255))
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+local PlayersSection = Tabs.Misc:AddSection("Players")
+
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+
+_G.Player = {
+    InfiniteJump = false, 
+    NoClip = false
+}
+
+local function SetCollision(state)
+    local char = LP.Character
+    if not char then return end
+    for _, v in ipairs(char:GetDescendants()) do
+        if v:IsA("BasePart") then v.CanCollide = state end
+    end
+end
+
+PlayersSection:AddToggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(v) _G.Player.InfiniteJump = v end
+})
+
+UIS.JumpRequest:Connect(function()
+    if _G.Player.InfiniteJump then
+        local hum = Hum()
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+PlayersSection:AddToggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(v)
+        _G.Player.NoClip = v
+        if not v then SetCollision(true) end
+    end
+})
+
+RunService.Stepped:Connect(function()
+    if _G.Player.NoClip then SetCollision(false) end
+end)
+
+LP.CharacterAdded:Connect(function()
+    task.wait(1)
+    if not _G.Player.NoClip then SetCollision(true) end
+end)
+
+local UtilitySection = Tabs.Misc:AddSection("Utility")
+
+_G.Utility = {
+    AntiAFK = false,
+}
+
+local function ServerHop()
+    local servers = {}
+    local req = game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Desc&limit=100")
+    local data = HttpService:JSONDecode(req)
+    
+    for _, server in ipairs(data.data) do
+        if server.playing < server.maxPlayers and server.id ~= game.JobId then
+            table.insert(servers, server.id)
+        end
+    end
+    
+    if #servers > 0 then
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], LP)
+    else
+        warn("No servers found!")
+    end
+end
+
+local function Rejoin()
+    TeleportService:Teleport(game.PlaceId, LP)
+end
+
+UtilitySection:AddButton({
+    Title = "Rejoin Server",
+    Callback = function()
+        Rejoin()
+    end
+})
+
+UtilitySection:AddButton({
+    Title = "Server Hop",
+    Callback = function()
+        ServerHop()
+    end
+})
+
+UtilitySection:AddToggle({
+    Title = "Anti AFK",
+    Default = true,
+    Callback = function(v)
+        _G.Utility.AntiAFK = v
+        if v then
+            task.spawn(function()
+                while _G.Utility.AntiAFK do
+                    VirtualUser:CaptureController()
+                    VirtualUser:ClickButton2(Vector2.new())
+                    task.wait(30)
+                end
+            end)
+        end
+    end
+})
