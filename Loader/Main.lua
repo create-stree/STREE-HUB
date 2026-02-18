@@ -4,7 +4,7 @@ local CoreGui = game:GetService("CoreGui")
 local placeId = game.PlaceId
 
 _G.scripts_key = _G.scripts_key or scripts_key or "FREE_USER"
-local streeLogo = "rbxassetid://122683047852451"
+local streeLogo = "rbxassetid://128806139932217"
 
 local premiumKeys = {
     "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
