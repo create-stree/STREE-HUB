@@ -773,7 +773,7 @@ local function TweenToPosition(pos)
     local hrp = char:WaitForChild("HumanoidRootPart")
 
     local tweenInfo = TweenInfo.new(
-        0.08, -- durasi (detik)
+        0.08,
         Enum.EasingStyle.Quad,
         Enum.EasingDirection.Out
     )
@@ -804,7 +804,7 @@ local function TweenToPosition(pos)
     local hrp = char:WaitForChild("HumanoidRootPart")
 
     local tweenInfo = TweenInfo.new(
-        0.08, -- durasi (detik)
+        0.08,
         Enum.EasingStyle.Quad,
         Enum.EasingDirection.Out
     )
@@ -907,10 +907,6 @@ x3:AddButton({
 			:InvokeServer()
 	end
 })
-
-if Window then
-    notify("Thanks For Using Premium StreeHub!")
-end
 
 --// ANTI AFK 
 local VIM=game:GetService("VirtualInputManager")
