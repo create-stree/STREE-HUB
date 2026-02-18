@@ -1339,7 +1339,7 @@ local Window = StreeHub:Window({
 })
 
 local Tabs = {
-	Home = Window:AddTab({ Name = "Home", Icon = "star" }),
+	Home = Window:AddTab({ Name = "Home", Icon = "info" }),
 	Main = Window:AddTab({ Name = "Main", Icon = "landmark" }),
 	Farm = Window:AddTab({ Name = "Auto", Icon = "next" }),
 	Teleport = Window:AddTab({ Name = "Teleport", Icon = "map" }),
@@ -1360,16 +1360,6 @@ x1:AddParagraph({
             setclipboard(link)
         end
     end
-})
-
-x1:AddButton({
-	Title = "Join our Discord",
-	Callback = function()
-		if setclipboard then
-			setclipboard("https://discord.gg/jdmX43t5mY")
-			Window:Notify({ Title = "Discord", Content = "Discord link copied!", Duration = 3 })
-		end
-	end
 })
 
 local x2 = Tabs.Main:AddSection("Helper Features")
