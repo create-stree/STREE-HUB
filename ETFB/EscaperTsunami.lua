@@ -31,7 +31,7 @@ local function notify(msg, delay, color, title, desc)
 end
 
 local Tabs = {
-    Info = Window:AddTab({ Name = "Info", Icon = "player" }),
+    Info = Window:AddTab({ Name = "Info", Icon = "info" }),
     Player = Window:AddTab({ Name = "Player", Icon = "user" }),
     Main = Window:AddTab({ Name = "Main", Icon = "landmark" }),
     Gaps = Window:AddTab({ Name = "Gaps", Icon = "gps" }),
