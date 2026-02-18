@@ -706,7 +706,6 @@ local function StartAutoFarm()
 				end
 
 				if st.CatchMode == "Instant" or st.InstantCatch then
-					-- Instant Catch Logic (Loop)
 					local timeout = tick()
 					while tick() - timeout < 1 and st.AutoFarm do
 						if not LocalPlayer:GetAttribute("catching") then
@@ -718,7 +717,6 @@ local function StartAutoFarm()
 						task.wait()
 					end
 				elseif st.CatchMode == "Blatant" then
-					-- Blatant Catch (New Blatant-like Logic)
 					task.spawn(function()
 						pcall(function() Remotes.StartCatching:InvokeServer(target.id) end)
 					end)
@@ -730,7 +728,6 @@ local function StartAutoFarm()
 						pcall(function() Remotes.CollectFish:InvokeServer(target.id) end)
 					end)
 				else
-					-- Normal Catching Logic
 					local success = pcall(function()
 						Remotes.StartCatching:InvokeServer(target.id)
 					end)
@@ -1059,7 +1056,7 @@ local function CreateStreePanel()
     header.BackgroundTransparency = 1
 
     local logo = Instance.new("ImageLabel", header)
-    logo.Image = "rbxassetid://122683047852451"
+    logo.Image = "rbxassetid://128806139932217"
     logo.Size = UDim2.new(0,18,0,18)
     logo.Position = UDim2.new(0,6,0.5,-9)
     logo.BackgroundTransparency = 1
@@ -1330,25 +1327,21 @@ local function RestoreExtremeGraphics()
 	if _extremeGfxConnection then _extremeGfxConnection:Disconnect(); _extremeGfxConnection = nil end
 end
 
-
-
-
--- [[ load Window ]]
 local Window = StreeHub:Window({
-    Title   = "StreeHub |",                --- title
-    Footer  = "Abyss",                   --- in right after title
+    Title   = "StreeHub |",
+    Footer  = "Abyss",
     Images  = "128806139932217",
-    Color   = Color3.fromRGB(57, 255, 20),   --- default Hijau Neom Color3.fromRGB(57, 255, 20)
-    Theme   = 122376116281975,                  ---- background for theme ui (rbxassetid) - optional
-    ThemeTransparency = 0.15,              --- transparency of theme image - optional
-    ["Tab Width"] = 120,                   --- width of tabs section - optional
-    Version = 1,                           --- version config set as default 1 if u remake / rewrite / big update and change name name in your hub change it to 2 and config will reset
+    Color   = Color3.fromRGB(57, 255, 20),
+    Theme   = 9542022979,
+    ThemeTransparency = 0.15,
+    ["Tab Width"] = 120,
+    Version = 1,
 })
 
 local Tabs = {
 	Home = Window:AddTab({ Name = "Home", Icon = "star" }),
-	Main = Window:AddTab({ Name = "Main", Icon = "rod" }),
-	Farm = Window:AddTab({ Name = "Auto Farm", Icon = "rod" }),
+	Main = Window:AddTab({ Name = "Main", Icon = "landmark" }),
+	Farm = Window:AddTab({ Name = "Auto", Icon = "next" }),
 	Teleport = Window:AddTab({ Name = "Teleport", Icon = "map" }),
 	Backpack = Window:AddTab({ Name = "Backpack", Icon = "bag" }),
 	Shop = Window:AddTab({ Name = "Shop", Icon = "shop" }),
@@ -1684,7 +1677,6 @@ task.spawn(function()
 	end
 end)
 
---- [[ Notify Function ]]
 local function notify(msg, delay, color, title, desc)
     return StreeHub:MakeNotify({
         Title = title or "StreeHub",
@@ -1697,7 +1689,6 @@ end
 
 task.defer(function()
 	task.wait(0.1)
-	--- [[ Or Use Like This ]]
 StreeHub:MakeNotify({
     Title = "StreeHub",
     Description = "Notification",
