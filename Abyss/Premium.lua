@@ -1342,7 +1342,7 @@ local Tabs = {
 	Home = Window:AddTab({ Name = "Home", Icon = "info" }),
 	Main = Window:AddTab({ Name = "Main", Icon = "landmark" }),
 	Farm = Window:AddTab({ Name = "Auto", Icon = "next" }),
-	Teleport = Window:AddTab({ Name = "Teleport", Icon = "map" }),
+	Teleport = Window:AddTab({ Name = "Teleport", Icon = "pinmap" }),
 	Backpack = Window:AddTab({ Name = "Backpack", Icon = "bag" }),
 	Shop = Window:AddTab({ Name = "Shop", Icon = "shop" }),
 	Webhook = Window:AddTab({ Name = "Webhook", Icon = "web" }),
