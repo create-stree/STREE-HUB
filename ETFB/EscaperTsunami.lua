@@ -525,7 +525,7 @@ local function TweenToPosition(pos)
     local hrp = char:WaitForChild("HumanoidRootPart")
 
     local tweenInfo = TweenInfo.new(
-        0.00001, -- durasi (detik)
+        0.00001,
         Enum.EasingStyle.Quad,
         Enum.EasingDirection.Out
     )
@@ -910,10 +910,7 @@ x3:AddToggle({
     Default = false,
     Callback = function(state)
         AutoUpgradeJump = state
-        
         if state then
-            Lexs("Auto Upgrade Jump ON")
-            
             task.spawn(function()
                 while AutoUpgradeJump do
                     pcall(function()
@@ -941,7 +938,6 @@ x3:AddButton({
         pcall(function()
             UpgradeJumpRemote:InvokeServer()
         end)
-        
         notify("Upgrade Jump Sent")
     end
 })
@@ -959,11 +955,6 @@ x3:AddButton({
 	end
 })
 
-if Window then
-    notify("Thanks For Using Premium StreeHub!")
-end
-
---// ANTI AFK 
 local VIM=game:GetService("VirtualInputManager")
 task.spawn(function()
  while true do
