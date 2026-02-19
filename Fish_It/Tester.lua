@@ -30,7 +30,7 @@ local RPath = game:GetService("ReplicatedStorage")
 
 local Window = WindUI:CreateWindow({
     Title = "STREE HUB",
-    Icon = "rbxassetid://122683047852451",
+    Icon = "rbxassetid://128806139932217",
     Author = "KirsiaSC | Fish It",
     Folder = "STREE_HUB",
     Size = UDim2.fromOffset(260, 290),
@@ -62,7 +62,7 @@ G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
 G2L["ButtonRezise_2"].BorderSizePixel = 0
 G2L["ButtonRezise_2"].Draggable = true
 G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 255, 120)
-G2L["ButtonRezise_2"].Image = "rbxassetid://123032091977400"
+G2L["ButtonRezise_2"].Image = "rbxassetid://128806139932217"
 G2L["ButtonRezise_2"].Size = UDim2.new(0, 47, 0, 47)
 G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
 G2L["ButtonRezise_2"].Visible = true
@@ -1254,7 +1254,7 @@ function sendTestWebhook()
 
     local payload = {
         username = "StreeHub Webhook",
-        avatar_url = "https://cdn.discordapp.com/attachments/1430527420468953159/1450326233844940904/1752815705447-1000034555-1.png?ex=6942210f&is=6940cf8f&hm=582f526e0391329af202628cfbb3d17780626252e107defd4a5421573d3b7b4b",
+        avatar_url = "https://cdn.discordapp.com/attachments/1454783748909432893/1468591782454628352/Tak_berjudul76_20260203000028.png?ex=6997b1ee&is=6996606e&hm=c633dbc5d9833ac65c26409df2ba0b63b2b9e5f2b90dca2210aa0a33c9021819",
         embeds = {{
             title = "Test Webhook Connected",
             description = "Webhook connection successful!",
@@ -1309,7 +1309,7 @@ function sendNewFishWebhook(newlyCaughtFish)
             },
             footer = {
                 text = "StreeHub Webhook",
-                icon_url = "https://cdn.discordapp.com/attachments/1430527420468953159/1450326233844940904/1752815705447-1000034555-1.png?ex=6942210f&is=6940cf8f&hm=582f526e0391329af202628cfbb3d17780626252e107defd4a5421573d3b7b4b"
+                icon_url = "https://cdn.discordapp.com/attachments/1454783748909432893/1468591782454628352/Tak_berjudul76_20260203000028.png?ex=6997b1ee&is=6996606e&hm=c633dbc5d9833ac65c26409df2ba0b63b2b9e5f2b90dca2210aa0a33c9021819"
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z"),
             thumbnail = {
@@ -1317,7 +1317,7 @@ function sendNewFishWebhook(newlyCaughtFish)
             }
         }},
         username = "StreeHub Webhook",
-        avatar_url = "https://cdn.discordapp.com/attachments/1430527420468953159/1450326233844940904/1752815705447-1000034555-1.png?ex=6942210f&is=6940cf8f&hm=582f526e0391329af202628cfbb3d17780626252e107defd4a5421573d3b7b4b",
+        avatar_url = "https://cdn.discordapp.com/attachments/1454783748909432893/1468591782454628352/Tak_berjudul76_20260203000028.png?ex=6997b1ee&is=6996606e&hm=c633dbc5d9833ac65c26409df2ba0b63b2b9e5f2b90dca2210aa0a33c9021819",
         attachments = {}
     }
 
@@ -1393,6 +1393,7 @@ end))
 local Section = Tab4:Section({
 	Title = "Blantant Fishing",
 	Icon = "fish",
+	Locked = true,
 	TextXAlignment = "Left",
 	TextSize = 17
 })
@@ -1541,12 +1542,14 @@ end
 
 Tab4:Toggle({
     Title = "Blantant",
+	Locked = true,
     Value = Config.blantant,
     Callback = Toggle
 })
 
 Tab4:Input({
     Title = "Delay Bait",
+	Locked = true,
     Default = tostring(Config.cancel),
     Callback = function(v)
         local n = tonumber(v)
@@ -1558,6 +1561,7 @@ Tab4:Input({
 
 Tab4:Input({
     Title = "Delay Reel",
+	Locked = true,
     Default = tostring(Config.complete),
     Callback = function(v)
         local n = tonumber(v)
@@ -1580,8 +1584,6 @@ RE = {
     FavoriteItem = Net:FindFirstChild("RE/FavoriteItem"),
     FavoriteStateChanged = Net:FindFirstChild("RE/FavoriteStateChanged"),
 }
-
-Tab4:Divider()
 
 local VFX = require(game:GetService("ReplicatedStorage").Controllers.VFXController)
 
@@ -1658,7 +1660,7 @@ local function CreateStreePanel()
     header.BackgroundTransparency = 1
 
     local logo = Instance.new("ImageLabel", header)
-    logo.Image = "rbxassetid://122683047852451"
+    logo.Image = "rbxassetid://128806139932217"
     logo.Size = UDim2.new(0,18,0,18)
     logo.Position = UDim2.new(0,6,0.5,-9)
     logo.BackgroundTransparency = 1
@@ -1823,8 +1825,6 @@ if REFishCaught then
         st.canFish = true
     end)
 end
-
-
 
 tierToRarity = {
     [1] = "Uncommon",
