@@ -1396,45 +1396,55 @@ local RS = game:GetService("ReplicatedStorage")
 local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
 
 local RE = {
-    Equip = Net:FindFirstChild("RE/EquipToolFromHotbar"),
+    Equip = Net:FindFirstChild("RE/EquipToolFromHotbar")
 }
 
 local RF = {
     Cancel = Net:FindFirstChild("RF/CancelFishingInputs"),
     Charge = Net:FindFirstChild("RF/ChargeFishingRod"),
     Request = Net:FindFirstChild("RF/RequestFishingMinigameStarted"),
-	Completed = Net:FindFirstChild("RF/CatchFishCompleted")
+    Completed = Net:FindFirstChild("RF/CatchFishCompleted")
 }
 
 local function EquipRod()
     pcall(function()
-        RE.Equip:FireServer(1)
+        if RE.Equip then
+            RE.Equip:FireServer(1)
+        end
     end)
 end
 
 local function ChargeRod()
     pcall(function()
-        RF.Charge:InvokeServer(math.huge)
+        if RF.Charge then
+            RF.Charge:InvokeServer(math.huge)
+        end
     end)
 end
 
 local function RequestGame()
     pcall(function()
-        RF.Request:InvokeServer(-0.57187473773956, 0.97093835883872, 1771549415.5401)
+        if RF.Request then
+            RF.Request:InvokeServer(-0.57187473773956, 0.97093835883872, tick())
+        end
     end)
 end
 
 local function Completed(minDelay)
     pcall(function()
         task.wait(minDelay or _G.CompletedDelay)
-        RE.Completed:FireServer()
+        if RF.Completed then
+            RF.Completed:InvokeServer()
+        end
     end)
 end
 
 local function CancelFishing(minDelay)
     pcall(function()
         task.wait(minDelay or _G.CancelDelay)
-        RF.Cancel:InvokeServer()
+        if RF.Cancel then
+            RF.Cancel:InvokeServer()
+        end
     end)
 end
 
