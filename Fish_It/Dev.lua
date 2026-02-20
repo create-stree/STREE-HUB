@@ -1397,13 +1397,13 @@ local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
 
 local RE = {
     Equip = Net:FindFirstChild("RE/EquipToolFromHotbar"),
-    Completed = Net:FindFirstChild("RE/FishingCompleted")
 }
 
 local RF = {
     Cancel = Net:FindFirstChild("RF/CancelFishingInputs"),
     Charge = Net:FindFirstChild("RF/ChargeFishingRod"),
-    Request = Net:FindFirstChild("RF/RequestFishingMinigameStarted")
+    Request = Net:FindFirstChild("RF/RequestFishingMinigameStarted"),
+	Completed = Net:FindFirstChild("RF/CatchFishCompleted")
 }
 
 local function EquipRod()
@@ -1420,7 +1420,7 @@ end
 
 local function RequestGame()
     pcall(function()
-        RF.Request:InvokeServer(-139.63, 0.996)
+        RF.Request:InvokeServer(-0.57187473773956, 0.97093835883872, 1771549415.5401)
     end)
 end
 
@@ -2939,4 +2939,3 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
-
