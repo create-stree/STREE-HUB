@@ -1804,7 +1804,8 @@ local function scanInventory()
 end
 
 Data:OnChange({ "Inventory", "Items" }, function()
-    if st.autoFavEnabled then scanInventory() end
+        if st.autoFavEnabled then scanInventory() 
+	end
 end)
 
 function getPlayerNames()
