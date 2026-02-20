@@ -26,9 +26,12 @@ local _lastNotifyTime = 0
 
 local Window = StreeHub:Window({
     Title   = "StreeHub |",
-    Footer  = "Blox Fruits",
-    Images  = "139538383104637",
-    Color   = Color3.fromRGB(255, 50, 50),
+    Footer  = "Escape Tsunami For Brainrot",
+    Images  = "128806139932217",
+    Color   = Color3.fromRGB(57, 255, 20),
+    Theme   = 9542022979,
+    ThemeTransparency = 0.15,
+    ["Tab Width"] = 120,
     Version = 1,
 })
 
