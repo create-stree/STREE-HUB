@@ -129,16 +129,6 @@ Tab1:Button({
     end
 })
 
-Tab1:Button({
-    Title = "WhatsApp",
-    Desc = "click to copy link",
-    Callback = function()
-        if setclipboard then
-            setclipboard("https://whatsapp.com/channel/0029VbAwRihKAwEtwyowt62N")
-        end
-    end
-})
-
 Tab1:Divider()
 
 Tab1:Paragraph({
