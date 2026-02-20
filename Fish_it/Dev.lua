@@ -1383,181 +1383,102 @@ end))
 local Section = Tab4:Section({
 	Title = "Blantant Fishing",
 	Icon = "fish",
-	Locked = true,
 	TextXAlignment = "Left",
 	TextSize = 17
 })
 
 Tab4:Divider()
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
+_G.CancelDelay = 1.8
+_G.CompletedDelay = 1.6
 
-local Config = {
-    blantant = false,
-    cancel = 100,
-    complete = 100
+local RS = game:GetService("ReplicatedStorage")
+local Net = RS.Packages._Index:FindFirstChild("sleitnick_net@0.2.0").net
+
+local RE = {
+    Equip = Net:FindFirstChild("RE/EquipToolFromHotbar"),
+    Completed = Net:FindFirstChild("RE/FishingCompleted")
 }
 
-local Net = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_net@0.2.0")
-    :WaitForChild("net")
+local RF = {
+    Cancel = Net:FindFirstChild("RF/CancelFishingInputs"),
+    Charge = Net:FindFirstChild("RF/ChargeFishingRod"),
+    Request = Net:FindFirstChild("RF/RequestFishingMinigameStarted")
+}
 
-local charge
-local requestminigame
-local fishingcomplete
-local equiprod
-local cancelinput
-local ReplicateTextEffect
-local BaitSpawned
-local BaitDestroyed
+local function EquipRod()
+    pcall(function()
+        RE.Equip:FireServer(1)
+    end)
+end
 
-pcall(function()
-    charge               = Net:WaitForChild("RF/ChargeFishingRod")
-    requestminigame       = Net:WaitForChild("RF/RequestFishingMinigameStarted")
-    fishingcomplete       = Net:WaitForChild("RF/CatchFishCompleted")
-    equiprod              = Net:WaitForChild("RE/EquipToolFromHotbar")
-    cancelinput           = Net:WaitForChild("RF/CancelFishingInputs")
-    ReplicateTextEffect   = Net:WaitForChild("RE/ReplicateTextEffect")
-    BaitSpawned           = Net:WaitForChild("RE/BaitSpawned")
-    BaitDestroyed         = Net:WaitForChild("RE/BaitDestroyed")
-end)
+local function ChargeRod()
+    pcall(function()
+        RF.Charge:InvokeServer(math.huge)
+    end)
+end
 
-local mainThread
-local equipThread
+local function RequestGame()
+    pcall(function()
+        RF.Request:InvokeServer(-139.63, 0.996)
+    end)
+end
 
-local exclaimDetected = false
-local bait = 0
+local function Completed(minDelay)
+    pcall(function()
+        task.wait(minDelay or _G.CompletedDelay)
+        RE.Completed:FireServer()
+    end)
+end
 
-ReplicateTextEffect.OnClientEvent:Connect(function(data)
-    local char = LocalPlayer.Character
-    if not char or not data.TextData or not data.TextData.AttachTo then return end
+local function CancelFishing(minDelay)
+    pcall(function()
+        task.wait(minDelay or _G.CancelDelay)
+        RF.Cancel:InvokeServer()
+    end)
+end
 
-    if data.TextData.AttachTo:IsDescendantOf(char)
-        and data.TextData.Text == "!" then
-        exclaimDetected = true
+task.spawn(function()
+    while task.wait() do
+        if _G.AutoFishing then
+            EquipRod()
+            task.wait(0.1)
+            ChargeRod()
+            task.wait(0.2)
+            RequestGame()
+            Completed()
+            CancelFishing()
+        end
     end
 end)
 
-if BaitSpawned then
-    BaitSpawned.OnClientEvent:Connect(function(bobber, position, owner)
-        if owner and owner ~= LocalPlayer then return end
-        bait = 1
-    end)
-end
-
-if BaitDestroyed then
-    BaitDestroyed.OnClientEvent:Connect(function(bobber)
-        bait = 0
-    end)
-end
-
-local function StartCast()
-    task.spawn(function()
-        pcall(function()
-            local ok = cancelinput:InvokeServer()
-            if not ok then
-                repeat ok = cancelinput:InvokeServer() until ok
-            end
-
-            local charged = charge:InvokeServer(math.huge)
-            if not charged then
-                repeat charged = charge:InvokeServer(math.huge) until charged
-            end
-
-            requestminigame:InvokeServer(1, 0.05, 1731873.1873)
-        end)
-    end)
-
-    task.spawn(function()
-        exclaimDetected = false
-
-        local timeout = 20
-        local timer = 0
-
-        while Config.blantant and timer < timeout do
-            if exclaimDetected and bait == 0 then
-                break
-            end
-            task.wait(0.01)
-            timer += 0.1
+Tab4:Input({
+    Title = "Cancel Delay",
+    Placeholder = "1.8",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num then
+            _G.CancelDelay = num
         end
-
-        if not Config.blantant then return end
-        if not (exclaimDetected and bait == 0) then return end
-
-        task.wait(Config.complete)
-
-        if Config.blantant then
-            pcall(fishingcomplete.InvokeServer, fishingcomplete)
-        end
-    end)
-end
-
-local function MainLoop()
-    equipThread = task.spawn(function()
-        while Config.blantant do
-            pcall(equiprod.FireServer, equiprod, 1)
-            task.wait(1.5)
-        end
-    end)
-
-    while Config.blantant do
-        StartCast()
-        task.wait(Config.cancel)
-        if not Config.blantant then break end
-        task.wait(0.1)
     end
-end
+})
 
-local function Toggle(state)
-    Config.blantant = state
-
-    if state then
-        if mainThread then task.cancel(mainThread) end
-        if equipThread then task.cancel(equipThread) end
-        mainThread = task.spawn(MainLoop)
-    else
-        if mainThread then task.cancel(mainThread) end
-        if equipThread then task.cancel(equipThread) end
-        mainThread = nil
-        equipThread = nil
-        bait = 0
-        pcall(cancelinput.InvokeServer, cancelinput)
+Tab4:Input({
+    Title = "Completed Delay",
+    Placeholder = "1.6",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num then
+            _G.CompletedDelay = num
+        end
     end
-end
+})
 
 Tab4:Toggle({
-    Title = "Blantant",
-	Locked = true,
-    Value = Config.blantant,
-    Callback = Toggle
-})
-
-Tab4:Input({
-    Title = "Delay Bait",
-	Locked = true,
-    Default = tostring(Config.cancel),
+    Title = "Blantant Fishing",
+    Default = false,
     Callback = function(v)
-        local n = tonumber(v)
-        if n and n > 0 then
-            Config.cancel = n
-        end
-    end
-})
-
-Tab4:Input({
-    Title = "Delay Reel",
-	Locked = true,
-    Default = tostring(Config.complete),
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n > 0 then
-            Config.complete = n
-        end
+        _G.AutoFishing = v
     end
 })
 
@@ -3018,3 +2939,4 @@ Tab7:Button({
         loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
+
