@@ -1,5 +1,3 @@
--- 
-
 repeat
     wait(1)
 until game:IsLoaded()
@@ -13652,4 +13650,5 @@ String51 = "AddButton"
 String51 = "Join Sever [BETA]"
 Tab13[String51](String51, function()
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.placeId, _G.Job, game.Players.LocalPlayer)
+
 end)
