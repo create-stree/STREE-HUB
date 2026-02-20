@@ -1417,7 +1417,7 @@ end
 local function ChargeRod()
     pcall(function()
         if RF.Charge then
-            RF.Charge:InvokeServer(nil, nil, tick(), nil)
+            RF.Charge:InvokeServer()
         end
     end)
 end
@@ -1452,11 +1452,11 @@ task.spawn(function()
     while task.wait() do
         if _G.AutoFishing then
             EquipRod()
-            task.wait(0.15)
+            task.wait(0.1)
             ChargeRod()
-            task.wait(0.35)
+            task.wait(0.2)
             RequestGame()
-            task.wait(0.5)
+            task.wait(0.2)
             Completed()
             CancelFishing()
         end
