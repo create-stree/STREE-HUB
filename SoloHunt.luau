@@ -68,6 +68,7 @@ function Collection:IsReturnPortal()
         if v.Name == "OverworldPortal" then
             print("Exit portal found")
             return true
+        end
     end
     print("No exit portal")
     return false
@@ -602,13 +603,40 @@ do
         end
     })
 
+    -- Fly setup function
+    local function setupFly(character)
+        if not character then return end
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        if getgenv().enablefly and not flying then
+            flying = true
+            bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+            bv.Velocity = Vector3.zero
+            bv.Parent = hrp
+
+            bg = Instance.new("BodyGyro")
+            bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+            bg.CFrame = hrp.CFrame
+            bg.Parent = hrp
+        end
+    end
+
+    LocalPlayer.CharacterAdded:Connect(setupFly)
+    if LocalPlayer.Character then setupFly(LocalPlayer.Character) end
+
     local enableflytoggle = Section_8:AddToggle("enableflytoggle", {Title = "Enable Fly", Description = "Enables flying", Default = getgenv().enablefly })
     enableflytoggle:OnChanged(function(v)
         getgenv().enablefly = v
-        if not v and flying then
-            flying = false
-            if bv then bv:Destroy() end
-            if bg then bg:Destroy() end
+        if v then
+            if LocalPlayer.Character and not flying then
+                setupFly(LocalPlayer.Character)
+            end
+        else
+            if flying then
+                flying = false
+                if bv then bv:Destroy() end
+                if bg then bg:Destroy() end
+            end
         end
     end)
 
@@ -631,27 +659,6 @@ do
         if input.KeyCode == Enum.KeyCode.Space then keys.Space = false end
         if input.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = false end
     end)
-
-    -- Fly logic with respawn handling
-    local function setupFly(character)
-        if not character then return end
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        if getgenv().enablefly and not flying then
-            flying = true
-            bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-            bv.Velocity = Vector3.zero
-            bv.Parent = hrp
-
-            bg = Instance.new("BodyGyro")
-            bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-            bg.CFrame = hrp.CFrame
-            bg.Parent = hrp
-        end
-    end
-
-    LocalPlayer.CharacterAdded:Connect(setupFly)
-    if LocalPlayer.Character then setupFly(LocalPlayer.Character) end
 
     RunService.RenderStepped:Connect(function()
         if getgenv().enablefly and flying then
