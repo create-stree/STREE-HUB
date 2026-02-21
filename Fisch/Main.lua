@@ -16298,4 +16298,3 @@ local _call4180 = _call4170:AddSubSection("Teleport Event Zone")
 Workspace:WaitForChild("zones")
 zones:WaitForChild("fishing")
 error('Runtime : /app/triplesixxx:970: internal 508: Triplesixxx: infinitylooperror')
-
