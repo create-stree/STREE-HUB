@@ -30,29 +30,29 @@ end)
     local _call10 = loadstring_result(...):Window({
     Color = <userdata>,
     Footer = " [v1.0.0]",
-    Image = "99764942615873",
+    Image = "128806139932217",
     ["Tab Width"] = 120,
-    Title = "Meng Hub | Fisch",
+    Title = "StreeHub | Fisch",
     Version = 3,
 })
     local _call11 = _call10.AddTab
     local _call12 = _call10:AddTab({
-    Icon = "user",
-    Name = "About",
+    Icon = "info",
+    Name = "Info",
 })
     local _call13 = _call10.AddTab
     local _call14 = _call10:AddTab({
-    Icon = "star",
+    Icon = "landmark",
     Name = "Main",
 })
     local _call15 = _call10.AddTab
     local _call16 = _call10:AddTab({
-    Icon = "",
+    Icon = "store",
     Name = "Shop",
 })
     local _call17 = _call10.AddTab
     local _call18 = _call10:AddTab({
-    Icon = "",
+    Icon = "next",
     Name = "Automatic",
 })
     local _call19 = _call10.AddTab
