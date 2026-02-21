@@ -36,7 +36,13 @@ local premiumKeys = {
 "YkLmNbVcXzAsDfGhJkLpOiUyTrEwQmNy","tRqWpLnMxKvBsGfHeJzDuQiYcPaLmNkQ",
 "JmQnLpRtYxKvBsGhEfZaWiCuTdOyQnLu","kVxYoPaSdFgHjKlMnBvCxZqWeRtYuIoT",
 "pLnMxKvBsGhEfZaWiCuTdOyQnLkVxYon","XcVbNmLpQrTyUiOpAsDfGhJkLmNbVcXs",
-"sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig","HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp"
+"sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig","HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp",
+
+"developer_access","ZxCvBnMaSdFgHjKlQwErTyUiOpAsDfGh",
+"team_access","MnBvCxZaSdFgHjKlQwErTyUiOpLkJhGf",
+"tester_access","QpWoEiRuTyAlSkDjFhGzXcVbNmQaWeRt",
+"content_creator","AsDfGhJkLqWeRtYuIoPzXcVbNmLaKsJh"
+"reseller_offcial","QwErTyUiOpAsDfGhJkLzXcVbNmLpQrTy"
 }
 
 local function isPremiumKey(key)
