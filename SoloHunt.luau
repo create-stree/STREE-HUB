@@ -120,22 +120,104 @@ local List_Leggings = {
     "Iron Leggings"
 }
 
+function Collection:GetPlayerInventory()
+    local playerData = LocalPlayer:FindFirstChild("PlayerData")
+    if playerData then
+        return playerData:FindFirstChild("Inventory")
+    end
+    local success, inv = pcall(function()
+        return ReplicatedStorage.RemoteServices.InventoryService.RF.GetInventory:InvokeServer()
+    end)
+    if success then
+        return inv
+    end
+    return nil
+end
+
+function Collection:EquipBestArmorV2()
+    local inventory = self:GetPlayerInventory()
+    if not inventory then
+        self:EquipBestArmor()
+        return
+    end
+    
+    local armorTypes = {"Helmet", "Chestplate", "Leggings"}
+    local priorityLists = {
+        Helmet = List_Helmet,
+        Chestplate = List_Chestplate,
+        Leggings = List_Leggings
+    }
+    
+    for _, armorType in ipairs(armorTypes) do
+        for _, itemName in ipairs(priorityLists[armorType]) do
+            local owned = false
+            if type(inventory) == "table" then
+                for _, invItem in pairs(inventory) do
+                    if (type(invItem) == "table" and invItem.Name == itemName) or invItem == itemName then
+                        owned = true
+                        break
+                    end
+                end
+            elseif type(inventory) == "Instance" then
+                if inventory:FindFirstChild(itemName) then
+                    owned = true
+                end
+            end
+            
+            if owned then
+                pcall(function()
+                    ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer(armorType, itemName)
+                end)
+                break
+            end
+        end
+    end
+end
+
+function Collection:EquipBestSwordV2()
+    local inventory = self:GetPlayerInventory()
+    if not inventory then
+        self:EquipBestSword()
+        return
+    end
+    
+    for _, itemName in ipairs(ListSword) do
+        local owned = false
+        if type(inventory) == "table" then
+            for _, invItem in pairs(inventory) do
+                if (type(invItem) == "table" and invItem.Name == itemName) or invItem == itemName then
+                    owned = true
+                    break
+                end
+            end
+        elseif type(inventory) == "Instance" then
+            if inventory:FindFirstChild(itemName) then
+                owned = true
+            end
+        end
+        
+        if owned then
+            pcall(function()
+                ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Weapon", itemName)
+            end)
+            break
+        end
+    end
+end
+
 function Collection:EquipBestArmor()
-    -- Equip best owned helmet
     for _, item in ipairs(List_Helmet) do
         local success = pcall(function()
             ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Helmet", item)
         end)
         if success then break end
     end
-    -- Equip best owned chestplate
     for _, item in ipairs(List_Chestplate) do
         local success = pcall(function()
             ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Chestplate", item)
         end)
         if success then break end
     end
-    -- Equip best owned leggings
     for _, item in ipairs(List_Leggings) do
         local success = pcall(function()
             ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Leggings", item)
@@ -279,7 +361,7 @@ do
 
     task.spawn(function()
         while task.wait(0.5) do
-            local success, err = pcall(function()
+            pcall(function()
                 if not getgenv().autofarmdungeon then return end
 
                 local selectedDungeon = getgenv().choosendungeon
@@ -298,10 +380,8 @@ do
                 end
 
                 if targetPortal then
-                    -- Teleport to portal
                     Collection:InstantTeleportTo(targetPortal.CFrame)
 
-                    -- Join if enabled and not already joined
                     if getgenv().autojoindungeon and not Joined then
                         task.wait(0.4)
                         local portalId = "N_" .. targetPortal.Name
@@ -312,9 +392,6 @@ do
                     end
                 end
             end)
-            if not success then
-                warn("Error in Auto Farm Dungeon: " .. err)
-            end
         end
     end)
 
@@ -384,15 +461,15 @@ do
     task.spawn(function()
         while task.wait(0.2) do
             pcall(function()
-                if getgenv().AutoFarmMonster then
+                if getgenv().AutoFarmMonster and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                     for _, mob in pairs(workspace.Mobs:GetChildren()) do
-                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") then
+                        if mob and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") then
                             local dist = (mob.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
                             if dist < 350 then
-                                repeat
+                                while getgenv().AutoFarmMonster and mob and mob.Parent and mob.Humanoid.Health > 0 do
                                     Collection:InstantTeleportTo(mob.HumanoidRootPart.CFrame)
-                                    task.wait()
-                                until not mob or not mob.Parent or not getgenv().AutoFarmMonster
+                                    task.wait(0.1)
+                                end
                             end
                         end
                     end
@@ -408,18 +485,15 @@ do
 
     task.spawn(function()
         while task.wait(0.1) do
-            local success, err = pcall(function()
+            pcall(function()
                 if getgenv().AutoAttackMonster then
                     for _, mob in pairs(workspace.Mobs:GetChildren()) do
-                        if mob:FindFirstChild("Humanoid") then
+                        if mob and mob:FindFirstChild("Humanoid") then
                             ReplicatedStorage.RemoteServices.CombatService.RF.UseWeapon:InvokeServer(10, {mob}, 10)
                         end
                     end
                 end
             end)
-            if not success then
-                warn("Error in Auto Attack: " .. err)
-            end
         end
     end)
 
@@ -447,7 +521,7 @@ do
 
     task.spawn(function()
         while task.wait(0.1) do
-            local success, err = pcall(function()
+            pcall(function()
                 if getgenv().KillAura then
                     sethiddenproperty(Players.LocalPlayer, "SimulationRadius", 5000)
                     sethiddenproperty(LocalPlayer, "MaxSimulationRadius", 5000)
@@ -458,9 +532,6 @@ do
                     end
                 end
             end)
-            if not success then
-                warn("Error in Kill Aura: " .. err)
-            end
         end
     end)
 
@@ -529,9 +600,18 @@ do
         Title = "Buy Item Once",
         Description = "Buys the selected item once",
         Callback = function()
-            pcall(function()
-                ReplicatedStorage.RemoteServices.MerchantService.RF.Buy:InvokeServer(getgenv().chooseItems)
-            end)
+            local itemName = getgenv().chooseItems
+            if itemName and itemName ~= "" then
+                pcall(function()
+                    ReplicatedStorage.RemoteServices.MerchantService.RF.Buy:InvokeServer(itemName, 1)
+                end)
+            else
+                Fluent:Notify({
+                    Title = "Forge Hub",
+                    Content = "Pilih item terlebih dahulu!",
+                    Duration = 3
+                })
+            end
         end
     })
 
@@ -603,40 +683,42 @@ do
         end
     })
 
-    -- Fly setup function
-    local function setupFly(character)
-        if not character then return end
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        if getgenv().enablefly and not flying then
-            flying = true
-            bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-            bv.Velocity = Vector3.zero
-            bv.Parent = hrp
+    -- Fly cleanup function
+    local function cleanupFly()
+        if bv then bv:Destroy() bv = nil end
+        if bg then bg:Destroy() bg = nil end
+        flying = false
+    end
 
-            bg = Instance.new("BodyGyro")
-            bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-            bg.CFrame = hrp.CFrame
-            bg.Parent = hrp
-        end
+    local function setupFly(character)
+        if not character or not getgenv().enablefly then return end
+        cleanupFly()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        flying = true
+        bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bv.Velocity = Vector3.zero
+        bv.Parent = hrp
+
+        bg = Instance.new("BodyGyro")
+        bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        bg.CFrame = hrp.CFrame
+        bg.Parent = hrp
     end
 
     LocalPlayer.CharacterAdded:Connect(setupFly)
+    LocalPlayer.CharacterRemoving:Connect(cleanupFly)
     if LocalPlayer.Character then setupFly(LocalPlayer.Character) end
 
     local enableflytoggle = Section_8:AddToggle("enableflytoggle", {Title = "Enable Fly", Description = "Enables flying", Default = getgenv().enablefly })
     enableflytoggle:OnChanged(function(v)
         getgenv().enablefly = v
         if v then
-            if LocalPlayer.Character and not flying then
+            if LocalPlayer.Character then
                 setupFly(LocalPlayer.Character)
             end
         else
-            if flying then
-                flying = false
-                if bv then bv:Destroy() end
-                if bg then bg:Destroy() end
-            end
+            cleanupFly()
         end
     end)
 
@@ -661,7 +743,7 @@ do
     end)
 
     RunService.RenderStepped:Connect(function()
-        if getgenv().enablefly and flying then
+        if getgenv().enablefly and flying and bv and bg then
             local cam = workspace.CurrentCamera
             local dir = Vector3.zero
 
@@ -679,9 +761,7 @@ do
             bv.Velocity = dir
             bg.CFrame = cam.CFrame
         elseif not getgenv().enablefly and flying then
-            flying = false
-            if bv then bv:Destroy() end
-            if bg then bg:Destroy() end
+            cleanupFly()
         end
     end)
 
@@ -780,7 +860,9 @@ do
         Title = "Sell All Loot Materials",
         Description = "",
         Callback = function()
-            ReplicatedStorage.RemoteServices.InventoryService.RF.SellAllLootMaterial:FireServer()
+            pcall(function()
+                ReplicatedStorage.RemoteServices.InventoryService.RF.SellAllLootMaterial:InvokeServer()
+            end)
         end
     })
 
@@ -790,7 +872,7 @@ do
         Title = "Equip Best Sword",
         Description = "Equip best sword in your inventory",
         Callback = function()
-            Collection:EquipBestSword()
+            Collection:EquipBestSwordV2()
         end
     })
 
@@ -798,7 +880,7 @@ do
         Title = "Equip Best Armor",
         Description = "Equip best armor in your inventory",
         Callback = function()
-            Collection:EquipBestArmor()
+            Collection:EquipBestArmorV2()
         end
     })
 
