@@ -1,4 +1,3 @@
--- No output generated (Check console/stderr)
 game:GetService("ReplicatedStorage")
 local _call2 = game:GetService("VirtualInputManager")
 local _call3 = game:GetService("GuiService")
