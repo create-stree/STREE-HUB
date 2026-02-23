@@ -108,6 +108,11 @@ local gameScripts = {
         free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c",
         premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
     },
+    [130594398886540] = {
+        name = "Garden Horizons",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Main.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Premium.lua"
+    },
     [136599248168660] = {
         name = "Solo Hunter",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Main.lua",
