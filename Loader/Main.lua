@@ -1,122 +1,49 @@
+repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+local placeId = game.PlaceId
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-local placeId = game.PlaceId
 
-_G.scripts_key = _G.scripts_key or scripts_key or "FREE_USER"
-local streeLogo = "rbxassetid://128806139932217"
-
-local premiumKeys = {
-    "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
-    "kRpXaVnqZyLhTjBfGmWcSdEoUiNpQvJ",
-    "YtHqFzPaKrXeBwNuDjMiVsGoClLrSnQe",
-    "pZxYvQmAaTrWnGfBqCkJdEoHsLuVtSiN",
-    "wJzDnQyGmTcLkVxEoPaFbSgRrUuMiZh",
-    "eBtXqNpRzVhLkCmSgJaWiFuTdOyQnPc",
-    "qYwRzEbTgLkPmDaVxHnUiFsCoSjMvNQ",
-    "ZkWmNtGpQrHxSaJlDyCfVuEbLoPiTnR",
-    "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuNM",
-    "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsMQ", -- 10
-    "hKQZrXvTnMFaJpLwSgDBeEYcUoNiRA",
-    "QmYBvDZoTnCwLrHFaXkUJEpSgNiVMQ",
-    "XoZKQnYJpLrEHTwSgDMBaFiCvUqRNP",
-    "nFvTQwXgYHKEoLaSBDZCUMJpRNiVTF",
-    "ZxJvXHnYkSgBLCMTFUpQoDaERwViNP",
-    "rTnMZQXvJHLFSCYwBKaUpgDoENiVPM",
-    "vBFSHkJXnLZCwQpDgMTUYoaERViNPQ",
-    "QpHnZLBkTgXvFMCwSYDoUaJERiVNQP",
-    "XQYpJkLCMZBvDgSwnHToFUERNiVPMQ",
-    "JXoZkYpLHQwMBnDgCvTFSUERiVNPQM", -- 20
-    "MTZLwXHnYkQgJpDCSBFoUvERiNPMQX",
-    "ZgYJQXkHnBvTFUoMCSwDLpERiNPMQV",
-    "wJXHnZkYFQpDvSLCMToUBgERiNPMQV",
-    "XwYkJZHQnMBCgTFDvUSpLoERiNPMQV",
-    "QZJXkHMYnLwBTDpCgUSFoERiNPMQVX",
-    "HXkZBvJMYQwDnTLpUCSFgERiNPMQVX",
-    "JkQHnXMYDvZLBFoCgSwUTpERiNPMQV",
-    "YJXQkZHDvMBSgTFLnUwCoERiNPMQVX",
-    "XkHnQZJMYpLwTDgCBUSFoERiNPMQVX",
-    "QXJZkHnYwMBgDvSCUTLpFERiNPMQVX", -- 30
-    "RfbTkLmNqPsAdFhGjKzXcVwQyUtIoPaSd",
-    "AzXcVbNmLpOiUyTrEwQqAsDfGhJkLmNbV",
-    "QwErTyUiOpAsDfGhJkLzXcVbNmLpOiUyT",
-    "MnBvCxZlKjHgFdSaQwErTyUiOpLkJhGfD",
-    "VwQyUtIoPaSdFgHjKlMnBvCxZqWeRtYuI",
-    "GhJkLmNbVcXzQwErTyUiOpAsDfGhJkLmN",
-    "XcVbNmLpOiUyTrEwQqAsDfGhJkLmNbVcX",
-    "SdFgHjKlMnBvCxZqWeRtYuIoPaSdFgHjK",
-    "LkJhGfDsAqWeRtYuIoPaSdFgHjKlMnBvC",
-    "PaSdFgHjKlMnBvCxZqWeRtYuIoPaSdFgH", -- 40
-    "xQmZbTnLcVrWpKyJdHsUfGaEiLoPnYtR",
-    "BnVcXzQpLmYtRwQkJhGfDsAzXbNmLpOt",
-    "YkLmNbVcXzAsDfGhJkLpOiUyTrEwQmNy",
-    "tRqWpLnMxKvBsGfHeJzDuQiYcPaLmNkQ",
-    "JmQnLpRtYxKvBsGhEfZaWiCuTdOyQnLu",
-    "kVxYoPaSdFgHjKlMnBvCxZqWeRtYuIoT",
-    "pLnMxKvBsGhEfZaWiCuTdOyQnLkVxYon",
-    "XcVbNmLpQrTyUiOpAsDfGhJkLmNbVcXs",
-    "sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig",
-    "HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp", -- 50
-    "developer_access",
-    "team_access",
-}
-
-local function isPremiumKey(key)
-    for _, k in ipairs(premiumKeys) do
-        if key == k then
-            return true
-        end
-    end
-    return false
-end
-
-local userType = isPremiumKey(_G.scripts_key) and "Premium" or "Freemium"
+local streeLogo = "rbxassetid://99948086845842"
 
 local gameScripts = {
     [127794225497302] = {
         name = "Abyss",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Main.lua"
     },
     [124311897657957] = {
         name = "Break A Lucky Block",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Main.lua"
     },
     [2753915549] = {
         name = "Blox Fruit",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Main.lua"
     },
     [123921593837160] = {
         name = "Climb and Jump Tower",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"
     },
     [131623223084840] = {
         name = "Escape Tsunami For Brainrot",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Main.lua"
     },
     [121864768012064] = {
         name = "Fish It",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Main.lua"
     },
     [18687417158] = {
         name = "Forsaken",
-        free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c",
-        premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
+        free = "https://pandadevelopment.net/virtual/file/510939b1302a5a9c"
     },
     [130594398886540] = {
         name = "Garden Horizons",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Main.lua"
     },
     [136599248168660] = {
         name = "Solo Hunter",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Main.lua",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Main.lua"
     }
 }
 
@@ -187,33 +114,17 @@ StarterGui:SetCore("SendNotification", {
     Icon = streeLogo,
     Duration = 3
 })
-StarterGui:SetCore("SendNotification", {
-    Title = "STREE HUB",
-    Text = "User Type: " .. userType,
-    Icon = streeLogo,
-    Duration = 3
-})
 
 task.wait(2)
 
 if gameData then
-    if userType == "Premium" then
-        StarterGui:SetCore("SendNotification", {
-            Title = "STREE HUB",
-            Text = "Loading Premium version for " .. gameName .. "...",
-            Icon = streeLogo,
-            Duration = 3
-        })
-        loadstring(game:HttpGet(gameData.premium))()
-    else
-        StarterGui:SetCore("SendNotification", {
-            Title = "STREE HUB",
-            Text = "Loading Freemium version for " .. gameName .. "...",
-            Icon = streeLogo,
-            Duration = 3
-        })
-        loadstring(game:HttpGet(gameData.free))()
-    end
+    StarterGui:SetCore("SendNotification", {
+        Title = "STREE HUB",
+        Text = "Loading Free version for " .. gameName .. "...",
+        Icon = streeLogo,
+        Duration = 3
+    })
+    loadstring(game:HttpGet(gameData.free))()
 else
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
@@ -221,4 +132,5 @@ else
         Icon = streeLogo,
         Duration = 4
     })
+    game.Players.LocalPlayer:Kick("❌ Game not supported!")
 end
