@@ -3,10 +3,12 @@ local Collection = {}; Collection.__index = Collection
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local UserInputService = game:GetService("UserInputService")
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -16,40 +18,12 @@ local Joined = false
 local ProtectName = "Protect by Forge Hub"
 local ForgeHub_Image = "rbxassetid://88704482117379"
 
--- Fly variables
 local flying = false
 local bv, bg
 local keys = {
     W = false, A = false, S = false, D = false,
     Space = false, Ctrl = false
 }
-
--- Initialize global settings
-getgenv().choosendungeon = getgenv().choosendungeon or "Subway"
-getgenv().choosendungeonrank = getgenv().choosendungeonrank or "F"
-getgenv().autofarmdungeon = getgenv().autofarmdungeon or false
-getgenv().autojoindungeon = getgenv().autojoindungeon or false
-getgenv().autostartdungeon = getgenv().autostartdungeon or false
-getgenv().autoleavedungeon = getgenv().autoleavedungeon or false
-getgenv().AutoOpenChest = getgenv().AutoOpenChest or false
-getgenv().AutoFarmMonster = getgenv().AutoFarmMonster or false
-getgenv().AutoAttackMonster = getgenv().AutoAttackMonster or false
-getgenv().normalattack = getgenv().normalattack or false
-getgenv().KillAura = getgenv().KillAura or false
-getgenv().PointAmount = getgenv().PointAmount or 1
-getgenv().choosenstats = getgenv().choosenstats or "Strength"
-getgenv().autostats = getgenv().autostats or false
-getgenv().chooseItems = getgenv().chooseItems or ""
-getgenv().enableprotection = getgenv().enableprotection or false
-getgenv().Camera_Zoom = getgenv().Camera_Zoom or 100
-getgenv().FlySpeed = getgenv().FlySpeed or 50
-getgenv().enablefly = getgenv().enablefly or false
-getgenv().speedchanger = getgenv().speedchanger or 13
-getgenv().enablespeed = getgenv().enablespeed or false
-getgenv().jumppowerchanger = getgenv().jumppowerchanger or 13
-getgenv().enablejumppower = getgenv().enablejumppower or false
-getgenv().choosesword = getgenv().choosesword or ""
-getgenv().autotakesubwayquest = getgenv().autotakesubwayquest or false
 
 function Collection:IsTeleporting()
     if LocalPlayer:GetAttribute("DungeonId") == (nil or "") then
@@ -59,36 +33,33 @@ function Collection:IsTeleporting()
     end
 end
 
-function Collection:RewriteSyntax(str)
+function Collection:RewriteSynxtaxe(str)
     return string.lower(str):gsub("%s+", "")
 end
 
 function Collection:IsReturnPortal()
     for _, v in pairs(workspace:GetChildren()) do
         if v.Name == "OverworldPortal" then
-            print("Exit portal found")
+            print("Is havz for exit")
             return true
         end
     end
-    print("No exit portal")
+    print("not Door exit")
     return false
 end
 
 function Collection:CheckDistanceFrom(a, b, distance)
-    if a and b and a.Position and b.Position then
-        return (a.Position - b.Position).Magnitude <= distance
+    if (a.Position - b.Position).Magnitude <= distance then
+        return true
+    else
+        return false
     end
-    return false
 end
 
 function Collection:InstantTeleportTo(pos)
-    local character = LocalPlayer.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = pos
-    end
+    LocalPlayer.Character.HumanoidRootPart.CFrame = pos
 end
 
--- Item lists (ordered from best to worst)
 local ListSword = {
     "Shadow Scrythe",
     "Dual Daggers",
@@ -120,122 +91,36 @@ local List_Leggings = {
     "Iron Leggings"
 }
 
-function Collection:GetPlayerInventory()
-    local playerData = LocalPlayer:FindFirstChild("PlayerData")
-    if playerData then
-        return playerData:FindFirstChild("Inventory")
-    end
-    local success, inv = pcall(function()
-        return ReplicatedStorage.RemoteServices.InventoryService.RF.GetInventory:InvokeServer()
-    end)
-    if success then
-        return inv
-    end
-    return nil
-end
-
-function Collection:EquipBestArmorV2()
-    local inventory = self:GetPlayerInventory()
-    if not inventory then
-        self:EquipBestArmor()
-        return
-    end
-    
-    local armorTypes = {"Helmet", "Chestplate", "Leggings"}
-    local priorityLists = {
-        Helmet = List_Helmet,
-        Chestplate = List_Chestplate,
-        Leggings = List_Leggings
-    }
-    
-    for _, armorType in ipairs(armorTypes) do
-        for _, itemName in ipairs(priorityLists[armorType]) do
-            local owned = false
-            if type(inventory) == "table" then
-                for _, invItem in pairs(inventory) do
-                    if (type(invItem) == "table" and invItem.Name == itemName) or invItem == itemName then
-                        owned = true
-                        break
-                    end
-                end
-            elseif type(inventory) == "Instance" then
-                if inventory:FindFirstChild(itemName) then
-                    owned = true
-                end
-            end
-            
-            if owned then
-                pcall(function()
-                    ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer(armorType, itemName)
-                end)
-                break
-            end
+function Collection:EquipBestArmor()
+    for _, v1 in ipairs(List_Helmet) do
+        if not LocalPlayer.Character:FindFirstChild(v1) then
+            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Helmet", v1)
+            break
         end
     end
-end
-
-function Collection:EquipBestSwordV2()
-    local inventory = self:GetPlayerInventory()
-    if not inventory then
-        self:EquipBestSword()
-        return
-    end
-    
-    for _, itemName in ipairs(ListSword) do
-        local owned = false
-        if type(inventory) == "table" then
-            for _, invItem in pairs(inventory) do
-                if (type(invItem) == "table" and invItem.Name == itemName) or invItem == itemName then
-                    owned = true
-                    break
-                end
-            end
-        elseif type(inventory) == "Instance" then
-            if inventory:FindFirstChild(itemName) then
-                owned = true
-            end
+    for _, v2 in ipairs(List_Chestplate) do
+        if not LocalPlayer.Character:FindFirstChild(v2) then
+            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Chestplate", v2)
+            break
         end
-        
-        if owned then
-            pcall(function()
-                ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Weapon", itemName)
-            end)
+    end
+    for _, v3 in ipairs(List_Leggings) do
+        if not LocalPlayer.Character:FindFirstChild(v3) then
+            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Leggings", v3)
             break
         end
     end
 end
 
-function Collection:EquipBestArmor()
-    for _, item in ipairs(List_Helmet) do
-        local success = pcall(function()
-            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Helmet", item)
-        end)
-        if success then break end
-    end
-    for _, item in ipairs(List_Chestplate) do
-        local success = pcall(function()
-            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Chestplate", item)
-        end)
-        if success then break end
-    end
-    for _, item in ipairs(List_Leggings) do
-        local success = pcall(function()
-            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Leggings", item)
-        end)
-        if success then break end
-    end
-end
-
 function Collection:EquipBestSword()
-    for _, item in ipairs(ListSword) do
-        local success = pcall(function()
-            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Weapon", item)
-        end)
-        if success then break end
+    for _, v in ipairs(ListSword) do
+        if not LocalPlayer.Backpack:FindFirstChild(v) then
+            ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Weapon", v)
+            break
+        end
     end
 end
 
--- UI Library
 local Fluent, SaveManager, InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/Beta.lua"))()
 
 local Window = Fluent:CreateWindow({
@@ -256,7 +141,6 @@ local Window = Fluent:CreateWindow({
     UserInfoTop = false
 })
 
--- Mobile drag icon (unchanged)
 if isMobile then
     local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
     gui.Name = "ForgeHub.Ui"
@@ -290,7 +174,7 @@ if isMobile then
         if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
     end)
 
-    UserInputService.InputChanged:Connect(function(input)
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
         if dragging and input == dragInput then
             local delta = input.Position - dragStart
             icon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
@@ -304,7 +188,6 @@ if isMobile then
     end)
 end
 
--- Tabs
 local Tabs = {
     General = Window:AddTab({ Title = "Main", Icon = "house" }),
     Stats = Window:AddTab({ Title = "Stats", Icon = "bar-chart-2" }),
@@ -318,34 +201,37 @@ do
     local Section_1 = Tabs.General:AddSection("[🔧] Setup")
 
     local selectdungeaonsdropdown = Section_1:AddDropdown("selectdungeaonsdropdown", {
-        Title = "Choose Dungeon",
+        Title = "Choose Dungueon",
         Values = {"Subway", "Caves", "Desert", "Jungle", "WolfCave", "SpiderCave"},
         Multi = false,
         Default = getgenv().choosendungeon,
     })
+
     selectdungeaonsdropdown:OnChanged(function(v)
         getgenv().choosendungeon = v
     end)
 
     local selectdungeaonsrankdropdown = Section_1:AddDropdown("selectdungeaonsrankdropdown", {
-        Title = "Choose Dungeon Rank",
+        Title = "Choose Dungueon Rank",
         Values = {"F", "F+", "E", "E+", "D", "D+", "C", "C+", "B", "B+", "A", "A+", "S", "S+", "S++", "S+++"},
         Multi = false,
         Default = getgenv().choosendungeonrank,
     })
+
     selectdungeaonsrankdropdown:OnChanged(function(v)
         getgenv().choosendungeonrank = v
     end)
 
     local Section_2 = Tabs.General:AddSection("[☠️] Dungeon")
 
-    local autofarmdungeontoggle = Section_2:AddToggle("autofarmdungeontoggle", {Title = "Auto Farm Dungeon", Description = "Automatically farms the selected dungeon", Default = getgenv().autofarmdungeon })
+    local autofarmdungeontoggle = Section_2:AddToggle("autofarmdungeontoggle", {Title = "Auto Farm Dungeon", Description = "Automatically farms the selected dungeon", Default = false })
+
     autofarmdungeontoggle:OnChanged(function(v)
         getgenv().autofarmdungeon = v
-        if not v then Joined = false end -- Reset join state when toggled off
     end)
 
-    local autojoindungeontoggle = Section_2:AddToggle("autojoindungeontoggle", {Title = "Auto Join Dungeon", Description = "Automatically joins the selected dungeon", Default = getgenv().autojoindungeon })
+    local autojoindungeontoggle = Section_2:AddToggle("autojoindungeontoggle", {Title = "Auto Join Dungeon", Description = "Automatically joins the selected dungeon", Default = false })
+
     autojoindungeontoggle:OnChanged(function(v)
         getgenv().autojoindungeon = v
     end)
@@ -361,41 +247,45 @@ do
 
     task.spawn(function()
         while task.wait(0.5) do
-            pcall(function()
-                if not getgenv().autofarmdungeon then return end
-
-                local selectedDungeon = getgenv().choosendungeon
-                local selectedRank = getgenv().choosendungeonrank
-                local dungeonKey = DungeonMap[selectedDungeon]
-                if not dungeonKey then return end
-
-                local targetPortal = nil
-                for _, portal in pairs(workspace.PortalSpawns.Normal:GetChildren()) do
-                    local portalName = Collection:RewriteSyntax(portal.Name)
-                    local formattedDungeon = Collection:RewriteSyntax(dungeonKey)
-                    if string.find(portalName, formattedDungeon, 1, true) and portal:GetAttribute("Rank") == selectedRank then
-                        targetPortal = portal
-                        break
-                    end
-                end
-
-                if targetPortal then
-                    Collection:InstantTeleportTo(targetPortal.CFrame)
-
-                    if getgenv().autojoindungeon and not Joined then
-                        task.wait(0.4)
-                        local portalId = "N_" .. targetPortal.Name
-                        ReplicatedStorage.RemoteServices.PortalService.RF.QueuePortal:InvokeServer(portalId)
-                        task.wait(0.5)
-                        ReplicatedStorage.RemoteServices.PortalService.RF.EnterPortal:InvokeServer(portalId)
-                        Joined = true
+            local Success, Error = pcall(function()
+                if getgenv().autofarmdungeon then
+                    local SelectedDungeonIs = getgenv().choosendungeon
+                    local SelectRankIs = getgenv().choosendungeonrank
+                    local Alrin = false
+                    local TransformedNameDungeonIs = DungeonMap[SelectedDungeonIs]
+                    for _, PortalSpawns in pairs(workspace.PortalSpawns.Normal:GetChildren()) do
+                        local realPortal = Collection:RewriteSynxtaxe(PortalSpawns.Name)
+                        local formattedDungeon = Collection:RewriteSynxtaxe(TransformedNameDungeonIs)
+                        local rankAttribute = PortalSpawns:GetAttribute("Rank")
+                        if string.find(realPortal, formattedDungeon, 1, true) and rankAttribute == SelectRankIs then
+                            if not Alrin then
+                                LocalPlayer.Character.HumanoidRootPart.CFrame = PortalSpawns.CFrame
+                                Alrin = true
+                            end
+                            if getgenv().autojoindungeon and not Joined then
+                                task.wait(0.4)
+                                local portalId = "N_" .. PortalSpawns.Name
+                                ReplicatedStorage.RemoteServices.PortalService.RF.QueuePortal:InvokeServer(portalId)
+                                task.wait(0.5)
+                                ReplicatedStorage.RemoteServices.PortalService.RF.EnterPortal:InvokeServer(portalId)
+                                task.wait(0.2)
+                                Joined = true
+                                break
+                            end
+                            task.wait(6)
+                        end
                     end
                 end
             end)
+            if not Success then
+                task.wait(3)
+                warn("Eror Auto Farm Deungeon : " .. Error)
+            end
         end
     end)
 
-    local autostartdungeontoggle = Section_2:AddToggle("autostartdungeontoggle", {Title = "Auto Start Dungeon", Description = "Automatically start dungeon if able to", Default = getgenv().autostartdungeon })
+    local autostartdungeontoggle = Section_2:AddToggle("autostartdungeontoggle", {Title = "Auto Start Dungeon", Description = "Automatically Start dungeon if able to", Default = false })
+
     autostartdungeontoggle:OnChanged(function(v)
         getgenv().autostartdungeon = v
     end)
@@ -404,13 +294,15 @@ do
         while task.wait(1) do
             pcall(function()
                 if getgenv().autostartdungeon then
-                    ReplicatedStorage.RemoteServices.DungeonService.RF.StartDungeon:InvokeServer()
+                    local Event = game:GetService("ReplicatedStorage").RemoteServices.DungeonService.RF.StartDungeon
+                    Event:InvokeServer()
                 end
             end)
         end
     end)
 
-    local autoleavedungeontoggle = Section_2:AddToggle("autoleavedungeontoggle", {Title = "Auto Leave Dungeon", Description = "Automatically leaves the dungeon", Default = getgenv().autoleavedungeon })
+    local autoleavedungeontoggle = Section_2:AddToggle("autoleavedungeontoggle", {Title = "Auto Leave Dungeon", Description = "Automatically leaves the dungeon", Default = false })
+
     autoleavedungeontoggle:OnChanged(function(v)
         getgenv().autoleavedungeon = v
     end)
@@ -418,15 +310,27 @@ do
     task.spawn(function()
         while task.wait(1) do
             pcall(function()
-                if getgenv().autoleavedungeon and Collection:IsReturnPortal() then
-                    ReplicatedStorage.RemoteServices.DungeonService.RF.TeleportToLobby:InvokeServer()
-                    Joined = false
+                if getgenv().autoleavedungeon then
+                    if Collection:IsReturnPortal() then
+                        local Event = game:GetService("ReplicatedStorage").RemoteServices.DungeonService.RF.TeleportToLobby
+                        Event:InvokeServer()
+                        Joined = false
+                    else
+                        Fluent:Notify({
+                            Title = "Forge Hub - Solo Hunter",
+                            Content = "Not in dungeon or no portal to exit found",
+                            SubContent = "Check Notifications",
+                            Duration = 5
+                        })
+                        task.wait(8)
+                    end
                 end
             end)
         end
     end)
 
-    local autopenchesttoggle = Section_2:AddToggle("autopenchesttoggle", {Title = "Auto Open Chest", Description = "Automatically opens chests", Default = getgenv().AutoOpenChest })
+    local autopenchesttoggle = Section_2:AddToggle("autopenchesttoggle", {Title = "Auto Open Chest", Description = "Automatically opens chests", Default = false })
+
     autopenchesttoggle:OnChanged(function(v)
         getgenv().AutoOpenChest = v
     end)
@@ -437,12 +341,14 @@ do
                 if getgenv().AutoOpenChest then
                     for _, v in pairs(workspace:GetChildren()) do
                         if string.find(v.Name, "Chest") and v:IsA("Model") then
-                            local owner = v:GetAttribute("Owner")
-                            local chestUUID = v:GetAttribute("ChestUUID")
-                            if owner == LocalPlayer.Name and chestUUID then
-                                Collection:InstantTeleportTo(v.Part.CFrame + Vector3.new(0,3,0))
+                            local OwwnerAttributes = v:GetAttribute("Owner")
+                            local KnowChestAttributes = v:GetAttribute("ChestUUID")
+                            if OwwnerAttributes == LocalPlayer.Name then
+                                local RemoteNameChest = KnowChestAttributes
+                                Collection:InstantTeleportTo(v.Part.CFrame + Vector3.new(0, 3, 0))
                                 task.wait(0.15)
-                                ReplicatedStorage.RemoteServices.BossDropsService.RF.OpenChest:InvokeServer(chestUUID)
+                                ReplicatedStorage.RemoteServices.BossDropsService.RF.OpenChest:InvokeServer(RemoteNameChest)
+                                Joined = false
                             end
                         end
                     end
@@ -453,7 +359,8 @@ do
 
     local Section_4 = Tabs.General:AddSection("[🧟] Monster")
 
-    local autofarmmonstertoggle = Section_4:AddToggle("autofarmmonstertoggle", {Title = "Auto Farm Monster", Description = "Automatically farms monsters", Default = getgenv().AutoFarmMonster })
+    local autofarmmonstertoggle = Section_4:AddToggle("autofarmmonstertoggle", {Title = "Auto Farm Monster", Description = "Automatically farms monsters", Default = false })
+
     autofarmmonstertoggle:OnChanged(function(v)
         getgenv().AutoFarmMonster = v
     end)
@@ -461,16 +368,12 @@ do
     task.spawn(function()
         while task.wait(0.2) do
             pcall(function()
-                if getgenv().AutoFarmMonster and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    for _, mob in pairs(workspace.Mobs:GetChildren()) do
-                        if mob and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") then
-                            local dist = (mob.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                            if dist < 350 then
-                                while getgenv().AutoFarmMonster and mob and mob.Parent and mob.Humanoid.Health > 0 do
-                                    Collection:InstantTeleportTo(mob.HumanoidRootPart.CFrame)
-                                    task.wait(0.1)
-                                end
-                            end
+                if getgenv().AutoFarmMonster then
+                    for i, v in pairs(workspace.Mobs:GetChildren()) do
+                        if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 350 then
+                            repeat task.wait()
+                                Collection:InstantTeleportTo(v.HumanoidRootPart.CFrame)
+                            until not v or not v.Parent or not getgenv().AutoFarmMonster
                         end
                     end
                 end
@@ -478,60 +381,78 @@ do
         end
     end)
 
-    local autoattackmonster = Section_4:AddToggle("autoattackmonster", {Title = "Fast Attack Monster", Description = "Automatically attacks monsters", Default = getgenv().AutoAttackMonster })
+    local autoattackmonster = Section_4:AddToggle("autoattackmonster", {Title = "Fast Attack Monster", Description = "Automatically attacks monsters", Default = false })
+
     autoattackmonster:OnChanged(function(v)
         getgenv().AutoAttackMonster = v
     end)
 
     task.spawn(function()
         while task.wait(0.1) do
-            pcall(function()
+            local Success, Error = pcall(function()
                 if getgenv().AutoAttackMonster then
-                    for _, mob in pairs(workspace.Mobs:GetChildren()) do
-                        if mob and mob:FindFirstChild("Humanoid") then
-                            ReplicatedStorage.RemoteServices.CombatService.RF.UseWeapon:InvokeServer(10, {mob}, 10)
-                        end
+                    for i, v in pairs(workspace.Mobs:GetChildren()) do
+                        local Event = game:GetService("ReplicatedStorage").RemoteServices.CombatService.RF.UseWeapon
+                        Event:InvokeServer(
+                            10,
+                            {
+                                v
+                            },
+                            10
+                        )
                     end
                 end
             end)
+            if not Success then
+                task.wait(3)
+                warn("EROR AUTO ATTACK : " .. Error)
+            end
         end
     end)
 
-    local normalattacktoggle = Section_4:AddToggle("normalattacktoggle", {Title = "Normal Attack Monster", Description = "Simulates mouse clicks", Default = getgenv().normalattack })
+    local normalattacktoggle = Section_4:AddToggle("normalattacktoggle", {Title = "Normal Attack Monster", Description = "Automatically attacks monsters", Default = false })
+
     normalattacktoggle:OnChanged(function(v)
         getgenv().normalattack = v
     end)
 
     task.spawn(function()
         while task.wait(0.1) do
-            pcall(function()
+            local Success, Error = pcall(function()
                 if getgenv().normalattack then
                     VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
                     task.wait(0.1)
                     VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
                 end
             end)
+            if not Success then
+                task.wait(3)
+                warn("EROR AUTO ATTACK : " .. Error)
+            end
         end
     end)
 
-    local enablekillauratoggle = Section_4:AddToggle("enablekillauratoggle", {Title = "Enable Kill Aura", Description = "Automatically kills monsters in range", Default = getgenv().KillAura })
+    local enablekillauratoggle = Section_4:AddToggle("enablekillauratoggle", {Title = "Enable Kill Aura", Description = "Automatically kills monsters in range", Default = false })
+
     enablekillauratoggle:OnChanged(function(v)
         getgenv().KillAura = v
     end)
 
     task.spawn(function()
         while task.wait(0.1) do
-            pcall(function()
+            local Success, Error = pcall(function()
                 if getgenv().KillAura then
-                    sethiddenproperty(Players.LocalPlayer, "SimulationRadius", 5000)
-                    sethiddenproperty(LocalPlayer, "MaxSimulationRadius", 5000)
-                    for _, mob in pairs(workspace.Mobs:GetChildren()) do
-                        if mob:FindFirstChild("Humanoid") then
-                            mob.Humanoid.Health = 0
-                        end
+                    for i, v in pairs(workspace.Mobs:GetChildren()) do
+                        sethiddenproperty(Players.LocalPlayer, "SimulationRadius", 5000)
+                        sethiddenproperty(LocalPlayer, "MaxSimulationRadius", 5000)
+                        v.Humanoid.Health = 0
                     end
                 end
             end)
+            if not Success then
+                task.wait(3)
+                warn("EROR AUTO ATTACK : " .. Error)
+            end
         end
     end)
 
@@ -540,7 +461,7 @@ do
     local pointamountslider = Section_3:AddSlider("pointamountslider", {
         Title = "Point Amount",
         Description = "Choose how many points you want to spend",
-        Default = getgenv().PointAmount,
+        Default = 1,
         Min = 0,
         Max = 10,
         Rounding = 0,
@@ -553,13 +474,15 @@ do
         Title = "Choose Stats",
         Values = {"Magic", "Strength", "Defense", "Agility", "Energy"},
         Multi = false,
-        Default = getgenv().choosenstats,
+        Default = false,
     })
+
     selectstatsdopdown:OnChanged(function(v)
         getgenv().choosenstats = v
     end)
 
-    local enableautostatstoggle = Section_3:AddToggle("enableautostatstoggle", {Title = "Enable Auto Stats", Default = getgenv().autostats })
+    local enableautostatstoggle = Section_3:AddToggle("enableautostatstoggle", {Title = "Enable Auto Stats", Default = false })
+
     enableautostatstoggle:OnChanged(function(v)
         getgenv().autostats = v
     end)
@@ -568,9 +491,12 @@ do
         while task.wait(0.5) do
             pcall(function()
                 if getgenv().autostats then
-                    ReplicatedStorage.RemoteServices.InventoryService.RF.UseSkillPoints:InvokeServer({
-                        [getgenv().choosenstats] = getgenv().PointAmount
-                    })
+                    local Event = game:GetService("ReplicatedStorage").RemoteServices.InventoryService.RF.UseSkillPoints
+                    Event:InvokeServer(
+                        {
+                            [getgenv().choosenstats] = getgenv().PointAmount
+                        }
+                    )
                 end
             end)
         end
@@ -582,6 +508,7 @@ do
     local MerchantItems = require(ReplicatedStorage.ReplicatedStorage.Modules.Shared.Data.MerchantItems)
     for _, item in pairs(MerchantItems.Normal) do
         if type(item) == "table" and item.Base then
+            print(item.Base)
             table.insert(TableItemsShop, item.Base)
         end
     end
@@ -590,8 +517,9 @@ do
         Title = "Choose Items To Buy",
         Values = TableItemsShop,
         Multi = false,
-        Default = getgenv().chooseItems,
+        Default = false,
     })
+
     selectshopstuffdopdown:OnChanged(function(v)
         getgenv().chooseItems = v
     end)
@@ -600,24 +528,38 @@ do
         Title = "Buy Item Once",
         Description = "Buys the selected item once",
         Callback = function()
-            local itemName = getgenv().chooseItems
-            if itemName and itemName ~= "" then
-                pcall(function()
-                    ReplicatedStorage.RemoteServices.MerchantService.RF.Buy:InvokeServer(itemName, 1)
-                end)
-            else
-                Fluent:Notify({
-                    Title = "Forge Hub",
-                    Content = "Pilih item terlebih dahulu!",
-                    Duration = 3
-                })
-            end
+            local Event33 = game:GetService("ReplicatedStorage").RemoteServices.MerchantService.RF.Buy
+            Event33:InvokeServer(getgenv().chooseItems)
         end
     })
 
+    local Section_AutoBuy = Tabs.Merchant:AddSection("[🤖] Auto Buy")
+
+    local autobuytoggle = Section_AutoBuy:AddToggle("autobuytoggle", {
+        Title = "Auto Buy Selected Item",
+        Description = "Continuously buys the chosen item (use with caution)",
+        Default = false
+    })
+
+    autobuytoggle:OnChanged(function(v)
+        getgenv().AutoBuy = v
+    end)
+
+    task.spawn(function()
+        while task.wait(3) do
+            pcall(function()
+                if getgenv().AutoBuy and getgenv().chooseItems then
+                    local Event = game:GetService("ReplicatedStorage").RemoteServices.MerchantService.RF.Buy
+                    Event:InvokeServer(getgenv().chooseItems)
+                end
+            end)
+        end
+    end)
+
     local Section_6 = Tabs.Misc:AddSection("[🛡️] Protection")
 
-    local enableprotectiontoggle = Section_6:AddToggle("enableprotectiontoggle", {Title = "Enable Protection", Description = "Enables protection against certain game mechanics", Default = getgenv().enableprotection })
+    local enableprotectiontoggle = Section_6:AddToggle("enableprotectiontoggle", {Title = "Enable Protection", Description = "Enables protection against certain game mechanics", Default = false })
+
     enableprotectiontoggle:OnChanged(function(v)
         getgenv().enableprotection = v
     end)
@@ -625,15 +567,15 @@ do
     task.spawn(function()
         while task.wait(0.5) do
             pcall(function()
-                if getgenv().enableprotection then
+                if getgenv().enableprotection then 
                     if LocalPlayer.DisplayName ~= ProtectName then
                         LocalPlayer.DisplayName = ProtectName
                     end
-                    local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
-                    if leaderstats then
-                        for _, stat in pairs(leaderstats:GetChildren()) do
-                            if stat.Name ~= ProtectName then
-                                stat.Name = ProtectName
+                    local LeaderStats = LocalPlayer:FindFirstChild("leaderstats")
+                    if LeaderStats then
+                        for _, Stats in pairs(LeaderStats:GetChildren()) do
+                            if Stats.Name ~= ProtectName then
+                                Stats.Name = ProtectName
                             end
                         end
                     end
@@ -645,9 +587,9 @@ do
     local Section_7 = Tabs.Misc:AddSection("[🔎] Max Zoom")
 
     local camerazoomslider = Section_7:AddSlider("camerazoomslider", {
-        Title = "Maximum Zoom Distance",
-        Description = "Change the maximum zoom distance of your camera",
-        Default = getgenv().Camera_Zoom,
+        Title = "Maximum  Zoom  Distance",
+        Description = "change the maximum zoom distance of your camera",
+        Default = 100,
         Min = 10,
         Max = 1000,
         Rounding = 1,
@@ -659,22 +601,19 @@ do
     task.spawn(function()
         while task.wait(0.5) do
             pcall(function()
-                if getgenv().Camera_Zoom and LocalPlayer.Character then
-                    local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        humanoid.CameraMaxZoomDistance = getgenv().Camera_Zoom
-                    end
+                if getgenv().Camera_Zoom then
+                    game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").CameraMaxZoomDistance = getgenv().Camera_Zoom
                 end
             end)
         end
     end)
-
+    
     local Section_8 = Tabs.Misc:AddSection("[🪽] Fly")
 
     local flyspeedslider = Section_8:AddSlider("flyspeedslider", {
         Title = "Fly Speed",
-        Description = "Change the speed of fly",
-        Default = getgenv().FlySpeed,
+        Description = "change the speed of fly",
+        Default = 50,
         Min = 10,
         Max = 500,
         Rounding = 1,
@@ -683,46 +622,12 @@ do
         end
     })
 
-    -- Fly cleanup function
-    local function cleanupFly()
-        if bv then bv:Destroy() bv = nil end
-        if bg then bg:Destroy() bg = nil end
-        flying = false
-    end
+    local enableflytoggle = Section_8:AddToggle("enableflytoggle", {Title = "Enable Fly", Description = "Enables flying", Default = false })
 
-    local function setupFly(character)
-        if not character or not getgenv().enablefly then return end
-        cleanupFly()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        flying = true
-        bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        bv.Velocity = Vector3.zero
-        bv.Parent = hrp
-
-        bg = Instance.new("BodyGyro")
-        bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-        bg.CFrame = hrp.CFrame
-        bg.Parent = hrp
-    end
-
-    LocalPlayer.CharacterAdded:Connect(setupFly)
-    LocalPlayer.CharacterRemoving:Connect(cleanupFly)
-    if LocalPlayer.Character then setupFly(LocalPlayer.Character) end
-
-    local enableflytoggle = Section_8:AddToggle("enableflytoggle", {Title = "Enable Fly", Description = "Enables flying", Default = getgenv().enablefly })
     enableflytoggle:OnChanged(function(v)
         getgenv().enablefly = v
-        if v then
-            if LocalPlayer.Character then
-                setupFly(LocalPlayer.Character)
-            end
-        else
-            cleanupFly()
-        end
     end)
 
-    -- Fly input handling
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end
         if input.KeyCode == Enum.KeyCode.W then keys.W = true end
@@ -743,7 +648,27 @@ do
     end)
 
     RunService.RenderStepped:Connect(function()
-        if getgenv().enablefly and flying and bv and bg then
+        if getgenv().enablefly and not flying then
+            flying = true
+
+            bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+            bv.Velocity = Vector3.zero
+            bv.Parent = LocalPlayer.Character.HumanoidRootPart
+
+            bg = Instance.new("BodyGyro")
+            bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+            bg.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+            bg.Parent = LocalPlayer.Character.HumanoidRootPart
+        end
+
+        if not getgenv().enablefly and flying then
+            flying = false
+            if bv then bv:Destroy() end
+            if bg then bg:Destroy() end 
+        end
+
+        if flying then
             local cam = workspace.CurrentCamera
             local dir = Vector3.zero
 
@@ -760,8 +685,6 @@ do
 
             bv.Velocity = dir
             bg.CFrame = cam.CFrame
-        elseif not getgenv().enablefly and flying then
-            cleanupFly()
         end
     end)
 
@@ -769,8 +692,8 @@ do
 
     local speedchangerslider = Section_9:AddSlider("speedchangerslider", {
         Title = "Speed Changer",
-        Description = "Change the speed of your character",
-        Default = getgenv().speedchanger,
+        Description = "change the speed of your character",
+        Default = 13,
         Min = 1,
         Max = 300,
         Rounding = 1,
@@ -779,7 +702,8 @@ do
         end
     })
 
-    local enablespeedtoggle = Section_9:AddToggle("enablespeedtoggle", {Title = "Enable Speed Changer", Description = "Enables speed changing", Default = getgenv().enablespeed })
+    local enablespeedtoggle = Section_9:AddToggle("enablespeedtoggle", {Title = "Enable Speed Changer", Description = "Enables speed changing", Default = false })
+
     enablespeedtoggle:OnChanged(function(v)
         getgenv().enablespeed = v
     end)
@@ -787,11 +711,8 @@ do
     task.spawn(function()
         while task.wait(0.5) do
             pcall(function()
-                if getgenv().enablespeed and LocalPlayer.Character then
-                    local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        humanoid.WalkSpeed = getgenv().speedchanger
-                    end
+                if getgenv().enablespeed then
+                    game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = getgenv().speedchanger
                 end
             end)
         end
@@ -799,8 +720,8 @@ do
 
     local jumppowercachangerslider = Section_9:AddSlider("jumppowercachangerslider", {
         Title = "Jump Power Changer",
-        Description = "Change the jump power of your character",
-        Default = getgenv().jumppowerchanger,
+        Description = "change the jump power of your character",
+        Default = 13,
         Min = 1,
         Max = 300,
         Rounding = 1,
@@ -809,7 +730,8 @@ do
         end
     })
 
-    local enablejumppowertoggle = Section_9:AddToggle("enablejumppowertoggle", {Title = "Enable Jump Power Changer", Description = "Enables jump power changing", Default = getgenv().enablejumppower })
+    local enablejumppowertoggle = Section_9:AddToggle("enablejumppowertoggle", {Title = "Enable Jump Power Changer", Description = "Enables jump power changing", Default = false })
+
     enablejumppowertoggle:OnChanged(function(v)
         getgenv().enablejumppower = v
     end)
@@ -817,40 +739,40 @@ do
     task.spawn(function()
         while task.wait(0.5) do
             pcall(function()
-                if getgenv().enablejumppower and LocalPlayer.Character then
-                    local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        humanoid.JumpPower = getgenv().jumppowerchanger
-                    end
+                if getgenv().enablejumppower then
+                    game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = getgenv().jumppowerchanger
                 end
             end)
         end
     end)
 
     local Section_10 = Tabs.Items:AddSection("[⚔️] Sword")
-
-    local SwordList = {}
-    for _, v in pairs(ReplicatedStorage.ReplicatedStorage.Storage.Weapons:GetChildren()) do
-        table.insert(SwordList, v.Name)
+    
+    local SwordList = {};
+    for i, v in pairs(game:GetService("ReplicatedStorage").ReplicatedStorage.Storage.Weapons:GetChildren()) do
+         table.insert(SwordList, v.Name)
     end
 
-    local selectsworddropdown = Section_10:AddDropdown("selectsworddropdown", {
+    local selectshopstuffdopdown = Section_10:AddDropdown("selectshopstuffdopdown", {
         Title = "Choose Sword To Equip",
         Values = SwordList,
         Multi = false,
-        Default = getgenv().choosesword,
+        Default = false,
     })
-    selectsworddropdown:OnChanged(function(v)
+
+    selectshopstuffdopdown:OnChanged(function(v)
         getgenv().choosesword = v
     end)
 
     Section_10:AddButton({
-        Title = "Equip Chosen Sword",
+        Title = "Equip choosen sword",
         Description = "",
         Callback = function()
-            pcall(function()
-                ReplicatedStorage.RemoteServices.InventoryService.RF.Equip:InvokeServer("Weapon", getgenv().choosesword)
-            end)
+            local Event = game:GetService("ReplicatedStorage").RemoteServices.InventoryService.RF.Equip
+            Event:InvokeServer(
+                "Weapon",
+                getgenv().choosesword
+            )
         end
     })
 
@@ -860,33 +782,89 @@ do
         Title = "Sell All Loot Materials",
         Description = "",
         Callback = function()
-            pcall(function()
-                ReplicatedStorage.RemoteServices.InventoryService.RF.SellAllLootMaterial:InvokeServer()
-            end)
+            game:GetService("ReplicatedStorage").RemoteServices.InventoryService.RF.SellAllLootMaterial:FireServer()
         end
     })
+
+    local Section_AutoSell = Tabs.Items:AddSection("[💰] Auto Sell")
+
+    local autoselltoggle = Section_AutoSell:AddToggle("autoselltoggle", {
+        Title = "Auto Sell Loot Materials",
+        Description = "Automatically sells all loot materials every few seconds",
+        Default = false
+    })
+
+    autoselltoggle:OnChanged(function(v)
+        getgenv().AutoSellLoot = v
+    end)
+
+    task.spawn(function()
+        while task.wait(10) do
+            pcall(function()
+                if getgenv().AutoSellLoot then
+                    game:GetService("ReplicatedStorage").RemoteServices.InventoryService.RF.SellAllLootMaterial:FireServer()
+                end
+            end)
+        end
+    end)
 
     local Section_12 = Tabs.Items:AddSection("[🏆] Best")
 
     Section_12:AddButton({
         Title = "Equip Best Sword",
-        Description = "Equip best sword in your inventory",
+        Description = "Equip Best Sword in your inventory",
         Callback = function()
-            Collection:EquipBestSwordV2()
+            Collection:EquipBestSword()
         end
     })
 
     Section_12:AddButton({
         Title = "Equip Best Armor",
-        Description = "Equip best armor in your inventory",
+        Description = "Equip Best armor in your inventory",
         Callback = function()
-            Collection:EquipBestArmorV2()
+            Collection:EquipBestArmor()
         end
     })
 
+    local Section_AutoEquip = Tabs.Items:AddSection("[🔄] Auto Equip")
+
+    local autoequipswordtoggle = Section_AutoEquip:AddToggle("autoequipswordtoggle", {
+        Title = "Auto Equip Best Sword",
+        Description = "Continuously equips the best sword available",
+        Default = false
+    })
+
+    autoequipswordtoggle:OnChanged(function(v)
+        getgenv().AutoEquipSword = v
+    end)
+
+    local autoequiparmortoggle = Section_AutoEquip:AddToggle("autoequiparmortoggle", {
+        Title = "Auto Equip Best Armor",
+        Description = "Continuously equips the best helmet/chestplate/leggings",
+        Default = false
+    })
+
+    autoequiparmortoggle:OnChanged(function(v)
+        getgenv().AutoEquipArmor = v
+    end)
+
+    task.spawn(function()
+        while task.wait(5) do
+            pcall(function()
+                if getgenv().AutoEquipSword then
+                    Collection:EquipBestSword()
+                end
+                if getgenv().AutoEquipArmor then
+                    Collection:EquipBestArmor()
+                end
+            end)
+        end
+    end)
+
     local Section_13 = Tabs.Items:AddSection("[📜] Quest")
 
-    local autotakesubwayquest = Section_13:AddToggle("autotakesubwayquest", {Title = "Auto Take Quest", Description = "Automatically takes the subway quest", Default = getgenv().autotakesubwayquest })
+    local autotakesubwayquest = Section_13:AddToggle("autotakesubwayquest", {Title = "Auto Take Quest", Description = "Automatically takes the subway quest", Default = false })
+
     autotakesubwayquest:OnChanged(function(v)
         getgenv().autotakesubwayquest = v
     end)
@@ -895,29 +873,31 @@ do
         while task.wait(1) do
             pcall(function()
                 if getgenv().autotakesubwayquest then
-                    ReplicatedStorage.RemoteServices.OnboardingService.RF.TalkedToTin:InvokeServer()
+                    game:GetService("ReplicatedStorage").RemoteServices.OnboardingService.RF.TalkedToTin:InvokeServer()
                     task.wait(0.3)
-                    ReplicatedStorage.RemoteServices.QuestsV2Service.RF.MarkGiverViewed:InvokeServer("Subway")
+                    game:GetService("ReplicatedStorage").RemoteServices.QuestsV2Service.RF.MarkGiverViewed:InvokeServer("Subway")
                     task.wait(0.5)
-                    ReplicatedStorage.RemoteServices.QuestsV2Service.RF.RequestQuest:InvokeServer("Subway")
+                    game:GetService("ReplicatedStorage").RemoteServices.QuestsV2Service.RF.RequestQuest:InvokeServer("Subway")
                 end
             end)
         end
     end)
 end
 
--- Save/Load managers
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
+
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
+
 InterfaceManager:SetFolder("FluentScriptHub")
 SaveManager:SetFolder("FluentScriptHub/specific-game")
+
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
 Fluent:Notify({
-    Title = "Forge Hub",
+    Title = "Fluent",
     Content = "Solo Hunter loaded successfully!",
     Duration = 5
 })
