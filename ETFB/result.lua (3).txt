@@ -1,0 +1,627 @@
+-- No output generated (Check console/stderr)
+game:GetService("ReplicatedStorage")
+local _call2 = game:GetService("VirtualInputManager")
+local _call3 = game:GetService("GuiService")
+LocalPlayer:WaitForChild("PlayerGui")
+local Lighting = game:GetService("Lighting")
+local _call4 = game:GetService("VirtualUser")
+local Connection
+Connection = game.Players.LocalPlayer.Idled:Connect(function(p1_0, p2_0, p3_0, p4_0, p5_0, p6_0, p7_0, p8_0, p9_0, p10_0)
+    local _call5 = _call4.CaptureController
+    local _call6 = _call4:CaptureController()
+    local _call7 = _call4.ClickButton2
+    local _call8 = _call4:ClickButton2(Vector2.new())
+    warn(Anti-AFK: Aktivitas terdeteksi, mencegah diskoneksi.)
+end)
+warn(Anti AFK Automatic On!)
+settings().Network.IncomingReplicationLag = 0
+RunService.Heartbeat:Connect(function(...)
+end)
+    local _call9 = game_GetService_5.PreSimulation
+    local Connection_2
+    Connection_2 = _call9:Connect(function(p1_0, p2_0, p3_0, p4_0, p5_0, p6_0, p7_0, p8_0, p9_0, p10_0)
+        game.Players.LocalPlayer.GameplayPaused = false
+    end)
+    warn(Anti-Gameplay Paused Active!)
+    local CFrame_New = CFrame.new
+    local _call10 = _call1.Shared
+    local _call11 = _call10.Mutations
+    Mutations:GetChildren()
+    for _i11, _v11 in ipairs(Mutations:GetChildren()) do
+        v:IsA("ModuleScript")
+        local _call12 = _v11.Name
+    end
+    local _call13 = _call1.Assets
+    local _call14 = _call13.LuckyBlocks
+    LuckyBlocks:GetChildren()
+    for _i14, _v14 in ipairs(LuckyBlocks:GetChildren()) do
+        v:IsA("MeshPart")
+        local _call15 = _v14.Name
+    end
+    local loadstring_result = loadstring(game:HttpGet("https://raw.githubusercontent.com/zhidanptrsyh/tester/refs/heads/main/universal"))
+    local Color3_FromRGB = Color3.fromRGB
+    local _call16 = loadstring_result(...):Window({
+    Color = <userdata>,
+    Footer = "Executor: Solara",
+    Image = "80659354137631",
+    ["Tab Width"] = 120,
+    Title = "Meng Hub | Tsunami Brainrot |",
+    Version = 3,
+})
+    local _call17 = _call16.AddTab
+    local _call18 = _call16:AddTab({
+    Icon = "user",
+    Name = "About",
+})
+    local _call19 = _call16.AddTab
+    local _call20 = _call16:AddTab({
+    Icon = "star",
+    Name = "Local Player",
+})
+    local _call21 = _call16.AddTab
+    local _call22 = _call16:AddTab({
+    Icon = "star",
+    Name = "Main",
+})
+    local _call23 = _call16.AddTab
+    local _call24 = _call16:AddTab({
+    Icon = "star",
+    Name = "Automatic",
+})
+    local _call25 = _call16.AddTab
+    local _call26 = _call16:AddTab({
+    Icon = "",
+    Name = "Base",
+})
+    local _call27 = _call16.AddTab
+    local _call28 = _call16:AddTab({
+    Icon = "",
+    Name = "Misc",
+})
+    local _call29 = _call16.AddTab
+    local _call30 = _call16:AddTab({
+    Icon = "menu",
+    Name = "Configuration",
+})
+    local _call31 = _call18.AddSection
+    local _call32 = _call18:AddSection("About MengHub?", true)
+    local _call33 = _call32.AddParagraph
+    local _call34 = _call32:AddParagraph({
+    Content = "MengHub is a personal project dedicated to my special one, Ameng. \nThis script is built with passion and serves as a milestone in my coding journey. \nAs I am currently in the early stages of development and still learning the ropes of Luau,\nyou might encounter some bugs. I am committed to continuously improving this tool to provide the most seamless experience possible. \nThank you for being part of my learning process!",
+    Title = "What is MengHub?",
+})
+    local _call35 = _call32.AddParagraph
+    local _call36 = _call32:AddParagraph({
+    ButtonCallback = <function>,
+    ButtonText = "COPY LINK",
+    Content = "This link discord Meng Hub!",
+    Icon = "discord",
+    Title = "Meng Hub Discord",
+})
+    local _call37 = _call20.AddSection
+    local _call38 = _call20:AddSection("Player")
+    local _call39 = _call38.AddToggle
+    function AddToggle_Callback(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+    local _ = (ext_1_0 or false)
+    if ext_1_0 then -- default stub
+end
+end
+local _call40 = _call38:AddToggle({
+    Callback = AddToggle_Callback,
+    Default = false,
+    Title = "Infinite Jump",
+})
+local _call41 = game_GetService_4.JumpRequest
+local Connection_3
+Connection_3 = _call41:Connect(function(p1_0, p2_0, p3_0, p4_0, p5_0, p6_0, p7_0, p8_0, p9_0, p10_0)
+end)
+local _call42 = _call38.AddToggle
+function AddToggle_Callback_2(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call43 = _call38:AddToggle({
+    Callback = AddToggle_Callback_2,
+    Content = "Increase max camera distance",
+    Default = false,
+    Title = "Max Zoom 1000",
+})
+local _call44 = _call20.AddSection
+local _call45 = _call20:AddSection("God Mode")
+local _call46 = _call45.AddToggle
+function AddToggle_Callback_3(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call47 = _call45:AddToggle({
+    Callback = AddToggle_Callback_3,
+    Default = false,
+    Title = "God Mode",
+})
+local _call48 = _call22.AddSection
+local _call49 = _call22:AddSection("Auto Farm")
+local _call50 = _call49.AddDropdown
+function AddDropdown_Callback(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call51 = _call49:AddDropdown({
+    Callback = AddDropdown_Callback,
+    Default = "Hybird",
+    Options = {
+        "Hybird",
+        "Brainrot Only",
+        "Lucky Blocks Only",
+    },
+    Title = "Select Farm Mode",
+})
+local _call52 = _call49.AddDropdown
+function AddDropdown_Callback_2(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call53 = _call49:AddDropdown({
+    Callback = AddDropdown_Callback_2,
+    Default = {},
+    Multi = true,
+    Options = {
+        "Infinity",
+        "Divine",
+        "Celestial",
+        "Secret",
+        "Cosmic",
+        "Mythical",
+        "Legendary",
+        "Epic",
+        "Rare",
+        "Uncommon",
+        "Common",
+    },
+    Title = "Select Brainrot Rarities",
+})
+local _call54 = _call49.AddDropdown
+function AddDropdown_Callback_3(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call55 = _call49:AddDropdown({
+    Callback = AddDropdown_Callback_3,
+    Default = {
+        "Uncommon",
+        "Common",
+        "Rare",
+        "Epic",
+        "Legendary",
+        "Mythical",
+        "Cosmic",
+        "Secret",
+    },
+    Multi = true,
+    Options = {
+        _call15,
+    },
+    Title = "Select Lucky Block Rarities",
+})
+local _call56 = _call49.AddToggle
+function AddToggle_Callback_4(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call57 = _call49:AddToggle({
+    Callback = AddToggle_Callback_4,
+    Default = false,
+    Title = "Enable Auto Farm",
+})
+LocalPlayer.CharacterAdded:Connect(function(...)
+end)
+    task.spawn(function(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+        task.wait(5)
+    end)
+    local _call58 = _call22.AddSection
+    local _call59 = _call22:AddSection("Farm Settings")
+    local _call60 = _call59.AddInput
+    function AddInput_Callback(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+    local _ = (ext_1_0 or false)
+    if ext_1_0 then -- default stub
+end
+end
+local _call61 = _call59:AddInput({
+    Callback = AddInput_Callback,
+    Default = 4,
+    Placeholder = "Write ur input (1-6)",
+    Title = "Carry Capacity",
+})
+local _call62 = _call59.AddToggle
+function AddToggle_Callback_5(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call63 = _call59:AddToggle({
+    Callback = AddToggle_Callback_5,
+    Default = false,
+    Title = "Auto Unequip Items",
+})
+local _call64 = _call59.AddSlider
+function AddSlider_Callback(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call65 = _call59:AddSlider({
+    Callback = AddSlider_Callback,
+    Default = 200,
+    Max = 500,
+    Min = 10,
+    Title = "Tween Speed",
+})
+local _call66 = _call59.AddToggle
+function AddToggle_Callback_6(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call67 = _call59:AddToggle({
+    Callback = AddToggle_Callback_6,
+    Default = true,
+    Title = "Auto Adjust Tween Speed",
+})
+local _call68 = _call24.AddSection
+local _call69 = _call24:AddSection("Upgrade Features")
+local _call70 = _call69.AddDropdown
+function AddDropdown_Callback_4(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call71 = _call69:AddDropdown({
+    Callback = AddDropdown_Callback_4,
+    Default = "10",
+    Options = {
+        "1",
+        "5",
+        "10",
+    },
+    Title = "Speed Amount",
+})
+local _call72 = _call69.AddToggle
+function AddToggle_Callback_7(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call73 = _call69:AddToggle({
+    Callback = AddToggle_Callback_7,
+    Default = false,
+    Title = "Auto Upgrade Speed",
+})
+local _call74 = _call69.AddToggle
+function AddToggle_Callback_8(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call75 = _call69:AddToggle({
+    Callback = AddToggle_Callback_8,
+    Default = false,
+    Title = "Auto Upgrade Carry",
+})
+local _call76 = _call24.AddSection
+local _call77 = _call24:AddSection("Auto Rebirth")
+local _call78 = _call77.AddToggle
+function AddToggle_Callback_9(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call79 = _call77:AddToggle({
+    Callback = AddToggle_Callback_9,
+    Default = false,
+    Title = "Auto Rebirth",
+})
+local _call80 = _call24.AddSection
+local _call81 = _call24:AddSection("Auto Sell")
+local _call82 = _call81.AddToggle
+function AddToggle_Callback_10(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call83 = _call81:AddToggle({
+    Callback = AddToggle_Callback_10,
+    Default = false,
+    Title = "Auto Sell",
+})
+local _call84 = _call24.AddSection
+local _call85 = _call24:AddSection("Auto Collect Cash")
+local _call86 = _call1.Shared
+local _call87 = _call86.Remotes
+local _call88 = _call87.Networking
+local _call89 = _call88["RF/PlotAction"]
+local _call90 = _call85.AddToggle
+function AddToggle_Callback_11(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call91 = _call85:AddToggle({
+    Callback = AddToggle_Callback_11,
+    Default = false,
+    Title = "Auto Collect Money",
+})
+local _call92 = _call1.SharedModules
+local _call93 = _call92.BrainrotModule
+require(_call93)
+local _call94 = _call24.AddSection
+local _call95 = _call24:AddSection("Inventory Lock")
+local _call96 = _call95.AddToggle
+function AddToggle_Callback_12(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call97 = _call95:AddToggle({
+    Callback = AddToggle_Callback_12,
+    Default = false,
+    Title = "Auto Lock Inventory",
+})
+local _call98 = _call95.AddDropdown
+function AddDropdown_Callback_5(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call99 = _call95:AddDropdown({
+    Callback = AddDropdown_Callback_5,
+    Default = "Both",
+    Options = {
+        "Both",
+        "Brainrot Only",
+        "Lucky Blocks Only",
+    },
+    Title = "Lock Type",
+})
+local _call100 = _call95.AddDropdown
+function AddDropdown_Callback_6(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call101 = _call95:AddDropdown({
+    Callback = AddDropdown_Callback_6,
+    Default = {},
+    Multi = true,
+    Options = {
+        _call15,
+    },
+    Title = "Select by Rarity for Lucky Blocks",
+})
+local _call102 = _call95.AddDropdown
+function AddDropdown_Callback_7(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call103 = _call95:AddDropdown({
+    Callback = AddDropdown_Callback_7,
+    Default = {},
+    Multi = true,
+    Options = {
+        "Infinity",
+        "Divine",
+        "Celestial",
+        "Secret",
+        "Cosmic",
+        "Mythical",
+        "Legendary",
+        "Epic",
+        "Rare",
+        "Uncommon",
+        "Common",
+    },
+    Title = "Select by Rarity for Brainrot",
+})
+local _call104 = _call1.Assets
+local _call105 = _call104.Brainrots
+Brainrots:GetChildren()
+for k, v in pairs(Brainrots:GetChildren()) do
+    v:GetChildren()
+    for k, v in pairs(v:GetChildren()) do
+        local _call106 = v.Name
+    end
+end
+local _call107 = _call95.AddDropdown
+function AddDropdown_Callback_8(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call108 = _call95:AddDropdown({
+    Callback = AddDropdown_Callback_8,
+    Default = {},
+    Multi = true,
+    Options = {
+        _call106,
+    },
+    Title = "Select by Brainrot Name",
+})
+local _call109 = _call95.AddDropdown
+function AddDropdown_Callback_9(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call110 = _call95:AddDropdown({
+    Callback = AddDropdown_Callback_9,
+    Default = {},
+    Multi = true,
+    Options = {
+        _call12,
+    },
+    Title = "Select by Mutation",
+})
+local _call111 = _call95.AddButton
+function AddButton_Callback(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call112 = _call95:AddButton({
+    Callback = AddButton_Callback,
+    Title = "Unlock All Items",
+})
+local Connection_4
+Connection_4 = game.Players.LocalPlayer.Backpack.ChildAdded:Connect(function(p1_0, p2_0, p3_0, p4_0, p5_0, p6_0, p7_0, p8_0, p9_0, p10_0)
+end)
+local _call113 = _call26.AddSection
+local _call114 = _call26:AddSection("Base Features")
+local _call115 = _call114.AddToggle
+function AddToggle_Callback_13(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call116 = _call114:AddToggle({
+    Callback = AddToggle_Callback_13,
+    Default = false,
+    Title = "Auto Place Brainrot",
+})
+local _call117 = _call114.AddToggle
+function AddToggle_Callback_14(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call118 = _call114:AddToggle({
+    Callback = AddToggle_Callback_14,
+    Default = false,
+    Title = "Auto Pickup Brainrot",
+})
+local _call119 = _call28.AddSection
+local _call120 = _call28:AddSection("Remove VIP Walls")
+local _call121 = _call120.AddButton
+function AddButton_Callback_2(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call122 = _call120:AddButton({
+    Callback = AddButton_Callback_2,
+    Title = "Remove VIP Walls",
+})
+isfile("Meng Hub_TsunamiBrainrot/Config/Autoload.txt") -- false
+local _call123 = _call30.AddSection
+local _call124 = _call30:AddSection("Configuration")
+local _call125 = _call124.AddParagraph
+local _call126 = _call124:AddParagraph({
+    Content = "Current: None | Autoload: None",
+    Icon = "settings",
+    Title = "Config Manager",
+})
+task.spawn(function(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+    task.wait(1.5)
+end)
+local _call127 = _call124.AddInput
+function AddInput_Callback_2(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call128 = _call124:AddInput({
+    Callback = AddInput_Callback_2,
+    Content = "Enter the name for u config",
+    Placeholder = "Input Here",
+    Title = "Config Name",
+})
+local _call129 = _call124.AddDropdown
+listfiles("Meng Hub_TsunamiBrainrot/Config/")
+function AddDropdown_Callback_10(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call130 = _call124:AddDropdown({
+    Callback = AddDropdown_Callback_10,
+    Content = "Choose from exists configs",
+    Options = {},
+    Title = "Select Config",
+})
+local _call131 = _call124.AddButton
+function AddButton_Callback_3(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call132 = _call124:AddButton({
+    Callback = AddButton_Callback_3,
+    SubCallback = <function>,
+    SubTitle = "Load Config",
+    Title = "Save Config",
+})
+local _call133 = _call124.AddButton
+function AddButton_Callback_4(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call134 = _call124:AddButton({
+    Callback = AddButton_Callback_4,
+    SubCallback = <function>,
+    SubTitle = "Set Autoload",
+    Title = "Delete Config",
+})
+local _call135 = _call124.AddButton
+function AddButton_Callback_5(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call136 = _call124:AddButton({
+    Callback = AddButton_Callback_5,
+    SubCallback = <function>,
+    SubTitle = "Clear Autoload",
+    Title = "Refresh List",
+})
+local _call137 = _call124.AddButton
+function AddButton_Callback_6(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call138 = _call124:AddButton({
+    Callback = AddButton_Callback_6,
+    Title = "Reset All Elements to Default",
+})
+local _call139 = _call124.AddSubSection
+local _call140 = _call124:AddSubSection("Load From External")
+local _call141 = _call124.AddInput
+function AddInput_Callback_3(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call142 = _call124:AddInput({
+    Callback = AddInput_Callback_3,
+    Content = "Paste ur raw JSON config here",
+    Title = "External Config JSON",
+})
+local _call143 = _call124.AddButton
+function AddButton_Callback_7(ext_1_0, ext_2_0, ext_3_0, ext_4_0, ext_5_0, ...)
+local _ = (ext_1_0 or false)
+if ext_1_0 then -- default stub
+end
+end
+local _call144 = _call124:AddButton({
+    Callback = AddButton_Callback_7,
+    SubCallback = <function>,
+    SubTitle = "Import Config",
+    Title = "Load External JSON",
+})
+error('Runtime : [string "script"]:1: attempt to call a nil value')
+
