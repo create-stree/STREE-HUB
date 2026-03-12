@@ -10,7 +10,7 @@ local Services = setmetatable({}, {
 
 
 local HttpService = Services.HttpService
-local FolderName = "Bear hub | Farm"
+local FolderName = "StreeHub | Dev"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
