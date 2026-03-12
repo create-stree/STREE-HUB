@@ -2643,8 +2643,8 @@ end
 
 local bearlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Myvkhuy/BearLibrary/Bearlib/V8.1.lua"))()
 local Window = bearlib:MakeWindow({
-    Title = "Bear hub | Farm",
-    SubTitle = "by Quang Huy",
+    Title = "StreeHub | Dev",
+    SubTitle = "",
     SaveFolder = true,
     Image = "82107905019656"
 })
