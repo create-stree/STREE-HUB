@@ -7,7 +7,7 @@ local Services = setmetatable({}, {
 })
 
 local HttpService = Services.HttpService
-local FolderName = "Bear hub | Farm"
+local FolderName = "StreeHub | Blox Fruits"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -2597,11 +2597,11 @@ task.spawn(function()
 end)
 
 local v0 = Window:MakeTab({
-    Title = "Info/Group",
-    Icon = "info"
+    Title = "Home",
+    Icon = "scan-face"
 })
 local v1 = Window:MakeTab({
-    Title = "Status/Server",
+    Title = "Status",
     Icon = "activity"
 })
 local v2 = Window:MakeTab({
@@ -2625,31 +2625,31 @@ local v6 = Window:MakeTab({
     Icon = "globe"
 })
 local v7 = Window:MakeTab({
-    Title = "Volcano/Dojo",
+    Title = "Volcano",
     Icon = "flame"
 })
 local v8 = Window:MakeTab({
-    Title = "Mirage/Race",
+    Title = "Race",
     Icon = "map"
 })
 local v9 = Window:MakeTab({
-    Title = "Fruits/Check Stock",
+    Title = "Fruits",
     Icon = "package"
 })
 local v10 = Window:MakeTab({
-    Title = "Raid/Dungoen",
+    Title = "Raid",
     Icon = "shield"
 })
 local v11 = Window:MakeTab({
-    Title = "Teleport/World",
+    Title = "Teleport",
     Icon = "navigation"
 })
 local v12 = Window:MakeTab({
-    Title = "PvP/Player",
+    Title = "PvP",
     Icon = "sword"
 })
 local v13 = Window:MakeTab({
-    Title = "Esp/Stats",
+    Title = "Esp",
     Icon = "eye"
 })
 
@@ -2668,8 +2668,8 @@ v0:AddParagraph({
 })
 
 v0:AddParagraph({
-    Title = "Thông báo",
-    Text = "•Bear hub\n• Script by Quang Huy\n• Creation Date: 7-6-2026\n• Last updated date: 7-6-2026\n• Aura gun hiện chưa bắn được thuyền và leviathan"
+    Title = "StreeHub",
+    Text = "•StreeHub\n• Script oleh KirsiaSC\n• Tanggal Pembuatan: 13 Maret 2026\n• Tanggal terakhir diperbarui: 13 Maret 2026\n• Senjata Aura saat ini tidak dapat menembak perahu dan leviathan"
 })
 
 local Time = v1:AddParagraph({
