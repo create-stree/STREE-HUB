@@ -89,7 +89,7 @@ local gameScripts = {
     },
     [2753915549] = {
         name = "Blox Fruit",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/main/Premium.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Blox-Fruit/Dev.lua"
     },
     [123921593837160] = {
         name = "Climb and Jump Tower",
