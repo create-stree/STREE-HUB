@@ -2590,7 +2590,7 @@ local Window = StreeLib:MakeWindow({
 task.spawn(function()
     task.wait(2)
     StreeLib:Notify({
-        Title = "Bear Hub",
+        Title = "StreeHub",
         Message = "Blox Fruit successfully loaded",
         Duration = 10
     })
@@ -2655,7 +2655,7 @@ local v13 = Window:MakeTab({
 
 local v14 = Window:MakeTab({
     Title = "Shop",
-    Icon = "shopping-cart"
+    Icon = "shopping-bag"
 })
 local v15 = Window:MakeTab({
     Title = "Settings",
@@ -2663,8 +2663,8 @@ local v15 = Window:MakeTab({
 })
 
 v0:AddParagraph({
-    Title = "Bear Hub",
-    Text = "Script by Quang Huy"
+    Title = "StreeHub",
+    Text = "Script by StreeHub"
 })
 
 v0:AddParagraph({
