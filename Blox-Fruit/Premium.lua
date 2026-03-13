@@ -2580,6 +2580,7 @@ local function performClick()
 end
 
 local StreeLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/76MkPn/refs/heads/main/StreeLib.lua"))()
+
 local Window = StreeLib:MakeWindow({
     Title = "StreeHub | Blox Fruit",
     SubTitle = "",
