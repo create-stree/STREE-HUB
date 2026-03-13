@@ -2582,8 +2582,8 @@ end
 
 local StreeLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/76MkPn/refs/heads/main/StreeLib.lua"))()
 local Window = StreeLib:MakeWindow({
-    Title = "Bear Hub | Farm",
-    SubTitle = "by Quang Huy",
+    Title = "StreeHub | Blox Fruit",
+    SubTitle = "",
     SaveFolder = "BearHub_Save.json"
 })
 
@@ -2591,7 +2591,7 @@ task.spawn(function()
     task.wait(2)
     StreeLib:Notify({
         Title = "Bear Hub",
-        Message = "Script Load Download Completed",
+        Message = "Blox Fruit successfully loaded",
         Duration = 10
     })
 end)
