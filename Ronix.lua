@@ -829,7 +829,7 @@ local WebhookTab = MainSection:Tab({
 WebhookTab:Section({ Title = "Discord Webhook" })
 
 WebhookTab:Input({
-    Flag = "WebhookURLInput",
+    Flag = "Webhook URL",
     Title = "Webhook URL",
     Desc = "Paste your Discord webhook URL here",
     Placeholder = "https://discord.com/api/webhooks/...",
@@ -841,9 +841,9 @@ WebhookTab:Input({
 WebhookTab:Space()
 
 WebhookTab:Toggle({
-    Flag = "WebhookEnabledToggle",
+    Flag = "Webhook Enabled",
     Title = "Enable Webhook",
-    Desc = "Auto-send stock info to Discord on every restock",
+    Desc = "Auto send stock info to Discord on every restock",
     Value = false,
     Callback = function(value)
         if value and webhookURL == "" then
@@ -859,7 +859,7 @@ WebhookTab:Space()
 
 WebhookTab:Button({
     Title = "Test Webhook",
-    Icon = "solar:send-bold",
+    Icon = "solar send bold",
     Justify = "Center",
     Color = Purple,
     Callback = function()
@@ -875,7 +875,7 @@ WebhookTab:Space()
 
 WebhookTab:Button({
     Title = "Send Stock Now",
-    Icon = "solar:share-bold",
+    Icon = "solar share bold",
     Justify = "Center",
     Callback = function()
         if webhookURL == "" then
