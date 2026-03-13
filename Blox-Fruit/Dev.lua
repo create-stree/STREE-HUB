@@ -2598,7 +2598,7 @@ end)
 
 local v0 = Window:MakeTab({
     Title = "Home",
-    Icon = "scan-face"
+    Icon = "rbxassetid://109959345069668"
 })
 local v1 = Window:MakeTab({
     Title = "Status",
@@ -2642,7 +2642,7 @@ local v10 = Window:MakeTab({
 })
 local v11 = Window:MakeTab({
     Title = "Teleport",
-    Icon = "navigation"
+    Icon = "rbxassetid://120978111007514"
 })
 local v12 = Window:MakeTab({
     Title = "PvP",
@@ -2655,7 +2655,7 @@ local v13 = Window:MakeTab({
 
 local v14 = Window:MakeTab({
     Title = "Shop",
-    Icon = "shopping-bag"
+    Icon = "rbxassetid://71885477293226"
 })
 local v15 = Window:MakeTab({
     Title = "Settings",
@@ -2665,6 +2665,21 @@ local v15 = Window:MakeTab({
 v0:AddParagraph({
     Title = "StreeHub",
     Text = "Script by StreeHub"
+})
+
+v0:AddParagraph({
+    Title = "Discord",
+    Text = "Join Server Discord"
+})
+
+v0:AddButton({
+    Name = "Copy Link Discord",
+    Callback = function()
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
+    end
 })
 
 v0:AddParagraph({
