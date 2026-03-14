@@ -308,14 +308,10 @@ FarmSection:AddToggle({
     Title = "Auto Harvest",
     Default = false,
     Callback = function(value)
-
         if value then
             HarvestLoop = task.spawn(function()
-
                 while value do
-
                     local hasPlant, allPlant = GetFilterFlags()
-
                     if not hasPlant then
                         task.wait(0.5)
                         continue
@@ -330,66 +326,48 @@ FarmSection:AddToggle({
                     TeleportTo(plot:GetPivot().Position)
                     task.wait(0.5)
 
-                    for _, plant in pairs(ClientPlants:GetChildren()) do
+                    local harvestBatch = {}
 
-                        if not IsPlantSelected(plant, hasPlant, allPlant) then
-                            continue
-                        end
+                    for _, plant in pairs(ClientPlants:GetChildren()) do
+                        if plant.Parent ~= plot then continue end
+                        if not IsPlantSelected(plant, hasPlant, allPlant) then continue end
+                        if plant:GetAttribute("Favorited") == true then continue end
 
                         local isFruitPlant = IsFruitPlant(plant.Name)
-
                         if isFruitPlant then
-                            local foundFruit = false
-                            for _, child in pairs(plant:GetChildren()) do
-                                if child.Name:match("^Fruit%d+$") then
-                                    foundFruit = true
-                                    break
-                                end
-                            end
-
-                            if not foundFruit then continue end
-
                             for _, fruit in pairs(plant:GetChildren()) do
-                                if fruit.Name:match("^Fruit%d+$") then
-                                    if fruit:GetAttribute("Favorited") == true then continue end
-                                    if not IsReadyToHarvest(fruit) then continue end
-                                    TeleportTo(fruit:GetPivot().Position)
-                                    task.wait(0.5)
-
+                                if fruit.Name:match("^Fruit%d+$") and fruit:GetAttribute("Favorited") ~= true and IsReadyToHarvest(fruit) then
                                     local rawUuid = fruit:GetAttribute("Uuid")
-                                    local growthIndex = fruit:GetAttribute("GrowthAnchorIndex") or 1
                                     if rawUuid then
                                         local cleanUuid = rawUuid:match("^([^:]+)")
-                                        HarvestEvent:FireServer({{
-                                            GrowthAnchorIndex = growthIndex,
-                                            Uuid = cleanUuid
-                                        }})
-                                        task.wait(0.1)
+                                        local growthIndex = fruit:GetAttribute("GrowthAnchorIndex") or 1
+                                        table.insert(harvestBatch, {
+                                            Uuid = cleanUuid,
+                                            GrowthAnchorIndex = growthIndex
+                                        })
                                     end
                                 end
                             end
                         else
-                            if plant:GetAttribute("Favorited") == true then continue end
-                            if not IsReadyToHarvest(plant) then continue end
-                            TeleportTo(plant:GetPivot().Position)
-                            task.wait(0.3)
-
-                            local rawUuid = plant:GetAttribute("Uuid")
-                            if rawUuid then
-                                local cleanUuid = rawUuid:match("^([^:]+)")
-                                HarvestEvent:FireServer({{
-                                    Uuid = cleanUuid
-                                }})
-                                task.wait(0.1)
+                            if IsReadyToHarvest(plant) then
+                                local rawUuid = plant:GetAttribute("Uuid")
+                                if rawUuid then
+                                    local cleanUuid = rawUuid:match("^([^:]+)")
+                                    table.insert(harvestBatch, {
+                                        Uuid = cleanUuid
+                                    })
+                                end
                             end
                         end
                     end
 
+                    if #harvestBatch > 0 then
+                        FireBatch(harvestBatch)
+                    end
+
                     task.wait(0.5)
                 end
-
             end)
-
         else
             if HarvestLoop then
                 task.cancel(HarvestLoop)
