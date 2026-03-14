@@ -1044,6 +1044,16 @@ SeedShopSection:AddToggle({
     end
 })
 
+SeedShopSection:AddButton({
+    Title = "Open UI Seed",
+    Callback = function()
+        local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+        if not playerGui then return end
+        local seedShopGui = playerGui:FindFirstChild("SeedShop")
+        if seedShopGui then seedShopGui.Enabled = true end
+    end
+})
+
 local gearOptions = {
     "Watering Can","Basic Sprinkler","Harvest Bell",
     "Turbo Sprinkler","Favorite Tool","Super Sprinkler",
@@ -1109,6 +1119,16 @@ GearShopSection:AddToggle({
                 end
             end)
         end
+    end
+})
+
+GearShopSection:AddButton({
+    Title = "Open UI GearShop",
+    Callback = function()
+        local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+        if not playerGui then return end
+        local gearShopGui = playerGui:FindFirstChild("GearShop")
+        if gearShopGui then gearShopGui.Enabled = true end
     end
 })
 
