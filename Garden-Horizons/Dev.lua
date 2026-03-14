@@ -204,7 +204,6 @@ end)
 local Settings = Settings or {}
 Settings.Enabled = Settings.Enabled or false
 Settings.IgnoreFavorited = Settings.IgnoreFavorited ~= false
-Settings.AutoClaimQuests = Settings.AutoClaimQuests or false
 Settings.Delay = Settings.Delay or 0.1
 Settings.HarvestBatchSize = Settings.HarvestBatchSize or 10
 Settings.Range = Settings.Range or 50
@@ -265,6 +264,44 @@ function HarvestMethods:IsHarvestPrompt(prompt)
     return actionText:find("harvest") ~= nil or objectText:find("harvest") ~= nil
 end
 
+function HarvestMethods:IsFavoritedPrompt(prompt)
+    if not Settings.IgnoreFavorited then
+        return false
+    end
+
+    local source = prompt.Parent
+    if not source then
+        return false
+    end
+
+    local checkNames = {
+        "Favorite",
+        "Favorited",
+        "IsFavorite",
+        "IsFavorited"
+    }
+
+    for _, name in ipairs(checkNames) do
+        local obj = source:FindFirstChild(name, true)
+        if obj then
+            if obj:IsA("BoolValue") and obj.Value == true then
+                return true
+            end
+
+            if obj:IsA("StringValue") and tostring(obj.Value):lower() == "true" then
+                return true
+            end
+        end
+    end
+
+    local sourceName = tostring(source.Name):lower()
+    if sourceName:find("favorite") or sourceName:find("favourite") then
+        return true
+    end
+
+    return false
+end
+
 function HarvestMethods:GetHarvestPrompts()
     local root = getCharacterRoot()
     if not root then
@@ -275,7 +312,7 @@ function HarvestMethods:GetHarvestPrompts()
     local found = {}
 
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if self:IsHarvestPrompt(obj) then
+        if self:IsHarvestPrompt(obj) and not self:IsFavoritedPrompt(obj) then
             local pos = self:GetPromptWorldPosition(obj)
             if pos then
                 local dist = (rootPos - pos).Magnitude
@@ -304,7 +341,7 @@ function HarvestMethods:GetHarvestPrompts()
 end
 
 function HarvestMethods:ShouldTeleport()
-    return Settings.HarvestMode == "Teleport"
+    return tostring(Settings.HarvestMode) == "Teleport"
 end
 
 function HarvestMethods:TeleportToPrompt(prompt)
@@ -369,10 +406,14 @@ Farm:AddDropdown({
     Title = "Harvest Mode",
     Content = "Choose harvest movement mode.",
     Values = {"Manual", "Teleport"},
-    Default = Settings.HarvestMode,
+    Default = 1,
     Multi = false,
     Callback = function(value)
-        Settings.HarvestMode = value
+        if type(value) == "table" then
+            Settings.HarvestMode = value[1] or "Manual"
+        else
+            Settings.HarvestMode = value or "Manual"
+        end
     end
 })
 
@@ -385,16 +426,7 @@ Farm:AddToggle({
     end
 })
 
-Farm:AddToggle({
-    Title = "Auto Claim Quests",
-    Content = "Automatically claim completed quests.",
-    Default = Settings.AutoClaimQuests,
-    Callback = function(state)
-        Settings.AutoClaimQuests = state
-    end
-})
-
-Farm1:AddSlider({
+Farm:AddSlider({
     Title = "Harvest Delay",
     Content = "Delay between harvest actions (0.05-1)",
     Min = 0.05,
@@ -406,7 +438,7 @@ Farm1:AddSlider({
     end
 })
 
-Farm1:AddSlider({
+Farm:AddSlider({
     Title = "Harvest Batch Size",
     Content = "How many prompts are harvested each cycle.",
     Min = 1,
@@ -418,7 +450,7 @@ Farm1:AddSlider({
     end
 })
 
-Farm1:AddSlider({
+Farm:AddSlider({
     Title = "Harvest Range",
     Content = "Maximum distance to detect harvest prompts.",
     Min = 10,
@@ -430,10 +462,13 @@ Farm1:AddSlider({
     end
 })
 
-Farm1:AddButton({
+Farm:AddButton({
     Title = "Harvest Once",
     Callback = function()
+        local oldState = Settings.Enabled
+        Settings.Enabled = true
         HarvestMethods:Run()
+        Settings.Enabled = oldState
     end
 })
 
