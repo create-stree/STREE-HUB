@@ -699,7 +699,7 @@ local x5 = CodesSection:AddButton({
     end
 })
 
-FavoritedSection = Tabs.Bag:AddSection("Bag")
+FavoritedSection = Tabs.Bag:AddSection("Favorite")
 
 local bcpck = game:GetService("Players").LocalPlayer:WaitForChild("Backpack")
 local ToggleFavorite = game:GetService("ReplicatedStorage")
