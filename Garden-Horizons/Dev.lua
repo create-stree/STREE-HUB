@@ -207,7 +207,6 @@ Settings.IgnoreFavorited = Settings.IgnoreFavorited ~= false
 Settings.Delay = Settings.Delay or 0.1
 Settings.HarvestBatchSize = Settings.HarvestBatchSize or 10
 Settings.Range = Settings.Range or 50
-Settings.HarvestMode = Settings.HarvestMode or "Manual"
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -340,31 +339,9 @@ function HarvestMethods:GetHarvestPrompts()
     return results
 end
 
-function HarvestMethods:ShouldTeleport()
-    return tostring(Settings.HarvestMode) == "Teleport"
-end
-
-function HarvestMethods:TeleportToPrompt(prompt)
-    if not self:ShouldTeleport() then
-        return
-    end
-
-    local root = getCharacterRoot()
-    local pos = self:GetPromptWorldPosition(prompt)
-
-    if root and pos then
-        root.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
-    end
-end
-
 function HarvestMethods:HarvestBatch(prompts)
     for _, prompt in ipairs(prompts) do
         pcall(function()
-            if self:ShouldTeleport() then
-                self:TeleportToPrompt(prompt)
-                task.wait(0.05)
-            end
-
             fireproximityprompt(prompt)
         end)
 
@@ -399,21 +376,6 @@ Farm:AddToggle({
     Default = Settings.Enabled,
     Callback = function(state)
         Settings.Enabled = state
-    end
-})
-
-Farm:AddDropdown({
-    Title = "Harvest Mode",
-    Content = "Choose harvest movement mode.",
-    Values = {"Manual", "Teleport"},
-    Default = 1,
-    Multi = false,
-    Callback = function(value)
-        if type(value) == "table" then
-            Settings.HarvestMode = value[1] or "Manual"
-        else
-            Settings.HarvestMode = value or "Manual"
-        end
     end
 })
 
