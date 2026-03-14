@@ -1438,12 +1438,6 @@ local function processPlant(model)
     end
 end
 
-local function scanPlants()
-    for _,v in ipairs(container:GetChildren()) do
-        processPlant(v)
-    end
-end
-
 k9v:AddToggle({
     Title = "Plant ESP",
     Default = false,
@@ -1869,6 +1863,7 @@ Farm1:AddButton({
         HarvestMethods:Run()
     end
 })
+
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     SaveConfig()
