@@ -144,6 +144,8 @@ local u_q1 = PlantSection:AddDropdown({
         "Orange",
         "Amberpine",
         "Emberwood",
+        "Watermelon",
+        "Pineapple",
     },
     Default = {},
     Callback = function(selected)
@@ -390,11 +392,11 @@ Farm:AddToggle({
 
 Farm:AddSlider({
     Title = "Harvest Delay",
-    Content = "Delay between harvest actions (0.05-1)",
-    Min = 0.05,
-    Max = 1,
+    Content = "Delay between harvest actions (0.1-5)",
+    Min = 0.1,
+    Max = 5,
     Default = Settings.Delay,
-    Increment = 0.01,
+    Increment = 0.1,
     Callback = function(value)
         Settings.Delay = value
     end
@@ -967,8 +969,9 @@ end
 
 local seedOptions = {
     "Carrot","Corn","Onion","Strawberry","Mushroom","Beetrott",
-    "Tomato","Apple","Rose","Wheat","Banana","Plum",
-    "Potato","Cabbage","Cherry","Birch","Bellpepper","Dandelion","Mango","Bamboo"
+    "Tomato","Apple","Rose","Wheat","Banana","Pineapple","Plum",
+    "Potato","Cabbage","Cherry","Birch","Bellpepper","Dandelion",
+    "Mango","Bamboo","Watermelon"
 }
 
 _G.autoBuySeed = false
@@ -1043,7 +1046,8 @@ SeedShopSection:AddToggle({
 
 local gearOptions = {
     "Watering Can","Basic Sprinkler","Harvest Bell",
-    "Turbo Sprinkler","Favorite Tool","Super Sprinkler"
+    "Turbo Sprinkler","Favorite Tool","Super Sprinkler",
+    "Trowel","Reverter"
 }
 
 local GearShopSection = Tabs.Shop:AddSection("Gear Shop")
