@@ -1312,6 +1312,32 @@ UIS.JumpRequest:Connect(function()
     end
 end)
 
+local v_u1 = Tabs.Misc:AddSection("Tutorial")
+
+v_u1:AddParagraph({
+    Title = "Get Available Plots",
+    Content = "to exit the tutorial from within the game",
+    Icon = "info",
+})
+
+v_u1:AddParagraph({
+    Title = "Set Streaming Focus Update",
+    Content = "For Streaming Focus Update, it's better to skip the tutorial for the update only.",
+    Icon = "info",
+})
+
+v_u1:AddParagraph({
+    Title = "Set Streaming Focus Start",
+    Content = "Focus on the game and ignore the tutorials in the game.",
+    Icon = "info",
+})
+
+v_u1:AddParagraph({
+    Title = "Configuration",
+    Content = "The config has been made automatic so it can be used.",
+    Icon = "info",
+})
+
 local k9v = Tabs.Misc:AddSection("Visual")
 
 local module_rarity = loadstring(game:HttpGet("https://raw.githubusercontent.com/Walvy666/awdudjsjenen/refs/heads/main/ahhhshit.lua"))()
@@ -1536,7 +1562,7 @@ t1:AddButton({
     end
 })
 
-local y = Tabs.Misc:AddSection("Configuration")
+local y = Tabs.Misc:AddSection("UI Setting")
 
 y:AddToggle({
     Title = "Show UI Button",
@@ -1546,17 +1572,6 @@ y:AddToggle({
         local button = game:GetService("CoreGui"):FindFirstChild("StreeHubButton")
         if button then
             button.Enabled = state
-        end
-    end
-})
-
-y:AddButton({
-    Title = "Reset Configuration",
-    Callback = function()
-        local configPath = "StreeHub/Config/StreeHub_" .. gameName .. ".json"
-        if isfile and isfile(configPath) then
-            delfile(configPath)
-            game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
         end
     end
 })
@@ -1583,6 +1598,277 @@ y:AddPanel({
     end
 })
 
+local y2 = Tabs.Misc:AddSection("Configuration")
+
+y2:AddButton({
+    Title = "Save Configuration",
+    Callback = function()
+        if SaveManager and SaveManager.Save then
+            SaveManager:Save()
+        end
+    end
+})
+
+y2:AddButton({
+    Title = "Load Configuration",
+    Callback = function()
+        if SaveManager and SaveManager.Load then
+            SaveManager:Load()
+        end
+    end
+})
+
+y2:AddButton({
+    Title = "Reset Configuration",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local TeleportService = game:GetService("TeleportService")
+        local LocalPlayer = Players.LocalPlayer
+        local configPath = "StreeHub/Config/StreeHub_" .. gameName .. ".json"
+
+        if isfile and isfile(configPath) then
+            delfile(configPath)
+        end
+
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+})
+
+local Settings = Settings or {}
+Settings.Enabled = Settings.Enabled or false
+Settings.IgnoreFavorited = Settings.IgnoreFavorited ~= false
+Settings.AutoClaimQuests = Settings.AutoClaimQuests or false
+Settings.Delay = Settings.Delay or 0.1
+Settings.HarvestBatchSize = Settings.HarvestBatchSize or 10
+Settings.Range = Settings.Range or 50
+Settings.HarvestMode = Settings.HarvestMode or "Manual"
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function getCharacter()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+end
+
+local function getCharacterRoot()
+    local character = getCharacter()
+    return character and character:FindFirstChild("HumanoidRootPart")
+end
+
+local HarvestMethods = {}
+
+function HarvestMethods:GetPromptWorldPosition(prompt)
+    if not prompt or not prompt.Parent then
+        return nil
+    end
+
+    local parent = prompt.Parent
+
+    if parent:IsA("BasePart") then
+        return parent.Position
+    end
+
+    if parent:IsA("Model") then
+        if parent.PrimaryPart then
+            return parent.PrimaryPart.Position
+        end
+
+        local basePart = parent:FindFirstChildWhichIsA("BasePart", true)
+        if basePart then
+            return basePart.Position
+        end
+    end
+
+    local anyPart = parent:FindFirstChildWhichIsA("BasePart", true)
+    if anyPart then
+        return anyPart.Position
+    end
+
+    return nil
+end
+
+function HarvestMethods:IsHarvestPrompt(prompt)
+    if not prompt or not prompt:IsA("ProximityPrompt") then
+        return false
+    end
+
+    local actionText = tostring(prompt.ActionText or ""):lower()
+    local objectText = tostring(prompt.ObjectText or ""):lower()
+
+    return actionText:find("harvest") ~= nil or objectText:find("harvest") ~= nil
+end
+
+function HarvestMethods:GetHarvestPrompts()
+    local root = getCharacterRoot()
+    if not root then
+        return {}
+    end
+
+    local rootPos = root.Position
+    local found = {}
+
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if self:IsHarvestPrompt(obj) then
+            local pos = self:GetPromptWorldPosition(obj)
+            if pos then
+                local dist = (rootPos - pos).Magnitude
+                if dist <= Settings.Range then
+                    table.insert(found, {
+                        prompt = obj,
+                        distance = dist
+                    })
+                end
+            end
+        end
+    end
+
+    table.sort(found, function(a, b)
+        return a.distance < b.distance
+    end)
+
+    local results = {}
+    local limit = math.min(Settings.HarvestBatchSize, #found)
+
+    for i = 1, limit do
+        table.insert(results, found[i].prompt)
+    end
+
+    return results
+end
+
+function HarvestMethods:ShouldTeleport()
+    return Settings.HarvestMode == "Teleport"
+end
+
+function HarvestMethods:TeleportToPrompt(prompt)
+    if not self:ShouldTeleport() then
+        return
+    end
+
+    local root = getCharacterRoot()
+    local pos = self:GetPromptWorldPosition(prompt)
+
+    if root and pos then
+        root.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+    end
+end
+
+function HarvestMethods:HarvestBatch(prompts)
+    for _, prompt in ipairs(prompts) do
+        pcall(function()
+            if self:ShouldTeleport() then
+                self:TeleportToPrompt(prompt)
+                task.wait(0.05)
+            end
+
+            fireproximityprompt(prompt)
+        end)
+
+        task.wait(Settings.Delay)
+    end
+end
+
+function HarvestMethods:Run()
+    if not Settings.Enabled then
+        return
+    end
+
+    local prompts = self:GetHarvestPrompts()
+    if #prompts > 0 then
+        self:HarvestBatch(prompts)
+    end
+end
+
+task.spawn(function()
+    while task.wait(Settings.Delay) do
+        if Settings.Enabled then
+            HarvestMethods:Run()
+        end
+    end
+end)
+
+local Farm1 = Tabs.Main:AddSection("Farm")
+
+Farm1:AddToggle({
+    Title = "Enable Auto Harvest",
+    Content = "Automatically harvest nearby crops.",
+    Default = Settings.Enabled,
+    Callback = function(state)
+        Settings.Enabled = state
+    end
+})
+
+Farm1:AddDropdown({
+    Title = "Harvest Mode",
+    Content = "Choose harvest movement mode.",
+    Values = {"Manual", "Teleport"},
+    Default = Settings.HarvestMode,
+    Multi = false,
+    Callback = function(value)
+        Settings.HarvestMode = value
+    end
+})
+
+Farm1:AddToggle({
+    Title = "Ignore Favorited",
+    Content = "Skip favorited plants while harvesting.",
+    Default = Settings.IgnoreFavorited,
+    Callback = function(state)
+        Settings.IgnoreFavorited = state
+    end
+})
+
+Farm1:AddToggle({
+    Title = "Auto Claim Quests",
+    Content = "Automatically claim completed quests.",
+    Default = Settings.AutoClaimQuests,
+    Callback = function(state)
+        Settings.AutoClaimQuests = state
+    end
+})
+
+Farm1:AddSlider({
+    Title = "Harvest Delay",
+    Content = "Delay between harvest actions.",
+    Min = 0.05,
+    Max = 1,
+    Default = Settings.Delay,
+    Increment = 0.01,
+    Callback = function(value)
+        Settings.Delay = value
+    end
+})
+
+Farm1:AddSlider({
+    Title = "Harvest Batch Size",
+    Content = "How many prompts are harvested each cycle.",
+    Min = 1,
+    Max = 50,
+    Default = Settings.HarvestBatchSize,
+    Increment = 1,
+    Callback = function(value)
+        Settings.HarvestBatchSize = value
+    end
+})
+
+Farm1:AddSlider({
+    Title = "Harvest Range",
+    Content = "Maximum distance to detect harvest prompts.",
+    Min = 10,
+    Max = 200,
+    Default = Settings.Range,
+    Increment = 1,
+    Callback = function(value)
+        Settings.Range = value
+    end
+})
+
+Farm1:AddButton({
+    Title = "Harvest Once",
+    Callback = function()
+        HarvestMethods:Run()
+    end
+})
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     SaveConfig()
