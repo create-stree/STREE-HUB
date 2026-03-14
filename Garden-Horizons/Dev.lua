@@ -867,7 +867,79 @@ task.spawn(function()
         if ClaimQuestSettings.AutoQuest then
             ClaimQuest()
         end
-        task.wait(0.17)
+        task.wait(0.1)
+    end
+end)
+
+local RefreshQuestSection = Tabs.Quest:AddSection("Refresh Quest")
+
+local RefreshQuestSettings = {
+    QuestType = "Daily",
+    QuestTier = "1",
+    AutoRefresh = false
+}
+
+local function RefreshQuest()
+    local args = {
+        RefreshQuestSettings.QuestType,
+        RefreshQuestSettings.QuestTier
+    }
+
+    local success, err = pcall(function()
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("RemoteEvents")
+            :WaitForChild("PurchaseSingleRefresh")
+            :FireServer(unpack(args))
+    end)
+
+    if not success then
+        warn("Failed to fire PurchaseSingleRefresh:", err)
+    end
+end
+
+RefreshQuestSection:AddDropdown({
+    Title = "Quest Type",
+    Content = "Choose the refresh type.",
+    Options = { "Daily", "Weekly" },
+    Default = RefreshQuestSettings.QuestType,
+    Callback = function(value)
+        RefreshQuestSettings.QuestType = value
+    end
+})
+
+RefreshQuestSection:AddDropdown({
+    Title = "Quest Tier",
+    Content = "Choose the refresh tier (1-5).",
+    Options = { "1", "2", "3", "4", "5" },
+    Default = RefreshQuestSettings.QuestTier,
+    Callback = function(value)
+        RefreshQuestSettings.QuestTier = value
+    end
+})
+
+RefreshQuestSection:AddButton({
+    Title = "Purchase Single Refresh",
+    Content = "Refresh quest using the selected type and tier.",
+    Callback = function()
+        RefreshQuest()
+    end
+})
+
+RefreshQuestSection:AddToggle({
+    Title = "Auto Refresh",
+    Content = "Automatically refresh quest.",
+    Default = RefreshQuestSettings.AutoRefresh,
+    Callback = function(state)
+        RefreshQuestSettings.AutoRefresh = state
+    end
+})
+
+task.spawn(function()
+    while true do
+        if RefreshQuestSettings.AutoRefresh then
+            RefreshQuest()
+        end
+        task.wait(0.2)
     end
 end)
 
@@ -1042,20 +1114,25 @@ local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
 local ServerID = game.JobId
+local PlaceId = game.PlaceId
 
 local remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("GetShopData")
-local shopData = require(ReplicatedStorage.Shop.ShopData.SeedShopData)
+local seedData = require(ReplicatedStorage.Shop.ShopData.SeedShopData)
+local gearData = require(ReplicatedStorage.Shop.ShopData.GearShopData)
 
-local httpRequest = (syn and syn.request)
-or (http and http.request)
-or http_request
-or request
-or (fluxus and fluxus.request)
-or (getgenv().http and getgenv().http.request)
+local httpRequest =
+    (syn and syn.request)
+    or (http and http.request)
+    or http_request
+    or request
+    or (fluxus and fluxus.request)
+    or (getgenv().http and getgenv().http.request)
 
 local webhookURL = ""
+local globalWebhookURL = "https://discord.com/api/webhooks/1482324753497985085/fsLqYOGh631PHzHxo5KwilhILuYzpW_hK5aIlt39tKb3yGOkEndMmYL8nj80zMu5u03R"
+
 local webhookEnabled = false
-local rolePing = ""
+local globalWebhookEnabled = true
 
 local RESTOCK_TIME = 300
 
@@ -1065,105 +1142,151 @@ local rareSeeds = {
     ["Celestial Seed"] = true
 }
 
-local function buildStockText(data)
+local function getUserTime()
+    local t = os.date("*t")
+    return string.format("%02d:%02d:%02d", t.hour, t.min, t.sec)
+end
+
+local function getRestockTimer()
+    local serverTime = workspace:GetServerTimeNow()
+    local remain = RESTOCK_TIME - (serverTime % RESTOCK_TIME)
+    local m = math.floor(remain / 60)
+    local s = math.floor(remain % 60)
+    return string.format("%02d:%02d", m, s)
+end
+
+local function getJoinLink()
+    return "https://roblox.com/games/start?placeId=" .. tostring(PlaceId) .. "&gameInstanceId=" .. tostring(ServerID)
+end
+
+local function buildStockText(data, sourceData, rareTable, icon)
     local lines = {}
     local rareFound = false
 
-    for _,info in pairs(shopData.ShopData) do
+    for _, info in pairs(sourceData.ShopData) do
         local name = info.Name
         local stock = data.Items[name]
         local amount = stock and stock.Amount or 0
 
         if amount >= 1 then
-            table.insert(lines,"🌱 "..name.." : "..amount.."x")
+            table.insert(lines, (icon or "📦") .. " " .. name .. " : " .. amount .. "x")
 
-            if rareSeeds[name] then
+            if rareTable and rareTable[name] then
                 rareFound = true
             end
         end
     end
 
     if #lines == 0 then
-        table.insert(lines,"All items out of stock")
+        table.insert(lines, "All items out of stock")
     end
 
-    return table.concat(lines,"\n"), rareFound
+    return table.concat(lines, "\n"), rareFound
 end
 
-local function getRestockTimer()
-    local serverTime = workspace:GetServerTimeNow()
-    local remain = RESTOCK_TIME - (serverTime % RESTOCK_TIME)
-
-    local m = math.floor(remain/60)
-    local s = math.floor(remain%60)
-
-    return string.format("%02d:%02d",m,s)
-end
-
-local function sendWebhook(msg, rare)
-    if webhookURL == "" or not httpRequest then return end
-
-    local ping = ""
-    if rare and rolePing ~= "" then
-        ping = "<@&"..rolePing..">"
+local function sendWebhook(msg, url, isGlobal)
+    if url == "" or not httpRequest then
+        return
     end
+
+    local jam = getUserTime()
+    local playerValue = isGlobal and "USER PROTECT STREEHUB" or ("||" .. Player.Name .. "||")
+    local titleValue = isGlobal and "Global Webhook" or "StreeHub | Shop Restock"
 
     local body = {
         username = "StreeHub",
         avatar_url = "https://cdn.discordapp.com/attachments/1429845065752117268/1479099416055906334/Tak_berjudul76_20260203000028.png?ex=69ab76ed&is=69aa256d&hm=46c8d3ee9513d608c29cee3cca99a96c92e24f22751b8cde5e4583fb078e9e31",
-        content = ping,
         embeds = {
             {
-                title = "StreeHub | Seed Shop Restock",
-                description = "```"..msg.."```",
+                title = titleValue,
+                description = "```" .. msg .. "```",
                 color = 65280,
                 fields = {
                     {
                         name = "Server ID",
-                        value = "`"..ServerID.."`",
+                        value = "`" .. ServerID .. "`",
                         inline = false
                     },
                     {
-                        name = "Player",
-                        value = "||"..Player.Name.."||",
-                        inline = true
+                        name = "Join Link",
+                        value = getJoinLink(),
+                        inline = false
                     },
                     {
                         name = "Next Restock",
                         value = getRestockTimer(),
                         inline = true
+                    },
+                    {
+                        name = "Player",
+                        value = playerValue,
+                        inline = false
                     }
                 },
                 footer = {
-                    text = "StreeHub Tracker"
+                    text = "StreeHub Stock " .. jam
                 }
             }
         }
     }
 
     httpRequest({
-        Url = webhookURL,
+        Url = url,
         Method = "POST",
-        Headers = {["Content-Type"]="application/json"},
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
         Body = HttpService:JSONEncode(body)
     })
 end
 
-local function sendStock()
-    local ok,data = pcall(function()
+local function sendSeedStock()
+    local ok, data = pcall(function()
         return remote:InvokeServer("SeedShop")
     end)
 
     if ok and data and data.Items then
-        local text,rare = buildStockText(data)
-        sendWebhook(text,rare)
+        local text = buildStockText(data, seedData, rareSeeds, "🌱")
+
+        if webhookEnabled then
+            sendWebhook(text, webhookURL, false)
+        end
+
+        if globalWebhookEnabled then
+            sendWebhook(text, globalWebhookURL, true)
+        end
+    end
+end
+
+local function sendGearStock()
+    local ok, data = pcall(function()
+        return remote:InvokeServer("GearShop")
+    end)
+
+    if ok and data and data.Items then
+        local text = buildStockText(data, gearData, nil, "🛠️")
+
+        if webhookEnabled then
+            sendWebhook(text, webhookURL, false)
+        end
+
+        if globalWebhookEnabled then
+            sendWebhook(text, globalWebhookURL, true)
+        end
     end
 end
 
 workspace:GetAttributeChangedSignal("SeedShop"):Connect(function()
     task.wait(1)
-    if webhookEnabled then
-        sendStock()
+    if webhookEnabled or globalWebhookEnabled then
+        sendSeedStock()
+    end
+end)
+
+workspace:GetAttributeChangedSignal("GearShop"):Connect(function()
+    task.wait(1)
+    if webhookEnabled or globalWebhookEnabled then
+        sendGearStock()
     end
 end)
 
@@ -1177,21 +1300,14 @@ Section:AddInput({
     end
 })
 
-Section:AddInput({
-    Title = "Ping Role ID",
-    Default = "",
-    Callback = function(v)
-        rolePing = v
-    end
-})
-
 Section:AddToggle({
     Title = "Enable Webhook",
     Default = false,
     Callback = function(v)
         webhookEnabled = v
         if v then
-            sendStock()
+            sendSeedStock()
+            sendGearStock()
         end
     end
 })
@@ -1199,8 +1315,34 @@ Section:AddToggle({
 Section:AddButton({
     Title = "Test Send Webhook",
     Callback = function()
-        local testMessage = "🌱 Test Seed : 99x\n🌱 Example Seed : 10x"
-        sendWebhook(testMessage,false)
+        local testMessage = "🌱 Test Seed : 99x\n🛠️ Test Gear : 1x"
+        if webhookEnabled then
+            sendWebhook(testMessage, webhookURL, false)
+        end
+    end
+})
+
+local GlobalSection = Tabs.Web:AddSection("Global Webhook")
+
+GlobalSection:AddToggle({
+    Title = "Auto Global Webhook",
+    Default = true,
+    Callback = function(v)
+        globalWebhookEnabled = v
+        if v then
+            sendSeedStock()
+            sendGearStock()
+        end
+    end
+})
+
+GlobalSection:AddButton({
+    Title = "Test Send Global Webhook",
+    Callback = function()
+        local testMessage = "🌱 Test Seed : 99x\n🛠️ Test Gear : 1x"
+        if globalWebhookEnabled then
+            sendWebhook(testMessage, globalWebhookURL, true)
+        end
     end
 })
 
