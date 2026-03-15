@@ -13,7 +13,7 @@ local gameScripts = {
         name = "Abyss",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Main.lua"
     },
-    [127794225497302] = {
+    [286090429] = {
         name = "Arsenal",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Main.lua"
     },
