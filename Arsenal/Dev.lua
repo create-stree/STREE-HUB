@@ -4,7 +4,7 @@ local StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/crea
 
 local Window = StreeHub:Window({
     Title   = "StreeHub |",
-    Footer  = "Garden Horizons",
+    Footer  = "Arsenal",
     Images  = "122683047852451",
     Color   = Color3.fromRGB(57, 255, 20),
     Theme   = 9542022979,
@@ -930,10 +930,54 @@ y:AddPanel({
     end
 })
 
+local y2 = Tabs.Misc:AddSection("Configuration")
+
+y2:AddButton({
+    Title = "Save Configuration",
+    Callback = function()
+        if SaveManager and SaveManager.Save then
+            SaveManager:Save()
+        end
+    end
+})
+
+y2:AddButton({
+    Title = "Load Configuration",
+    Callback = function()
+        if SaveManager and SaveManager.Load then
+            SaveManager:Load()
+        end
+    end
+})
+
+y2:AddButton({
+    Title = "Reset Configuration",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local TeleportService = game:GetService("TeleportService")
+        local LocalPlayer = Players.LocalPlayer
+        local configPath = "StreeHub/Config/StreeHub_" .. gameName .. ".json"
+
+        if isfile and isfile(configPath) then
+            delfile(configPath)
+        end
+
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+})
+
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     SaveConfig()
 end)
+
+StreeHub:MakeNotify({
+    Title = "StreeHub",
+    Description = "Notification",
+    Content = "Script loaded successfully!",
+    Color = Color3.fromRGB(57, 255, 20),
+    Delay = 4
+})
 
 StreeHub:MakeNotify({
     Title = "StreeHub",
