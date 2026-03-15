@@ -83,6 +83,10 @@ local gameScripts = {
         name = "Abyss",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Premium.lua"
     },
+    [286090429] = {
+        name = "Arsenal",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Premium.lua"
+    },
     [124311897657957] = {
         name = "Break A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
