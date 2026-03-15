@@ -978,11 +978,3 @@ StreeHub:MakeNotify({
     Color = Color3.fromRGB(57, 255, 20),
     Delay = 4
 })
-
-StreeHub:MakeNotify({
-    Title = "StreeHub",
-    Description = "Notification",
-    Content = "Script loaded successfully!",
-    Color = Color3.fromRGB(57, 255, 20),
-    Delay = 4
-})
