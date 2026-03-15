@@ -16,7 +16,7 @@ local Window = StreeHub:Window({
 local Tabs = {
     Info     = Window:AddTab({ Name = "Info",     Icon = "info"     }),
     Combat   = Window:AddTab({ Name = "Combat",   Icon = "sword"    }),
-    Visuals  = Window:AddTab({ Name = "Visuals",  Icon = "eye"      }),
+    Visuals  = Window:AddTab({ Name = "Visuals",  Icon = "eyes"     }),
     Players  = Window:AddTab({ Name = "Players",  Icon = "user"     }),
     Misc     = Window:AddTab({ Name = "Misc",     Icon = "settings" }),
 }
