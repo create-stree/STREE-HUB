@@ -1,21 +1,14 @@
-local success, StreeHub = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/StreeHub.lua"))()
-end)
+repeat task.wait() until game.Players.LocalPlayer.Character
 
-if not success or not StreeHub then
-    warn("⚠️ UI failed to load!")
-    return
-else
-    print("✓ UI loaded successfully!")
-end
+local StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/UI.Library/refs/heads/main/StreeHub.lua"))()
 
 local Window = StreeHub:Window({
-    Title = "SeraphinHub |",
-    Footer = "KirsiaSC | Arsenal",
-    Images = "120248611602330",
-    Color = Color3.fromRGB(180, 0, 255),
-    Theme = 122376116281975,
-    ThemeTransparency = 0.1,
+    Title   = "StreeHub |",
+    Footer  = "Garden Horizons",
+    Images  = "122683047852451",
+    Color   = Color3.fromRGB(57, 255, 20),
+    Theme   = 9542022979,
+    ThemeTransparency = 0.15,
     ["Tab Width"] = 120,
     Version = 1,
 })
@@ -25,7 +18,7 @@ local Tabs = {
     Combat   = Window:AddTab({ Name = "Combat",   Icon = "sword"    }),
     Visuals  = Window:AddTab({ Name = "Visuals",  Icon = "eye"      }),
     Players  = Window:AddTab({ Name = "Players",  Icon = "user"     }),
-    Settings = Window:AddTab({ Name = "Settings", Icon = "settings" }),
+    Misc     = Window:AddTab({ Name = "Misc",     Icon = "settings" }),
 }
 
 local Players = game:GetService("Players")
@@ -34,24 +27,19 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-local InfoSection = Tabs.Info:AddSection("Community Support")
+local y1 = Tabs.Info:AddSection("Information")
 
-InfoSection:AddParagraph({
+y1:AddParagraph({
     Title = "Discord",
-    Content = "Click the button below to copy the Discord link.",
+    Content = "Join Us!",
     Icon = "discord",
     ButtonText = "Copy Discord Link",
     ButtonCallback = function()
+        local link = "https://discord.gg/jdmX43t5mY"
         if setclipboard then
-            setclipboard("https://discord.gg/getseraphin")
+            setclipboard(link)
         end
     end
-})
-
-InfoSection:AddParagraph({
-    Title = "Support",
-    Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible.",
-    Icon = "star",
 })
 
 local CombatSection = Tabs.Combat:AddSection("Combat")
@@ -806,119 +794,151 @@ MovementSection:AddToggle({
     end
 })
 
-local GeneralSection = Tabs.Settings:AddSection("General")
+local t1 = Tabs.Misc:AddSection("Server")
 
-GeneralSection:AddToggle({
-    Title = "AntiAFK",
+local AntiAfkConnection
+local AntiAFKToggle = t1:AddToggle({
+    Title   = "Anti AFK",
+    Content = "Prevent being kicked for inactivity.",
     Default = false,
     Callback = function(state)
-        _G.AntiAFK = state
-        local VirtualUser = game:GetService("VirtualUser")
-        task.spawn(function()
-            while _G.AntiAFK do
-                task.wait(60)
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton2(Vector2.new())
-            end
-        end)
-    end
-})
-
-GeneralSection:AddToggle({
-    Title = "Auto Reconnect",
-    Default = false,
-    Callback = function(state)
-        _G.AutoReconnect = state
-        task.spawn(function()
-            while _G.AutoReconnect do
-                task.wait(2)
-                local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
-                if reconnectUI then
-                    local prompt = reconnectUI:FindFirstChild("promptOverlay")
-                    if prompt then
-                        local errorPrompt = prompt:FindFirstChild("ErrorPrompt")
-                        if errorPrompt then
-                            local confirmButton = errorPrompt:FindFirstChild("ConfirmButton")
-                            if confirmButton then
-                                firesignal(confirmButton.MouseButton1Click)
+        _G.AntiAFKActive = state
+        if state then
+            AntiAfkConnection = UIS.WindowFocusReleased:Connect(function()
+                local vInputInfo = UIS:GetFocusedTextBox()
+                if not vInputInfo then
+                    local VIM = game:GetService("VirtualInputManager")
+                    if VIM then
+                        pcall(function()
+                            VIM:SendMouseMoveEvent(0, 0, false)
+                        end)
+                    end
+                end
+            end)
+            _G.AntiAFKLoop = task.spawn(function()
+                while _G.AntiAFKActive do
+                    task.wait(60)
+                    if _G.AntiAFKActive then
+                        local char = LP.Character
+                        if char then
+                            local hum = char:FindFirstChildOfClass("Humanoid")
+                            if hum then
+                                hum:ChangeState(Enum.HumanoidStateType.Jumping)
                             end
                         end
                     end
                 end
+            end)
+        else
+            if AntiAfkConnection then
+                AntiAfkConnection:Disconnect()
+                AntiAfkConnection = nil
             end
-        end)
+        end
     end
 })
 
-local ServerSection = Tabs.Settings:AddSection("Server")
+local AutoReconnectToggle = t1:AddToggle({
+    Title   = "Auto Reconnect",
+    Content = "Automatically reconnect if disconnected.",
+    Default = false,
+    Callback = function(state)
+        _G.AutoReconnect = state
+    end
+})
 
-ServerSection:AddButton({
-    Title = "Rejoin",
+game.Players.LocalPlayer.OnTeleport:Connect(function(teleportState)
+    if teleportState == Enum.TeleportState.Failed and _G.AutoReconnect then
+        task.wait(3)
+        game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
+    end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.AutoReconnect and not game:GetService("Players").LocalPlayer then
+        task.wait(3)
+        game:GetService("TeleportService"):Teleport(game.PlaceId)
+    end
+end)
+
+t1:AddButton({
+    Title = "Rejoin Server",
     Callback = function()
-        local TeleportService = game:GetService("TeleportService")
-        local PlaceId = game.PlaceId
-        local Player = game.Players.LocalPlayer
-        TeleportService:Teleport(PlaceId, Player)
+        task.wait(1)
+        game:GetService("TeleportService"):Teleport(game.PlaceId, LP)
     end
 })
 
-ServerSection:AddButton({
+t1:AddButton({
     Title = "Server Hop",
     Callback = function()
-        local HttpService = game:GetService("HttpService")
-        local TeleportService = game:GetService("TeleportService")
-        local PlaceId = game.PlaceId
-        local Servers = {}
-        local ok, response = pcall(function()
-            return game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
-        end)
-        if ok and response then
-            local data = HttpService:JSONDecode(response)
-            for _, v in pairs(data.data) do
-                if v.playing < v.maxPlayers and v.id ~= game.JobId then
-                    table.insert(Servers, v.id)
-                end
-            end
-        end
-        if #Servers > 0 then
-            local randomServer = Servers[math.random(1, #Servers)]
-            TeleportService:TeleportToPlaceInstance(PlaceId, randomServer, game.Players.LocalPlayer)
-        end
-    end
-})
-
-local OtherSection = Tabs.Settings:AddSection("Other Scripts")
-
-OtherSection:AddButton({
-    Title = "Infinite Yield",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-    end
-})
-
-task.spawn(function()
-    while true do
-        task.wait()
-        if _G.Aimbot then
-            local closestPlayer, closestDistance = nil, math.huge
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
-                    local character = player.Character
-                    if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Head") then
-                        local distance = (LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
-                        if distance < closestDistance then
-                            closestDistance = distance
-                            closestPlayer = player
-                        end
+        task.spawn(function()
+            local Http = game:GetService("HttpService")
+            local TPS  = game:GetService("TeleportService")
+            local ok, result = pcall(function()
+                return Http:JSONDecode(game:HttpGetAsync(
+                    "https://games.roblox.com/v1/games/" ..
+                    game.PlaceId ..
+                    "/servers/Public?sortOrder=Asc&limit=100"
+                ))
+            end)
+            if ok and result and result.data then
+                for _, v in pairs(result.data) do
+                    if v.id ~= game.JobId and v.playing < v.maxPlayers then
+                        TPS:TeleportToPlaceInstance(game.PlaceId, v.id, LP)
+                        return
                     end
                 end
             end
-            if closestPlayer and closestPlayer.Character then
-                local targetHead = closestPlayer.Character:FindFirstChild("Head")
-                if targetHead then
-                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
-                end
-            end
+        end)
+    end
+})
+
+local y = Tabs.Misc:AddSection("Configuration")
+
+y:AddToggle({
+    Title = "Show UI Button",
+    Content = "Toggle the floating hub button visibility.",
+    Default = true,
+    Callback = function(state)
+        local button = game:GetService("CoreGui"):FindFirstChild("StreeHubButton")
+        if button then
+            button.Enabled = state
         end
     end
+})
+
+y:AddButton({
+    Title = "Destroy GUI",
+    Callback = function()
+        Window:DestroyGui()
+    end
+})
+
+y:AddPanel({
+    Title = "UI Color",
+    Placeholder = "57,255,20",
+    ButtonText = "Apply Color",
+    ButtonCallback = function(colorText)
+        local r, g, b = colorText:match("(%d+),%s*(%d+),%s*(%d+)")
+        if r and g and b then
+            local color = Color3.fromRGB(tonumber(r), tonumber(g), tonumber(b))
+        end
+    end,
+    SubButtonText = "Reset Color",
+    SubButtonCallback = function()
+    end
+})
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    SaveConfig()
 end)
+
+StreeHub:MakeNotify({
+    Title = "StreeHub",
+    Description = "Notification",
+    Content = "Script loaded successfully!",
+    Color = Color3.fromRGB(57, 255, 20),
+    Delay = 4
+})
