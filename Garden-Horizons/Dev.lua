@@ -628,53 +628,35 @@ AutoShovelSection:AddToggle({
     end
 })
 
-local SellPos = CFrame.new(149.40, 204.01, 672.00)
+x4 = Tabs.Main:AddSection("Auto Botanist")
 
-local function teleport(cf)
-    local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-    root.CFrame = cf
-end
+local RS = game:GetService("ReplicatedStorage")
 
-local function sell(mode)
-    local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-    local old = root.CFrame
-    teleport(SellPos)
-    task.wait(0.6)
-    local Event = game:GetService("ReplicatedStorage").RemoteEvents.SellItems
-    Event:InvokeServer(mode)
-    task.wait(0.6)
-    teleport(old)
-end
+local QuestRemote = RS
+    :WaitForChild("RemoteEvents")
+    :WaitForChild("BotanistQuestRequest")
 
-local SellSection = Tabs.Main:AddSection("Sell")
+_G.AutoSubmitQuest = false
 
-SellSection:AddToggle({
-    Title = "Auto Sell All",
-    Content = "Automatically sell all items periodically",
+x4:AddToggle({
+    Title = "Auto Submit All (Botanist)",
     Default = false,
     Callback = function(state)
-        _G.AutoSellAll = state
-        if state then
-            task.spawn(function()
-                while _G.AutoSellAll do
-                    task.wait(2)
-                    if _G.AutoSellAll then
-                        sell("SellAll")
-                    end
-                end
-            end)
-        end
+        _G.AutoSubmitQuest = state
     end
 })
 
-SellSection:AddButton({
-    Title = "Sell Single",
-    Callback = function()
-        sell("SellSingle")
+task.spawn(function()
+    while true do
+        if _G.AutoSubmitQuest then
+            pcall(function()
+                QuestRemote:InvokeServer("TurnInAll")
+            end)
+        end
+        
+        task.wait() 
     end
-})
+end)
 
 local CodesSection = Tabs.Main:AddSection("Redeem Codes")
 
@@ -699,6 +681,54 @@ local x5 = CodesSection:AddButton({
             end)
             task.wait(0.5)
         end
+    end
+})
+
+local SellPos = CFrame.new(149.40, 204.01, 672.00)
+
+local function teleport(cf)
+    local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+    local root = char:WaitForChild("HumanoidRootPart")
+    root.CFrame = cf
+end
+
+local function sell(mode)
+    local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+    local root = char:WaitForChild("HumanoidRootPart")
+    local old = root.CFrame
+    teleport(SellPos)
+    task.wait(0.6)
+    local Event = game:GetService("ReplicatedStorage").RemoteEvents.SellItems
+    Event:InvokeServer(mode)
+    task.wait(0.6)
+    teleport(old)
+end
+
+local SellSection = Tabs.Bag:AddSection("Sell")
+
+SellSection:AddToggle({
+    Title = "Auto Sell All",
+    Content = "Automatically sell all items periodically",
+    Default = false,
+    Callback = function(state)
+        _G.AutoSellAll = state
+        if state then
+            task.spawn(function()
+                while _G.AutoSellAll do
+                    task.wait(2)
+                    if _G.AutoSellAll then
+                        sell("SellAll")
+                    end
+                end
+            end)
+        end
+    end
+})
+
+SellSection:AddButton({
+    Title = "Sell Single",
+    Callback = function()
+        sell("SellSingle")
     end
 })
 
