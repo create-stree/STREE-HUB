@@ -16,12 +16,13 @@ local Window = StreeHub:Window({
 local Tabs = {
     Info = Window:AddTab({ Name = "Info", Icon = "info" }),
     Main = Window:AddTab({ Name = "Main", Icon = "landmark" }),
-    Bag = Window:AddTab({ Name = "Backpack", Icon = "bag" }),
-    Quest = Window:AddTab({ Name = "Quest", Icon = "menu" }),
-    Shop = Window:AddTab({ Name = "Shop", Icon = "shop" }),
-    Web = Window:AddTab({ Name = "Webhook", Icon = "web" }),
-    Teleport = Window:AddTab({ Name = "Teleport", Icon = "gps" }),
-    Misc = Window:AddTab({ Name = "Misc", Icon = "settings" }),
+    Bag = Window:AddTab({ Name = "Backpack", Icon = "backpack" }),
+    Quest = Window:AddTab({ Name = "Quest", Icon = "send" }),
+    Shop = Window:AddTab({ Name = "Shop", Icon = "shopping-bag" }),
+    Web = Window:AddTab({ Name = "Webhook", Icon = "webhook" }),
+    Teleport = Window:AddTab({ Name = "Teleport", Icon = "map-pin" }),
+    Misc = Window:AddTab({ Name = "Misc", Icon = "settings-2" }),
+    Settings = Window:AddTab({ Name = "Settings", Icon = "settings" }),
 }
 
 local y1 = Tabs.Info:AddSection("Information")
@@ -1772,7 +1773,7 @@ t1:AddButton({
     end
 })
 
-local y = Tabs.Misc:AddSection("UI Setting")
+local y = Tabs.Settings:AddSection("UI Setting")
 
 y:AddToggle({
     Title = "Show UI Button",
@@ -1808,7 +1809,7 @@ y:AddPanel({
     end
 })
 
-local y2 = Tabs.Misc:AddSection("Configuration")
+local y2 = Tabs.Settings:AddSection("Configuration")
 
 y2:AddButton({
     Title = "Save Configuration",
