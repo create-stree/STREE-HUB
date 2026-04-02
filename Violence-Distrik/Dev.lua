@@ -11,7 +11,7 @@ local Camera            = Workspace.CurrentCamera
 
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
-local VexoraHub
+local StreeHub
 local UI = {}
 local NEX_CrosshairGui, NEX_CrossH, NEX_CrossV = nil, nil, nil
 
@@ -20,9 +20,9 @@ local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset
 
 local ok, result = pcall(require, "./src/Init")
 if ok and result then
-    VexoraHub = result
+    StreeHub = result
 else
-    VexoraHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua"))()
+    StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua"))()
 end
 
 if isMobile then UI.Mobile = true end
@@ -30,7 +30,7 @@ print("[Universal] Platform:", isMobile and "MOBILE" or "PC")
 
 
 local Window
-if VexoraHub then
+if StreeHub then
     Window = StreeHub:CreateWindow({
         Title = "StreeHub",
         Icon = "rbxassetid://91948065763443",
