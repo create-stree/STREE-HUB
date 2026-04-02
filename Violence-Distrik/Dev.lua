@@ -33,7 +33,7 @@ local Window
 if StreeHub then
     Window = StreeHub:CreateWindow({
         Title = "StreeHub",
-        Icon = "rbxassetid://91948065763443",
+        Icon = "rbxassetid://99948086845842",
         Author = "Violence Distrik",
         Folder = "StreeHub",
         Size = WindowSize,
