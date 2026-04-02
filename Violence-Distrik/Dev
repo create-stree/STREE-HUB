@@ -22,7 +22,7 @@ local ok, result = pcall(require, "./src/Init")
 if ok and result then
     VexoraHub = result
 else
-    VexoraHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/kirsiaball-dev/46GhMjd7/refs/heads/main/ui.lua"))()
+    VexoraHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua"))()
 end
 
 if isMobile then UI.Mobile = true end
@@ -31,14 +31,14 @@ print("[Universal] Platform:", isMobile and "MOBILE" or "PC")
 
 local Window
 if VexoraHub then
-    Window = VexoraHub:CreateWindow({
-        Title          = "Luxv'S Hub - Violence District",
-        Icon           = "rbxassetid://75522306265517",
-        Author         = "developed by Nex",
-        Folder         = "LSHub-Univcs",
-        Size           = WindowSize,
+    Window = StreeHub:CreateWindow({
+        Title = "StreeHub",
+        Icon = "rbxassetid://91948065763443",
+        Author = "Violence Distrik",
+        Folder = "StreeHub",
+        Size = WindowSize,
         LiveSearchDropdown = true,
-        FileSaveName   = "LSHub-Univcs/config.json",
+        FileSaveName = "StreeHub/config.json",
     })
 end
 
@@ -3887,5 +3887,3 @@ RunService.Heartbeat:Connect(function()
         pcall(UpdateMobileFOV)
     end
 end)
-
--- End of file
