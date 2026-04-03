@@ -1,3 +1,4 @@
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -8,8 +9,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-
--- combat
 
 local killAuraToggle = false
 local chopAuraToggle = false
@@ -23,8 +22,6 @@ local toolsDamageIDs = {
     ["Chainsaw"] = "647_8992824875",
     ["Spear"] = "196_8999010016"
 }
-
--- auto food
 
 local autoFeedToggle = false
 local selectedFood = {}
@@ -40,8 +37,6 @@ local alimentos = {
     "Cooked Steak"
 }
 
--- esp
-
 local ie = {
     "Bandage", "Bolt", "Broken Fan", "Broken Microwave", "Cake", "Carrot", "Chair", "Coal", "Coin Stack",
     "Cooked Morsel", "Cooked Steak", "Fuel Canister", "Iron Body", "Leather Armor", "Log", "MadKit", "Metal Chair",
@@ -49,8 +44,6 @@ local ie = {
     "Morsel", "Sheet Metal", "Steak", "Tyre", "Washing Machine"
 }
 local me = {"Bunny", "Wolf", "Alpha Wolf", "Bear", "Cultist", "Crossbow Cultist", "Alien"}
-
--- bring
 
 local junkItems = {"Tyre", "Bolt", "Broken Fan", "Broken Microwave", "Sheet Metal", "Old Radio", "Washing Machine", "Old Car Engine"}
 local selectedJunkItems = {}
@@ -67,29 +60,24 @@ local isCollecting = false
 local originalPosition = nil
 local autoBringEnabled = false
 
--- Toggle states for each category
 local junkToggleEnabled = false
 local fuelToggleEnabled = false
 local foodToggleEnabled = false
 local medicalToggleEnabled = false
 local equipmentToggleEnabled = false
 
--- Loop control variables to properly stop threads
 local junkLoopRunning = false
 local fuelLoopRunning = false
 local foodLoopRunning = false
 local medicalLoopRunning = false
 local equipmentLoopRunning = false
 
--- Auto chop
 local chopAuraEnabled = false
 local chopAuraRadius = 50
 
--- Auto kill
 local killAuraEnabled = false
 local killAuraRadius = 50
 
--- Variables yang diperlukan untuk Auto Cook dan Upgrade
 local autoCookEnabled = false
 local autoCookEnabledItems = {}
 local autocookItems = {"Morsel", "Steak"}
@@ -98,14 +86,12 @@ local selectedCampfireItem = nil
 local campfireFuelItems = {"Log", "Chair", "Coal"}
 local campfireDropPos = Vector3.new(-15.5, 8.12, -82.6)
 
--- Variables yang diperlukan untuk ESP
 local espItemsEnabled = false
 local espMobsEnabled = false
 local selectedItems = {}
 local selectedMobs = {}
 local espConnections = {}
 
--- Variables yang diperlukan untuk Teleport
 local currentChests = {}
 local currentChestNames = {}
 local currentMobs = {}
@@ -113,7 +99,6 @@ local currentMobNames = {}
 local selectedChest = nil
 local selectedMob = nil
 
--- Enhanced smooth pulling movement with easing
 local function smoothPullToItem(startPos, endPos, duration)
     local player = game.Players.LocalPlayer
     local hrp = player.Character.HumanoidRootPart
@@ -149,7 +134,6 @@ local function smoothPullToItem(startPos, endPos, duration)
     wait(duration)
 end
 
--- Enhanced item pulling effect
 local function createItemPullEffect(itemPart, targetPos, duration)
     if not itemPart or not itemPart.Parent then return end
     
@@ -190,7 +174,6 @@ local function createItemPullEffect(itemPart, targetPos, duration)
     wait(duration)
 end
 
--- Enhanced bypass system with smooth pulling (no noclip)
 local function bypassBringSystem(items, stopFlag)
     if isCollecting then 
         return 
@@ -321,7 +304,6 @@ local foodControl = {enabled = false, running = false}
 local medicalControl = {enabled = false, running = false}
 local equipmentControl = {enabled = false, running = false}
 
--- Functions for game mechanics
 local function equipTool(tool)
     if tool then
         local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("EquipItemHandle")
@@ -434,7 +416,6 @@ local function killAuraLoop()
     end
 end
 
--- Auto Food Functions
 local function getHunger()
     return math.floor(LocalPlayer.PlayerGui.Interface.StatBars.HungerBar.Bar.Size.X.Scale * 100)
 end
@@ -460,7 +441,6 @@ local function autoFeedLoop()
     end
 end
 
--- Function untuk move item ke posisi tertentu (untuk auto cook/upgrade)
 local function moveItemToPos(item, targetPos)
     if not item or not item:IsA("BasePart") then return end
     
@@ -471,7 +451,6 @@ local function moveItemToPos(item, targetPos)
     end)
 end
 
--- Function untuk ESP
 local espFolder = Instance.new("Folder")
 espFolder.Name = "ESP"
 espFolder.Parent = game.CoreGui
@@ -528,7 +507,6 @@ local function Desp(name, espType)
     removeESP(name, espType)
 end
 
--- Function untuk get chests
 local function getChests()
     local chests = {}
     local chestNames = {}
@@ -544,7 +522,6 @@ local function getChests()
     return chests, chestNames
 end
 
--- Function untuk get mobs/children
 local function getMobs()
     local mobs = {}
     local mobNames = {}
@@ -560,7 +537,6 @@ local function getMobs()
     return mobs, mobNames
 end
 
--- Function untuk teleport ke fire
 local function tp1()
     local character = LocalPlayer.Character
     if character and character:FindFirstChild("HumanoidRootPart") then
@@ -568,15 +544,10 @@ local function tp1()
     end
 end
 
--- Inisialisasi data
 currentChests, currentChestNames = getChests()
 currentMobs, currentMobNames = getMobs()
 selectedChest = currentChestNames[1]
 selectedMob = currentMobNames[1]
-
--- ============================================================
--- UI Setup (StreeHub)
--- ============================================================
 
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
