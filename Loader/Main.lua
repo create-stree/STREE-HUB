@@ -10,6 +10,10 @@ local streeLogo = "rbxassetid://99948086845842"
 
 local gameScripts = {
     [127794225497302] = {
+        name = "99 Night In The Forest",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/99NITF/Main.lua"
+    },
+    [127794225497302] = {
         name = "Abyss",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Main.lua"
     },
