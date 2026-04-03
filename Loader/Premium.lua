@@ -79,6 +79,10 @@ if not isPremiumKey(_G.scripts_key) then
 end
 
 local gameScripts = {
+    [79546208627805] = {
+        name = "99 Night In The Forest",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/99NITF/Main.lua"
+    },
     [127794225497302] = {
         name = "Abyss",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Premium.lua"
