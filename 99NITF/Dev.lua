@@ -579,53 +579,47 @@ selectedMob = currentMobNames[1]
 -- ============================================================
 
 local Window = StreeHub:CreateWindow({
-    Title = "VoraHub | 99 Nights In The Forest",
-    Icon = "rbxassetid://91948065763443",
-    Author = "VoraHub",
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "99 Night In The Forest") .. " | " .. version,
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
-    FileSaveName = "StreeHub/config.json",
+    FileSaveName = "StreeHub/99NITF.json"
 })
 
 local Tabs = {
-    Info    = Window:Tab({ Title = "Info",      Icon = "info",        Desc = "Script information and community links." }),
-    Combat  = Window:Tab({ Title = "Combat",    Icon = "sword",       Desc = "Kill Aura and Chop Aura settings." }),
-    next    = Window:Tab({ Title = "Auto",      Icon = "zap",         Desc = "Auto Bring, Auto Feed, Auto Cook, and Upgrade." }),
-    esp     = Window:Tab({ Title = "ESP",       Icon = "eye",         Desc = "ESP for items and mobs." }),
-    tp      = Window:Tab({ Title = "Teleport",  Icon = "navigation",  Desc = "Teleport to chests, mobs, and locations." }),
+    Home    = Window:Tab({ Title = "Home",      Icon = "scan-face",  }),
+    Combat  = Window:Tab({ Title = "Combat",    Icon = "swords",     }),
+    next    = Window:Tab({ Title = "Auto",      Icon = "play",       }),
+    esp     = Window:Tab({ Title = "ESP",       Icon = "eye",        }),
+    tp      = Window:Tab({ Title = "Teleport",  Icon = "map",        })
 }
 
-Window:SelectTab(1)
+Tabs.Home:Section({
+    Title = "Infomation",
+})
 
--- ============================================================
--- Info Tab
--- ============================================================
-
-Tabs.Info:Section({ Title = "Community Support" })
-
-Tabs.Info:Button({
-    Title = "Discord Server",
-    Desc = "Click to copy link",
+Tabs.Home:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
     Callback = function()
-        setclipboard("https://discord.gg/vorahub")
-        StreeHub:Notify({
-            Title = "Copied!",
-            Content = "Discord link copied to clipboard",
-            Icon = "clipboard-check",
-            Duration = 3,
-        })
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
     end
 })
+
+Tabs.Home:Paragraph{
+    Title = "Join Us",
+    Desc = "Every Update Will Be On Discord"
+}
 
 Tabs.Info:Paragraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
-
--- ============================================================
--- Combat Tab
--- ============================================================
 
 Tabs.Combat:Section({ Title = "Kill Aura" })
 
@@ -676,10 +670,6 @@ Tabs.Combat:Toggle({
         end
     end
 })
-
--- ============================================================
--- Auto Tab - Auto Bring Items
--- ============================================================
 
 Tabs.next:Section({ Title = "Junk Items" })
 
@@ -811,10 +801,6 @@ Tabs.next:Toggle({
     end
 })
 
--- ============================================================
--- Auto Tab - Auto Feed
--- ============================================================
-
 Tabs.next:Section({ Title = "Auto Feed" })
 
 Tabs.next:Dropdown({
@@ -850,10 +836,6 @@ Tabs.next:Toggle({
         end
     end
 })
-
--- ============================================================
--- Auto Tab - Auto Cook Food
--- ============================================================
 
 Tabs.next:Section({ Title = "Auto Cook Food" })
 
@@ -895,10 +877,6 @@ coroutine.wrap(function()
     end
 end)()
 
--- ============================================================
--- Auto Tab - Auto Upgrade
--- ============================================================
-
 Tabs.next:Section({ Title = "Auto Upgrade" })
 
 Tabs.next:Dropdown({
@@ -931,10 +909,6 @@ Tabs.next:Toggle({
         end
     end
 })
-
--- ============================================================
--- ESP Tab - Items
--- ============================================================
 
 Tabs.esp:Section({ Title = "ESP Items" })
 
@@ -998,10 +972,6 @@ Tabs.esp:Toggle({
     end
 })
 
--- ============================================================
--- ESP Tab - Mobs
--- ============================================================
-
 Tabs.esp:Section({ Title = "Mobs ESP" })
 
 Tabs.esp:Dropdown({
@@ -1063,10 +1033,6 @@ Tabs.esp:Toggle({
         end
     end
 })
-
--- ============================================================
--- Teleport Tab - Chest
--- ============================================================
 
 Tabs.tp:Section({ Title = "Chest" })
 
@@ -1137,10 +1103,6 @@ Tabs.tp:Button({
     end
 })
 
--- ============================================================
--- Teleport Tab - Children
--- ============================================================
-
 Tabs.tp:Section({ Title = "Children" })
 
 local MobDropdown = Tabs.tp:Dropdown({
@@ -1195,10 +1157,6 @@ Tabs.tp:Button({
     end
 })
 
--- ============================================================
--- Teleport Tab - Teleport
--- ============================================================
-
 Tabs.tp:Section({ Title = "Teleport" })
 
 Tabs.tp:Button({
@@ -1207,10 +1165,6 @@ Tabs.tp:Button({
         tp1()
     end
 })
-
--- ============================================================
--- Loaded Notification
--- ============================================================
 
 StreeHub:Notify({
     Title = "VoraHub",
