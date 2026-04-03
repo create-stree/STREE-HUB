@@ -587,7 +587,7 @@ Tabs.Home:Paragraph{
     Desc = "Every Update Will Be On Discord"
 }
 
-Tabs.Info:Paragraph({
+Tabs.Home:Paragraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
