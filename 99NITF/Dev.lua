@@ -1007,7 +1007,7 @@ Tabs.esp:Toggle({
 
 Tabs.tp:Section({ Title = "Chest" })
 
-local ChestDropdown = Tabs.tp:Dropdown({
+Tabs.tp:Dropdown({
     Title = "Select Chest",
     Values = currentChestNames,
     Value = currentChestNames[1],
@@ -1076,7 +1076,7 @@ Tabs.tp:Button({
 
 Tabs.tp:Section({ Title = "Children" })
 
-local MobDropdown = Tabs.tp:Dropdown({
+Tabs.tp:Dropdown({
     Title = "Select Child",
     Values = currentMobNames,
     Value = currentMobNames[1],
@@ -1138,8 +1138,8 @@ Tabs.tp:Button({
 })
 
 StreeHub:Notify({
-    Title = "VoraHub",
-    Content = "99 Night In The Forest Script loaded successfully!",
-    Icon = "check",
+    Title = "StreeHub",
+    Content = "Script loaded successfully!",
+    Icon = "bell-ring",
     Duration = 5,
 })
