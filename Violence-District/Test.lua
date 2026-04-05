@@ -91,8 +91,8 @@ end
 local Window = WindUI:CreateWindow({
     Title         = "StreeHub",
     Author        = "Violence District",
-    Icon          = "rbxassetid://128795866459585",
-    Size          = isMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(260, 290),
+    Icon          = "rbxassetid://99948086845842",
+    Size          = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350),
 })
 if Window.Tag then
     Window:Tag({
