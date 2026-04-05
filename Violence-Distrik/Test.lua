@@ -718,22 +718,52 @@ local SurvivorTab, KillerTab, GeneratorTab, FlingTab, ResetTab
 
 if Window then
     Main         = Window:Section({ Title = "Violence District" })
-    PlayerTab    = Main:Tab({ Title = "Player" })
-    ESPTab       = Main:Tab({ Title = "ESP" })
-    MapTab       = Main:Tab({ Title = "Map" })
-    AimTab       = Main:Tab({ Title = "Aim" })
-    FOVTab       = Main:Tab({ Title = "FOV" })
-    SurvivorTab  = Main:Tab({ Title = "Survivor" })
-    KillerTab    = Main:Tab({ Title = "Killer" })
-    GeneratorTab = Main:Tab({ Title = "Generator" })
-    FlingTab     = Main:Tab({ Title = "Fling Feature" })
-    SettingsTab  = Main:Tab({ Title = "Settings" })
-    ResetTab     = Main:Tab({ Title = "Reset" })
+    HomeTab      = Main:Tab({ Title = "Home", Icon = "scan-face" })
+    PlayerTab    = Main:Tab({ Title = "Player", Icon = "user" })
+    ESPTab       = Main:Tab({ Title = "ESP", Icon = "eyes" })
+    MapTab       = Main:Tab({ Title = "Map", Icon = "map" })
+    AimTab       = Main:Tab({ Title = "Aim", Icon = "crosshair" })
+    FOVTab       = Main:Tab({ Title = "FOV", Icon = "plus" })
+    SurvivorTab  = Main:Tab({ Title = "Survivor", Icon = "key-round" })
+    KillerTab    = Main:Tab({ Title = "Killer", Icon = "swords" })
+    GeneratorTab = Main:Tab({ Title = "Generator", Icon = "gallery-vertical-end" })
+    FlingTab     = Main:Tab({ Title = "Fling Feature", Icon = "drone" })
+    SettingsTab  = Main:Tab({ Title = "Settings", Icon = "settings" })
+    ResetTab     = Main:Tab({ Title = "Reset", Icon = "timer-reset" })
 end
 
 if Window then
 
 do
+    local Infomation = HomeTab:Section({
+        Title     = "Infomation",
+        Icon      = "solar:running-round-bold",
+        Box       = true,
+        BoxBorder = true,
+        Opened    = false,
+    })
+
+    Infomation:Button({
+        Title = "Discord",
+        Desc = "Copy Discord Link",
+        Callback = function()
+            local link = "https://discord.gg/jdmX43t5mY"
+            if setclipboard then
+                setclipboard(link)
+            end
+        end
+    })
+
+    Infomation:Paragraph({
+        Title = "Join Us",
+        Desc = "Every Update Will Be On Discord"
+    })
+
+    Infomation:Paragraph({
+        Title = "Support",
+        Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+    })
+
     local movSection = PlayerTab:Section({
         Title     = "Movement",
         Icon      = "solar:running-round-bold",
