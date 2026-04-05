@@ -556,7 +556,7 @@ local Window = StreeHub:CreateWindow({
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
-    FileSaveName = "StreeHub/99NITF.json"
+    FileSaveName = "StreeHub/Config.json"
 })
 
 local Tabs = {
@@ -564,7 +564,8 @@ local Tabs = {
     Combat  = Window:Tab({ Title = "Combat",    Icon = "swords",     }),
     next    = Window:Tab({ Title = "Auto",      Icon = "play",       }),
     esp     = Window:Tab({ Title = "ESP",       Icon = "eye",        }),
-    tp      = Window:Tab({ Title = "Teleport",  Icon = "map",        })
+    tp      = Window:Tab({ Title = "Teleport",  Icon = "map",        }),
+    Misc    = Window:Tab({ Title = "Misc",      Icon = "settings-2", }),
 }
 
 Tabs.Home:Section({
@@ -1136,6 +1137,78 @@ Tabs.tp:Button({
         tp1()
     end
 })
+
+Tabs.Misc:Section({ Title = "Player" })
+
+Tabs.Misc:Slider({
+    Title = "WalkSpeed",
+    Step = 1,
+    Value = { Min = 0, Max = 100, Default = 16 },
+    Callback = function(value)
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = value
+        end
+    end
+})
+
+Tabs.Misc:Slider({
+    Title = "Jump Power",
+    Step = 1,
+    Value = { Min = 0, Max = 200, Default = 50 },
+    Callback = function(value)
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.JumpPower = value
+        end
+    end
+})
+
+Tabs.Misc:Section({ Title = "Ability" })
+
+local noclip = false
+Tabs.Misc:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(v)
+        noclip = v
+    end
+})
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip then
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+local infJump = false
+Tabs.Misc:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(v)
+        infJump = v
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump then
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid:ChangeState("Jumping")
+        end
+    end
+end)
 
 StreeHub:Notify({
     Title = "StreeHub",
