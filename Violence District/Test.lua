@@ -90,12 +90,10 @@ function WindUI:CreateWindow(data)
 end
 
 local Window = WindUI:CreateWindow({
-    Title         = "Violence District x StreeHub",
-    Theme         = "Dark",
-    Author        = "developed by Nex & Client",
-    Folder        = "ViolenceDistrict",
+    Title         = "StreeHub",
+    Author        = "Violence District",
     Icon          = "rbxassetid://128795866459585",
-    Size          = isMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370),
+    Size          = isMobile and UDim2.fromOffset(260, 290) or UDim2.fromOffset(620, 370),
 })
 if Window.Tag then
     Window:Tag({
