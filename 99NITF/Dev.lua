@@ -2,7 +2,7 @@ local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:spli
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
-local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370)
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(260, 290)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -540,7 +540,7 @@ end
 local function tp1()
     local character = LocalPlayer.Character
     if character and character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = CFrame.new(-15.5, 8.12, -82.6)
+        character.HumanoidRootPart.CFrame = CFrame.new(-15, 8, -82)
     end
 end
 
