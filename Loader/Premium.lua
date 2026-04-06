@@ -122,12 +122,15 @@ local gameScripts = {
     [136599248168660] = {
         name = "Solo Hunter",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
-    }
+    },
+    [93978595733734] = {
+        name = "Violence Districk",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Premium.lua"
 }
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.IgnoreGuiInset = true
-ScreenGui.ResetOnSpawn = false
+ScreenGui.ResetOnSpawn = false"
 ScreenGui.Parent = CoreGui
 
 local Frame = Instance.new("Frame")
