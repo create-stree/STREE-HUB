@@ -257,16 +257,19 @@ Sec_MainTab_Default:AddButton({
         SaveConfig()
 
         Chloex:MakeNotify({
-    Title = "NatHub Notify",
-    Description = "NatHub",
-    Content = "⚠️ Config has been reset!",
-    Color = Color3.fromRGB(0, 208, 255),
-    Delay = 3
-})
+            Title = "NatHub Notify",
+            Description = "NatHub",
+            Content = "⚠️ Config has been reset!",
+            Color = Color3.fromRGB(0, 208, 255),
+            Delay = 3
+        })
     end
 })
+
 if Hutan then
+
 local Sec_MainTab_1 = Tabs.MainTab:AddSection("Auto Farm")
+
 Sec_MainTab_1:AddDropdown({
     Title = "Tree Type",
     Options = {"Small Tree", "Big Tree"},
