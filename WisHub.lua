@@ -8,7 +8,7 @@ local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:G
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
     local Window = Chloex:Window({
-        Title   = "WisHub",
+        Title   = "WisHub |",
         Footer  = (premium and "Premium" or "99 NITF") .. " | " .. version,
         Image   = "99764942615873",
         Color   = Color3.fromRGB(200, 0, 255),
