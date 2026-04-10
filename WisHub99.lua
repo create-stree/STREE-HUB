@@ -24,6 +24,7 @@ Tabs.CraftingTab = Window:AddTab({ Name = "Crafting", Icon = "idea"})
 Tabs.TeleportTab = Window:AddTab({ Name = "Teleport", Icon = "gps"})
 Tabs.EspTab = Window:AddTab({ Name = "Esp", Icon = "eyes"})
 Tabs.MiscTab = Window:AddTab({ Name = "Misc", Icon = "compas"})
+Tabs.LobbyTab = Window:AddTab({ Name = "Lobby", Icon = "scan"})
 
 _G.Settings = {
 	Main = {
@@ -230,12 +231,59 @@ end
 
 if Lobby then
     Chloex:MakeNotify({
-    Title = "Lobby Detected",
-    Description = "NatHub",
-    Content = "        Features not loaded",
-    Color = Color3.fromRGB(0, 208, 255),
-    Delay = 4
-})
+        Title = "Lobby Detected",
+        Description = "NatHub",
+        Content = "        Features not loaded",
+        Color = Color3.fromRGB(0, 208, 255),
+        Delay = 4
+    })
+
+    local TeleportEvent = game:GetService("ReplicatedStorage").RemoteEvents.TeleportEvent
+
+    _G.AutoPlay = false
+    _G.SelectedAdd = 1
+    _G.SelectedChosen = 5
+
+    local Sec_Lobby = Tabs.LobbyTab:AddSection("Play")
+
+    Sec_Lobby:AddDropdown({
+        Title = "Select Add (1-3)",
+        Options = { "1", "2", "3" },
+        Default = "1",
+        Callback = function(value)
+            _G.SelectedAdd = tonumber(value)
+        end
+    })
+
+    Sec_Lobby:AddDropdown({
+        Title = "Select Chosen (1-5)",
+        Options = { "1", "2", "3", "4", "5" },
+        Default = "5",
+        Callback = function(value)
+            _G.SelectedChosen = tonumber(value)
+        end
+    })
+
+    Sec_Lobby:AddButton({
+        Title = "Set Chosen",
+        Callback = function()
+            TeleportEvent:FireServer("Chosen", nil, _G.SelectedChosen, nil)
+        end
+    })
+
+    Sec_Lobby:AddButton({
+        Title = "Remove",
+        Callback = function()
+            TeleportEvent:FireServer("Remove")
+        end
+    })
+
+    Sec_Lobby:AddButton({
+        Title = "Play",
+        Callback = function()
+            TeleportEvent:FireServer("Add", _G.SelectedAdd)
+        end
+    })
 end
 Sec_MainTab_Default:AddButton({
     Title = "Reset Config",
