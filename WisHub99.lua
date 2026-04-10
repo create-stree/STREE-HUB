@@ -1,30 +1,29 @@
 loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
+
 local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local Chloex = loadstring(game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/4mVaA8QEMe/refs/heads/main/.lua"))()
-local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
-local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
-
     local Window = Chloex:Window({
-        Title   = "NatHub",
+        Title   = "WisHub",
         Footer  = (premium and "Premium" or "99 NITF") .. " | " .. version,
         Image   = "99764942615873",
-        Color   = Color3.fromRGB(0, 208, 255),
+        Color   = Color3.fromRGB(200, 0, 255),
         Theme   = 9542022979,
         Version = 1,
     })
 
 local Tabs = {}
 
-Tabs.MainTab = Window:AddTab({ Name = "Main", Icon = "10723407389"})
-Tabs.ItemTab = Window:AddTab({ Name = "Items", Icon = "10734984606"})
-Tabs.QuestTab = Window:AddTab({ Name = "Quest", Icon = "10723415335"})
---Tabs.EventTab = Window:AddTab({ Name = "Event", Icon = "10747373176"})
-Tabs.CraftingTab = Window:AddTab({ Name = "Crafting", Icon = "10734952479"})
-Tabs.TeleportTab = Window:AddTab({ Name = "Teleport", Icon = "10734886004"})
-Tabs.EspTab = Window:AddTab({ Name = "Esp", Icon = "10723346959"})
-Tabs.MiscTab = Window:AddTab({ Name = "Misc", Icon = "10723424838"})
+
+Tabs.MainTab = Window:AddTab({ Name = "Main", Icon = "settings"})
+Tabs.ItemTab = Window:AddTab({ Name = "Items", Icon = "plug"})
+Tabs.QuestTab = Window:AddTab({ Name = "Quest", Icon = "scroll"})
+--Tabs.EventTab = Window:AddTab({ Name = "Event", Icon = "next"})
+Tabs.CraftingTab = Window:AddTab({ Name = "Crafting", Icon = "idea"})
+Tabs.TeleportTab = Window:AddTab({ Name = "Teleport", Icon = "gps"})
+Tabs.EspTab = Window:AddTab({ Name = "Esp", Icon = "eyes"})
+Tabs.MiscTab = Window:AddTab({ Name = "Misc", Icon = "compas"})
 
 _G.Settings = {
 	Main = {
@@ -101,7 +100,7 @@ end
 
 
 local HttpService = game:GetService("HttpService")
-local folderPath = "NatHub"
+local folderPath = "WisHub"
 makefolder(folderPath)
 local configFile = folderPath .. "/99NITF.json"
 
@@ -256,8 +255,8 @@ Sec_MainTab_Default:AddButton({
         SaveConfig()
 
         Chloex:MakeNotify({
-    Title = "NatHub Notify",
-    Description = "NatHub",
+    Title = "WisHub Notify",
+    Description = "WisHub",
     Content = "⚠️ Config has been reset!",
     Color = Color3.fromRGB(0, 208, 255),
     Delay = 3
@@ -2217,7 +2216,7 @@ Sec_TeleportTab_1:AddButton({
             else
                 Chloex:MakeNotify({
     Title = "Volcano Not Found",
-    Description = "NatHub",
+    Description = "WisHub",
     Content = "Volcano has not spawned yet",
     Color = Color3.fromRGB(0, 208, 255),
     Delay = 4
