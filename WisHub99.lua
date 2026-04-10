@@ -15,7 +15,7 @@ local Chloex = loadstring(game:HttpGet("https://raw.githubusercontent.com/dy1zn4
 
 local Tabs = {}
 
-
+Tabs.LobbyTab = Window:AddTab({ Name = "Lobby", Icon = "scan"})
 Tabs.MainTab = Window:AddTab({ Name = "Main", Icon = "settings"})
 Tabs.ItemTab = Window:AddTab({ Name = "Items", Icon = "plug"})
 Tabs.QuestTab = Window:AddTab({ Name = "Quest", Icon = "scroll"})
@@ -24,7 +24,6 @@ Tabs.CraftingTab = Window:AddTab({ Name = "Crafting", Icon = "idea"})
 Tabs.TeleportTab = Window:AddTab({ Name = "Teleport", Icon = "gps"})
 Tabs.EspTab = Window:AddTab({ Name = "Esp", Icon = "eyes"})
 Tabs.MiscTab = Window:AddTab({ Name = "Misc", Icon = "compas"})
-Tabs.LobbyTab = Window:AddTab({ Name = "Lobby", Icon = "scan"})
 
 _G.Settings = {
 	Main = {
