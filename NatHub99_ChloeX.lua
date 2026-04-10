@@ -1,14 +1,15 @@
 loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
+
 local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local Chloex = loadstring(game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/4mVaA8QEMe/refs/heads/main/.lua"))()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
     local Window = Chloex:Window({
-        Title   = "NatHub",
-        Footer  = (premium and "Premium" or "99 NITF") .. " | " .. version,
+        Title   = "NatHub |",
+        Footer  = (premium and "Premium" or " 99 NITF") .. " | " .. version,
         Image   = "99764942615873",
         Color   = Color3.fromRGB(0, 208, 255),
         Theme   = 9542022979,
