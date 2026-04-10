@@ -267,9 +267,7 @@ Sec_MainTab_Default:AddButton({
 })
 
 if Hutan then
-
 local Sec_MainTab_1 = Tabs.MainTab:AddSection("Auto Farm")
-
 Sec_MainTab_1:AddDropdown({
     Title = "Tree Type",
     Options = {"Small Tree", "Big Tree"},
