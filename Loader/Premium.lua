@@ -125,7 +125,7 @@ local gameScripts = {
     },
     [93978595733734] = {
         name = "Violence Districk",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Premium.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Dev.lua"
 }
 
 local ScreenGui = Instance.new("ScreenGui")
