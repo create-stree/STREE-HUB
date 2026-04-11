@@ -91,13 +91,13 @@ local gameScripts = {
         name = "Arsenal",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Premium.lua"
     },
-    [124311897657957] = {
-        name = "Break A Lucky Block",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
-    },
     [2753915549] = {
         name = "Blox Fruit",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Blox-Fruit/Dev.lua"
+    },
+    [124311897657957] = {
+        name = "Break A Lucky Block",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
     },
     [123921593837160] = {
         name = "Climb and Jump Tower",
@@ -126,6 +126,7 @@ local gameScripts = {
     [93978595733734] = {
         name = "Violence Districk",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Dev.lua"
+    }
 }
 
 local ScreenGui = Instance.new("ScreenGui")
