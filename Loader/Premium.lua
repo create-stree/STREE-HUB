@@ -131,7 +131,7 @@ local gameScripts = {
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.IgnoreGuiInset = true
-ScreenGui.ResetOnSpawn = false"
+ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
 local Frame = Instance.new("Frame")
