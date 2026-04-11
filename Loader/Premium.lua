@@ -74,12 +74,12 @@ local function isPremiumKey(key)
 end
 
 if not isPremiumKey(_G.scripts_key) then
-    game.Players.LocalPlayer:Kick("❌ Invalid Premium Key! Contact seller.")
+    game.Players.LocalPlayer:Kick("Invalid Premium Key! Contact seller.")
     return
 end
 
 local gameScripts = {
-    [79546208627805] = {
+    [126509999114328] = {
         name = "99 Night In The Forest",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/99NITF/Premium.lua"
     },
@@ -221,5 +221,5 @@ else
         Icon = streeLogo,
         Duration = 4
     })
-    game.Players.LocalPlayer:Kick("❌ Game not supported!")
+    game.Players.LocalPlayer:Kick("Game not supported!")
 end
