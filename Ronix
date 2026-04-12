@@ -1,0 +1,340 @@
+local WindUI
+do
+    local ok, result = pcall(function()
+        return require("./src/Init")
+    end)
+    if ok then
+        WindUI = result
+    else
+        if cloneref(game:GetService("RunService")):IsStudio() then
+            WindUI = require(cloneref(game:GetService("ReplicatedStorage"):WaitForChild("WindUI"):WaitForChild("Init")))
+        else
+            WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+        end
+    end
+end
+
+local Window = WindUI:CreateWindow({
+    Title = "ronix hub",
+    Folder = "ronixhub",
+    Icon = "rbxassetid://136256350192953",
+    NewElements = true,
+    HideSearchBar = false,
+    OpenButton = {
+        Title = "Open ronix hub",
+        CornerRadius = UDim.new(1, 0),
+        StrokeThickness = 3,
+        Enabled = true,
+        Draggable = true,
+        OnlyMobile = false,
+        Scale = 0.5,
+        Color = ColorSequence.new(
+            Color3.fromHex("#30FF6A"),
+            Color3.fromHex("#e7ff2f")
+        )
+    },
+    Topbar = {
+        Height = 44,
+        ButtonsType = "Mac",
+    },
+})
+
+local Green  = Color3.fromHex("#10C550")
+local Blue   = Color3.fromHex("#257AF7")
+local Yellow = Color3.fromHex("#ECA201")
+local Purple = Color3.fromHex("#7775F2")
+local Red    = Color3.fromHex("#EF4F1D")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+getgenv().WS = 1500
+getgenv().AntiBot = false
+getgenv().AntiBotDistance = 35
+getgenv().NextbotESP = false
+getgenv().NextbotTracers = false
+getgenv().PlayerESP = false
+getgenv().PlayerTracers = false
+getgenv().AutoTicket = false
+getgenv().AutoRevive = false
+getgenv().AutoRevivePlayer = false
+getgenv().AutoRevivePlayerActive = false
+getgenv().AutoRevivePlayerConnection = nil
+
+local botTracerElements = {}
+local playerTracerElements = {}
+local nametagCache = {}
+
+local nextbotNames = {}
+if ReplicatedStorage:FindFirstChild("NPCs") then
+    for _, npc in ipairs(ReplicatedStorage.NPCs:GetChildren()) do
+        table.insert(nextbotNames, npc.Name)
+    end
+end
+
+local nextbotKeywords = {"nextbot","scp","monster","zombie","ghost","demon"}
+
+local function isNextbot(model)
+    if not model or not model:IsA("Model") then return false end
+    if Players:GetPlayerFromCharacter(model) then return false end
+    if table.find(nextbotNames, model.Name) then return true end
+    local n = model.Name:lower()
+    for _,v in ipairs(nextbotKeywords) do
+        if n:find(v) then return true end
+    end
+    if model:FindFirstChild("HumanoidRootPart") and not model:FindFirstChild("Humanoid") then
+        return true
+    end
+    return false
+end
+
+local function destroyNametag(t)
+    if nametagCache[t] then
+        pcall(function() nametagCache[t]:Destroy() end)
+        nametagCache[t] = nil
+    end
+end
+
+local function clearAllNametags()
+    for t,_ in pairs(nametagCache) do
+        destroyNametag(t)
+    end
+    nametagCache = {}
+end
+
+local function removeTracer(tbl,k)
+    local t = tbl[k]
+    if t then
+        t.Visible = false
+        pcall(function() t:Remove() end)
+    end
+    tbl[k] = nil
+end
+
+local function clearTracers(tbl)
+    for k,_ in pairs(tbl) do
+        removeTracer(tbl,k)
+    end
+end
+
+local function createNametag(target,text,color)
+    if not target.Parent then return end
+    local root = target:FindFirstChild("HumanoidRootPart") or target.PrimaryPart
+    if not root then return end
+    destroyNametag(target)
+    local g = Instance.new("BillboardGui")
+    g.Name = "VexNametag"
+    g.Adornee = root
+    g.Size = UDim2.new(0,120,0,30)
+    g.StudsOffset = Vector3.new(0,3,0)
+    g.AlwaysOnTop = true
+    g.Parent = root
+    local l = Instance.new("TextLabel")
+    l.Size = UDim2.new(1,0,1,0)
+    l.BackgroundTransparency = 1
+    l.Text = text
+    l.TextColor3 = color
+    l.TextScaled = true
+    l.Font = Enum.Font.GothamBold
+    l.Parent = g
+    nametagCache[target] = g
+end
+
+local function createTracer()
+    local t = Drawing.new("Line")
+    t.Visible = false
+    t.Thickness = 1.5
+    t.Transparency = 1
+    return t
+end
+
+RunService.RenderStepped:Connect(function()
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+    local bottom = Vector2.new(cam.ViewportSize.X/2,cam.ViewportSize.Y)
+
+    if getgenv().PlayerTracers then
+        for _,p in ipairs(Players:GetPlayers()) do
+            if p~=LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                if not playerTracerElements[p] then
+                    playerTracerElements[p] = createTracer()
+                end
+                local tr = playerTracerElements[p]
+                local pos,vis = cam:WorldToViewportPoint(p.Character.HumanoidRootPart.Position)
+                tr.Visible = vis
+                if vis then
+                    tr.From = bottom
+                    tr.To = Vector2.new(pos.X,pos.Y)
+                    tr.Color = Color3.fromRGB(200,220,255)
+                end
+            end
+        end
+    end
+
+    if getgenv().NextbotTracers then
+        for _,obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and isNextbot(obj) then
+                local hrp = obj:FindFirstChild("HumanoidRootPart") or obj.PrimaryPart
+                if hrp then
+                    if not botTracerElements[obj] then
+                        botTracerElements[obj] = createTracer()
+                    end
+                    local tr = botTracerElements[obj]
+                    local pos,vis = cam:WorldToViewportPoint(hrp.Position)
+                    tr.Visible = vis
+                    if vis then
+                        tr.From = bottom
+                        tr.To = Vector2.new(pos.X,pos.Y)
+                        tr.Color = Color3.fromRGB(255,70,70)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local MainSec = Window:Section({ Title = "Main" })
+
+local MainTab = MainSec:Tab({ 
+    Title = "Auto", 
+    Icon = "lucide:play", 
+    IconColor = Green 
+})
+
+MainTab:Toggle({ 
+    Title = "Auto Revive", 
+    Callback = function(v) 
+        getgenv().AutoRevive = v 
+    end 
+})
+
+MainTab:Toggle({
+    Title = "Auto Revive Player",
+    Callback = function(v) 
+        getgenv().AutoRevivePlayer = v 
+    end
+})
+MainTab:Toggle({ 
+    Title = "Auto Ticket", 
+    Callback = function(v) 
+        getgenv().AutoTicket = v 
+    end 
+})
+
+local VisualTab = MainSec:Tab({ 
+    Title = "Visual", 
+    Icon = "lucide:eye", 
+    IconColor = Blue 
+})
+
+VisualTab:Toggle({ 
+    Title = "Nextbot ESP", 
+    Callback = function(v) 
+        getgenv().NextbotESP = v 
+    end 
+})
+
+VisualTab:Toggle({ 
+    Title = "Nextbot Tracer", 
+    Callback = function(v) 
+        getgenv().NextbotTracers = v 
+    end 
+})
+
+VisualTab:Toggle({ 
+    Title = "Player ESP", 
+    Callback = function(v) 
+        getgenv().PlayerESP = v 
+    end 
+})
+
+VisualTab:Toggle({ 
+    Title = "Player Tracer", 
+    Callback = function(v) 
+        getgenv().PlayerTracers = v 
+    end 
+})
+
+local MoveTab = MainSec:Tab({ 
+    Title = "Move", 
+    Icon = "lucide:zap", 
+    IconColor = Yellow 
+})
+
+MoveTab:Input({ 
+    Title = "Speed",
+    Default = "1500", 
+    Callback = function(v) 
+        getgenv().WS = tonumber(v) or 1500 
+    end
+})
+
+local CombatTab = MainSec:Tab({ 
+    Title = "Combat", 
+    Icon = "lucide:sword", 
+    IconColor = Red 
+})
+
+CombatTab:Toggle({ 
+    Title = "Anti Bot", 
+    Callback = function(v) 
+        getgenv().AntiBot = v 
+    end 
+})
+
+task.spawn(function()
+    while true do
+        pcall(function()
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = getgenv().WS
+            end
+
+            if getgenv().AutoTicket and hrp then
+                local tk = workspace:FindFirstChild("Game")
+                if tk and tk:FindFirstChild("Effects") and tk.Effects:FindFirstChild("Tickets") then
+                    for _,t in ipairs(tk.Effects.Tickets:GetChildren()) do
+                        local p = t:IsA("BasePart") and t or t.PrimaryPart
+                        if p then
+                            hrp.CFrame = p.CFrame + Vector3.new(0,5,0)
+                            break
+                        end
+                    end
+                end
+            end
+
+            if getgenv().AutoRevive and char and char:GetAttribute("Downed") then
+                ReplicatedStorage.Events.Player.ChangePlayerMode:FireServer(true)
+            end
+        end)
+        task.wait(0.05)
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if getgenv().PlayerESP then
+        for _,p in ipairs(Players:GetPlayers()) do
+            if p~=LocalPlayer and p.Character then
+                createNametag(p.Character,p.Name,Color3.fromRGB(200,220,255))
+            end
+        end
+    end
+
+    if getgenv().NextbotESP then
+        for _,o in ipairs(workspace:GetDescendants()) do
+            if o:IsA("Model") and isNextbot(o) then
+                createNametag(o,o.Name,Color3.fromRGB(255,80,80))
+            end
+        end
+    end
+end)
+
+LocalPlayer.CharacterRemoving:Connect(function()
+    clearAllNametags()
+    clearTracers(playerTracerElements)
+    clearTracers(botTracerElements)
+end)
