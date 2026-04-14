@@ -1,4 +1,3 @@
---FH
 if getgenv().FourHub_Running then
     warn("Script already running!")
     return
@@ -83,16 +82,12 @@ end
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370)
 
--- Load StreeHub UI Library
 local StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua"))()
 
--- ====================================================================
--- STATE LAYER  (replaces Obsidian's internal Toggles / Options tables)
--- ====================================================================
+
 local Toggles = {}
 local Options  = {}
 
--- Toggle state object  (supports .Value, :SetValue, :OnChanged)
 local function MakeToggle(key, default, uiRef)
     local obj = { Value = default or false, _ref = uiRef, _handlers = {} }
 
@@ -114,7 +109,6 @@ local function MakeToggle(key, default, uiRef)
     return obj
 end
 
--- Option/Slider/Dropdown state object
 local function MakeOption(key, default, uiRef)
     local obj = { Value = default, Values = {}, _ref = uiRef, _handlers = {} }
 
@@ -143,19 +137,16 @@ local function MakeOption(key, default, uiRef)
         end
     end
 
-    -- Stub for slider :SetText() called in SpecPassive logic
     function obj:SetText(_t) end
 
     Options[key] = obj
     return obj
 end
 
--- Label stub object  (supports :SetText, :SetVisible, :AddKeyPicker chaining)
 local function MakeLabel()
     local lbl = { _text = "", _visible = true }
     function lbl:SetText(t)   self._text = t end
     function lbl:SetVisible(v) self._visible = v end
-    -- Obsidian :AddLabel():AddKeyPicker(...) chaining
     function lbl:AddKeyPicker(key, cfg)
         MakeOption(key, cfg and cfg.Default or "None", nil)
         return self
@@ -163,25 +154,19 @@ local function MakeLabel()
     return lbl
 end
 
--- Slider wrapper that exposes :SetVisible (for AddSliderToggle pattern)
 local function MakeSliderWrapper(key, streeRef)
     local obj = { Value = Options[key] and Options[key].Value or 0, _ref = streeRef }
-    function obj:SetVisible(_v)   end  -- stub – StreeHub does not support toggling visibility
+    function obj:SetVisible(_v)   end
     return obj
 end
 
--- ====================================================================
--- GROUP-BOX PROXY  (maps Obsidian groupbox API → StreeHub Tab API)
--- ====================================================================
 local function MakeGroupProxy(tab, sectionTitle)
-    -- Insert a section header once when the group is first defined
     if sectionTitle and sectionTitle ~= "" then
         tab:Section({ Title = sectionTitle })
     end
 
     local proxy = {}
 
-    -- :AddToggle(key, cfg)
     function proxy:AddToggle(key, cfg)
         local streeRef = tab:Toggle({
             Title    = cfg.Text or key,
@@ -198,11 +183,9 @@ local function MakeGroupProxy(tab, sectionTitle)
             end,
         })
         local tog = MakeToggle(key, cfg.Default or false, streeRef)
-        -- Return the toggle obj so callers can do toggle:OnChanged() / toggle.Value
         return tog
     end
 
-    -- :AddButton(cfg_or_text, func)
     function proxy:AddButton(cfg_or_text, func)
         local title, callback, disabled
         if type(cfg_or_text) == "table" then
@@ -217,7 +200,6 @@ local function MakeGroupProxy(tab, sectionTitle)
         return tab:Button({ Title = title, Locked = disabled, Callback = callback })
     end
 
-    -- :AddSlider(key, cfg)
     function proxy:AddSlider(key, cfg)
         local step = 1
         local r = cfg.Rounding
@@ -240,11 +222,9 @@ local function MakeGroupProxy(tab, sectionTitle)
 
         MakeOption(key, cfg.Default or 0, streeRef)
         local wrapper = MakeSliderWrapper(key, streeRef)
-        -- Also expose .Value on wrapper matching Options table
         return wrapper
     end
 
-    -- :AddDropdown(key, cfg)
     function proxy:AddDropdown(key, cfg)
         local streeRef = tab:Dropdown({
             Title    = cfg.Text or key,
@@ -266,7 +246,6 @@ local function MakeGroupProxy(tab, sectionTitle)
         return streeRef
     end
 
-    -- :AddInput(key, cfg)
     function proxy:AddInput(key, cfg)
         local streeRef = tab:Input({
             Title       = cfg.Text or key,
@@ -287,7 +266,6 @@ local function MakeGroupProxy(tab, sectionTitle)
         return streeRef
     end
 
-    -- :AddLabel(text_or_table, _wrap)
     function proxy:AddLabel(text_or_table, _wrap)
         local text
         if type(text_or_table) == "table" then
@@ -299,34 +277,27 @@ local function MakeGroupProxy(tab, sectionTitle)
         return MakeLabel()
     end
 
-    -- :AddDivider()
     function proxy:AddDivider()
         tab:Section({ Title = "─────────────────" })
     end
 
-    -- :AddKeyPicker(key, cfg)  — keybinds not supported natively; stub state only
     function proxy:AddKeyPicker(key, cfg)
         MakeOption(key, cfg and cfg.Default or "None", nil)
-        return proxy  -- allow chaining
+        return proxy
     end
 
-    -- Stub for Artifact tab-specific method
     function proxy:UpdateWarningBox(_cfg) end
 
     return proxy
 end
 
--- ====================================================================
--- TAB-BOX PROXY  (creates new StreeHub tabs per sub-tab)
--- ====================================================================
-local _StreeWindow   -- set when CreateWindow is called
+local _StreeWindow
 
 local function MakeTabboxProxy()
     local proxy = {}
     function proxy:AddTab(name, _icon)
         local streeTab = _StreeWindow:Tab({ Title = name, Icon = "layers" })
         local gp = MakeGroupProxy(streeTab, nil)
-        -- Expose groupbox + tabbox methods so nested usage works
         function gp:AddLeftGroupbox(title, _i)  return MakeGroupProxy(streeTab, title) end
         function gp:AddRightGroupbox(title, _i) return MakeGroupProxy(streeTab, title) end
         function gp:AddLeftTabbox()  return MakeTabboxProxy() end
@@ -337,9 +308,6 @@ local function MakeTabboxProxy()
     return proxy
 end
 
--- ====================================================================
--- LIBRARY COMPATIBILITY OBJECT  (replaces Obsidian Library)
--- ====================================================================
 local Library = {
     Toggles                  = Toggles,
     Options                  = Options,
@@ -353,7 +321,7 @@ local Library = {
 
 function Library:Notify(msg, duration)
     StreeHub:Notify({
-        Title    = "FourHub",
+        Title    = "StreHub",
         Content  = tostring(msg),
         Icon     = "bell",
         Duration = duration or 5,
@@ -370,9 +338,9 @@ function Library:SetDPIScale(_d)    end
 
 function Library:CreateWindow(cfg)
     _StreeWindow = StreeHub:CreateWindow({
-        Title            = cfg.Title or "FourHub",
+        Title            = "Streeub",
         Icon             = "rbxassetid://109909694492498",
-        Author           = cfg.Footer or "",
+        Author           = "Sailor Piece",
         Folder           = "FourHub",
         Size             = WindowSize,
         LiveSearchDropdown = true,
@@ -395,9 +363,6 @@ function Library:CreateWindow(cfg)
     return winProxy
 end
 
--- ====================================================================
--- STUB: ThemeManager & SaveManager  (not needed with StreeHub)
--- ====================================================================
 local ThemeManager = {
     SetLibrary  = function() end,
     SetFolder   = function() end,
@@ -413,10 +378,6 @@ local SaveManager = {
     BuildConfigSection  = function() end,
     LoadAutoloadConfig  = function() end,
 }
--- ====================================================================
--- End of StreeHub Native UI Layer
--- ====================================================================
-
 
 getgenv().FourHub_Running = true
 
@@ -4648,8 +4609,8 @@ local function Func_ArtifactAutomation()
 end
 
 local Window = Library:CreateWindow({
-	Title = "FourHub | SP",
-	Footer = "" .. assetName .. " | by jokerbiel13 | Sailor Piece | Version 1.5 Beta",
+	Title = "StreeHub",
+	Footer = "Sailor Piece",
 	NotifySide = "Right",
     Icon = tostring(theChosenOne),
 	ShowCustomCursor = false,
