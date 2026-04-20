@@ -348,7 +348,7 @@ local net = RS.Packages._Index["sleitnick_net@0.2.0"].net
 
 local function rod()
     safeCall("rod", function()
-        net["RE/EquipToolFromHotbar"]:FireServer(1)
+        net["RE/123c0d986399d5b6c1443a685e214586fd1592cc470ca8d96db20cdb681e1cc4"]:FireServer(1)
     end)
 end
 
@@ -360,13 +360,13 @@ end
 
 local function autoon()
     safeCall("autoon", function()
-        net["RF/UpdateAutoFishingState"]:InvokeServer(true)
+        net["RF/36e8791e8846413c7fd51e7b990954f321b2110e6ba9271b407cba12eb0a758c"]:InvokeServer(true)
     end)
 end
 
 local function autooff()
     safeCall("autooff", function()
-        net["RF/UpdateAutoFishingState"]:InvokeServer(false)
+        net["RF/36e8791e8846413c7fd51e7b990954f321b2110e6ba9271b407cba12eb0a758c"]:InvokeServer(false)
     end)
 end
 
@@ -1100,49 +1100,6 @@ Tab3:Toggle({
                 chestThread = nil
             end
         end
-    end
-})
-
-local RS = game:GetService("ReplicatedStorage")
-
-local Net = RS
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_net@0.2.0")
-    :WaitForChild("net")
-
-local RE_DialogueEnded = Net:WaitForChild("RE/DialogueEnded")
-local RE_PickupItem = Net:WaitForChild("RE/SearchItemPickedUp")
-local RE_OpenMaze = Net:WaitForChild("RE/GainAccessToMaze")
-
-Tab3:Button({
-    Title = "Auto Collect TNT + Open Maze",
-    Callback = function()
-        task.spawn(function()
-
-            local questArgs = {
-                [1] = "Carpenter",
-                [2] = 2,
-                [3] = 1
-            }
-            RE_DialogueEnded:FireServer(unpack(questArgs))
-
-            task.wait(1)
-
-            local tntArgs = {
-                [1] = "TNT"
-            }
-
-            for i = 1, 4 do
-                RE_PickupItem:FireServer(unpack(tntArgs))
-                task.wait(0.5)
-            end
-
-            task.wait(1)
-
-            RE_OpenMaze:FireServer()
-
-        end)
     end
 })
 
@@ -2980,41 +2937,5 @@ Tab7:Button({
         if isfile(ConfigFolder.."/"..ConfigName) then
             delfile(ConfigFolder.."/"..ConfigName)
         end
-    end
-})
-
-Tab7:Section({ 
-    Title = "Other Scripts",
-    Icon = "file-code-corner",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tab7:Divider()
-
-Tab7:Button({
-    Title = "FLY",
-    Desc = "Scripts Fly Gui",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
-    end
-})
-
-Tab7:Button({
-    Title = "Simple Shader",
-    Desc = "Shader",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/p0e1/1/refs/heads/main/SimpleShader.lua"))()
-    end
-})
-
-Tab7:Button({
-    Title = "Infinite Yield",
-    Desc = "Other Scripts",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end
 })
