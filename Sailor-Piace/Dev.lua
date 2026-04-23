@@ -4418,7 +4418,7 @@ Tabs.Home:AddButton("Redeem All Codes", function()
     end
 end)
 
-Tabs.Information:AddLabel("Some features are disabled, it is because your executor lacks the required functions.", true)
+Tabs.Home:AddParagraph("Some features are disabled, it is because your executor lacks the required functions.", true)
 
 
 local HttpService = game:GetService("HttpService")
@@ -4434,7 +4434,7 @@ Tabs.Home:Button({
 })
 
 for i = 1, #PriorityTasks do
-    GB.Priority.Left.Config:AddDropdown("SelectedPriority_" .. i, {
+    Tabs.Priority:AddDropdown("SelectedPriority_" .. i, {
         Text = "Priority " .. i,
         Values = PriorityTasks,
         Default = DefaultPriority[i],
@@ -4444,7 +4444,7 @@ for i = 1, #PriorityTasks do
     })
 end
 
-GB.Webhook.Left.Config:AddInput("WebhookURL", {
+Tabs.Priority:AddInput("WebhookURL", {
 	Default = "",
 	Numeric = false,
 	Finished = false,
@@ -4453,7 +4453,7 @@ GB.Webhook.Left.Config:AddInput("WebhookURL", {
 	Placeholder = "Enter Webhook URL...",
 })
 
-GB.Webhook.Left.Config:AddInput("UID", {
+Tabs.Priority:AddInput("UID", {
 	Default = "",
 	Numeric = false,
 	Finished = false,
@@ -4462,7 +4462,7 @@ GB.Webhook.Left.Config:AddInput("UID", {
 	Placeholder = "Enter UID...",
 })
 
-GB.Webhook.Left.Config:AddDropdown("SelectedData", {
+Tabs.Priority:AddDropdown("SelectedData", {
     Text = "Select Data (s)",
     Values = {"Name", "Stats", "New Items", "All Items"},
     Default = nil,
@@ -4470,7 +4470,7 @@ GB.Webhook.Left.Config:AddDropdown("SelectedData", {
     Searchable = true,
 })
 
-GB.Webhook.Left.Config:AddDropdown("SelectedItemRarity", {
+Tabs.Priority:AddDropdown("SelectedItemRarity", {
     Text = "Select Rarity To Send",
     Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Secret"},
     Default = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Secret"},
@@ -4478,18 +4478,18 @@ GB.Webhook.Left.Config:AddDropdown("SelectedItemRarity", {
     Searchable = true,
 })
 
-GB.Webhook.Left.Config:AddToggle("PingUser", {
+Tabs.Priority:AddToggle("PingUser", {
     Text = "Ping User",
     Default = false,
 })
 
-GB.Webhook.Left.Config:AddToggle("SendWebhook", {
+Tabs.Priority:AddToggle("SendWebhook", {
     Text = "Send Webhook",
     Default = false,
     Disabled = not Support.Webhook,
 })
 
-GB.Webhook.Left.Config:AddSlider("WebhookDelay", {
+Tabs.Priority:AddSlider("WebhookDelay", {
     Text = "Send every [x] minutes",
     Default = 5,
     Min = 1,
@@ -4500,11 +4500,11 @@ GB.Webhook.Left.Config:AddSlider("WebhookDelay", {
     end
 })
 
-GB.Webhook.Left.Config:AddButton("Test Webhook", function()
+Tabs.Priority:AddButton("Test Webhook", function()
     PostToWebhook()
 end)
 
-TB_Tabs.Autofarm.T1:AddDropdown("SelectedMob", {
+Tabs.Main:AddDropdown("SelectedMob", {
     Text = "Select Mob (s)",
     Values = Tables.MobList,
     Default = nil,
@@ -4512,19 +4512,19 @@ TB_Tabs.Autofarm.T1:AddDropdown("SelectedMob", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T1:AddButton("Refresh", UpdateNPCLists)
+Tabs.Main:AddButton("Refresh", UpdateNPCLists)
 
-TB_Tabs.Autofarm.T1:AddToggle("MobFarm", {
+Tabs.Main:AddToggle("MobFarm", {
     Text = "Autofarm Selected Mob",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T1:AddToggle("AllMobFarm", {
+Tabs.Main:AddToggle("AllMobFarm", {
     Text = "Autofarm All Mobs",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T1:AddDropdown("AllMobType", {
+Tabs.Main:AddDropdown("AllMobType", {
     Text = "Select Type [All Mob]",
     Values = {"Normal", "Fast"},
     Default = "Normal",
@@ -4532,12 +4532,12 @@ TB_Tabs.Autofarm.T1:AddDropdown("AllMobType", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T1:AddToggle("LevelFarm", {
+Tabs.Main:AddToggle("LevelFarm", {
     Text = "Autofarm Level",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedBosses", {
+Tabs.Main:AddDropdown("SelectedBosses", {
     Text = "Select Bosses",
     Values = Tables.BossList,
     Default = nil,
@@ -4545,19 +4545,19 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedBosses", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("BossesFarm", {
+Tabs.Main:AddToggle("BossesFarm", {
     Text = "Autofarm Selected Boss",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("AllBossesFarm", {
+Tabs.Main:AddToggle("AllBossesFarm", {
     Text = "Autofarm All Bosses",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddDivider()
+Tabs.Main:AddDivider()
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedSummon", {
+Tabs.Main:AddDropdown("SelectedSummon", {
     Text = "Select Summon Boss",
     Values = Tables.SummonList,
     Default = nil,
@@ -4565,7 +4565,7 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedSummon", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedSummonDiff", {
+Tabs.Main:AddDropdown("SelectedSummonDiff", {
     Text = "Select Difficulty",
     Values = Tables.DiffList,
     Default = nil,
@@ -4573,21 +4573,21 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedSummonDiff", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("AutoSummon", {
+Tabs.Main:AddToggle("AutoSummon", {
     Text = "Auto Summon",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("SummonBossFarm", {
+Tabs.Main:AddToggle("SummonBossFarm", {
     Text = "Autofarm Summon Boss",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddDivider()
+Tabs.Main:AddDivider()
 
-PityLabel = TB_Tabs.Autofarm.T2:AddLabel("<b>Pity:</b> 0/25")
+PityLabel = Tabs.Main:AddParagraph("<b>Pity:</b> 0/25")
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedBuildPity", {
+Tabs.Main:AddDropdown("SelectedBuildPity", {
     Text = "Select Boss [Build Pity]",
     Values = Tables.AllBossList,
     Default = nil,
@@ -4596,7 +4596,7 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedBuildPity", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedUsePity", {
+Tabs.Main:AddDropdown("SelectedUsePity", {
     Text = "Select Boss [Use Pity]",
     Values = Tables.AllBossList,
     Default = nil,
@@ -4605,7 +4605,7 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedUsePity", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedPityDiff", {
+Tabs.Main:AddDropdown("SelectedPityDiff", {
     Text = "Select Difficulty [Use Pity]",
     Values = Tables.DiffList,
     Default = nil,
@@ -4613,14 +4613,14 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedPityDiff", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("PityBossFarm", {
+Tabs.Main:AddToggle("PityBossFarm", {
     Text = "Autofarm Pity Boss",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddDivider()
+Tabs.Main:AddDivider()
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedOtherSummon", {
+Tabs.Main:AddDropdown("SelectedOtherSummon", {
     Text = "Select Summon Boss (Other)",
     Values = Tables.OtherSummonList,
     Default = nil,
@@ -4629,7 +4629,7 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedOtherSummon", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddDropdown("SelectedOtherSummonDiff", {
+Tabs.Main:AddDropdown("SelectedOtherSummonDiff", {
     Text = "Select Difficulty",
     Values = Tables.DiffList,
     Default = nil,
@@ -4638,17 +4638,17 @@ TB_Tabs.Autofarm.T2:AddDropdown("SelectedOtherSummonDiff", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("AutoOtherSummon", {
+Tabs.Main:AddToggle("AutoOtherSummon", {
     Text = "Auto Summon",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T2:AddToggle("OtherSummonFarm", {
+Tabs.Main:AddToggle("OtherSummonFarm", {
     Text = "Autofarm Summon Boss",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T3:AddDropdown("SelectedAltBoss", {
+Tabs.Main:AddDropdown("SelectedAltBoss", {
     Text = "Select Boss",
     Values = Tables.AllBossList,
     Default = nil,
