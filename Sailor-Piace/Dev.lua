@@ -79,10 +79,11 @@ for _, name in ipairs(LimitedExecutors) do
     end
 end
 
-local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
-local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
+local StreeHub = loadstring(StreeHub)()
+local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(260, 290)
 
 getgenv().FourHub_Running = true
 
@@ -4318,186 +4319,28 @@ local function Func_ArtifactAutomation()
     end
 end
 
-local Window = Library:CreateWindow({
-	Title = "FourHub | SP",
-	Footer = "" .. assetName .. " | by jokerbiel13 | Sailor Piece | Version 1.5 Beta",
-	NotifySide = "Right",
-    Icon = tostring(theChosenOne),
-	ShowCustomCursor = false,
-	AutoShow = true,
-	Center = true,
-	EnableSidebarResize = true,
-    Font = Enum.Font.RobotoMono,
+local Window = StreeHub:CreateWindow({
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "" .. Asset.Name .. "") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+    FileSaveName = "StreeHub/Config.json"
 })
 
 local Tabs = {
-    Information = Window:AddTab("Information", "info"),
-    Priority = Window:AddTab("Priority", "arrow-up-down"),
-	Main = Window:AddTab("Main", "box"),
-    Automation = Window:AddTab("Automation", "repeat-2"),
+    Home = Window:AddTab("Home", "scan-face"),
+    Priority = Window:AddTab("Priority", "chart-column-increasing"),
+	Main = Window:AddTab("Main", "landmark"),
+    Automation = Window:AddTab("Automation", "play"),
     Artifact = Window:AddTab("Artifact", "martini"),
     Dungeon = Window:AddTab("Dungeon", "door-open"),
     Player = Window:AddTab("Player", "user"),
-    Teleport = Window:AddTab("Teleport", "map-pin"),
-    Webhook = Window:AddTab("Webhook", "send"),
-    Misc = Window:AddTab("Misc", "apple"),
-    Config = Window:AddTab("Config", "cog"),
-}
-
-local GB = {
-    Information = {
-        Left = {
-            User = Tabs.Information:AddLeftGroupbox("User", "user"),
-            Game = Tabs.Information:AddLeftGroupbox("Game", "gamepad"),
-        },
-        Right = {
-            Others = Tabs.Information:AddRightGroupbox("Others", "boxes"),
-        },
-    },
-    Priority = {
-        Left = {
-            Config = Tabs.Priority:AddLeftGroupbox("Config", "wrench"),
-        },
-    },
-    Artifact = {
-        Left = {
-            Status = Tabs.Artifact:AddLeftGroupbox("Status", "info"),
-            Equip = Tabs.Artifact:AddLeftGroupbox("Auto-Equip", "kayak"),
-            Upgrade = Tabs.Artifact:AddLeftGroupbox("Upgrade", "hammer"),
-        },
-        Right = {
-            Lock = Tabs.Artifact:AddRightGroupbox("Lock", "lock"),
-            Delete = Tabs.Artifact:AddRightGroupbox("Delete", "trash"),
-        },
-    },
-    Player = {
-        Left = {
-            General = Tabs.Player:AddLeftGroupbox("General", "user-cog"),
-            Server = Tabs.Player:AddLeftGroupbox("Server", "server"),
-        },
-        Right = {
-            Game = Tabs.Player:AddRightGroupbox("Game", "earth"),
-            Safety = Tabs.Player:AddRightGroupbox("Safety", "shield"),
-        },
-    },
-    Webhook = {
-        Left = {
-            Config = Tabs.Webhook:AddLeftGroupbox("Config", "wrench"),
-        },
-    }
-}
-
-local TB = {
-    Main = {
-        Left = {
-            Autofarm = Tabs.Main:AddLeftTabbox(),
-            MiscAuto = Tabs.Main:AddLeftTabbox(),
-        },
-        Right = {
-            Switch = Tabs.Main:AddRightTabbox(),
-            MiscAuto = Tabs.Main.AddRightTabbox(),
-        },
-    },
-    Automation = {
-        Left = {
-            Misc1 = Tabs.Automation:AddLeftTabbox(),
-            Stats1 = Tabs.Automation:AddLeftTabbox(),
-        },
-        Right = {
-            Enchant = Tabs.Automation:AddRightTabbox(),
-        },
-    },
-    Teleport = {
-        Left = {
-            Waypoint = Tabs.Teleport:AddLeftTabbox(),
-        },
-        Right = {
-            NPCs = Tabs.Teleport:AddRightTabbox(),
-        },
-    },
-    Dungeon = {
-        Left = {
-            Autojoin = Tabs.Dungeon:AddLeftTabbox(),
-        },
-        Right = {
-
-        },
-    },
-  Misc = {
-    Left = {
-      Merchant = Tabs.Misc:AddLeftTabbox(),
-      Merchant2 = Tabs.Misc:AddLeftTabbox(),
-      Misc1 = Tabs.Misc:AddLeftTabbox(),
-    },
-    Right = {
-      Quests = Tabs.Misc:AddRightTabbox(),
-    },
-  },
-}
-
-local TB_Tabs = {
-    Autofarm = {
-        T1 = TB.Main.Left.Autofarm:AddTab("Autofarm"),
-        T2 = TB.Main.Left.Autofarm:AddTab("Boss"),
-        T3 = TB.Main.Left.Autofarm:AddTab("Misc"),
-        T4 = TB.Main.Left.Autofarm:AddTab("Config"),
-    },
-    MiscAuto = {
-        T1 = TB.Main.Left.MiscAuto:AddTab("Haki"),
-        T2 = TB.Main.Left.MiscAuto:AddTab("Skill"),
-        T3 = TB.Main.Left.MiscAuto:AddTab("Combo"),
-    },
-    Switch = {
-        T1 = TB.Main.Right.Switch:AddTab("Title"),
-        T2 = TB.Main.Right.Switch:AddTab("Rune"),
-        T3 = TB.Main.Right.Switch:AddTab("Build"),
-    },
-    MiscAuto_Left = {
-        T1 = TB.Automation.Left.Misc1:AddTab("Ascend"),
-        T2 = TB.Automation.Left.Misc1:AddTab("Rolls"),
-        T3 = TB.Automation.Left.Misc1:AddTab("Trade"),
-    },
-    Stats1 = {
-        T1 = TB.Automation.Left.Stats1:AddTab("Level"),
-        T2 = TB.Automation.Left.Stats1:AddTab("Gem"),
-        T3 = TB.Automation.Left.Stats1:AddTab("Misc"),
-    },
-    Enchant = {
-        T1 = TB.Automation.Right.Enchant:AddTab("Enchant"),
-        T2 = TB.Automation.Right.Enchant:AddTab("Passive"),
-        T3 = TB.Automation.Right.Enchant:AddTab("Config"),
-    },
-    Dungeon = {
-        T1 = TB.Dungeon.Left.Autojoin:AddTab("Autojoin"),
-        T2 = TB.Dungeon.Left.Autojoin:AddTab("Config"),
-    },
-    Waypoint = {
-        T1 = TB.Teleport.Left.Waypoint:AddTab("Island"),
-        T2 = TB.Teleport.Left.Waypoint:AddTab("Quest"),
-        T3 = TB.Teleport.Left.Waypoint:AddTab("Misc"),
-    },
-    NPCs = {
-        T1 = TB.Teleport.Right.NPCs:AddTab("Moveset"),
-        T2 = TB.Teleport.Right.NPCs:AddTab("Mastery"),
-    },
-  Merchant = {
-    T1 = TB.Misc.Left.Merchant:AddTab("Regular"),
-    T2 = TB.Misc.Left.Merchant:AddTab("Dungeon"),
-    T3 = TB.Misc.Left.Merchant:AddTab("Valentine"),
-  },
-  Merchant2 = {
-    T1 = TB.Misc.Left.Merchant2:AddTab("Tower"),
-    T2 = TB.Misc.Left.Merchant2:AddTab("Boss Rush"),
-  },
-    Misc1 = {
-        T1 = TB.Misc.Left.Misc1:AddTab("Chests"),
-        T2 = TB.Misc.Left.Misc1:AddTab("Craft"),
-        T3 = TB.Misc.Left.Misc1:AddTab("Notify"),
-    },
-    Puzzle = {
-        T1 = TB.Misc.Right.Quests:AddTab("Puzzles"),
-        T2 = TB.Misc.Right.Quests:AddTab("Questlines"),
-    },
+    Teleport = Window:AddTab("Teleport", "map"),
+    Webhook = Window:AddTab("Webhook", "webhook"),
+    Misc = Window:AddTab("Misc", "settings-2"),
+    Config = Window:AddTab("Config", "settings"),
 }
 
 local function GetData()
@@ -4519,8 +4362,8 @@ local extraNote = isLimitedExecutor
 
 local initTier, initTime, initUser = GetData()
 
-TierLabel = GB.Information.Left.User:AddLabel("<b>Type:</b> " .. initTier)
-TimeLabel = GB.Information.Left.User:AddLabel("<b>Time Left:</b> " .. initTime)
+TierLabel = Tabs.Home:AddParagraph("<b>Type:</b> " .. initTier)
+TimeLabel = Tabs.Home:AddParagraph("<b>Time Left:</b> " .. initTime)
 
 task.spawn(function()
     while task.wait(5) do
@@ -4537,9 +4380,9 @@ task.spawn(function()
     end
 end)
 
-GB.Information.Left.User:AddLabel("<b>Executor:</b> " .. executorDisplayName .. "\n<b>Status:</b> " .. statusText .. "\n" .. extraNote, true)
+Tabs.Home:AddParagraph("<b>Executor:</b> " .. executorDisplayName .. "\n<b>Status:</b> " .. statusText .. "\n" .. extraNote, true)
 
-GB.Information.Left.Game:AddButton("Redeem All Codes", function()
+Tabs.Home:AddButton("Redeem All Codes", function()
     local allCodes = Modules.Codes.Codes
     local playerLevel = Plr.Data.Level.Value
     
@@ -4564,51 +4407,29 @@ GB.Information.Left.Game:AddButton("Redeem All Codes", function()
                 end
             end
 
-            Library:Notify("Attempt to redeem code: " .. codeName .. rewardText, 8)
+            StreeHub:Notify("Attempt to redeem code: " .. codeName .. rewardText, 8)
             
             Remotes.UseCode:InvokeServer(codeName)
             
             task.wait(2)
         else
-            Library:Notify(string.format("Not enough requirement for: %s (Req. Lvl %d)", codeName, levelReq), 4)
+            StreeHub:Notify(string.format("Not enough requirement for: %s (Req. Lvl %d)", codeName, levelReq), 4)
         end
     end
 end)
 
-GB.Information.Right.Others:AddLabel("Some features are disabled, it is because your executor lacks the required functions.", true)
+Tabs.Information:AddLabel("Some features are disabled, it is because your executor lacks the required functions.", true)
 
 
 local HttpService = game:GetService("HttpService")
 
-GB.Information.Right.Others:AddButton({ 
-    Text = "Join Discord Server",
-    Func = function()
-
-        local inviteCode = "cUwR4tUJv3"
-        local inviteLink = "https://discord.gg/" .. inviteCode
-
-        if request then
-            pcall(function()
-                request({
-                    Url = "http://127.0.0.1:6463/rpc?v=1",
-                    Method = "POST",
-                    Headers = {
-                        ["Content-Type"] = "application/json",
-                        ["Origin"] = "https://discord.com"
-                    },
-                    Body = HttpService:JSONEncode({
-                        cmd = "INVITE_BROWSER",
-                        args = { code = inviteCode },
-                        nonce = HttpService:GenerateGUID(false)
-                    })
-                })
-            end)
-        end
-
+Tabs.Home:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
+    Callback = function()
         if setclipboard then
-            setclipboard(inviteLink)
+            setclipboard("https://discord.gg/jdmX43t5mY")
         end
-
     end
 })
 
