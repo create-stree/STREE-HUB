@@ -4354,6 +4354,8 @@ local function GetData()
     return tier, timeStr
 end
 
+Tabs.Home:Section({ Title = "User" })
+
 local executorDisplayName = (identifyexecutor and identifyexecutor() or "Unknown")
 local statusText = isLimitedExecutor and "<font color='#FFA500'>Semi-Working</font>" or "<font color='#00FF00'>Working</font>"
 local extraNote = isLimitedExecutor 
@@ -4420,6 +4422,7 @@ end)
 
 Tabs.Home:AddParagraph("Some features are disabled, it is because your executor lacks the required functions.", true)
 
+Tabs.Home:Section({ Title = "Information" })
 
 local HttpService = game:GetService("HttpService")
 
@@ -4432,6 +4435,8 @@ Tabs.Home:Button({
         end
     end
 })
+
+Tabs.Priority:Section({ Title = "Webhook" })
 
 for i = 1, #PriorityTasks do
     Tabs.Priority:AddDropdown("SelectedPriority_" .. i, {
@@ -4504,6 +4509,8 @@ Tabs.Priority:AddButton("Test Webhook", function()
     PostToWebhook()
 end)
 
+Tabs.Main:Section({ Title = "Farm Mob" })
+
 Tabs.Main:AddDropdown("SelectedMob", {
     Text = "Select Mob (s)",
     Values = Tables.MobList,
@@ -4536,6 +4543,8 @@ Tabs.Main:AddToggle("LevelFarm", {
     Text = "Autofarm Level",
     Default = false,
 })
+
+Tabs.Main:Section({ Title = "Farm Boss" })
 
 Tabs.Main:AddDropdown("SelectedBosses", {
     Text = "Select Bosses",
@@ -4656,6 +4665,8 @@ Tabs.Main:AddDropdown("SelectedAltBoss", {
     AllowNull = true,
     Searchable = true,
 })
+
+Tabs.Main:Section({ Title = "Battle Players" })
 
 TB_Tabs.Autofarm.T3:AddDropdown("SelectedAltDiff", {
     Text = "Select Difficulty",
