@@ -1,4 +1,4 @@
-if getgenv().FourHub_Running then
+if getgenv().StreeHub_Running then
     warn("Script already running!")
     return
 end
@@ -85,7 +85,7 @@ local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(260, 290)
 
-getgenv().FourHub_Running = true
+getgenv().StreeHub_Running = true
 
 local Options = Library.Options
 local Toggles = Library.Toggles
@@ -1265,7 +1265,7 @@ local function PanicStop()
         Shared.Farm = true
     end)
 
-    Library:Notify("Stopped.", 5)
+    StreeHub:Notify("Stopped.", 5)
 end
 
 local function FuncTPW()
@@ -1501,7 +1501,7 @@ local function SendSafetyWebhook(targetPlayer, reason)
                 { ["name"] = "Type", ["value"] = reason, ["inline"] = true },
                 { ["name"] = "ID", ["value"] = "```" .. game.JobId .. "```", ["inline"] = false }
             },
-            ["footer"] = { ["text"] = "FourHub â€¢ " .. os.date("%x %X") }
+            ["footer"] = { ["text"] = " StreeHub " .. os.date("%x %X") }
         }}
     }
 
@@ -1542,7 +1542,7 @@ local function CheckServerTypeSafety()
                             { ["name"] = "Username", ["value"] = "`" .. Plr.Name .. "`", ["inline"] = true },
                             { ["name"] = "JobId", ["value"] = "```" .. game.JobId .. "```", ["inline"] = false }
                         },
-                        ["footer"] = { ["text"] = "FourHub | Sailor Piece" }
+                        ["footer"] = { ["text"] = "StreeHub | Sailor Piece" }
                     }}
                 }
                 task.spawn(function()
@@ -1558,7 +1558,7 @@ local function CheckServerTypeSafety()
             end
 
             task.wait(0.8)
-            Plr:Kick("\n[FourHub]\nReason: You are in a public server.")
+            Plr:Kick("\n[StreeHub]\nReason: You are in a public server.")
         end
     end
 end
@@ -1573,7 +1573,7 @@ local function CheckPlayerForSafety(targetPlayer)
         SendSafetyWebhook(targetPlayer, "Player Join Detection")
         
         task.wait(0.5) 
-        Plr:Kick("\n[FourHub]\nReason: A player joined the server (" .. targetPlayer.Name .. ")")
+        Plr:Kick("\n[StreeHub]\nReason: A player joined the server (" .. targetPlayer.Name .. ")")
         return
     end
 
@@ -1583,7 +1583,7 @@ local function CheckPlayerForSafety(targetPlayer)
             SendSafetyWebhook(targetPlayer, "Moderator Detection (Rank: " .. tostring(rank) .. ")")
             
             task.wait(0.5)
-            Plr:Kick("\n[FourHub]\nReason: Moderator Detected (" .. targetPlayer.Name .. ")")
+            Plr:Kick("\n[StreeHub]\nReason: Moderator Detected (" .. targetPlayer.Name .. ")")
         end
     end
 end
@@ -1817,7 +1817,7 @@ local function SafeTeleportToNPC(targetName, customMap)
         root.AssemblyLinearVelocity = Vector3.new(0, 0.01, 0)
         root.AssemblyAngularVelocity = Vector3.zero
     else
-        Library:Notify("NPC not found: " .. tostring(actualName), 3)
+        StreeHub:Notify("NPC not found: " .. tostring(actualName), 3)
     end
 end
 
@@ -2571,7 +2571,7 @@ local function UniversalPuzzleSolver(puzzleType)
     local piecesToCollect = data.Pieces or settings.IslandOrder
     local pieceModelName = settings and settings.PieceModelName or "DungeonPuzzlePiece"
     
-    Library:Notify("Starting " .. puzzleType .. " Puzzle...", 5)
+    StreeHub:Notify("Starting " .. puzzleType .. " Puzzle...", 5)
 
     for i, islandOrPiece in ipairs(piecesToCollect) do
         local piece = nil
@@ -2624,13 +2624,13 @@ local function UniversalPuzzleSolver(puzzleType)
                 Library:Notify(string.format("Collected Piece %d/%d", i, #piecesToCollect), 2)
                 task.wait(1.5)
             else
-                Library:Notify("Found piece but no interaction prompt was detected.", 3)
+                StreeHub:Notify("Found piece but no interaction prompt was detected.", 3)
             end
         else
-            Library:Notify("Failed to find piece " .. i .. " on " .. tostring(tpTarget or "Island"), 3)
+            StreeHub:Notify("Failed to find piece " .. i .. " on " .. tostring(tpTarget or "Island"), 3)
         end
     end
-    Library:Notify(puzzleType .. " Puzzle Completed!", 5)
+    StreeHub:Notify(puzzleType .. " Puzzle Completed!", 5)
 end
 
 local function GetCurrentQuestUI()
@@ -3636,7 +3636,7 @@ local function AutoRollStatsLoop()
     local hasRank = false; for _ in pairs(selectedRanks) do hasRank = true break end
 
     if not hasStat or not hasRank then
-        Library:Notify("Error: Select at least one Stat and one Rank first!", 5)
+        StreeHub:Notify("Error: Select at least one Stat and one Rank first!", 5)
         Toggles.AutoRollStats:SetValue(false)
         return
     end
@@ -3664,7 +3664,7 @@ local function AutoRollStatsLoop()
                         end)
                         
                         if not success then
-                            Library:Notify("ERROR: " .. tostring(err):gsub("<", "["), 5)
+                            StreeHub:Notify("ERROR: " .. tostring(err):gsub("<", "["), 5)
                         end
                         
                         task.wait(tonumber(Options.StatsRollCD.Value) or 0.1)
@@ -3676,7 +3676,7 @@ local function AutoRollStatsLoop()
         end
 
         if workDone then
-            Library:Notify("Successfully rolled selected stats.", 5)
+            StreeHub:Notify("Successfully rolled selected stats.", 5)
             Toggles.AutoRollStats:SetValue(false)
             break
         end
@@ -3694,7 +3694,7 @@ local function Func_UnifiedRollManager()
             local selected = Options.SelectedTrait.Value or {}
 
             if selected[currentTrait] then
-                Library:Notify("Success! Got Trait: " .. currentTrait, 5)
+                StreeHub:Notify("Success! Got Trait: " .. currentTrait, 5)
                 Toggles.AutoTrait:SetValue(false)
             else
                 pcall(SyncTraitAutoSkip)
@@ -3713,7 +3713,7 @@ local function Func_UnifiedRollManager()
             local selected = Options.SelectedRace.Value or {}
 
             if selected[currentRace] then
-                Library:Notify("Success! Got Race: " .. currentRace, 5)
+                StreeHub:Notify("Success! Got Race: " .. currentRace, 5)
                 Toggles.AutoRace:SetValue(false)
             else
                 pcall(SyncRaceSettings)
@@ -3728,7 +3728,7 @@ local function Func_UnifiedRollManager()
             local selected = Options.SelectedClan.Value or {}
 
             if selected[currentClan] then
-                Library:Notify("Success! Got Clan: " .. currentClan, 5)
+                StreeHub:Notify("Success! Got Clan: " .. currentClan, 5)
                 Toggles.AutoClan:SetValue(false)
             else
                 pcall(SyncClanSettings)
@@ -3808,7 +3808,7 @@ local function AutoSpecPassiveLoop()
         end
 
         if not workDone then
-            Library:Notify("Done", 5)
+            StreeHub:Notify("Done", 5)
             Toggles.AutoSpec:SetValue(false)
             break
         end
@@ -4666,9 +4666,9 @@ Tabs.Main:AddDropdown("SelectedAltBoss", {
     Searchable = true,
 })
 
-Tabs.Main:Section({ Title = "Battle Players" })
+Tabs.Main:Section({ Title = "Select Players" })
 
-TB_Tabs.Autofarm.T3:AddDropdown("SelectedAltDiff", {
+Tabs.Main:AddDropdown("SelectedAltDiff", {
     Text = "Select Difficulty",
     Values = Tables.DiffList,
     Default = nil,
@@ -4677,7 +4677,7 @@ TB_Tabs.Autofarm.T3:AddDropdown("SelectedAltDiff", {
 })
 
 for i = 1, 5 do
-    TB_Tabs.Autofarm.T3:AddDropdown("SelectedAlt_" .. i, {
+    Tabs.Main:AddDropdown("SelectedAlt_" .. i, {
         Text = "Select Alt #" .. i,
         SpecialType = "Player",
         ExcludeLocalPlayer = true,
@@ -4688,19 +4688,21 @@ for i = 1, 5 do
     })
 end
 
-TB_Tabs.Autofarm.T3:AddToggle("AltBossFarm", {
+Tabs.Main:AddToggle("AltBossFarm", {
     Text = "Auto Help Alt",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T4:AddDropdown("SelectedWeaponType", {
+Tabs.Main:Section({ Title = "Target" })
+
+Tabs.Main:AddDropdown("SelectedWeaponType", {
     Text = "Select Weapon Type",
     Values = Tables.Weapon,
     Default = nil,
     Multi = true,
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("SwitchWeaponCD", {
+Tabs.Main:AddSlider("SwitchWeaponCD", {
   Text = "Switch Weapon Delay",
   Default = 4,
   Min = 1,
@@ -4711,17 +4713,17 @@ TB_Tabs.Autofarm.T4:AddSlider("SwitchWeaponCD", {
   end
 })
 
-TB_Tabs.Autofarm.T4:AddToggle("SwitchWeapon", {
+Tabs.Main:AddToggle("SwitchWeapon", {
   Text = "Auto Switch Weapon",
   Default = true,
 })
 
-TB_Tabs.Autofarm.T4:AddToggle("IslandTP", {
+Tabs.Main:AddToggle("IslandTP", {
     Text = "Island TP [Autofarm]",
     Default = true,
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("IslandTPCD", {
+Tabs.Main:AddSlider("IslandTPCD", {
     Text = "Island TP CD",
     Default = 0.67,
     Min = 0,
@@ -4732,7 +4734,7 @@ TB_Tabs.Autofarm.T4:AddSlider("IslandTPCD", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("TargetTPCD", {
+Tabs.Main:AddSlider("TargetTPCD", {
     Text = "Target TP CD",
     Default = 0,
     Min = 0,
@@ -4743,7 +4745,7 @@ TB_Tabs.Autofarm.T4:AddSlider("TargetTPCD", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("TargetDistTP", {
+Tabs.Main:AddSlider("TargetDistTP", {
     Text = "Target Distance TP [Tween]",
     Default = 0,
     Min = 0,
@@ -4754,7 +4756,7 @@ TB_Tabs.Autofarm.T4:AddSlider("TargetDistTP", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("M1Speed", {
+Tabs.Main:AddSlider("M1Speed", {
     Text = "M1 Attack Cooldown",
     Default = 0,
     Min = 0,
@@ -4765,7 +4767,7 @@ TB_Tabs.Autofarm.T4:AddSlider("M1Speed", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddDropdown("SelectedMovementType", {
+Tabs.Main:AddDropdown("SelectedMovementType", {
     Text = "Select Movement Type",
     Values = {"Teleport", "Tween"},
     Default = "Tween",
@@ -4773,7 +4775,7 @@ TB_Tabs.Autofarm.T4:AddDropdown("SelectedMovementType", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T4:AddDropdown("SelectedFarmType", {
+Tabs.Main:AddDropdown("SelectedFarmType", {
     Text = "Select Farm Type",
     Values = {"Behind", "Above", "Below"},
     Default = "Behind",
@@ -4781,7 +4783,7 @@ TB_Tabs.Autofarm.T4:AddDropdown("SelectedFarmType", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("Distance", {
+Tabs.Main:AddSlider("Distance", {
     Text = "Farm Distance",
     Default = 12,
     Min = 0,
@@ -4792,7 +4794,7 @@ TB_Tabs.Autofarm.T4:AddSlider("Distance", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("TweenSpeed", {
+Tabs.Main:AddSlider("TweenSpeed", {
     Text = "Tween Speed",
     Default = 160,
     Min = 0,
@@ -4803,12 +4805,12 @@ TB_Tabs.Autofarm.T4:AddSlider("TweenSpeed", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddToggle("InstaKill", {
+Tabs.Main:AddToggle("InstaKill", {
     Text = "Instant Kill",
     Default = false,
 })
 
-TB_Tabs.Autofarm.T4:AddDropdown("InstaKillType", {
+Tabs.Main:AddDropdown("InstaKillType", {
     Text = "Select Type",
     Values = {"V1", "V2"},
     Default = "V1",
@@ -4816,7 +4818,7 @@ TB_Tabs.Autofarm.T4:AddDropdown("InstaKillType", {
     Searchable = true,
 })
 
-TB_Tabs.Autofarm.T4:AddSlider("InstaKillHP", {
+Tabs.Main:AddSlider("InstaKillHP", {
     Text = "HP% For Insta-Kill",
     Default = 90,
     Min = 1,
@@ -4827,7 +4829,7 @@ TB_Tabs.Autofarm.T4:AddSlider("InstaKillHP", {
     end
 })
 
-TB_Tabs.Autofarm.T4:AddInput("InstaKillMinHP", {
+Tabs.Main:AddInput("InstaKillMinHP", {
     Text = "Min MaxHP for Insta-Kill",
     Default = "100000",
     Numeric = true,
@@ -4838,12 +4840,12 @@ TB_Tabs.Autofarm.T4:AddInput("InstaKillMinHP", {
     end
 })
 
-TB_Tabs.MiscAuto.T1:AddToggle("ObserHaki", {
+Tabs.Main:AddToggle("ObserHaki", {
     Text = "Auto Observation Haki",
     Default = false,
 })
 
-TB_Tabs.MiscAuto.T1:AddToggle("ArmHaki", {
+TB_Tabs.MiscAuto.T1("ArmHaki", {
     Text = "Auto Armament Haki",
     Default = false,
 })
