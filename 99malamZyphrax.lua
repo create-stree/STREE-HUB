@@ -1,13 +1,14 @@
 loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
+
 local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
-local natui_url = game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/bmF0dWk-/refs/heads/main/ui.lua")
-local NatUI = loadstring(natui_url)()
+local ZyphraxHub = game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/bmF0dWk-/refs/heads/main/ui.lua")
+local ZyphraxHub = loadstring(ZyphraxHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
-local Window = NatUI:CreateWindow({
+local Window = ZyphraxHub:CreateWindow({
     Title = "ZyphraxHub",
     Icon = "rbxassetid://99764942615873",
     Author = (premium and "Premium" or "99 NITF") .. " - " .. version,
@@ -103,7 +104,7 @@ end
 
 
 local HttpService = game:GetService("HttpService")
-local folderPath = "NatHub"
+local folderPath = "ZyphraxHub"
 makefolder(folderPath)
 local configFile = folderPath .. "/99NITF.json"
 
@@ -492,6 +493,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end
     end
 end))
+
 Tabs.MainTab:Toggle({
     Title = "Auto Burn Fuel",
     Value = _G.Settings.Main["Auto Burn Fire"],
@@ -566,6 +568,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end
     end)
 end))
+
 Tabs.MainTab:Toggle({
     Title = "Auto Recycling",
     Value = _G.Settings.Main["Auto Recycling"],
@@ -637,6 +640,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end
     end)
 end))
+
 Tabs.MainTab:Toggle({
     Title = "Auto Plant",
     Value = _G.Settings.Main["Auto Plant Sapling"],
@@ -648,6 +652,7 @@ Tabs.MainTab:Toggle({
 		end
     end
 })
+
 spawn(LPH_NO_VIRTUALIZE(function()
     pcall(function()
         local remoteEvents = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents")
@@ -796,6 +801,7 @@ Tabs.MainTab:Toggle({
 		end
     end
 })
+
 spawn(LPH_NO_VIRTUALIZE(function()
     pcall(function()
         local autoCookFoods = {
@@ -833,6 +839,7 @@ Tabs.MainTab:Toggle({
 		end
     end
 })
+
 spawn(LPH_NO_VIRTUALIZE(function()
     pcall(function()
         local autoEatFoods = {
@@ -926,6 +933,7 @@ Tabs.MainTab:Toggle({
 		end
     end
 })
+
 Tabs.MainTab:Button({
     Title = "Show Flower Shop",
     Callback = function()
@@ -937,6 +945,7 @@ Tabs.MainTab:Button({
         end
     end
 })
+
 Tabs.MainTab:Button({
     Title = "Teleport Seed Box",
     Callback = function()
@@ -950,7 +959,8 @@ Tabs.MainTab:Button({
             end
         end
     end
-})             
+})
+
 selectedTargets = {}
 
 Tabs.ItemTab:Dropdown({
@@ -966,7 +976,9 @@ Tabs.ItemTab:Dropdown({
 
 
 Tabs.ItemTab:Section({ Title = "Gears" })
+
 local selectedItems = {}
+
 Tabs.ItemTab:Dropdown({
     Title = "Choose Item",
     Values = {
@@ -981,6 +993,7 @@ Tabs.ItemTab:Dropdown({
         selectedItems = option
     end
 })
+
 local MAX_ITEMS = 1000
 
 Tabs.ItemTab:Button({
@@ -1071,7 +1084,9 @@ Tabs.ItemTab:Button({
 
 
 Tabs.ItemTab:Section({ Title = "Fuel" })
+
 local selectedFuelItems = {}
+
 Tabs.ItemTab:Dropdown({
     Title = "Choose Fuel",
     Values = {
@@ -1085,6 +1100,7 @@ Tabs.ItemTab:Dropdown({
         selectedFuelItems = option
     end
 })
+
 Tabs.ItemTab:Button({
     Title = "Collect Fuel",
     Desc = "",
@@ -1172,7 +1188,9 @@ Tabs.ItemTab:Button({
 
 
 Tabs.ItemTab:Section({ Title = "Food / Healing" })
+
 local selectedFoodItems = {}
+
 Tabs.ItemTab:Dropdown({
     Title = "Choose Food / Healing",
     Values = {
@@ -1274,6 +1292,7 @@ Tabs.ItemTab:Button({
 
 
 Tabs.ItemTab:Section({ Title = "Guns & Armor" })
+
 local selectedGearItems = {}
 
 Tabs.ItemTab:Dropdown({
@@ -1377,6 +1396,7 @@ Tabs.ItemTab:Button({
 
 
 Tabs.ItemTab:Section({ Title = "Chest" })
+
 Tabs.ItemTab:Toggle({
     Title = "Auto Open Chest",
     Value = _G.Settings.Main["Auto Open Chest"],
@@ -1416,6 +1436,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end
     end)
 end))
+
 local selectedItems = {}
 
 local allItems = {
@@ -1468,6 +1489,7 @@ Tabs.ItemTab:Dropdown({
         selectedItems = selected
     end
 })
+
 Tabs.ItemTab:Button({
     Title = "Collect Chest Items",
     Desc = "",
@@ -1554,6 +1576,7 @@ Tabs.ItemTab:Button({
 
 
 Tabs.ItemTab:Section({ Title = "Other Items" })
+
 local selectedOtherItems = {}
 
 Tabs.ItemTab:Dropdown({
@@ -1570,6 +1593,7 @@ Tabs.ItemTab:Dropdown({
         selectedOtherItems = option
     end
 })
+
 Tabs.ItemTab:Button({
     Title = "Collect Other Items",
     Desc = "",
@@ -1656,6 +1680,7 @@ Tabs.ItemTab:Button({
 
 
 Tabs.EspTab:Section({ Title = "ESP Items" })
+
 local itemList = {}
 local selectedItems = {}
 
@@ -1785,10 +1810,12 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
 local CraftMaterialStatus = Tabs.CraftingTab:Paragraph({
     Title = "Material Status",
     Desc = "Waiting for material info..."
 })
+
 function CleanText(text)
     text = text:gsub("[%c%s]+", " ") 
     text = text:gsub("^%s+", "")    
@@ -1814,14 +1841,19 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
+
 Tabs.CraftingTab:Section({ Title = "Bench 1" })
+
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("CraftItem")
+
 local craftableItems = {
     "Map",
     "Old Bed",
     "Bunny Trap",
     "Crafting Bench 2"
 }
+
 for _, itemName in ipairs(craftableItems) do
     Tabs.CraftingTab:Button({
         Title = "Craft: " .. itemName,
@@ -1833,7 +1865,9 @@ for _, itemName in ipairs(craftableItems) do
         end
     })
 end
+
 Tabs.CraftingTab:Section({ Title = "Bench 2" })
+
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("CraftItem")
 local craftableItems = {
     "Sun Dial",
@@ -1847,6 +1881,7 @@ local craftableItems = {
     "Bear Trap",
     "Crafting Bench 3"
 }
+
 for _, itemName in ipairs(craftableItems) do
     Tabs.CraftingTab:Button({
         Title = "Craft: " .. itemName,
@@ -1858,7 +1893,9 @@ for _, itemName in ipairs(craftableItems) do
         end
     })
 end
+
 Tabs.CraftingTab:Section({ Title = "Bench 3" })
+
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("CraftItem")
 local craftableItems = {
     "Crock Pot",
@@ -1870,6 +1907,7 @@ local craftableItems = {
     "Lightning Rod",
     "Crafting Bench 4"
 }
+
 for _, itemName in ipairs(craftableItems) do
     Tabs.CraftingTab:Button({
         Title = "Craft: " .. itemName,
@@ -1881,7 +1919,9 @@ for _, itemName in ipairs(craftableItems) do
         end
     })
 end
+
 Tabs.CraftingTab:Section({ Title = "Bench 4" })
+
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("CraftItem")
 local craftableItems = {
     "Ammo Crate",
@@ -1890,6 +1930,7 @@ local craftableItems = {
     "Teleporter",
     "Crafting Bench 5"
 }
+
 for _, itemName in ipairs(craftableItems) do
     Tabs.CraftingTab:Button({
         Title = "Craft: " .. itemName,
@@ -1902,12 +1943,14 @@ for _, itemName in ipairs(craftableItems) do
     })
 end
 Tabs.CraftingTab:Section({ Title = "Bench 5" })
+
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("CraftItem")
 local craftableItems = {
     "Respawn Capsule",
     "Temporal Accelerometer",
     "Weather Machine"
 }
+
 for _, itemName in ipairs(craftableItems) do
     Tabs.CraftingTab:Button({
         Title = "Craft: " .. itemName,
@@ -1919,7 +1962,9 @@ for _, itemName in ipairs(craftableItems) do
         end
     })
 end
+
 Tabs.EspTab:Section({ Title = "ESP Enemy" })
+
 local enemyList = {}
 local selectedEnemies = {}
 
@@ -2046,7 +2091,9 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
 Tabs.TeleportTab:Section({ Title = "Teleport" })
+
 Tabs.TeleportTab:Button({
     Title = "Teleport to Campground",
     Desc = "",
@@ -2058,6 +2105,7 @@ Tabs.TeleportTab:Button({
         end
     end
 })
+
 local localPlayer = Players.LocalPlayer
 local itemFolder = workspace:WaitForChild("Items")
 local itemNames = {
@@ -2066,9 +2114,11 @@ local itemNames = {
     "Laser Fence Blueprint", "Log", "Old Flashlight", "Old Radio",
     "Sheet Metal", "Bandage", "Rifle"
 }
+
 _G.Settings = _G.Settings or {}
 _G.Settings.Teleport = _G.Settings.Teleport or {}
 _G.Settings.Teleport["Selected Item"] = itemNames[1]
+
 Tabs.TeleportTab:Dropdown({
     Title = "Teleport to Item",
     Values = itemNames,
@@ -2077,6 +2127,7 @@ Tabs.TeleportTab:Dropdown({
         _G.Settings.Teleport["Selected Item"] = value
     end
 })
+
 function getModelPart(model)
     if model.PrimaryPart then return model.PrimaryPart end
     for _, part in ipairs(model:GetChildren()) do
@@ -2084,6 +2135,7 @@ function getModelPart(model)
     end
     return nil
 end
+
 Tabs.TeleportTab:Button({
     Title = "Teleport to Selected Item",
     Desc = "",
@@ -2110,6 +2162,7 @@ Tabs.TeleportTab:Button({
         end
     end
 })
+
 Tabs.TeleportTab:Button({
     Title = "Teleport to Volcano",
     Desc = "",
@@ -2133,6 +2186,7 @@ Tabs.TeleportTab:Button({
         end)
     end
 })
+
 local Lighting = game:GetService("Lighting")
 
 Tabs.MiscTab:Toggle({
@@ -2182,6 +2236,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end
     end
 end))
+
 Tabs.MiscTab:Slider({
     Title = "Character Speed",
     Value = {
@@ -2201,6 +2256,7 @@ Tabs.MiscTab:Slider({
         end
     end
 })
+
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
@@ -2230,6 +2286,7 @@ if not _G.InfiniteJumpConnection then
         end
     end)
 end
+
 Tabs.MiscTab:Toggle({
     Title = "Fly",
     Value = _G.Settings.Misc and _G.Settings.Misc["Fly"] or false,
@@ -2310,6 +2367,7 @@ Tabs.MiscTab:Toggle({
         end
     end
 })
+
 local Lighting = game:GetService("Lighting")
 function setFogState(enabled)
     if enabled then
@@ -2328,6 +2386,7 @@ function setFogState(enabled)
         Lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
     end
 end
+
 Tabs.MiscTab:Toggle({
     Title = "Remove Fog",
     Value = _G.Settings.Misc and _G.Settings.Misc["Remove Fog"],
@@ -2337,6 +2396,7 @@ Tabs.MiscTab:Toggle({
         setFogState(value)
     end
 })
+
 Tabs.MiscTab:Button({
     Title = "FPS Boost",
     Callback = function()
@@ -2376,15 +2436,19 @@ Tabs.MiscTab:Button({
         end)
     end
 })
+
 Tabs.QuestTab:Paragraph({
     Title = "Announcement",
     Desc = "Equip Weapon to Enable"
 })
+
 Tabs.QuestTab:Section({ Title = "Lost Child 1" })
+
 local JailCellarLabel = Tabs.QuestTab:Paragraph({
     Title = "Jail Cellar Status",
     Desc = "Status : Waiting..."
 })
+
 spawn(LPH_NO_VIRTUALIZE(function()
     while task.wait(0.2) do
         pcall(function()
@@ -2400,6 +2464,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
 Tabs.QuestTab:Toggle({
     Title = "Auto Lost Child 1",
     Desc = "Need Campfire Level 2",
@@ -2411,6 +2476,7 @@ Tabs.QuestTab:Toggle({
 		end
     end
 })
+
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local HRP = character:WaitForChild("HumanoidRootPart")
@@ -2534,7 +2600,9 @@ task.spawn(LPH_NO_VIRTUALIZE(function()
         end
     end)
 end))
+
 Tabs.QuestTab:Section({ Title = "Lost Child 2" })
+
 local JailCellar2Label = Tabs.QuestTab:Paragraph({
     Title = "Jail Cellar 2 Status",
     Desc = "Status : Waiting..."
@@ -2555,6 +2623,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
 Tabs.QuestTab:Toggle({
     Title = "Auto Lost Child 2",
     Desc = "Need Campfire Level 4",
@@ -2566,6 +2635,7 @@ Tabs.QuestTab:Toggle({
 		end
     end
 })
+
 task.spawn(LPH_NO_VIRTUALIZE(function()
     pcall(function()
         local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
@@ -2659,7 +2729,9 @@ task.spawn(LPH_NO_VIRTUALIZE(function()
         end
     end)
 end))
+
 Tabs.QuestTab:Section({ Title = "Lost Child 3" })
+
 local JailCellar3Label = Tabs.QuestTab:Paragraph({
     Title = "Jail Cellar 3 Status",
     Desc = "Status : Waiting..."
@@ -2680,6 +2752,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
 Tabs.QuestTab:Toggle({
     Title = "Auto Lost Child 3",
     Desc = "Need Campfire Level 5",
@@ -2691,6 +2764,7 @@ Tabs.QuestTab:Toggle({
 		end
     end
 })
+
 task.spawn(LPH_NO_VIRTUALIZE(function()
     pcall(function()
         local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
@@ -2791,6 +2865,7 @@ task.spawn(LPH_NO_VIRTUALIZE(function()
     end)
 end))
 Tabs.QuestTab:Section({ Title = "Lost Child 4" })
+
 local JailCellar4Label = Tabs.QuestTab:Paragraph({
     Title = "Jail Cellar 4 Status",
     Desc = "Status : Waiting..."
@@ -2811,6 +2886,7 @@ spawn(LPH_NO_VIRTUALIZE(function()
         end)
     end
 end))
+
 Tabs.QuestTab:Toggle({
     Title = "Auto Lost Child 4",
     Desc = "Need Campfire Level 5",
@@ -2822,6 +2898,7 @@ Tabs.QuestTab:Toggle({
 		end
     end
 })
+
 task.spawn(function()
     pcall(function()
         local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
@@ -2924,6 +3001,7 @@ end)
 end
 
 Tabs.MainTab:Section({ Title = "Fishing" })
+
 Tabs.MainTab:Paragraph({
     Title = "Announcement",
     Desc = "If Rod Cast failed. Please perform a manual cast first."
