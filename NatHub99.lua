@@ -7,25 +7,26 @@ local NatUI = loadstring(natui_url)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
-    local Window = NatUI:CreateWindow({
-        Title = "NatHub",
-        Icon = "rbxassetid://99764942615873",
-        Author = (premium and "Premium" or "99 NITF") .. " | " .. version,
-        Folder = "NatHub",
-        Size = WindowSize,
-        LiveSearchDropdown = true,
-    })
+local Window = NatUI:CreateWindow({
+    Title = "ZyphraxHub",
+    Icon = "rbxassetid://99764942615873",
+    Author = (premium and "Premium" or "99 NITF") .. " - " .. version,
+    Folder = "ZyphraxHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+})
 
-local Tabs = {}
-
-Tabs.MainTab = Window:Tab({ Title = "Main", Icon = "rbxassetid://10723407389"})
-Tabs.ItemTab = Window:Tab({ Title = "Items", Icon = "rbxassetid://10734984606"})
-Tabs.QuestTab = Window:Tab({ Title = "Quest", Icon = "rbxassetid://10723415335"})
---Tabs.EventTab = Window:Tab({ Title = "Event", Icon = "rbxassetid://10747373176"})
-Tabs.CraftingTab = Window:Tab({ Title = "Crafting", Icon = "rbxassetid://10734952479"})
-Tabs.TeleportTab = Window:Tab({ Title = "Teleport", Icon = "rbxassetid://10734886004"})
-Tabs.EspTab = Window:Tab({ Title = "Esp", Icon = "rbxassetid://10723346959"})
-Tabs.MiscTab = Window:Tab({ Title = "Misc", Icon = "rbxassetid://10723424838"})
+local Tabs = {
+	HomeTab = Window:Tab({ Title = "Home", Icon = "scan-face"})
+    MainTab = Window:Tab({ Title = "Main", Icon = "landmark"})
+    ItemTab = Window:Tab({ Title = "Items", Icon = "axe"})
+    QuestTab = Window:Tab({ Title = "Quest", Icon = "layers"})
+    --EventTab = Window:Tab({ Title = "Event", Icon = "party-popper"})
+    CraftingTab = Window:Tab({ Title = "Crafting", Icon = "anvil"})
+    TeleportTab = Window:Tab({ Title = "Teleport", Icon = "map"})
+    EspTab = Window:Tab({ Title = "Esp", Icon = "eyes"})
+    MiscTab = Window:Tab({ Title = "Misc", Icon = "layout-grid"})
+}
 
 _G.Settings = {
 	Main = {
