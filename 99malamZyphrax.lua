@@ -3,10 +3,11 @@ loadstring([[
 ]])();
 
 local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
-local ZyphraxHub = game:HttpGet("https://raw.githubusercontent.com/dy1zn4t/bmF0dWk-/refs/heads/main/ui.lua")
+local ZyphraxHub = game:HttpGet("https://raw.githubusercontent.com/Moonshall/ZyphraxHub/refs/heads/main/mainui.lua")
 local ZyphraxHub = loadstring(ZyphraxHub)()
-local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
-local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
+local isMobile = table.find({ Enum.Platform.Android, Enum.Platform.IOS }, UserInputService:GetPlatform()) ~= nil
+local windowSize = isMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370)
+
 
 local Window = ZyphraxHub:CreateWindow({
     Title = "ZyphraxHub",
