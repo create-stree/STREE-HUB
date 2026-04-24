@@ -1,2 +1,2 @@
 # STREE Community
-**script Roblox Free,safe,modern**
+**Script Roblox Safe,Modern**
