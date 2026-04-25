@@ -16,6 +16,7 @@ local Window = ZyphraxHub:CreateWindow({
     Folder = "ZyphraxHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
+    FileSaveName = "ZyphraxHub/config.json",
 })
 
 
@@ -3177,7 +3178,6 @@ end))
 
 if Hutan then
 Tabs.MainTab:Section({ Title = "Taming Animal" })
-
 local TamingEnabled = false
 local SelectedAnimal = ""
 
