@@ -21,19 +21,24 @@ local Window = ZyphraxHub:CreateWindow({
 
 local Tabs = {
 	HomeTab = Window:Tab({ Title = "Home", Icon = "scan-face"}),
-	LobbyTab = Window:Tab({ Title = "Lobby", Icon = "home" }),
+	LobbyTab = Window:Tab({ Title = "Lobby", Icon = "house" }),
     MainTab = Window:Tab({ Title = "Main", Icon = "landmark"}),
     ItemTab = Window:Tab({ Title = "Items", Icon = "axe"}),
     QuestTab = Window:Tab({ Title = "Quest", Icon = "layers"}),
     --EventTab = Window:Tab({ Title = "Event", Icon = "party-popper"}),
     CraftingTab = Window:Tab({ Title = "Crafting", Icon = "anvil"}),
     TeleportTab = Window:Tab({ Title = "Teleport", Icon = "map"}),
-    EspTab = Window:Tab({ Title = "Esp", Icon = "eyes"}),
+    EspTab = Window:Tab({ Title = "Esp", Icon = "eye"}),
     MiscTab = Window:Tab({ Title = "Misc", Icon = "layout-grid"})
 }
 
 
 _G.Settings = {
+    Lobby = {
+        ["AutoPlay"] = false,
+        ["SelectedAdd"] = 1,
+        ["SelectedChosen"] = 5,
+	}
 	Main = {
 		["Auto Choop Small Tree"] = false,
 		["Kill Aura"] = false,
@@ -73,21 +78,6 @@ _G.Settings = {
 	},
 	AutoSave = false
 }
-
-
-Tabs.HomeTab:Section({ Title = "Information" })
-
-Tabs.HomeTab:Button({
-    Title = "Discord",
-    Desc = "Copy Discord Link",
-    Callback = function()
-        local link = "https://discord.gg/zyphraxhub"
-        pcall(function()
-            setclipboard(link)
-        end)
-    end
-})
-
 
 --[[VARIABLE]]--
 local player = game:GetService("Players").LocalPlayer
@@ -157,6 +147,19 @@ LoadConfig()
 
 
 _G.Settings.AutoSave = true
+
+Tabs.HomeTab:Section({ Title = "Information" })
+
+Tabs.HomeTab:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
+    Callback = function()
+        local link = "https://discord.gg/zyphraxhub"
+        pcall(function()
+            setclipboard(link)
+        end)
+    end
+})
 
 if Hutan then
 local OpenMapToggle = Tabs.MainTab:Toggle({
@@ -253,6 +256,10 @@ end
 
 
 if Lobby then
+    _G.AutoPlay = _G.Settings.Lobby.AutoPlay
+    _G.SelectedAdd = _G.Settings.Lobby.SelectedAdd
+    _G.SelectedChosen = _G.Settings.Lobby.SelectedChosen
+
     ZyphraxHub:Notify({
         Title = "Lobby Detected",
         Content = "        Features not loaded",
@@ -261,31 +268,31 @@ if Lobby then
 
     local TeleportEvent = game:GetService("ReplicatedStorage").RemoteEvents.TeleportEvent
 
-    _G.AutoPlay = false
-    _G.SelectedAdd = 1
-    _G.SelectedChosen = 5
-
     Tabs.LobbyTab:Section({ Title = "Play" })
 
     Tabs.LobbyTab:Dropdown({
         Title = "Select Add (1-3)",
         Values = { "1", "2", "3" },
-        Value = "1",
+        Value = tostring(_G.SelectedAdd),
         Callback = function(value)
             _G.SelectedAdd = tonumber(value)
+            _G.Settings.Lobby.SelectedAdd = _G.SelectedAdd
+            if _G.Settings.AutoSave then SaveConfig() end
         end
     })
 
     Tabs.LobbyTab:Dropdown({
         Title = "Select Chosen (1-5)",
         Values = { "1", "2", "3", "4", "5" },
-        Value = "5",
+        Value = tostring(_G.SelectedChosen),
         Callback = function(value)
             _G.SelectedChosen = tonumber(value)
+            _G.Settings.Lobby.SelectedChosen = _G.SelectedChosen
+            if _G.Settings.AutoSave then SaveConfig() end
         end
     })
 
-    Tabs.LobbyTab:Button({
+	Tabs.LobbyTab:Button({
         Title = "Set Chosen",
         Callback = function()
             TeleportEvent:FireServer("Chosen", nil, _G.SelectedChosen, nil)
