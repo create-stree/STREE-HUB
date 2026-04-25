@@ -38,7 +38,7 @@ _G.Settings = {
         ["AutoPlay"] = false,
         ["SelectedAdd"] = 1,
         ["SelectedChosen"] = 5,
-	}
+	},
 	Main = {
 		["Auto Choop Small Tree"] = false,
 		["Kill Aura"] = false,
