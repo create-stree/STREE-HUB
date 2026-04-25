@@ -6,7 +6,7 @@ local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:spli
 local ZyphraxHub = game:HttpGet("https://raw.githubusercontent.com/Moonshall/ZyphraxHub/refs/heads/main/mainui.lua")
 local ZyphraxHub = loadstring(ZyphraxHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
-local WindowSize = isMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370)
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370)
 
 
 local Window = ZyphraxHub:CreateWindow({
