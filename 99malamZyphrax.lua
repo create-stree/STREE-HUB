@@ -145,9 +145,6 @@ end
 
 LoadConfig()
 
-
-_G.Settings.AutoSave = true
-
 Tabs.HomeTab:Section({ Title = "Information" })
 
 Tabs.HomeTab:Button({
@@ -160,6 +157,8 @@ Tabs.HomeTab:Button({
         end)
     end
 })
+
+_G.Settings.AutoSave = true
 
 if Hutan then
 local OpenMapToggle = Tabs.MainTab:Toggle({
