@@ -259,12 +259,6 @@ if Lobby then
     _G.SelectedAdd = _G.Settings.Lobby.SelectedAdd
     _G.SelectedChosen = _G.Settings.Lobby.SelectedChosen
 
-    ZyphraxHub:Notify({
-        Title = "Lobby Detected",
-        Content = "        Features not loaded",
-        Duration = 4,
-    })
-
     local TeleportEvent = game:GetService("ReplicatedStorage").RemoteEvents.TeleportEvent
 
     Tabs.LobbyTab:Section({ Title = "Play" })
