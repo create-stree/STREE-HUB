@@ -11,12 +11,13 @@ local windowSize = isMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(6
 
 local Window = ZyphraxHub:CreateWindow({
     Title = "ZyphraxHub",
-    Icon = "rbxassetid://99764942615873",
+    Icon = "rbxassetid://125623993645104",
     Author = (premium and "Premium" or "99 NITF") .. " - " .. version,
     Folder = "ZyphraxHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
 })
+
 
 local Tabs = {
 	HomeTab = Window:Tab({ Title = "Home", Icon = "scan-face"}),
@@ -30,6 +31,7 @@ local Tabs = {
     EspTab = Window:Tab({ Title = "Esp", Icon = "eyes"}),
     MiscTab = Window:Tab({ Title = "Misc", Icon = "layout-grid"})
 }
+
 
 _G.Settings = {
 	Main = {
