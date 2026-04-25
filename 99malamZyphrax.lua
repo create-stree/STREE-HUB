@@ -19,14 +19,15 @@ local Window = ZyphraxHub:CreateWindow({
 })
 
 local Tabs = {
-	HomeTab = Window:Tab({ Title = "Home", Icon = "scan-face"})
-    MainTab = Window:Tab({ Title = "Main", Icon = "landmark"})
-    ItemTab = Window:Tab({ Title = "Items", Icon = "axe"})
-    QuestTab = Window:Tab({ Title = "Quest", Icon = "layers"})
-    --EventTab = Window:Tab({ Title = "Event", Icon = "party-popper"})
-    CraftingTab = Window:Tab({ Title = "Crafting", Icon = "anvil"})
-    TeleportTab = Window:Tab({ Title = "Teleport", Icon = "map"})
-    EspTab = Window:Tab({ Title = "Esp", Icon = "eyes"})
+	HomeTab = Window:Tab({ Title = "Home", Icon = "scan-face"}),
+	LobbyTab = Window:Tab({ Title = "Lobby", Icon = "home" }),
+    MainTab = Window:Tab({ Title = "Main", Icon = "landmark"}),
+    ItemTab = Window:Tab({ Title = "Items", Icon = "axe"}),
+    QuestTab = Window:Tab({ Title = "Quest", Icon = "layers"}),
+    --EventTab = Window:Tab({ Title = "Event", Icon = "party-popper"}),
+    CraftingTab = Window:Tab({ Title = "Crafting", Icon = "anvil"}),
+    TeleportTab = Window:Tab({ Title = "Teleport", Icon = "map"}),
+    EspTab = Window:Tab({ Title = "Esp", Icon = "eyes"}),
     MiscTab = Window:Tab({ Title = "Misc", Icon = "layout-grid"})
 }
 
@@ -70,6 +71,21 @@ _G.Settings = {
 	},
 	AutoSave = false
 }
+
+
+Tabs.HomeTab:Section({ Title = "Information" })
+
+Tabs.HomeTab:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
+    Callback = function()
+        local link = "https://discord.gg/zyphraxhub"
+        pcall(function()
+            setclipboard(link)
+        end)
+    end
+})
+
 
 --[[VARIABLE]]--
 local player = game:GetService("Players").LocalPlayer
@@ -233,13 +249,62 @@ local GodModeToggle = Tabs.MainTab:Toggle({
 })
 end
 
+
 if Lobby then
-    NatUI:Notify({
+    ZyphraxHub:Notify({
         Title = "Lobby Detected",
         Content = "        Features not loaded",
         Duration = 4,
     })
+
+    local TeleportEvent = game:GetService("ReplicatedStorage").RemoteEvents.TeleportEvent
+
+    _G.AutoPlay = false
+    _G.SelectedAdd = 1
+    _G.SelectedChosen = 5
+
+    Tabs.LobbyTab:Section({ Title = "Play" })
+
+    Tabs.LobbyTab:Dropdown({
+        Title = "Select Add (1-3)",
+        Values = { "1", "2", "3" },
+        Value = "1",
+        Callback = function(value)
+            _G.SelectedAdd = tonumber(value)
+        end
+    })
+
+    Tabs.LobbyTab:Dropdown({
+        Title = "Select Chosen (1-5)",
+        Values = { "1", "2", "3", "4", "5" },
+        Value = "5",
+        Callback = function(value)
+            _G.SelectedChosen = tonumber(value)
+        end
+    })
+
+    Tabs.LobbyTab:Button({
+        Title = "Set Chosen",
+        Callback = function()
+            TeleportEvent:FireServer("Chosen", nil, _G.SelectedChosen, nil)
+        end
+    })
+
+    Tabs.LobbyTab:Button({
+        Title = "Remove",
+        Callback = function()
+            TeleportEvent:FireServer("Remove")
+        end
+    })
+
+    Tabs.LobbyTab:Button({
+        Title = "Play",
+        Callback = function()
+            TeleportEvent:FireServer("Add", _G.SelectedAdd)
+        end
+    })
 end
+
 Tabs.MainTab:Button({
     Title = "Reset Config",
     Callback = function()
