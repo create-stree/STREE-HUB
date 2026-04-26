@@ -49,6 +49,10 @@ local gameScripts = {
         name = "Garden Horizons",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Main.lua"
     },
+    [89469502395769] = {
+        name = "Kick A Lucky Block",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Main.lua"
+    },
     [136599248168660] = {
         name = "Solo Hunter",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Main.lua"
