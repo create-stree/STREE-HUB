@@ -31,7 +31,7 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-Tabs.Info:Section({ Title = "Community Support" })
+Tabs.Info:Section({ Title = "Community" })
 
 Tabs.Info:Button({
     Title = "Discord",
@@ -70,7 +70,7 @@ Tabs.Combat:Toggle({
                                 adorn.ZIndex = 5
                                 adorn.Size = Vector3.new(5, 5, 5)
                                 adorn.Transparency = 0.3
-                                adorn.Color3 = Color3.fromRGB(170, 0, 255)
+                                adorn.Color3 = Color3.fromRGB(0, 255, 0)
                             end
                             head.Size = Vector3.new(5, 5, 5)
                             head.CanCollide = false
@@ -352,14 +352,14 @@ local function createESP(player)
         drawings.Box = Drawing.new("Square")
         drawings.Box.Thickness = 1
         drawings.Box.Filled = false
-        drawings.Box.Color = Color3.fromRGB(180, 0, 255)
+        drawings.Box.Color = Color3.fromRGB(0, 255, 0)
         drawings.Box.Visible = false
     end
     
     if ESPFeatures.Line then
         drawings.Line = Drawing.new("Line")
         drawings.Line.Thickness = 1
-        drawings.Line.Color = Color3.fromRGB(180, 0, 255)
+        drawings.Line.Color = Color3.fromRGB(0, 255, 0)
         drawings.Line.Visible = false
     end
     
@@ -370,7 +370,7 @@ local function createESP(player)
         drawings.Name.Center = true
         drawings.Name.Outline = true
         drawings.Name.OutlineColor = Color3.new(0, 0, 0)
-        drawings.Name.Color = Color3.fromRGB(180, 0, 255)
+        drawings.Name.Color = Color3.fromRGB(0, 255, 0)
         drawings.Name.Visible = false
     end
     
@@ -386,8 +386,8 @@ local function createESP(player)
     
     if ESPFeatures.Highlight then
         drawings.Highlight = Instance.new("Highlight")
-        drawings.Highlight.Name = "SeraphinESP_HL"
-        drawings.Highlight.FillColor = Color3.fromRGB(180, 0, 255)
+        drawings.Highlight.Name = "StreeHubESP_HL"
+        drawings.Highlight.FillColor = Color3.fromRGB(0, 255, 0)
         drawings.Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
         drawings.Highlight.OutlineTransparency = 0
         drawings.Highlight.FillTransparency = 0.3
@@ -554,7 +554,7 @@ Tabs.Visuals:Toggle({
                     drawings.Box = Drawing.new("Square")
                     drawings.Box.Thickness = 1
                     drawings.Box.Filled = false
-                    drawings.Box.Color = Color3.fromRGB(180, 0, 255)
+                    drawings.Box.Color = Color3.fromRGB(0, 255, 0)
                     drawings.Box.Visible = false
                 end
             end
@@ -579,7 +579,7 @@ Tabs.Visuals:Toggle({
                 if not drawings.Line then
                     drawings.Line = Drawing.new("Line")
                     drawings.Line.Thickness = 1
-                    drawings.Line.Color = Color3.fromRGB(180, 0, 255)
+                    drawings.Line.Color = Color3.fromRGB(0, 255, 0)
                     drawings.Line.Visible = false
                 end
             end
@@ -608,7 +608,7 @@ Tabs.Visuals:Toggle({
                     drawings.Name.Center = true
                     drawings.Name.Outline = true
                     drawings.Name.OutlineColor = Color3.new(0, 0, 0)
-                    drawings.Name.Color = Color3.fromRGB(180, 0, 255)
+                    drawings.Name.Color = Color3.fromRGB(0, 255, 0)
                     drawings.Name.Visible = false
                 end
             end
@@ -660,8 +660,8 @@ Tabs.Visuals:Toggle({
             for player, drawings in pairs(ESP.Drawings) do
                 if not drawings.Highlight then
                     drawings.Highlight = Instance.new("Highlight")
-                    drawings.Highlight.Name = "SeraphinESP_HL"
-                    drawings.Highlight.FillColor = Color3.fromRGB(180, 0, 255)
+                    drawings.Highlight.Name = "StreeHubESP_HL"
+                    drawings.Highlight.FillColor = Color3.fromRGB(0, 255, 0)
                     drawings.Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
                     drawings.Highlight.OutlineTransparency = 0
                     drawings.Highlight.FillTransparency = 0.3
