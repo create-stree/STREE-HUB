@@ -1,4 +1,4 @@
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local version = LRM_ScriptVersion and "v" .. table.concat(string.split(LRM_ScriptVersion, ""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -108,6 +108,802 @@ RunService.Heartbeat:Connect(function()
                 if distance < 100 then
                     player.Character.Humanoid:TakeDamage(5)
                 end
+            end
+        end
+    end
+end)
+
+Tabs.Combat:Toggle({
+    Title = "Aimbot",
+    Default = false,
+    Callback = function(state)
+        _G.Aimbot = state
+    end
+})
+
+Tabs.Combat:Toggle({
+    Title = "Auto Aim (Head)",
+    Default = false,
+    Callback = function(state)
+        _G.AutoAim = state
+        if state then
+            task.spawn(function()
+                while _G.AutoAim do
+                    task.wait()
+                    local closestPlayer, closestDistance = nil, math.huge
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
+                            local character = player.Character
+                            if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Head") then
+                                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+                                if distance < closestDistance then
+                                    closestDistance = distance
+                                    closestPlayer = player
+                                end
+                            end
+                        end
+                    end
+
+                    if closestPlayer and closestPlayer.Character then
+                        local targetHead = closestPlayer.Character:FindFirstChild("Head")
+                        if targetHead then
+                            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local circle = Drawing.new("Circle")
+circle.Thickness = 1.5
+circle.NumSides = 100
+circle.Radius = 70
+circle.Filled = false
+circle.Color = Color3.fromRGB(170, 0, 255)
+circle.Visible = false
+
+Tabs.Combat:Toggle({
+    Title = "Aim Circle",
+    Default = false,
+    Callback = function(state)
+        _G.AimCircle = state
+        circle.Visible = state
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if _G.AimCircle then
+        local mouse = UserInputService:GetMouseLocation()
+        circle.Position = Vector2.new(mouse.X, mouse.Y + 36)
+    end
+end)
+
+local triggerBotRange = 500
+
+Tabs.Combat:Toggle({
+    Title = "Trigger Bot",
+    Default = false,
+    Callback = function(state)
+        _G.TriggerBot = state
+        if state then
+            task.spawn(function()
+                while _G.TriggerBot do
+                    task.wait(0.05)
+                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                        if tool and tool:FindFirstChild("Handle") then
+                            local closestPlayer = nil
+                            for _, player in ipairs(Players:GetPlayers()) do
+                                if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
+                                    local character = player.Character
+                                    if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+                                        local distance = (LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+                                        if distance < triggerBotRange then
+                                            local screenPoint, onScreen = Camera:WorldToViewportPoint(character.HumanoidRootPart.Position)
+                                            if onScreen then
+                                                closestPlayer = player
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            if closestPlayer and closestPlayer.Character then
+                                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                                task.wait(0.03)
+                                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Combat:Input({
+    Title = "Trigger Bot Range",
+    Value = "500",
+    Callback = function(val)
+        local num = tonumber(val)
+        if num then triggerBotRange = num end
+    end
+})
+
+Tabs.Combat:Section({ Title = "No delay" })
+
+Tabs.Combat:Toggle({
+    Title = "No Recoil",
+    Default = false,
+    Callback = function(state)
+        _G.NoRecoil = state
+    end
+})
+
+Tabs.Combat:Toggle({
+    Title = "No Spread",
+    Default = false,
+    Callback = function(state)
+        _G.NoSpread = state
+    end
+})
+
+RunService.Stepped:Connect(function()
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChildOfClass("Tool") then
+        local tool = char:FindFirstChildOfClass("Tool")
+        if tool:FindFirstChild("CameraRecoil") and _G.NoRecoil then
+            tool.CameraRecoil.Value = 0
+        end
+        if tool:FindFirstChild("Spread") and _G.NoSpread then
+            tool.Spread.Value = 0
+        end
+    end
+end)
+
+Tabs.Combat:Section({ Title = "Attack" })
+
+Tabs.Combat:Toggle({
+    Title = "Teleport to Enemy",
+    Default = false,
+    Callback = function(state)
+        _G.TeleportEnemy = state
+        task.spawn(function()
+            while _G.TeleportEnemy do
+                task.wait(1)
+                local nearest, dist = nil, math.huge
+                for _, plr in pairs(Players:GetPlayers()) do
+                    if plr ~= LocalPlayer and plr.Team ~= LocalPlayer.Team and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                        local mag = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+                        if mag < dist then
+                            dist = mag
+                            nearest = plr
+                        end
+                    end
+                end
+                if nearest and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = nearest.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                end
+            end
+        end)
+    end
+})
+
+local knifeRange = 10
+
+Tabs.Combat:Input({
+    Title = "Knife Range",
+    Value = "10",
+    Callback = function(val)
+        local num = tonumber(val)
+        if num then knifeRange = num end
+    end
+})
+
+Tabs.Combat:Toggle({
+    Title = "Auto Knife",
+    Default = false,
+    Callback = function(state)
+        _G.AutoKnife = state
+        task.spawn(function()
+            while _G.AutoKnife do
+                task.wait(0.2)
+                for _, plr in pairs(Players:GetPlayers()) do
+                    if plr ~= LocalPlayer and plr.Team ~= LocalPlayer.Team and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                        local mag = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+                        if mag <= knifeRange then
+                            game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                            game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+
+local ESP = {
+    Players = {},
+    Drawings = {},
+    Connections = {}
+}
+
+local ESPFeatures = {
+    Box = false,
+    Line = false,
+    Name = false,
+    Studs = false,
+    Highlight = false
+}
+
+local function createESP(player)
+    if player == LocalPlayer then return end
+    if ESP.Players[player] then return end
+    
+    ESP.Players[player] = true
+    
+    local drawings = {}
+    
+    if ESPFeatures.Box then
+        drawings.Box = Drawing.new("Square")
+        drawings.Box.Thickness = 1
+        drawings.Box.Filled = false
+        drawings.Box.Color = Color3.fromRGB(0, 255, 0)
+        drawings.Box.Visible = false
+    end
+    
+    if ESPFeatures.Line then
+        drawings.Line = Drawing.new("Line")
+        drawings.Line.Thickness = 1
+        drawings.Line.Color = Color3.fromRGB(0, 255, 0)
+        drawings.Line.Visible = false
+    end
+    
+    if ESPFeatures.Name then
+        drawings.Name = Drawing.new("Text")
+        drawings.Name.Text = player.Name
+        drawings.Name.Size = 14
+        drawings.Name.Center = true
+        drawings.Name.Outline = true
+        drawings.Name.OutlineColor = Color3.new(0, 0, 0)
+        drawings.Name.Color = Color3.fromRGB(0, 255, 0)
+        drawings.Name.Visible = false
+    end
+    
+    if ESPFeatures.Studs then
+        drawings.Distance = Drawing.new("Text")
+        drawings.Distance.Size = 12
+        drawings.Distance.Center = true
+        drawings.Distance.Outline = true
+        drawings.Distance.OutlineColor = Color3.new(0, 0, 0)
+        drawings.Distance.Color = Color3.fromRGB(255, 255, 255)
+        drawings.Distance.Visible = false
+    end
+    
+    if ESPFeatures.Highlight then
+        drawings.Highlight = Instance.new("Highlight")
+        drawings.Highlight.Name = "StreeHubESP_HL"
+        drawings.Highlight.FillColor = Color3.fromRGB(0, 255, 0)
+        drawings.Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        drawings.Highlight.OutlineTransparency = 0
+        drawings.Highlight.FillTransparency = 0.3
+        drawings.Highlight.Enabled = false
+    end
+    
+    ESP.Drawings[player] = drawings
+    
+    local function characterAdded(char)
+        if drawings.Highlight then
+            drawings.Highlight.Adornee = char
+            drawings.Highlight.Parent = char
+        end
+    end
+    
+    local charAddedConn = player.CharacterAdded:Connect(characterAdded)
+    local charRemovingConn = player.CharacterRemoving:Connect(function()
+        if drawings.Highlight then
+            drawings.Highlight.Adornee = nil
+            drawings.Highlight.Parent = nil
+        end
+    end)
+    
+    ESP.Connections[player] = {
+        CharAdded = charAddedConn,
+        CharRemoving = charRemovingConn
+    }
+    
+    if player.Character then
+        characterAdded(player.Character)
+    end
+end
+
+local function removeESP(player)
+    if ESP.Drawings[player] then
+        for _, drawing in pairs(ESP.Drawings[player]) do
+            if typeof(drawing) == "userdata" and drawing.Remove then
+                drawing:Remove()
+            elseif typeof(drawing) == "Instance" then
+                drawing:Destroy()
+            end
+        end
+        ESP.Drawings[player] = nil
+    end
+    
+    if ESP.Connections[player] then
+        if ESP.Connections[player].CharAdded then
+            ESP.Connections[player].CharAdded:Disconnect()
+        end
+        if ESP.Connections[player].CharRemoving then
+            ESP.Connections[player].CharRemoving:Disconnect()
+        end
+        ESP.Connections[player] = nil
+    end
+    
+    ESP.Players[player] = nil
+end
+
+local function updateESP()
+    for player, drawings in pairs(ESP.Drawings) do
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player ~= LocalPlayer then
+            local char = player.Character
+            local rootPart = char:FindFirstChild("HumanoidRootPart")
+            local head = char:FindFirstChild("Head")
+            
+            if rootPart and head then
+                local rootPos, rootVis = Camera:WorldToViewportPoint(rootPart.Position)
+                local headPos = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1.5, 0))
+                
+                if rootVis then
+                    local distanceVal = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                    
+                    if drawings.Box then
+                        local height = (headPos.Y - rootPos.Y)
+                        local width = height / 2
+                        
+                        drawings.Box.Size = Vector2.new(width, height)
+                        drawings.Box.Position = Vector2.new(rootPos.X - width/2, rootPos.Y - height)
+                        drawings.Box.Visible = true
+                    end
+                    
+                    if drawings.Line then
+                        local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                        drawings.Line.From = screenCenter
+                        drawings.Line.To = Vector2.new(rootPos.X, rootPos.Y)
+                        drawings.Line.Visible = true
+                    end
+                    
+                    if drawings.Name then
+                        drawings.Name.Position = Vector2.new(rootPos.X, headPos.Y + 10)
+                        drawings.Name.Visible = true
+                    end
+                    
+                    if drawings.Distance then
+                        drawings.Distance.Text = math.floor(distanceVal) .. " studs"
+                        drawings.Distance.Position = Vector2.new(rootPos.X, headPos.Y + 25)
+                        drawings.Distance.Visible = true
+                    end
+                    
+                    if drawings.Highlight then
+                        drawings.Highlight.Enabled = true
+                    end
+                else
+                    if drawings.Box then drawings.Box.Visible = false end
+                    if drawings.Line then drawings.Line.Visible = false end
+                    if drawings.Name then drawings.Name.Visible = false end
+                    if drawings.Distance then drawings.Distance.Visible = false end
+                    if drawings.Highlight then drawings.Highlight.Enabled = false end
+                end
+            else
+                if drawings.Box then drawings.Box.Visible = false end
+                if drawings.Line then drawings.Line.Visible = false end
+                if drawings.Name then drawings.Name.Visible = false end
+                if drawings.Distance then drawings.Distance.Visible = false end
+                if drawings.Highlight then drawings.Highlight.Enabled = false end
+            end
+        else
+            if drawings.Box then drawings.Box.Visible = false end
+            if drawings.Line then drawings.Line.Visible = false end
+            if drawings.Name then drawings.Name.Visible = false end
+            if drawings.Distance then drawings.Distance.Visible = false end
+            if drawings.Highlight then drawings.Highlight.Enabled = false end
+        end
+    end
+end
+
+local function setupAllESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            createESP(player)
+        end
+    end
+end
+
+local function cleanupAllESP()
+    for player, _ in pairs(ESP.Players) do
+        removeESP(player)
+    end
+end
+
+local function refreshESP()
+    cleanupAllESP()
+    setupAllESP()
+end
+
+Players.PlayerAdded:Connect(function(player)
+    createESP(player)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    removeESP(player)
+end)
+
+RunService.RenderStepped:Connect(updateESP)
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Box",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Box = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Box then
+                    drawings.Box = Drawing.new("Square")
+                    drawings.Box.Thickness = 1
+                    drawings.Box.Filled = false
+                    drawings.Box.Color = Color3.fromRGB(0, 255, 0)
+                    drawings.Box.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Box then
+                    drawings.Box:Remove()
+                    drawings.Box = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Line",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Line = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Line then
+                    drawings.Line = Drawing.new("Line")
+                    drawings.Line.Thickness = 1
+                    drawings.Line.Color = Color3.fromRGB(0, 255, 0)
+                    drawings.Line.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Line then
+                    drawings.Line:Remove()
+                    drawings.Line = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Name",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Name = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Name then
+                    drawings.Name = Drawing.new("Text")
+                    drawings.Name.Text = player.Name
+                    drawings.Name.Size = 14
+                    drawings.Name.Center = true
+                    drawings.Name.Outline = true
+                    drawings.Name.OutlineColor = Color3.new(0, 0, 0)
+                    drawings.Name.Color = Color3.fromRGB(0, 255, 0)
+                    drawings.Name.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Name then
+                    drawings.Name:Remove()
+                    drawings.Name = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Studs",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Studs = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Distance then
+                    drawings.Distance = Drawing.new("Text")
+                    drawings.Distance.Size = 12
+                    drawings.Distance.Center = true
+                    drawings.Distance.Outline = true
+                    drawings.Distance.OutlineColor = Color3.new(0, 0, 0)
+                    drawings.Distance.Color = Color3.fromRGB(255, 255, 255)
+                    drawings.Distance.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Distance then
+                    drawings.Distance:Remove()
+                    drawings.Distance = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Highlight",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Highlight = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Highlight then
+                    drawings.Highlight = Instance.new("Highlight")
+                    drawings.Highlight.Name = "StreeHubESP_HL"
+                    drawings.Highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                    drawings.Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    drawings.Highlight.OutlineTransparency = 0
+                    drawings.Highlight.FillTransparency = 0.3
+                    drawings.Highlight.Enabled = false
+                    
+                    if player.Character then
+                        drawings.Highlight.Adornee = player.Character
+                        drawings.Highlight.Parent = player.Character
+                    end
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Highlight then
+                    drawings.Highlight:Destroy()
+                    drawings.Highlight = nil
+                end
+            end
+        end
+    end
+})
+
+setupAllESP()
+
+
+local walkVal, jumpVal = 16, 50
+
+local function applyStats(char)
+    local hum = char:WaitForChild("Humanoid")
+    hum.WalkSpeed = walkVal
+    hum.UseJumpPower = true
+    hum.JumpPower = jumpVal
+end
+
+applyStats(LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait())
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid")
+    task.wait(0.2)
+    applyStats(char)
+end)
+
+Tabs.Players:Input({
+    Title = "WalkSpeed",
+    Value = tostring(walkVal),
+    Callback = function(val)
+        local spd = tonumber(val)
+        if spd and spd >= 16 then
+            walkVal = spd
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = walkVal
+            end
+        end
+    end
+})
+
+Tabs.Players:Input({
+    Title = "JumpPower",
+    Value = tostring(jumpVal),
+    Callback = function(val)
+        local jp = tonumber(val)
+        if jp then
+            jumpVal = jp
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.UseJumpPower = true
+                LocalPlayer.Character.Humanoid.JumpPower = jumpVal
+            end
+        end
+    end
+})
+
+Tabs.Players:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(state)
+        _G.Noclip = state
+    end
+})
+
+game:GetService("RunService").Stepped:Connect(function()
+    if _G.Noclip and game.Players.LocalPlayer.Character then
+        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+Tabs.Players:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        _G.InfiniteJump = state
+    end
+})
+
+UserInputService.JumpRequest:Connect(function()
+    if _G.InfiniteJump then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+Tabs.Players:Toggle({
+    Title = "Fly",
+    Default = false,
+    Callback = function(state)
+        _G.Fly = state
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if state and hrp then
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "FlyVelocity"
+            bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+            bv.Velocity = Vector3.zero
+            bv.Parent = hrp
+            task.spawn(function()
+                while _G.Fly and bv.Parent do
+                    task.wait()
+                    bv.Velocity = Camera.CFrame.LookVector * 50
+                end
+            end)
+        else
+            if hrp and hrp:FindFirstChild("FlyVelocity") then
+                hrp.FlyVelocity:Destroy()
+            end
+        end
+    end
+})
+
+
+Tabs.Settings:Toggle({
+    Title = "AntiAFK",
+    Default = false,
+    Callback = function(state)
+        _G.AntiAFK = state
+        local VirtualUser = game:GetService("VirtualUser")
+        task.spawn(function()
+            while _G.AntiAFK do
+                task.wait(60)
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end
+        end)
+    end
+})
+
+Tabs.Settings:Toggle({
+    Title = "Auto Reconnect",
+    Default = false,
+    Callback = function(state)
+        _G.AutoReconnect = state
+        task.spawn(function()
+            while _G.AutoReconnect do
+                task.wait(2)
+                local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
+                if reconnectUI then
+                    local prompt = reconnectUI:FindFirstChild("promptOverlay")
+                    if prompt then
+                        local errorPrompt = prompt:FindFirstChild("ErrorPrompt")
+                        if errorPrompt then
+                            local confirmButton = errorPrompt:FindFirstChild("ConfirmButton")
+                            if confirmButton then
+                                firesignal(confirmButton.MouseButton1Click)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+Tabs.Settings:Section({ Title = "Server" })
+
+Tabs.Settings:Button({
+    Title = "Rejoin",
+    Desc = "Reconnect to current server",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local PlaceId = game.PlaceId
+        local Player = game.Players.LocalPlayer
+        TeleportService:Teleport(PlaceId, Player)
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Server Hop",
+    Desc = "Teleport to a different server",
+    Callback = function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local PlaceId = game.PlaceId
+        local Servers = {}
+        local success, response = pcall(function()
+            return game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+        end)
+        if success and response then
+            local data = HttpService:JSONDecode(response)
+            for _, v in pairs(data.data) do
+                if v.playing < v.maxPlayers and v.id ~= game.JobId then
+                    table.insert(Servers, v.id)
+                end
+            end
+        end
+        if #Servers > 0 then
+            local randomServer = Servers[math.random(1, #Servers)]
+            TeleportService:TeleportToPlaceInstance(PlaceId, randomServer, game.Players.LocalPlayer)
+        end
+    end
+})
+
+task.spawn(function()
+    while true do
+        task.wait()
+        if _G.Aimbot then
+            local closestPlayer, closestDistance = nil, math.huge
+
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team then
+                    local character = player.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Head") then
+                        local distance = (LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+                        if distance < closestDistance then
+                            closestDistance = distance
+                            closestPlayer = player
+                        end
+                    end
+                end
+            end
+
+            if closestPlayer and closestPlayer.Character then
+                local targetHead = closestPlayer.Character:FindFirstChild("Head")
+                if targetHead then
+                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
+                end
+            end
+        end
+    end
+end)                end
             end
         end
     end
