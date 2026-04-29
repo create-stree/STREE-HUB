@@ -1,86 +1,29 @@
-local success, WindUI = pcall(function()
-    return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-end)
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
+local StreeHub = loadstring(StreeHub)()
+local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(260, 290)
 
-if not success or not WindUI then
-    warn("⚠️ UI failed to load!")
-    return
-else
-    print("✓ UI loaded successfully!")
-end
 
-local Window = WindUI:CreateWindow({
-    Title = "Seraphin",
-    Icon = "rbxassetid://120248611602330",
-    Author = "KirsiaSC | Arsenal",
-    Folder = "SERAPHIN_HUB",
-    Size = UDim2.fromOffset(280, 320),
-    Transparent = true,
-    Theme = "Dark",
-    SideBarWidth = 170,
-    HasOutline = true,
-    User = {
-        Enabled = true,
-        Anonymous = true,
-    },
+local Window = StreeHub:CreateWindow({
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "Grow A Garden") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+    FileSaveName = "StreeHub/Config.json"
 })
 
-Window:EditOpenButton({
-    Enabled = false,
-})
 
-local CollectionService = game:GetService("CollectionService")
-local Players = game:GetService("Players")
-local G2L = {}
+local Tabs = {
+    Info = Window:Tab({ Title = "Info", Icon = "info" }),
+    Combat = Window:Tab({ Title = "Combat", Icon = "sword" }),
+    Visuals = Window:Tab({ Title = "Visuals", Icon = "eye" }),
+    Players = Window:Tab({ Title = "Players", Icon = "user" }),
+    Settings = Window:Tab({ Title = "Settings", Icon = "settings" })
+}
 
-G2L["ScreenGui_1"] = Instance.new("ScreenGui")
-G2L["ScreenGui_1"].Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-G2L["ScreenGui_1"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-CollectionService:AddTag(G2L["ScreenGui_1"], "main")
-
-G2L["ButtonRezise_2"] = Instance.new("ImageButton")
-G2L["ButtonRezise_2"].Parent = G2L["ScreenGui_1"]
-G2L["ButtonRezise_2"].BorderSizePixel = 0
-G2L["ButtonRezise_2"].Draggable = true
-G2L["ButtonRezise_2"].BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-G2L["ButtonRezise_2"].Image = "rbxassetid://120248611602330"
-G2L["ButtonRezise_2"].Size = UDim2.new(0, 45, 0, 45)
-G2L["ButtonRezise_2"].Position = UDim2.new(0.13, 0, 0.03, 0)
-
-local corner = Instance.new("UICorner", G2L["ButtonRezise_2"])
-corner.CornerRadius = UDim.new(0, 8)
-
-local neon = Instance.new("UIStroke", G2L["ButtonRezise_2"])
-neon.Thickness = 2
-neon.Color = Color3.fromRGB(148, 0, 211)
-neon.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-G2L["ButtonRezise_2"].MouseButton1Click:Connect(function()
-    G2L["ButtonRezise_2"].Visible = false
-    Window:Open()
-end)
-
-Window:OnClose(function()
-    G2L["ButtonRezise_2"].Visible = true
-end)
-
-Window:OnDestroy(function()
-    G2L["ButtonRezise_2"].Visible = false
-end)
-
-G2L["ButtonRezise_2"].Visible = false
-
-Window:Tag({
-    Title = "v0.0.0.5",
-    Color = Color3.fromRGB(180, 0, 255)
-})
-
-WindUI:Notify({
-    Title = "SeraphinHub Loaded",
-    Content = "Arsenal script loaded!",
-    Duration = 3,
-    Icon = "bell",
-})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -88,15 +31,9 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-local Info = Window:Tab({ Title = "Info", Icon = "info" })
+Tabs.Info:Section({ Title = "Community Support" })
 
-Info:Section({
-    Title = "Community Support",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Info:Button({
+Tabs.Info:Button({
     Title = "Discord",
     Desc = "Click to copy Discord link",
     Callback = function()
@@ -106,15 +43,13 @@ Info:Button({
     end
 })
 
-Info:Paragraph({
+Tabs.Info:Paragraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
-local Combat = Window:Tab({ Title = "Combat", Icon = "sword" })
 
-local hitboxEnabled = false
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Hitbox Extender",
     Default = false,
     Callback = function(v)
@@ -157,9 +92,7 @@ Combat:Toggle({
     end
 })
 
-_G.KillAura = false
-
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Kill Aura",
     Default = false,
     Callback = function(state)
@@ -180,7 +113,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Aimbot",
     Default = false,
     Callback = function(state)
@@ -188,7 +121,7 @@ Combat:Toggle({
     end
 })
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Auto Aim (Head)",
     Default = false,
     Callback = function(state)
@@ -231,7 +164,7 @@ circle.Filled = false
 circle.Color = Color3.fromRGB(170, 0, 255)
 circle.Visible = false
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Aim Circle",
     Default = false,
     Callback = function(state)
@@ -247,10 +180,9 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-_G.TriggerBot = false
 local triggerBotRange = 500
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Trigger Bot",
     Default = false,
     Callback = function(state)
@@ -292,7 +224,7 @@ Combat:Toggle({
     end
 })
 
-Combat:Input({
+Tabs.Combat:Input({
     Title = "Trigger Bot Range",
     Value = "500",
     Callback = function(val)
@@ -301,16 +233,9 @@ Combat:Input({
     end
 })
 
-Combat:Section({
-    Title = "No delay",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
+Tabs.Combat:Section({ Title = "No delay" })
 
-_G.NoRecoil = false
-_G.NoSpread = false
-
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "No Recoil",
     Default = false,
     Callback = function(state)
@@ -318,7 +243,7 @@ Combat:Toggle({
     end
 })
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "No Spread",
     Default = false,
     Callback = function(state)
@@ -339,13 +264,9 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-Combat:Section({
-    Title = "Attack",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
+Tabs.Combat:Section({ Title = "Attack" })
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Teleport to Enemy",
     Default = false,
     Callback = function(state)
@@ -372,7 +293,8 @@ Combat:Toggle({
 })
 
 local knifeRange = 10
-Combat:Input({
+
+Tabs.Combat:Input({
     Title = "Knife Range",
     Value = "10",
     Callback = function(val)
@@ -381,7 +303,7 @@ Combat:Input({
     end
 })
 
-Combat:Toggle({
+Tabs.Combat:Toggle({
     Title = "Auto Knife",
     Default = false,
     Callback = function(state)
@@ -403,8 +325,6 @@ Combat:Toggle({
     end
 })
 
-
-local Visuals = Window:Tab({ Title = "Visuals", Icon = "eye" })
 
 local ESP = {
     Players = {},
@@ -623,7 +543,7 @@ end)
 
 RunService.RenderStepped:Connect(updateESP)
 
-Visuals:Toggle({
+Tabs.Visuals:Toggle({
     Title = "ESP Box",
     Default = false,
     Callback = function(state)
@@ -649,7 +569,7 @@ Visuals:Toggle({
     end
 })
 
-Visuals:Toggle({
+Tabs.Visuals:Toggle({
     Title = "ESP Line",
     Default = false,
     Callback = function(state)
@@ -674,7 +594,7 @@ Visuals:Toggle({
     end
 })
 
-Visuals:Toggle({
+Tabs.Visuals:Toggle({
     Title = "ESP Name",
     Default = false,
     Callback = function(state)
@@ -703,7 +623,7 @@ Visuals:Toggle({
     end
 })
 
-Visuals:Toggle({
+Tabs.Visuals:Toggle({
     Title = "ESP Studs",
     Default = false,
     Callback = function(state)
@@ -731,7 +651,7 @@ Visuals:Toggle({
     end
 })
 
-Visuals:Toggle({
+Tabs.Visuals:Toggle({
     Title = "ESP Highlight",
     Default = false,
     Callback = function(state)
@@ -766,10 +686,6 @@ Visuals:Toggle({
 
 setupAllESP()
 
-local PlayersTab = Window:Tab({
-    Title = "Players",
-    Icon = "user"
-})
 
 local walkVal, jumpVal = 16, 50
 
@@ -788,7 +704,7 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     applyStats(char)
 end)
 
-PlayersTab:Input({
+Tabs.Players:Input({
     Title = "WalkSpeed",
     Value = tostring(walkVal),
     Callback = function(val)
@@ -802,7 +718,7 @@ PlayersTab:Input({
     end
 })
 
-PlayersTab:Input({
+Tabs.Players:Input({
     Title = "JumpPower",
     Value = tostring(jumpVal),
     Callback = function(val)
@@ -817,7 +733,7 @@ PlayersTab:Input({
     end
 })
 
-PlayersTab:Toggle({
+Tabs.Players:Toggle({
     Title = "Noclip",
     Default = false,
     Callback = function(state)
@@ -835,7 +751,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-PlayersTab:Toggle({
+Tabs.Players:Toggle({
     Title = "Infinite Jump",
     Default = false,
     Callback = function(state)
@@ -852,7 +768,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-PlayersTab:Toggle({
+Tabs.Players:Toggle({
     Title = "Fly",
     Default = false,
     Callback = function(state)
@@ -878,9 +794,8 @@ PlayersTab:Toggle({
     end
 })
 
-local Settings = Window:Tab({ Title = "Settings", Icon = "settings" })
 
-Settings:Toggle({
+Tabs.Settings:Toggle({
     Title = "AntiAFK",
     Default = false,
     Callback = function(state)
@@ -896,7 +811,7 @@ Settings:Toggle({
     end
 })
 
-Settings:Toggle({
+Tabs.Settings:Toggle({
     Title = "Auto Reconnect",
     Default = false,
     Callback = function(state)
@@ -922,22 +837,9 @@ Settings:Toggle({
     end
 })
 
-Settings:Keybind({
-    Title = "Keybind",
-    Desc = "Keybind to open ui",
-    Value = "G",
-    Callback = function(v)
-        Window:SetToggleKey(Enum.KeyCode[v])
-    end
-})
+Tabs.Settings:Section({ Title = "Server" })
 
-Settings:Section({
-    Title = "Server",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Settings:Button({
+Tabs.Settings:Button({
     Title = "Rejoin",
     Desc = "Reconnect to current server",
     Callback = function()
@@ -948,7 +850,7 @@ Settings:Button({
     end
 })
 
-Settings:Button({
+Tabs.Settings:Button({
     Title = "Server Hop",
     Desc = "Teleport to a different server",
     Callback = function()
@@ -971,36 +873,6 @@ Settings:Button({
             local randomServer = Servers[math.random(1, #Servers)]
             TeleportService:TeleportToPlaceInstance(PlaceId, randomServer, game.Players.LocalPlayer)
         end
-    end
-})
-
-Settings:Section({
-    Title = "Config",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Settings:Button({
-    Title = "Save Config",
-    Desc = "Save your current settings",
-    Callback = function()
-        WindUI:SaveConfig("Seraphin_Config")
-    end
-})
-
-Settings:Button({
-    Title = "Load Config",
-    Desc = "Load your saved settings",
-    Callback = function()
-        WindUI:LoadConfig("Seraphin_Config")
-    end
-})
-
-Settings:Button({
-    Title = "Delete Config",
-    Desc = "Delete saved config",
-    Callback = function()
-        WindUI:DeleteConfig("Seraphin_Config")
     end
 })
 
@@ -1032,17 +904,3 @@ task.spawn(function()
         end
     end
 end)
-
-Settings:Section({
-    Title = "other scripts",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Settings:Button({
-    Title = "Infinite Yield",
-    Desc = "Script Other",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-    end
-})
