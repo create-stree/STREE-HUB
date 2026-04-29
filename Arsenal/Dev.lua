@@ -528,11 +528,6 @@ local function cleanupAllESP()
     end
 end
 
-local function refreshESP()
-    cleanupAllESP()
-    setupAllESP()
-end
-
 Players.PlayerAdded:Connect(function(player)
     createESP(player)
 end)
@@ -545,7 +540,87 @@ RunService.RenderStepped:Connect(updateESP)
 
 Tabs.Visuals:Toggle({
     Title = "ESP Box",
-     Default = false,
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Box = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Box then
+                    drawings.Box = Drawing.new("Square")
+                    drawings.Box.Thickness = 1
+                    drawings.Box.Filled = false
+                    drawings.Box.Color = Color3.fromRGB(0, 255, 0)
+                    drawings.Box.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Box then
+                    drawings.Box:Remove()
+                    drawings.Box = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Line",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Line = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Line then
+                    drawings.Line = Drawing.new("Line")
+                    drawings.Line.Thickness = 1
+                    drawings.Line.Color = Color3.fromRGB(0, 255, 0)
+                    drawings.Line.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Line then
+                    drawings.Line:Remove()
+                    drawings.Line = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Name",
+    Default = false,
+    Callback = function(state)
+        ESPFeatures.Name = state
+        if state then
+            for player, drawings in pairs(ESP.Drawings) do
+                if not drawings.Name then
+                    drawings.Name = Drawing.new("Text")
+                    drawings.Name.Text = player.Name
+                    drawings.Name.Size = 14
+                    drawings.Name.Center = true
+                    drawings.Name.Outline = true
+                    drawings.Name.OutlineColor = Color3.new(0, 0, 0)
+                    drawings.Name.Color = Color3.fromRGB(0, 255, 0)
+                    drawings.Name.Visible = false
+                end
+            end
+        else
+            for _, drawings in pairs(ESP.Drawings) do
+                if drawings.Name then
+                    drawings.Name:Remove()
+                    drawings.Name = nil
+                end
+            end
+        end
+    end
+})
+
+Tabs.Visuals:Toggle({
+    Title = "ESP Studs",
+    Default = false,
     Callback = function(state)
         ESPFeatures.Studs = state
         if state then
