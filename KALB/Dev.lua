@@ -19,6 +19,7 @@ local Window = StreeHub:CreateWindow({
 local Tabs = {
     Home = Window:Tab({ Title = "Home", Icon = "scan-face" }),
     Main = Window:Tab({ Title = "Main", Icon = "landmark" }),
+    Upgrade = Window:Tab({ Title = "Upgrade", Icon = "chart-column-increasing" }),
     Shop = Window:Tab({ Title = "Shop", Icon = "shopping-bag" }),
     Misc = Window:Tab({ Title = "Misc", Icon = "layout-grid" })
 }
@@ -54,6 +55,10 @@ Tabs.Home:Paragraph({
 })
 
 Tabs.Home:Section({ Title = "Local Player" })
+
+Tabs.Home:Paragraph({
+    Title = "Test"
+})
 
 Tabs.Home:Slider({
     Title = "WalkSpeed",
@@ -101,6 +106,7 @@ Tabs.Home:Button({
 
 local TweenService = game:GetService("TweenService")
 local tweenSpeed = 50
+local x2Delay = 0.2
 local selectedEquip = "Wooden Stick"
 local selectedIndex = 1
 
@@ -128,6 +134,7 @@ Tabs.Main:Toggle({
                 while autofarm do
                     local rs = game:GetService("ReplicatedStorage")
                     local kickEvent = rs.Shared.Packages.Network.rev_KickEvent
+                    local collectEvent = rs.Shared.Packages.Network.rev_KickCollect
 
                     local player = game.Players.LocalPlayer
                     local char = player.Character or player.CharacterAdded:Wait()
@@ -150,6 +157,11 @@ Tabs.Main:Toggle({
                     tween:Play()
                     tween.Completed:Wait()
 
+                    for i = 1, 8 do
+                        collectEvent:FireServer()
+                        task.wait(0.3)
+                    end
+
                     task.wait(1)
                 end
             end)
@@ -166,20 +178,35 @@ Tabs.Main:Slider({
     end
 })
 
-Tabs.Main:Section({ Title = "Tavi Mishkal" })
+local function clickX2()
+    local player = game:GetService("Players").LocalPlayer
+    local gui = player.PlayerGui:FindFirstChild("KickUpgrades")
+
+    if not gui then return end
+
+    for _, v in pairs(gui:GetDescendants()) do
+        if v.Name == "Bonus" and (v:IsA("ImageButton") or v:IsA("TextButton")) then
+            pcall(function()
+                firesignal(v.Activated)
+                firesignal(v.MouseButton1Click)
+            end)
+        end
+    end
+end
+
+Tabs.Main:Section({ Title = "Auto Click X2" })
 
 Tabs.Main:Toggle({
-    Title = "Auto Click Tavi Mishkal",
+    Title = "Auto Click X2",
     Default = false,
     Callback = function(state)
-        taviLoop = state
-        if taviLoop then
+        autoX2 = state
+
+        if autoX2 then
             task.spawn(function()
-                while taviLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_TaviMishkal
-                        :FireServer()
-                    task.wait(0.3)
+                while autoX2 do
+                    clickX2()
+                    task.wait(x2Delay)
                 end
             end)
         end
@@ -187,11 +214,18 @@ Tabs.Main:Toggle({
 })
 
 Tabs.Main:Button({
-    Title = "Run Tavi Mishkal",
+    Title = "Click X2",
     Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_TaviMishkal
-            :FireServer()
+        clickX2()
+    end
+})
+
+Tabs.Main:Slider({
+    Title = "Auto Click Delay",
+    Step = 0.05,
+    Value = { Min = 0.1, Max = 1, Default = 0.2 },
+    Callback = function(v)
+        x2Delay = v
     end
 })
 
@@ -319,81 +353,6 @@ Tabs.Main:Button({
     end
 })
 
-Tabs.Main:Section({ Title = "Upgrade Brainrot" })
-
-Tabs.Main:Dropdown({
-    Title = "Upgrade Brainrot Place",
-    Values = (function()
-        local t = {}
-        for i = 1, 30 do
-            table.insert(t, tostring(i))
-        end
-        return t
-    end)(),
-    Value = "1",
-    Callback = function(option)
-        selectedLevel = tonumber(option)
-    end
-})
-
-Tabs.Main:Button({
-    Title = "Upgrade Brainrot",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_B_Upgrade
-            :FireServer(selectedLevel)
-    end
-})
-
-Tabs.Main:Toggle({
-    Title = "Auto Upgrade Brainrot",
-    Default = false,
-    Callback = function(state)
-        upgradeLoop = state
-
-        if upgradeLoop then
-            task.spawn(function()
-                while upgradeLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_B_Upgrade
-                        :FireServer(selectedLevel)
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Main:Section({ Title = "Upgrade Base" })
-
-Tabs.Main:Button({
-    Title = "Upgrade Base",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_bs_upgrade
-            :FireServer()
-    end
-})
-
-Tabs.Main:Toggle({
-    Title = "Auto Upgrade Base",
-    Default = false,
-    Callback = function(state)
-        bsLoop = state
-
-        if bsLoop then
-            task.spawn(function()
-                while bsLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_bs_upgrade
-                        :FireServer()
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end
-})
-
 Tabs.Main:Section({ Title = "Offline Reward" })
 
 Tabs.Main:Button({
@@ -478,6 +437,82 @@ Tabs.Main:Toggle({
                         :InvokeServer()
 
                     task.wait(2)
+                end
+            end)
+        end
+    end
+})
+
+
+Tabs.Upgrade:Section({ Title = "Upgrade Base" })
+
+Tabs.Upgrade:Button({
+    Title = "Upgrade Base",
+    Callback = function()
+        game:GetService("ReplicatedStorage")
+            .Shared.Packages.Network.rev_bs_upgrade
+            :FireServer()
+    end
+})
+
+Tabs.Upgrade:Toggle({
+    Title = "Auto Upgrade Base",
+    Default = false,
+    Callback = function(state)
+        bsLoop = state
+
+        if bsLoop then
+            task.spawn(function()
+                while bsLoop do
+                    game:GetService("ReplicatedStorage")
+                        .Shared.Packages.Network.rev_bs_upgrade
+                        :FireServer()
+                    task.wait(0.5)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Upgrade:Section({ Title = "Upgrade Brainrot" })
+
+Tabs.Upgrade:Dropdown({
+    Title = "Upgrade Brainrot Place",
+    Values = (function()
+        local t = {}
+        for i = 1, 30 do
+            table.insert(t, tostring(i))
+        end
+        return t
+    end)(),
+    Value = "1",
+    Callback = function(option)
+        selectedLevel = tonumber(option)
+    end
+})
+
+Tabs.Upgrade:Button({
+    Title = "Upgrade Brainrot",
+    Callback = function()
+        game:GetService("ReplicatedStorage")
+            .Shared.Packages.Network.rev_B_Upgrade
+            :FireServer(selectedLevel)
+    end
+})
+
+Tabs.Upgrade:Toggle({
+    Title = "Auto Upgrade Brainrot",
+    Default = false,
+    Callback = function(state)
+        upgradeLoop = state
+
+        if upgradeLoop then
+            task.spawn(function()
+                while upgradeLoop do
+                    game:GetService("ReplicatedStorage")
+                        .Shared.Packages.Network.rev_B_Upgrade
+                        :FireServer(selectedLevel)
+                    task.wait(0.5)
                 end
             end)
         end
