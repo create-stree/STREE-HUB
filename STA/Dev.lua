@@ -22,14 +22,23 @@ local adjustBackpackRemote = Remotes and Remotes:FindFirstChild("Tools") and Rem
 local resetRemote = Remotes and Remotes:FindFirstChild("Misc") and Remotes.Misc:FindFirstChild("Reset")
 
 
-local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Andrazx23/voralib/refs/heads/main/flow%20ui/ui.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Andrazx23/voralib/refs/heads/main/flow%20ui/SaveManager.lua"))()
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
+local StreeHub = loadstring(StreeHub)()
+local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
-local Library = lib.new({
-    Name = "VoraHub",
-    AccentColor = Color3.fromRGB(0, 133, 255),
-    AutoConfig = false
+
+local Window = StreeHub:CreateWindow({
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "STA") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+    FileSaveName = "StreeHub/Config.json"
 })
+
 
 local Tabs = {
     local Home = Window:AddTab({Name = "Home", Icon = "house"})
@@ -665,7 +674,7 @@ local function refreshMobESP()
     end
     if not mobOptions.ESP then return end
     if not charactersFolder then
-        Library:Notify({ Title = "Mob ESP", Description = "Characters folder not found (retrying...)", Time = 3 })
+        StreeHub:Notify({ Title = "Mob ESP", Description = "Characters folder not found (retrying...)", Time = 3 })
         return
     end
 
@@ -1922,9 +1931,9 @@ local function enableRemoveFog()
             end
         end))
 
-        Library:Notify({ Title = "Remove Fog", Description = "Enabled – " .. #fogObjects .. " fog objects hidden", Time = 2 })
+        StreeHub:Notify({ Title = "Remove Fog", Description = "Enabled – " .. #fogObjects .. " fog objects hidden", Time = 2 })
     else
-        Library:Notify({ Title = "Remove Fog", Description = "Enabled – Lighting fog cleared (no Fog folder found)", Time = 2 })
+        StreeHub:Notify({ Title = "Remove Fog", Description = "Enabled – Lighting fog cleared (no Fog folder found)", Time = 2 })
     end
 end
 
@@ -1954,7 +1963,7 @@ local function disableRemoveFog()
     fogOriginalStates = {}
     fogObjects = {}
 
-    Library:Notify({ Title = "Remove Fog", Description = "Disabled – fog restored", Time = 2 })
+    StreeHub:Notify({ Title = "Remove Fog", Description = "Disabled – fog restored", Time = 2 })
 end
 
 local function stopBhop()
@@ -2117,7 +2126,7 @@ local function startFunnyDance()
                 return
             end
         end
-        Library:Notify({ Title = "Funny Dance", Description = "Animation blocked by game – using physics dance instead.", Time = 3 })
+        StreeHub:Notify({ Title = "Funny Dance", Description = "Animation blocked by game – using physics dance instead.", Time = 3 })
         startPhysDance(char)
     end
 
@@ -2193,7 +2202,7 @@ local function rejoinServer()
         return
     end
 
-    Library:Notify({ Title = "Rejoin", Description = "Rejoining server...", Time = 2 })
+    StreeHub:Notify({ Title = "Rejoin", Description = "Rejoining server...", Time = 2 })
 
     local ok1, err1 = pcall(function()
         local opts = Instance.new("TeleportOptions")
@@ -2210,7 +2219,7 @@ local function rejoinServer()
     warn("[Rejoin] TeleportToPlaceInstance failed: " .. tostring(err2))
 
     pcall(function() TeleportService:Teleport(placeId, LocalPlayer) end)
-    Library:Notify({ Title = "Rejoin", Description = "Server unavailable – rejoining via matchmaking...", Time = 3 })
+    StreeHub:Notify({ Title = "Rejoin", Description = "Server unavailable – rejoining via matchmaking...", Time = 3 })
 end
 
 local remoteSpyConnections = {}
@@ -2227,7 +2236,7 @@ local function stopRemoteSpy()
     end
     remoteSpyConnections = {}
     
-    Library:Notify({ Title = "Remote Spy", Description = "Disabled", Time = 2 })
+    StreeHub:Notify({ Title = "Remote Spy", Description = "Disabled", Time = 2 })
 end
 
 local function startRemoteSpy()
@@ -2235,7 +2244,7 @@ local function startRemoteSpy()
     remoteSpyEnabled = true
     remoteSpyLogs = {}
     
-    Library:Notify({ Title = "Remote Spy", Description = "Enabled - Check console for remote calls", Time = 3 })
+    StreeHub:Notify({ Title = "Remote Spy", Description = "Enabled - Check console for remote calls", Time = 3 })
 
     local function logRemoteCall(remote, method, args)
         if not remoteSpyEnabled then return end
@@ -2301,7 +2310,7 @@ local function startRemoteSpy()
             tempFunc:Destroy()
         end)
         if success then
-            Library:Notify({ Title = "Remote Spy", Description = "Hooked via hookfunction", Time = 2 })
+            StreeHub:Notify({ Title = "Remote Spy", Description = "Hooked via hookfunction", Time = 2 })
             return
         else
             warn("[RemoteSpy] hookfunction failed: " .. tostring(err))
@@ -2323,7 +2332,7 @@ local function startRemoteSpy()
             setreadonly(mt, true)
         end)
         if success then
-            Library:Notify({ Title = "Remote Spy", Description = "Hooked via namecall", Time = 2 })
+            StreeHub:Notify({ Title = "Remote Spy", Description = "Hooked via namecall", Time = 2 })
             return
         else
             warn("[RemoteSpy] namecall hook failed: " .. tostring(err))
@@ -2335,7 +2344,7 @@ local function startRemoteSpy()
         end
     end
 
-    Library:Notify({ Title = "Remote Spy", Description = "Running in passive mode (no hooks available)", Time = 4 })
+    StreeHub:Notify({ Title = "Remote Spy", Description = "Running in passive mode (no hooks available)", Time = 4 })
     
     if Remotes then
         print("[RemoteSpy] === Available Remotes ===")
@@ -2684,7 +2693,7 @@ local function startBringPickup()
                         if Toggles.BringPickupItem then
                             Toggles.BringPickupItem:SetValue(false)
                         end
-                        Library:Notify({
+                        StreeHub:Notify({
                             Title       = "Bring Pickup Item",
                             Description = "Max timeouts reached – backpack may be full or anti-cheat blocked.",
                             Time        = 4,
@@ -2774,43 +2783,41 @@ end
 
 do
 
-local info_user_group = info_tab:AddGroup({Name = "User", Side = "Left", Icon = "user"})
-local info_game_group = info_tab:AddGroup({Name = "Game", Side = "Left", Icon = "gamepad"})
-local info_others_group = info_tab:AddGroup({Name = "Others", Side = "Right", Icon = "boxes"})
+Tabs.Home:Section({ Title = "User" })
 
--- User Group
 local executorName = (identifyexecutor and identifyexecutor() or "Unknown")
-info_user_group:AddLabel({Text = "<b>Executor:</b> " .. executorName, Wrap = true})
-info_user_group:AddLabel({Text = "<b>Status:</b> <font color='#00FF00'>Working</font>", Wrap = true})
-info_user_group:AddLabel({Text = "<b>Player:</b> " .. LocalPlayer.Name, Wrap = true})
-info_user_group:AddLabel({Text = "<b>User ID:</b> " .. LocalPlayer.UserId, Wrap = true})
+Tabs.Home:Paragraph({Text = "<b>Executor:</b> " .. executorName })
+Tabs.Home:Paragraph({Text = "<b>Status:</b> <font color='#00FF00'>Working</font>" })
+Tabs.Home:Paragraph({Text = "<b>Player:</b> " .. LocalPlayer.Name })
+Tabs.Home:Paragraph({Text = "<b>User ID:</b> " .. LocalPlayer.UserId })
 
--- Game Group
-info_game_group:AddLabel({Text = "<b>Game:</b> Survive The Apocalypse", Wrap = true})
-info_game_group:AddLabel({Text = "<b>Place ID:</b> " .. game.PlaceId, Wrap = true})
-info_game_group:AddLabel({Text = "<b>Job ID:</b> " .. (game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown"), Wrap = true})
+Tabs.Home:Section({ Title = "Game" })
 
--- Others Group - Community Support
-info_others_group:AddLabel({Text = "<b>Community Support</b>", Wrap = true})
-info_others_group:AddLabel({Text = "<b>Update:</b> Every time there is a game update or someone reports something, I will fix it as soon as possible.", Wrap = true})
+Tabs.Home:Paragraph({Text = "<b>Game:</b> Survive The Apocalypse" })
+Tabs.Home:Paragraph({Text = "<b>Place ID:</b> " .. game.PlaceId })
+Tabs.Home:Paragraph({Text = "<b>Job ID:</b> " .. (game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown") })
 
-info_others_group:AddButton({
-    Name = "Discord",
+Tabs.Home:Section({ Title = "Information" })
+
+Tabs.Home:Paragraph({ Text = "<b>Community Support</b>" })
+Tabs.Home:Paragraph({ Text = "<b>Update:</b> Every time there is a game update or someone reports something, I will fix it as soon as possible." })
+
+Tabs.Home:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
     Callback = function()
-        setclipboard("https://discord.gg/vorahub")
-        Library:Notify({
-            Title = "Discord",
-            Description = "Link copied to clipboard!",
-            Time = 3,
-        })
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
     end
 })
 
-info_others_group:AddButton({
-    Name = "Copy Job ID",
+Tabs.Home:Button({
+    Title = "Copy Job ID",
     Callback = function()
         setclipboard(game.JobId)
-        Library:Notify({
+        StreeHub:Notify({
             Title = "Job ID",
             Description = "Copied to clipboard!",
             Time = 2,
