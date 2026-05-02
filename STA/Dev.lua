@@ -1,8 +1,5 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
 
--- ============================================
--- SERVICES
--- ============================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -11,12 +8,10 @@ local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
 local VirtualUser = game:GetService("VirtualUser")
-local TeleportService = game:GetService("TeleportService")  -- [ADDED v7.3] For Server Hop/Rejoin
-local HttpService = game:GetService("HttpService")  -- [ADDED v7.3] For Server Hop API requests
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 
--- ============================================
--- REMOTES (Comprehensive from ReplicatedStorage)
--- ============================================
+
 local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
 
 local pickUpItemRemote = Remotes and Remotes:FindFirstChild("Interaction") and Remotes.Interaction:FindFirstChild("PickUpItem")
@@ -27,9 +22,6 @@ local adjustBackpackRemote = Remotes and Remotes:FindFirstChild("Tools") and Rem
 local resetRemote = Remotes and Remotes:FindFirstChild("Misc") and Remotes.Misc:FindFirstChild("Reset")
 
 
--- ============================================
--- VORALIB UI SETUP
--- ============================================
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Andrazx23/voralib/refs/heads/main/flow%20ui/ui.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Andrazx23/voralib/refs/heads/main/flow%20ui/SaveManager.lua"))()
 
@@ -39,37 +31,17 @@ local Library = lib.new({
     AutoConfig = false
 })
 
--- Create sections (balanced 6 tabs + Info)
-local info_section = Library:AddSection({Name = "Information", Icon = "info"})
-local main_section = Library:AddSection({Name = "Main", Icon = "layout-grid"})
-local combat_section = Library:AddSection({Name = "Combat", Icon = "sword"})
-local player_section = Library:AddSection({Name = "Player", Icon = "user"})
-local auto_section = Library:AddSection({Name = "Auto", Icon = "repeat-2"})
-local visual_section = Library:AddSection({Name = "Visual", Icon = "eye"})
-local misc_section = Library:AddSection({Name = "Misc", Icon = "settings"})
-
--- Create tabs
-local info_tab = info_section:AddTab({Name = "Info", Description = "User & Game Info", Icon = "info"})
-local main_tab = main_section:AddTab({Name = "Main", Description = "Home & Settings", Icon = "layout-grid"})
-local combat_tab = combat_section:AddTab({Name = "Combat", Description = "Combat features", Icon = "sword"})
-local player_tab = player_section:AddTab({Name = "Player", Description = "Player movement", Icon = "user"})
-local auto_tab = auto_section:AddTab({Name = "Auto", Description = "Auto & Bring", Icon = "repeat-2"})
-local visual_tab = visual_section:AddTab({Name = "Visual", Description = "ESP features", Icon = "eye"})
-local misc_tab = misc_section:AddTab({Name = "Misc", Description = "Utilities & Tools", Icon = "settings"})
-
 local Tabs = {
-    Info = info_tab,
-    Main = main_tab,
-    Combat = combat_tab,
-    Player = player_tab,
-    Auto = auto_tab,
-    Visual = visual_tab,
-    Misc = misc_tab,
+    local Home = Window:AddTab({Name = "Home", Icon = "house"})
+    local Main = Window:AddTab({Name = "Main", Icon = "landmark"})
+    local Combat = Window:AddTab({Name = "Combat", Icon = "sword"})
+    local Player = Window:AddTab({Name = "Player", Icon = "user"})
+    local Auto = Window:AddTab({Name = "Auto", Icon = "repeat-2"})
+    local Visual = Window:AddTab({Name = "Visual", Icon = "eye"})
+    local Misc = Window:AddTab({Name = "Misc", Icon = "layout-grid"})
 }
 
--- ============================================
--- STATE VARIABLES
--- ============================================
+
 local connections = {}
 local mobESPInstances = {}
 local playerESPInstances = {}
@@ -104,15 +76,12 @@ local remoteSpyLogs = {}
 local mobNames = {"Runner", "Crawler", "Riot", "Zombie", "Brute", "Spitter", "Boss"}
 
 local espConfig = {
-    textSize            = 10,   -- ESP Text Size slider
-    fillTransparency    = 0.4,  -- Fill Transparency slider
+    textSize            = 10,
+    fillTransparency    = 0.4,
     outlineTransparency = 0.0,
 }
 
--- ============================================
--- ITEM CATEGORIES & COLOR DEFINITIONS
--- [CHANGED] Each ESP type now has its own dedicated color
--- ============================================
+
 local espDefinitions = {
     {
         key = "Gun",
@@ -193,8 +162,7 @@ local espDefinitions = {
     },
 }
 
--- Build per-ESP state tables, instance tables, and item lookups
-local espSystems = {} -- Master table holding all ESP system data and functions
+local espSystems = {}
 
 for _, def in ipairs(espDefinitions) do
     local sys = {
@@ -202,7 +170,7 @@ for _, def in ipairs(espDefinitions) do
         displayName = def.displayName,
         colors = def.colors,
         items = def.items,
-        itemList = {}, -- fast lookup set
+        itemList = {},
         vars = { ESP = false, Chams = false, Name = false, Distance = false },
         instances = {},
         listenersSetup = false,
@@ -213,7 +181,7 @@ for _, def in ipairs(espDefinitions) do
     espSystems[def.key] = sys
 end
 
--- Build flat itemNames from all ESP categories (used for BringPickupItem filter)
+
 local itemNames = {}
 local itemCategoryLookup = {}
 for _, def in ipairs(espDefinitions) do
@@ -222,7 +190,7 @@ for _, def in ipairs(espDefinitions) do
         itemCategoryLookup[itemName] = def.key
     end
 end
--- Add extra categories not covered by dedicated ESP (still usable in BringPickupItem / Teleport)
+
 local extraItemCategories = {
     Ammo = { "Ammo Box", "Long Ammo", "Medium Ammo", "Pistol Ammo", "Shells" },
     Structures = {
@@ -246,7 +214,7 @@ for catName, catItems in pairs(extraItemCategories) do
 end
 table.sort(itemNames)
 
--- Bring Pickup Item set (E-key: Guns, Melee, Medical, Armor, Ammo, Structures, Tools)
+
 local pickupItemSet = {
     ["Ammo Box"]=true,["Long Ammo"]=true,["Medium Ammo"]=true,["Shells"]=true,["Pistol Ammo"]=true,
     ["Power Armor"]=true,["Light Armor"]=true,["Medium Armor"]=true,["Heavy Armor"]=true,
@@ -278,9 +246,7 @@ local structureNames = {
     "Shelf", "Teleporter", "Time Machine", "Turret", "Wall", "Watchtower"
 }
 
--- ============================================
--- DYNAMIC FOLDER DISCOVERY
--- ============================================
+
 local charactersFolder = nil
 local droppedItemsFolder = nil
 local structuresFolder = nil
@@ -322,9 +288,7 @@ task.spawn(function()
     end
 end)
 
--- ============================================
--- UTILITY FUNCTIONS
--- ============================================
+
 local function getItemMainPart(item)
     if item.PrimaryPart then return item.PrimaryPart end
     for _, child in ipairs(item:GetChildren()) do
@@ -335,9 +299,7 @@ local function getItemMainPart(item)
     return nil
 end
 
--- ============================================
--- SHARED ESP HELPERS
--- ============================================
+
 local function getDistanceColor(dist)
     if dist > 250 then return Color3.fromRGB(255, 80, 80)
     elseif dist > 150 then return Color3.fromRGB(255, 180, 80)
@@ -406,11 +368,7 @@ local mobTypeColors = {
     Brute   = MOB_RED, Spitter = MOB_RED, Riot    = MOB_RED, Boss = MOB_RED,
 }
 
--- ============================================
--- GENERIC ITEM ESP FACTORY
--- [ADDED] Creates create/remove/refresh/setupListeners functions per ESP system
--- This eliminates code duplication across all 6 category ESPs
--- ============================================
+
 local function createCategoryESP(sys, item)
     if not item:IsA("Model") then return end
     if sys.instances[item] then return end
@@ -418,7 +376,6 @@ local function createCategoryESP(sys, item)
     local mainPart = getItemMainPart(item)
     if not mainPart then return end
 
-    -- MainPart stored at top level so the always-on connection can access it
     local espTable = { MainPart = mainPart }
 
     if sys.vars.Chams then
@@ -480,10 +437,7 @@ local function createCategoryESP(sys, item)
         espTable.DistLabel = distLabel
     end
 
-    -- [FIX] Always-on Heartbeat connection:
-    --   * distance culling works even when Name/Distance labels are hidden
-    --   * auto-restores Highlight if destroyed by the game engine
-    --   * self-cleans when the item is removed from the world
+
     local connection
     connection = RunService.Heartbeat:Connect(function()
         if not item or not item.Parent then
@@ -496,7 +450,7 @@ local function createCategoryESP(sys, item)
         local dist = (myRoot.Position - mainPart.Position).Magnitude
         local maxDist = Options and Options.ESPMaxDistance and Options.ESPMaxDistance.Value or 99999
         local visible = dist <= maxDist
-        -- Auto-restore highlight if destroyed by the game
+
         if sys.vars.Chams and (not espTable.Highlight or not espTable.Highlight.Parent) then
             local h = Instance.new("Highlight")
             h.Name = sys.key .. "ESP_Highlight"
@@ -520,7 +474,7 @@ local function createCategoryESP(sys, item)
         end
     end)
     espTable.DistanceConnection = connection
-    -- Not inserted into global connections table; self-disconnects via item.Parent check
+
 
     sys.instances[item] = espTable
 end
@@ -553,7 +507,7 @@ local function setupCategoryListeners(sys)
     sys.listenersSetup = true
     local addedConn = droppedItemsFolder.ChildAdded:Connect(function(child)
         if sys.vars.ESP and sys.itemList[child.Name] then
-            task.wait(0.2)  -- [FIX] Wait for item model/PrimaryPart to replicate
+            task.wait(0.2)
             createCategoryESP(sys, child)
         end
     end)
@@ -564,7 +518,6 @@ local function setupCategoryListeners(sys)
     table.insert(connections, removedConn)
 end
 
--- Wire up factory functions to each ESP system
 for _, sys in pairs(espSystems) do
     sys.create = function(item) createCategoryESP(sys, item) end
     sys.remove = function(item) removeCategoryESP(sys, item) end
@@ -572,14 +525,12 @@ for _, sys in pairs(espSystems) do
     sys.setupListeners = function() setupCategoryListeners(sys) end
 end
 
--- Set up all category listeners immediately (will also retry on folder discovery)
+
 for _, sys in pairs(espSystems) do
     setupCategoryListeners(sys)
 end
 
--- ============================================
--- MOB ESP FUNCTIONS
--- ============================================
+
 local function removeMobESP(char)
     local esp = mobESPInstances[char]
     if esp then
@@ -612,7 +563,6 @@ local function createMobESP(char)
         espTable.Highlight = highlight
     end
 
-    -- Hoist billboard vars so always-on connection can access them
     local billboard, nameLabel, distLabel
     if mobOptions.Name or mobOptions.Distance then
         billboard = Instance.new("BillboardGui")
@@ -661,8 +611,7 @@ local function createMobESP(char)
         espTable.DistLabel = distLabel
     end
 
-    -- [FIX] Always-on connection: culls by distance regardless of label visibility,
-    --       auto-restores Highlights destroyed by the server, self-cleans on mob death
+
     local connection
     connection = RunService.Heartbeat:Connect(function()
         if not char or not char.Parent then
@@ -719,7 +668,7 @@ local function refreshMobESP()
         Library:Notify({ Title = "Mob ESP", Description = "Characters folder not found (retrying...)", Time = 3 })
         return
     end
-    -- Build player char set to exclude real players (same logic as Kill Aura)
+
     local playerCharSet = {}
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then playerCharSet[p.Character] = true end
@@ -731,9 +680,7 @@ local function refreshMobESP()
     end
 end
 
--- ============================================
--- STRUCTURE ESP FUNCTIONS
--- ============================================
+
 local function removeStructureESP(structure)
     local esp = structureESPInstances[structure]
     if esp then
@@ -813,7 +760,6 @@ local function createStructureESP(structure)
         espTable.DistLabel = distLabel
     end
 
-    -- [FIX] Always-on connection for distance culling + highlight restoration
     local connection
     connection = RunService.Heartbeat:Connect(function()
         if not structure or not structure.Parent then
@@ -870,9 +816,7 @@ local function refreshStructureESP()
     end
 end
 
--- ============================================
--- PLAYER ESP FUNCTIONS
--- ============================================
+
 local function removePlayerESP(player)
     local esp = playerESPInstances[player]
     if esp then
@@ -887,7 +831,7 @@ end
 local function createPlayerESP(player)
     if player == LocalPlayer then return end
     if playerESPInstances[player] then return end
-    if not playerESPVars.ESP then return end  -- Must check ESP is enabled
+    if not playerESPVars.ESP then return end
 
     local char = player.Character
     if not char then return end
@@ -897,7 +841,6 @@ local function createPlayerESP(player)
 
     local espTable = {}
 
-    -- Create highlight if Chams is enabled OR if ESP is enabled (wallhack visibility)
     if playerESPVars.Chams or playerESPVars.ESP then
         local highlight = Instance.new("Highlight")
         highlight.Name = "PlayerESP_Highlight"
@@ -906,14 +849,14 @@ local function createPlayerESP(player)
         highlight.FillTransparency = espConfig.fillTransparency
         highlight.OutlineColor = Color3.fromRGB(100, 180, 255)
         highlight.OutlineTransparency = espConfig.outlineTransparency
-        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Wallhack: visible through walls
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop 
         highlight.Parent = char
         espTable.Highlight = highlight
     end
 
-    -- Hoist so always-on connection can reference them after the block
+
     local billboard, nameLabel, toolLabel, healthLabel, distLabel
-    -- Create billboard if any info option is enabled OR if ESP is enabled (default shows name)
+    
     if playerESPVars.Name or playerESPVars.Distance or playerESPVars.Health or playerESPVars.ESP then
         billboard = Instance.new("BillboardGui")
         billboard.Name = "PlayerESP_Info"
@@ -991,8 +934,7 @@ local function createPlayerESP(player)
         espTable.DistLabel = distLabel
     end
 
-    -- [FIX] Always-on connection: culls by distance regardless of which labels are
-    --       enabled, auto-restores destroyed Highlight, self-cleans on player leave
+
     local connection
     connection = RunService.Heartbeat:Connect(function()
         if not player or not player.Parent then
@@ -1011,7 +953,6 @@ local function createPlayerESP(player)
         local maxDist = Options and Options.ESPMaxDistance and Options.ESPMaxDistance.Value or 99999
         local visible = dist <= maxDist
 
-        -- Auto-restore highlight (check ESP or Chams)
         if (playerESPVars.Chams or playerESPVars.ESP) and (not espTable.Highlight or not espTable.Highlight.Parent) then
             local h = Instance.new("Highlight")
             h.Name = "PlayerESP_Highlight"
@@ -1020,7 +961,7 @@ local function createPlayerESP(player)
             h.FillTransparency = espConfig.fillTransparency
             h.OutlineColor = Color3.fromRGB(100, 180, 255)
             h.OutlineTransparency = espConfig.outlineTransparency
-            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Wallhack: visible through walls
+            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
             h.Parent = c
             espTable.Highlight = h
         elseif espTable.Highlight and espTable.Highlight.Parent then
@@ -1085,21 +1026,18 @@ local function refreshPlayerESP()
     end
 end
 
--- ============================================
--- FOLDER EVENT LISTENERS
--- ============================================
+
 local function setupMobListeners()
     if not charactersFolder or mobListenersSetup then return end
     mobListenersSetup = true
     local childAddedConn = charactersFolder.ChildAdded:Connect(function(child)
         if mobOptions.ESP and child:IsA("Model") then
-            -- Exclude real player characters
             local playerCharSet = {}
             for _, p in ipairs(Players:GetPlayers()) do
                 if p.Character then playerCharSet[p.Character] = true end
             end
             if not playerCharSet[child] then
-                task.wait(0.2)  -- [FIX] Wait for HumanoidRootPart to replicate
+                task.wait(0.2)
                 createMobESP(child)
             end
         end
@@ -1118,7 +1056,7 @@ local function setupStructureListeners()
     structureListenersSetup = true
     local descendantAddedConn = structuresFolder.DescendantAdded:Connect(function(child)
         if structureESPVars.ESP and child:IsA("Model") and table.find(structureNames, child.Name) then
-            task.wait(0.2)  -- [FIX] Wait for PrimaryPart to replicate
+            task.wait(0.2)
             createStructureESP(child)
         end
     end)
@@ -1131,10 +1069,7 @@ local function setupStructureListeners()
 end
 setupStructureListeners()
 
--- ============================================
--- SPEED HACK PERSISTENCE (FE BYPASS v2)
--- Improved: Handles respawn, prevents server correction, uses multiple bypass methods
--- ============================================
+
 local speedHackEnabled = false
 local currentSpeedValue = 50
 local speedHackThread = nil
@@ -1150,14 +1085,13 @@ local function startSpeedHack()
                     local humanoid = char:FindFirstChildOfClass("Humanoid")
                     local root = char:FindFirstChild("HumanoidRootPart")
                     if humanoid and root then
-                        -- Method 1: Direct WalkSpeed set
+
                         local targetSpeed = Options.SpeedValue and Options.SpeedValue.Value or currentSpeedValue
                         if humanoid.WalkSpeed ~= targetSpeed then
                             humanoid.WalkSpeed = targetSpeed
                         end
                         
-                        -- Method 2: Anti-cheat bypass - prevent server from resetting speed
-                        -- Set property directly to bypass some server checks
+
                         pcall(function()
                             local currentWS = humanoid.WalkSpeed
                             if currentWS < targetSpeed then
@@ -1167,7 +1101,7 @@ local function startSpeedHack()
                     end
                 end
             end
-            task.wait(0.03) -- 30ms refresh rate
+            task.wait(0.03)
         end
     end)
 end
@@ -1177,7 +1111,7 @@ local function stopSpeedHack()
     if speedHackThread then
         speedHackThread = nil
     end
-    -- Restore original speed
+
     local char = LocalPlayer.Character
     if char then
         local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -1187,37 +1121,30 @@ local function stopSpeedHack()
     end
 end
 
--- Handle character respawn for speed hack
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.5)
     if Toggles.SpeedHack and Toggles.SpeedHack.Value then
         local humanoid = char:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            originalValues.walkSpeed = 16 -- Default walk speed
+            originalValues.walkSpeed = 16
             humanoid.WalkSpeed = Options.SpeedValue and Options.SpeedValue.Value or 50
         end
     end
 end)
 
--- Legacy connection for compatibility
+
 local speedHackConn = RunService.Stepped:Connect(function()
     if not Toggles.SpeedHack then return end
     if not Toggles.SpeedHack.Value then return end
-    -- Handled by the new thread-based system above
 end)
 table.insert(connections, speedHackConn)
 
--- ============================================
--- NOCLIP (FE Bypass – prevents server rubber-band correction)
--- Heartbeat fires before physics simulation, so CanCollide = false takes effect
--- before the engine resolves collisions. Anti-rubberband detects sudden position
--- jumps (>8 studs/frame) that indicate a server correction and undoes them.
--- ============================================
-local noclipLastCFrame = nil  -- anti-rubberband: tracks last known good position
+
+local noclipLastCFrame = nil
 
 local noclipConn = RunService.Heartbeat:Connect(function()
     if not Toggles.NoClip or not Toggles.NoClip.Value then
-        noclipLastCFrame = nil  -- reset tracking when disabled
+        noclipLastCFrame = nil
         return
     end
     local char = LocalPlayer.Character
@@ -1225,7 +1152,6 @@ local noclipConn = RunService.Heartbeat:Connect(function()
     local root = char:FindFirstChild("HumanoidRootPart")
     if not root then noclipLastCFrame = nil return end
 
-    -- Anti-rubberband: if server tried to correct our position (sudden >8 stud jump), undo it
     local currentCF = root.CFrame
     if noclipLastCFrame then
         local delta = (currentCF.Position - noclipLastCFrame.Position).Magnitude
@@ -1236,7 +1162,6 @@ local noclipConn = RunService.Heartbeat:Connect(function()
     end
     noclipLastCFrame = currentCF
 
-    -- Disable collision on all body parts before physics resolves next frame
     for _, part in ipairs(char:GetDescendants()) do
         if part:IsA("BasePart") and part.CanCollide then
             part.CanCollide = false
@@ -1245,10 +1170,8 @@ local noclipConn = RunService.Heartbeat:Connect(function()
 end)
 table.insert(connections, noclipConn)
 
--- ============================================
--- FLY HACK
--- ============================================
-local stopFly  -- Forward declaration (defined below)
+
+local stopFly
 
 local function startFly()
     stopFly()
@@ -1319,9 +1242,7 @@ local flyMoveConn = RunService.RenderStepped:Connect(function()
 end)
 table.insert(connections, flyMoveConn)
 
--- ============================================
--- FULLBRIGHT
--- ============================================
+
 local function enableFullbright()
     if not originalLighting.stored then
         originalLighting.Brightness = Lighting.Brightness
@@ -1355,15 +1276,11 @@ local function disableFullbright()
     end
 end
 
--- ============================================
--- AUTO SPRINT
--- [FIXED v7.3.1] Use correct SendKeyEvent signature with game object
--- ============================================
+
 local function startAutoSprint()
     if autoSprintActive then return end
     autoSprintActive = true
-    -- SendKeyEvent: (isKeyDown, keyCode, isRepeated, game)
-    -- Some executors require the 4th argument
+
     pcall(function()
         game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.LeftShift, false, game)
     end)
@@ -1377,10 +1294,8 @@ local function stopAutoSprint()
     end)
 end
 
--- ============================================
--- ANTI-AFK
--- ============================================
-local stopAntiAFK  -- Forward declaration (defined below)
+
+local stopAntiAFK
 
 local function startAntiAFK()
     stopAntiAFK()
@@ -1398,36 +1313,25 @@ stopAntiAFK = function()
     end
 end
 
--- ============================================
--- KILL AURA (FE Bypass - Swing/HitTargets)
--- [IMPROVED v7.3.3] Major improvements:
---                  - Target nearest monster first
---                  - Faster target updates (RenderStepped)
---                  - Auto-detect weapon swing speed
---                  - Extended range option (server-side trick)
---                  - More robust and stable with pcall wrappers
--- ============================================
+
 local killAuraLastSwing = 0
 local killAuraCurrentTarget = nil
 local killAuraTargetDistance = nil
 
--- Weapon swing speeds (seconds between attacks)
--- [ENHANCED v8.0] More weapons, faster defaults, instant mode support
+
 local weaponSwingSpeeds = {
-    -- Ultra-fast weapons (0.1-0.2s) - Instant mode can bypass these
+
     ["Knife"] = 0.15,
     ["Shiv"] = 0.12,
     ["Dagger"] = 0.15,
     ["Stiletto"] = 0.12,
-    
-    -- Fast weapons (0.2-0.3s)
+
     ["Katana"] = 0.2,
     ["Crowbar"] = 0.25,
     ["Machete"] = 0.22,
     ["Combat Knife"] = 0.18,
     ["Karambit"] = 0.15,
-    
-    -- Medium weapons (0.3-0.45s)
+
     ["Bat"] = 0.35,
     ["Spiked Bat"] = 0.35,
     ["Hatchet"] = 0.3,
@@ -1437,11 +1341,10 @@ local weaponSwingSpeeds = {
     ["Golf Club"] = 0.35,
     ["Tennis Racket"] = 0.3,
     ["Pipe"] = 0.35,
-    
-    -- Slow weapons (0.45-0.6s)
+
     ["Fire Axe"] = 0.45,
     ["Sledgehammer"] = 0.5,
-    ["Chainsaw"] = 0.25,  -- Chainsaw is fast once running
+    ["Chainsaw"] = 0.25,
     ["Riot Shield"] = 0.4,
     ["Battle Axe"] = 0.5,
     ["War Hammer"] = 0.55,
@@ -1451,7 +1354,7 @@ local weaponSwingSpeeds = {
     ["Pickaxe"] = 0.5,
 }
 
--- Get weapon swing speed based on equipped tool
+
 local function getWeaponSwingSpeed()
     local char = LocalPlayer.Character
     if not char then return 0.5 end
@@ -1460,27 +1363,23 @@ local function getWeaponSwingSpeed()
     if not tool then return 0.5 end
     
     local toolName = tool.Name
-    
-    -- Check exact match first
+
     if weaponSwingSpeeds[toolName] then
         return weaponSwingSpeeds[toolName]
     end
     
-    -- Partial match for variants (e.g., "Golden Knife", "Rusty Knife")
+
     for weaponName, speed in pairs(weaponSwingSpeeds) do
         if string.find(toolName:lower(), weaponName:lower()) then
             return speed
         end
     end
     
-    -- Default speed for unknown weapons
+
     return 0.5
 end
 
--- Collect all valid kill aura targets within range, sorted by chosen priority.
--- Returns an array of { mob, dist, health, maxHealth } tables.
--- [FIX] Only targets known mob types (mobNames whitelist).
---       Explicitly excludes ALL player characters so friendly-fire is impossible.
+
 local function findTargetsInRange(range)
     local char = LocalPlayer.Character
     if not char then return {} end
@@ -1488,8 +1387,6 @@ local function findTargetsInRange(range)
     if not hrp then return {} end
     if not charactersFolder then return {} end
 
-    -- Build a fast lookup set of every player's current character
-    -- so we can exclude them in O(1) per iteration.
     local playerCharSet = {}
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then
@@ -1501,10 +1398,8 @@ local function findTargetsInRange(range)
     local myPos   = hrp.Position
 
     for _, mob in ipairs(charactersFolder:GetChildren()) do
-        -- Skip own character
         if mob == char then continue end
-        -- Skip every real player character (looked up from Players service)
-        -- Everything else in workspace.Characters is a mob/enemy
+
         if playerCharSet[mob] then continue end
 
         local mobHRP = mob:FindFirstChild("HumanoidRootPart")
@@ -1534,12 +1429,11 @@ local function findTargetsInRange(range)
     return targets
 end
 
--- Equip the fastest weapon available in the backpack.
--- Called when no tool is held and KillAuraAutoEquip is enabled.
+
 local function autoEquipWeapon()
     local char = LocalPlayer.Character
     if not char then return false end
-    if char:FindFirstChildOfClass("Tool") then return true end  -- already equipped
+    if char:FindFirstChildOfClass("Tool") then return true end 
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not backpack then return false end
 
@@ -1574,10 +1468,8 @@ local function stopKillAura()
     killAuraLastSwing = 0
     killAuraCurrentTarget = nil
     killAuraTargetDistance = nil
-    -- Hide visual indicator drawings
     if killAuraIndicatorLine   then killAuraIndicatorLine.Visible   = false end
     if killAuraIndicatorCircle then killAuraIndicatorCircle.Visible = false end
-    -- [Potassium] Restore default simulation radius when kill aura stops
     pcall(function()
         if setsimulationradius then setsimulationradius(50, 300) end
     end)
@@ -1586,7 +1478,6 @@ end
 local function startKillAura()
     stopKillAura()
 
-    -- Create indicator Drawing objects once; reused every frame
     if not killAuraIndicatorLine then
         killAuraIndicatorLine             = Drawing.new("Line")
         killAuraIndicatorLine.Thickness   = 1.5
@@ -1603,7 +1494,6 @@ local function startKillAura()
         killAuraIndicatorCircle.Visible     = false
     end
 
-    -- [Potassium] Raise simulation radius so the server accepts hits at extended range
     pcall(function()
         if setsimulationradius then setsimulationradius(1000, 1000) end
     end)
@@ -1622,7 +1512,7 @@ local function startKillAura()
             local hrp = char:FindFirstChild("HumanoidRootPart")
             if not hrp then return end
 
-            -- Auto-equip: grab best weapon from backpack if nothing is held
+
             local tool = char:FindFirstChildOfClass("Tool")
             if not tool and Toggles.KillAuraAutoEquip and Toggles.KillAuraAutoEquip.Value then
                 autoEquipWeapon()
@@ -1644,12 +1534,10 @@ local function startKillAura()
             local useExtendedRange = Toggles.KillAuraExtendedRange and Toggles.KillAuraExtendedRange.Value
             local attackRange      = useExtendedRange and (baseRange + 20) or baseRange
 
-            -- Prioritised list of all mobs in range this frame
             local targets = findTargetsInRange(attackRange)
             killAuraCurrentTarget  = targets[1] and targets[1].mob  or nil
             killAuraTargetDistance = targets[1] and targets[1].dist or nil
 
-            -- ── Visual indicator ──────────────────────────────────────────────
             local showIndicator = Toggles.KillAuraShowIndicator and Toggles.KillAuraShowIndicator.Value
             if showIndicator and killAuraCurrentTarget then
                 local camera = Workspace.CurrentCamera
@@ -1659,12 +1547,11 @@ local function startKillAura()
                         local sp, onScreen = camera:WorldToViewportPoint(tHRP.Position)
                         if onScreen and sp.Z > 0 then
                             local vp     = camera.ViewportSize
-                            local center = Vector2.new(vp.X / 2, vp.Y)  -- bottom-center
+                            local center = Vector2.new(vp.X / 2, vp.Y)
                             local tgt    = Vector2.new(sp.X, sp.Y)
                             killAuraIndicatorLine.From    = center
                             killAuraIndicatorLine.To      = tgt
                             killAuraIndicatorLine.Visible = true
-                            -- Circle radius scales inversely with distance (8–40 px)
                             local radius = math.clamp(1200 / math.max(killAuraTargetDistance, 1), 8, 40)
                             killAuraIndicatorCircle.Position = tgt
                             killAuraIndicatorCircle.Radius   = radius
@@ -1682,11 +1569,6 @@ local function startKillAura()
 
             if #targets == 0 then return end
 
-            -- ── Safe swing cooldown ───────────────────────────────────────────
-            -- effectiveSwingRate = max(weaponSpeed, userSetting)
-            -- We NEVER swing faster than the weapon physically allows.
-            -- This prevents the server from rejecting rapid-fire hits.
-            -- [ENHANCED] Massacre Mode bypasses cooldown for instant attacks
             local massacreMode       = Toggles.KillAuraMassacre and Toggles.KillAuraMassacre.Value
             local weaponSpeed        = getWeaponSwingSpeed()
             local userSwingRate      = Options.KillAuraSwingRate and Options.KillAuraSwingRate.Value or weaponSpeed
@@ -1694,9 +1576,6 @@ local function startKillAura()
             local now = tick()
             if now - killAuraLastSwing < effectiveSwingRate then return end
 
-            -- ── AoE attack ────────────────────────────────────────────────────
-            -- Pass ALL mobs in range to HitTargets in a single FireServer call.
-            -- The server validates each entry; only reachable mobs take damage.
             local mobModels = {}
             for _, t in ipairs(targets) do
                 table.insert(mobModels, t.mob)
@@ -1707,9 +1586,6 @@ local function startKillAura()
             if swing and hitTargets then
                 local s1, e1 = pcall(function() swing:FireServer() end)
                 if s1 then
-                    -- [FIX] Record swing time immediately after Swing fires.
-                    -- If HitTargets errors the cooldown is still respected,
-                    -- preventing rapid-fire Swing spam that the server will reject.
                     killAuraLastSwing = now
                     attackSuccess = true
                     local s2, e2 = pcall(function() hitTargets:FireServer(mobModels) end)
@@ -1718,7 +1594,6 @@ local function startKillAura()
                     warn("[KillAura] Swing error: " .. tostring(e1))
                 end
             elseif remoteClick then
-                -- RemoteClick accepts one target — use the highest-priority mob
                 local s, e = pcall(function() remoteClick:FireServer(targets[1].mob) end)
                 attackSuccess = s
                 if not s then warn("[KillAura] RemoteClick error: " .. tostring(e)) end
@@ -1735,11 +1610,6 @@ local function startKillAura()
     end)
 end
 
--- ============================================
--- AIMBOT
--- [ADDED v7.3] Advanced aimbot with smoothness, FOV, prediction
--- Supports both mobs and players with configurable target priority
--- ============================================
 local function stopAimbot()
     if aimbotConn then
         aimbotConn:Disconnect()
@@ -1749,7 +1619,6 @@ local function stopAimbot()
     if fovCircle then fovCircle.Visible = false end
 end
 
--- Get the closest valid target for aimbot
 local function getAimbotTarget()
     local char = LocalPlayer.Character
     if not char then return nil end
@@ -1768,32 +1637,27 @@ local function getAimbotTarget()
     local aimPart = Options.AimbotPart and Options.AimbotPart.Value or "Head"
 
     local bestTarget = nil
-    local bestScore = math.huge  -- Lower is better (FOV distance or distance)
+    local bestScore = math.huge
 
     local function isValidTarget(targetChar, targetRoot)
         if not targetChar or not targetRoot then return false end
         if targetChar == char then return false end
 
-        -- Check distance
         local dist = (targetRoot.Position - myRoot.Position).Magnitude
         if dist > maxRange then return false end
 
-        -- Check health (if has humanoid)
         local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
         if humanoid and humanoid.Health <= 0 then return false end
 
-        -- Check if on screen
         local screenPos, onScreen = camera:WorldToViewportPoint(targetRoot.Position)
         if not onScreen then return false end
 
-        -- Check FOV (distance from screen center)
         local fovDist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
         if fovDist > fov then return false end
 
         return true, dist, fovDist, screenPos
     end
 
-    -- Target Mobs
     if targetMode == "Mobs" or targetMode == "Both" then
         if charactersFolder then
             for _, mob in ipairs(charactersFolder:GetChildren()) do
@@ -1812,7 +1676,6 @@ local function getAimbotTarget()
         end
     end
 
-    -- Target Players
     if targetMode == "Players" or targetMode == "Both" then
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
@@ -1849,11 +1712,9 @@ local function startAimbot()
         local camera = Workspace.CurrentCamera
         if not camera then return end
 
-        -- Get target
         local target = getAimbotTarget()
-        aimbotTarget = target  -- Store for visualization
+        aimbotTarget = target
 
-        -- FOV Circle visualization
         if not fovCircle then
             fovCircle = Drawing.new("Circle")
             fovCircle.Filled = false
@@ -1873,18 +1734,15 @@ local function startAimbot()
 
         if not target then return end
 
-        -- Get the specific aim part
         local aimPartName = Options.AimbotPart and Options.AimbotPart.Value or "Head"
         local targetPart = target.character:FindFirstChild(aimPartName)
 
-        -- Fallback to root if aim part not found
         if not targetPart or not targetPart:IsA("BasePart") then
             targetPart = target.rootPart
         end
 
         if not targetPart then return end
 
-        -- Get target position with optional prediction
         local targetPos = targetPart.Position
         if Toggles.AimbotPrediction and Toggles.AimbotPrediction.Value then
             local velocity = targetPart.AssemblyLinearVelocity
@@ -1892,7 +1750,6 @@ local function startAimbot()
             targetPos = targetPos + (velocity * predictionAmount)
         end
 
-        -- Calculate the look vector to target
         local myRoot = char:FindFirstChild("HumanoidRootPart")
         if not myRoot then return end
 
@@ -1901,44 +1758,31 @@ local function startAimbot()
 
         local aimPos = targetPos
         if aimPartName == "Head" then
-            -- Aim slightly higher for headshots
             aimPos = targetPos + Vector3.new(0, 0.5, 0)
         end
 
-        -- Get smoothness value (0 = instant, 1 = very smooth)
         local smoothness = Options.AimbotSmoothness and Options.AimbotSmoothness.Value or 0.5
-        local smoothFactor = 1 - (smoothness * 0.95)  -- Convert to factor (0.05 to 1)
+        local smoothFactor = 1 - (smoothness * 0.95)
 
-        -- Calculate target CFrame
         local targetCFrame = CFrame.lookAt(myHead.Position, aimPos)
 
-        -- Apply smoothness
         if smoothness > 0 then
             targetCFrame = camera.CFrame:Lerp(targetCFrame, smoothFactor)
         end
 
-        -- Apply to camera
         camera.CFrame = targetCFrame
     end)
 end
 
--- ============================================
--- REMOVE FOG
--- [IMPROVED v7.3.3] Now handles Workspace.Fog folder
---                  - Makes all fog objects client-side invisible
---                  - Properly restores visibility on disable
--- ============================================
-local fogOriginalStates = {}  -- Store original visibility states
-local fogObjects = {}  -- Reference to fog objects
-local fogFEConns  = {}  -- [FE Bypass] Connections that prevent server from restoring fog
+local fogOriginalStates = {}
+local fogObjects = {}
+local fogFEConns  = {}
 
 local function makeFogObjectInvisible(obj)
     local success, err = pcall(function()
-        -- Store original state before modifying
         local originalState = {}
         
         if obj:IsA("BasePart") then
-            -- Parts, MeshParts, Unions, TrussParts, etc.
             originalState.Transparency = obj.Transparency
             originalState.Material = obj.Material
             obj.Transparency = 1
@@ -1977,7 +1821,6 @@ local function makeFogObjectInvisible(obj)
             obj.Transparency = 1
             fogOriginalStates[obj] = originalState
         elseif obj:IsA("Light") then
-            -- PointLight, SpotLight, SurfaceLight
             originalState.Enabled = obj.Enabled
             obj.Enabled = false
             fogOriginalStates[obj] = originalState
@@ -1986,7 +1829,6 @@ local function makeFogObjectInvisible(obj)
             obj.Enabled = false
             fogOriginalStates[obj] = originalState
         elseif obj:IsA("Folder") or obj:IsA("Model") then
-            -- Recursively handle containers
             for _, child in ipairs(obj:GetDescendants()) do
                 makeFogObjectInvisible(child)
             end
@@ -2018,7 +1860,6 @@ local function restoreFogObjectVisibility(obj)
 end
 
 local function enableRemoveFog()
-    -- Store Lighting fog settings (only once, so disable can restore originals)
     if not originalFog.stored then
         originalFog.FogEnd   = Lighting.FogEnd
         originalFog.FogStart = Lighting.FogStart
@@ -2027,10 +1868,9 @@ local function enableRemoveFog()
     Lighting.FogEnd   = 100000
     Lighting.FogStart = 0
 
-    -- Handle Atmosphere (visual density/haze separate from FogEnd)
     local atm = Lighting:FindFirstChildOfClass("Atmosphere")
     if atm then
-        if originalFog.AtmDensity == nil then  -- store only once
+        if originalFog.AtmDensity == nil then
             originalFog.AtmDensity = atm.Density
             originalFog.AtmHaze    = atm.Haze
             originalFog.AtmGlare   = atm.Glare
@@ -2040,18 +1880,15 @@ local function enableRemoveFog()
         atm.Glare   = 0
     end
 
-    -- [FE Bypass] Disconnect any previous server-override listeners and re-create them
     for _, conn in ipairs(fogFEConns) do pcall(function() conn:Disconnect() end) end
     fogFEConns = {}
 
-    -- Lighting.Changed: immediately reapply FogEnd/FogStart if server changes them
     table.insert(fogFEConns, Lighting.Changed:Connect(function(prop)
         if not (Toggles.RemoveFog and Toggles.RemoveFog.Value) then return end
         if prop == "FogEnd"   then Lighting.FogEnd   = 100000 end
         if prop == "FogStart" then Lighting.FogStart = 0      end
     end))
 
-    -- Atmosphere.Changed: keep density/haze/glare at zero
     local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
     if atmosphere then
         table.insert(fogFEConns, atmosphere.Changed:Connect(function(prop)
@@ -2062,7 +1899,6 @@ local function enableRemoveFog()
         end))
     end
 
-    -- Handle Workspace.Fog folder
     local fogFolder = Workspace:FindFirstChild("Fog")
     if fogFolder then
         fogOriginalStates = {}
@@ -2078,7 +1914,6 @@ local function enableRemoveFog()
             end
         end
 
-        -- [FE Bypass] Hide any new fog objects the server adds dynamically
         table.insert(fogFEConns, fogFolder.ChildAdded:Connect(function(child)
             if not (Toggles.RemoveFog and Toggles.RemoveFog.Value) then return end
             makeFogObjectInvisible(child)
@@ -2094,17 +1929,14 @@ local function enableRemoveFog()
 end
 
 local function disableRemoveFog()
-    -- [FE Bypass] Disconnect all server-override listeners first
     for _, conn in ipairs(fogFEConns) do pcall(function() conn:Disconnect() end) end
     fogFEConns = {}
 
-    -- Restore Lighting fog settings
     if originalFog.stored then
         Lighting.FogEnd   = originalFog.FogEnd
         Lighting.FogStart = originalFog.FogStart
     end
 
-    -- Restore Atmosphere
     local atm = Lighting:FindFirstChildOfClass("Atmosphere")
     if atm and originalFog.AtmDensity ~= nil then
         atm.Density = originalFog.AtmDensity
@@ -2115,7 +1947,6 @@ local function disableRemoveFog()
         originalFog.AtmGlare   = nil
     end
 
-    -- Restore visibility of all fog objects
     for obj, _ in pairs(fogOriginalStates) do
         restoreFogObjectVisibility(obj)
     end
@@ -2126,10 +1957,6 @@ local function disableRemoveFog()
     Library:Notify({ Title = "Remove Fog", Description = "Disabled – fog restored", Time = 2 })
 end
 
--- ============================================
--- BUNNY HOP (Auto-jump while moving)
--- [ADDED v7.3] Automatic jumping for speed/momentum
--- ============================================
 local function stopBhop()
     if bhopConn then
         bhopConn:Disconnect()
@@ -2152,8 +1979,7 @@ local function startBhop()
         local root = char:FindFirstChild("HumanoidRootPart")
         
         if not humanoid or not root then return end
-        
-        -- Only jump if moving and on ground
+
         local moveDir = humanoid.MoveDirection
         if moveDir.Magnitude > 0.1 then
             local state = humanoid:GetState()
@@ -2164,20 +1990,13 @@ local function startBhop()
     end)
 end
 
--- ============================================
--- FUNNY DANCE FE
--- [ADDED] Plays a looping dance animation visible to all players on the server.
--- FE compatible: local character animations are replicated to server automatically.
--- Action4 priority overrides idle/walk so the dance plays continuously.
--- ============================================
 local funnyDanceTrack = nil
 local funnyDanceConn  = nil
 
--- Roblox built-in emote animation IDs (free, work on any avatar)
 local DANCE_ANIM_IDS = {
-    507770723,  -- Dance 1 (Shuffle)
-    507772104,  -- Dance 2 (Twist)
-    507771281,  -- Dance 3 (Robot)
+    507770723,
+    507772104,
+    507771281,
 }
 
 local function stopFunnyDance()
@@ -2199,7 +2018,6 @@ local function startFunnyDance()
     local selectedIdx = Options.DanceStyle and Options.DanceStyle.Value or 1
     local selectedId  = DANCE_ANIM_IDS[selectedIdx] or DANCE_ANIM_IDS[1]
 
-    -- Physics-based dance state (fallback when the animation system is blocked)
     local physDanceConn = nil
 
     local function stopPhysDance()
@@ -2212,7 +2030,7 @@ local function startFunnyDance()
     local function startPhysDance(char)
         stopPhysDance()
         local t = 0
-        local spinDir = (selectedIdx % 2 == 0) and 1 or -1  -- alternate direction per style
+        local spinDir = (selectedIdx % 2 == 0) and 1 or -1 
         physDanceConn = RunService.Heartbeat:Connect(function(dt)
             if not Toggles.FunnyDance or not Toggles.FunnyDance.Value then
                 stopPhysDance()
@@ -2225,12 +2043,10 @@ local function startFunnyDance()
             local hum = c:FindFirstChildOfClass("Humanoid")
             if not hum or hum.Health <= 0 then return end
             t = t + dt
-            -- Spin the character + slight vertical bob
             local spin = CFrame.Angles(0, spinDir * dt * (2.5 + selectedIdx * 0.4), 0)
             local bob  = Vector3.new(0, math.sin(t * 4) * 0.08, 0)
             root.CFrame = CFrame.new(root.Position + bob) * (root.CFrame - root.CFrame.Position) * spin
         end)
-        -- Store as a sentinel so stopFunnyDance() can clean up
         funnyDanceTrack = "PHYS"
     end
 
@@ -2253,14 +2069,9 @@ local function startFunnyDance()
             funnyDanceTrack = nil
         end
 
-        -- Strategy 1: Deep-scan the character's Animate LocalScript for any pre-existing
-        -- Animation objects. The game's own Animate script loads these at a lower security
-        -- level that the place restriction does not apply to.
-        -- We try multiple folder name variants and recurse through all descendants.
         local function findNativeAnim()
             local animateScript = char:FindFirstChild("Animate")
             if not animateScript then return nil end
-            -- Ordered preference: dance-specific folders → any folder → any descendant
             local danceVariants = {
                 { "dance",  "dance2", "dance3"  },
                 { "Dance",  "Dance2", "Dance3"  },
@@ -2275,7 +2086,6 @@ local function startFunnyDance()
                     if anim then return anim end
                 end
             end
-            -- Fallback: any Animation anywhere inside Animate (covers non-standard games)
             for _, desc in ipairs(animateScript:GetDescendants()) do
                 if desc:IsA("Animation") then return desc end
             end
@@ -2294,8 +2104,6 @@ local function startFunnyDance()
             end
         end
 
-        -- Strategy 2: game:GetObjects() — executor API that fetches the asset without
-        -- appending the serverplaceid query param, bypassing the place restriction.
         local ok2, results = pcall(function()
             return game:GetObjects("rbxassetid://" .. tostring(selectedId))
         end)
@@ -2309,16 +2117,12 @@ local function startFunnyDance()
                 return
             end
         end
-
-        -- Strategy 3: Physics dance — no animation system used at all. Spins and bobs the
-        -- HumanoidRootPart every Heartbeat, which is replicated to the server. Always works.
         Library:Notify({ Title = "Funny Dance", Description = "Animation blocked by game – using physics dance instead.", Time = 3 })
         startPhysDance(char)
     end
 
     applyDance()
 
-    -- Reapply automatically after character respawn
     funnyDanceConn = LocalPlayer.CharacterAdded:Connect(function(newChar)
         task.delay(0.5, function()
             if Toggles.FunnyDance and Toggles.FunnyDance.Value then
@@ -2331,20 +2135,15 @@ local function startFunnyDance()
     end)
 end
 
--- ============================================
--- SERVER HOP
--- [ADDED v7.3] Join a different server
--- ============================================
 local function serverHop()
     local placeId = game.PlaceId
     local servers = {}
     local req = syn and syn.request or http_request or request or httprequest
 
     if req then
-        -- Alternate sort direction randomly each hop → different server pool every time
         local sortOrder = math.random(0, 1) == 0 and "Asc" or "Desc"
         local cursor = ""
-        local maxPages = 3  -- Up to 300 servers fetched for a large random pool
+        local maxPages = 3
 
         for _ = 1, maxPages do
             local url = "https://games.roblox.com/v1/games/" .. placeId
@@ -2360,13 +2159,11 @@ local function serverHop()
             if not ok2 or not data or not data.data then break end
 
             for _, server in ipairs(data.data) do
-                -- Skip current server and fully-packed servers
                 if server.id ~= game.JobId and server.playing < server.maxPlayers then
                     table.insert(servers, server.id)
                 end
             end
 
-            -- Follow pagination cursor for next page
             local nextCursor = data.nextPageCursor
             if not nextCursor or nextCursor == "" or nextCursor == "null" then break end
             cursor = tostring(nextCursor)
@@ -2374,8 +2171,6 @@ local function serverHop()
     end
 
     if #servers > 0 then
-        -- Fisher-Yates shuffle → every server has equal probability, no bias toward
-        -- servers that happen to appear first in the API response
         for i = #servers, 2, -1 do
             local j = math.random(1, i)
             servers[i], servers[j] = servers[j], servers[i]
@@ -2383,26 +2178,16 @@ local function serverHop()
         TeleportService:TeleportToPlaceInstance(placeId, servers[1], LocalPlayer)
         Library:Notify({ Title = "Server Hop", Description = "Joining 1 of " .. #servers .. " servers found...", Time = 3 })
     else
-        -- Fallback: force a fresh matchmake (will place in a different server)
         TeleportService:Teleport(placeId, LocalPlayer)
         Library:Notify({ Title = "Server Hop", Description = "No other servers found, re-matchmaking...", Time = 3 })
     end
 end
 
--- ============================================
--- REJOIN
--- [IMPROVED v7.3.3] Reconnects to the exact same server instance.
--- Priority chain:
---   1. TeleportAsync + TeleportOptions.ServerInstanceId  (modern, most reliable)
---   2. TeleportToPlaceInstance                           (legacy fallback)
---   3. TeleportService:Teleport                          (matchmaking fallback)
--- ============================================
 local function rejoinServer()
     local placeId = game.PlaceId
     local jobId   = game.JobId
 
     if not jobId or jobId == "" then
-        -- No JobId means we can't target the exact server; fall back to matchmaking
         pcall(function() TeleportService:Teleport(placeId, LocalPlayer) end)
         Library:Notify({ Title = "Rejoin", Description = "No JobId – rejoining via matchmaking...", Time = 3 })
         return
@@ -2410,8 +2195,6 @@ local function rejoinServer()
 
     Library:Notify({ Title = "Rejoin", Description = "Rejoining server...", Time = 2 })
 
-    -- Attempt 1: TeleportAsync with ServerInstanceId (Roblox recommended since 2022)
-    -- This targets the same running server instance by its JobId.
     local ok1, err1 = pcall(function()
         local opts = Instance.new("TeleportOptions")
         opts.ServerInstanceId = jobId
@@ -2420,26 +2203,15 @@ local function rejoinServer()
     if ok1 then return end
     warn("[Rejoin] TeleportAsync failed: " .. tostring(err1))
 
-    -- Attempt 2: Legacy TeleportToPlaceInstance
     local ok2, err2 = pcall(function()
         TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
     end)
     if ok2 then return end
     warn("[Rejoin] TeleportToPlaceInstance failed: " .. tostring(err2))
 
-    -- Attempt 3: Plain matchmaking teleport (server may be gone)
     pcall(function() TeleportService:Teleport(placeId, LocalPlayer) end)
     Library:Notify({ Title = "Rejoin", Description = "Server unavailable – rejoining via matchmaking...", Time = 3 })
 end
-
--- ============================================
--- REMOTE SPY
--- [ADDED v7.3] Log all remote calls for analysis
--- [FIXED v7.3.3] Uses hookfunction for proper method hooking
--- [IMPROVED v7.3.3+] Primary hook now uses Potassium's hookmetamethod:
---              hookmetamethod(game, "__namecall", hook) - safest, purpose-built
---              Fallback chain: hookfunction → setreadonly namecall → passive
--- ============================================
 
 local remoteSpyConnections = {}
 local oldFireServer = nil
@@ -2447,14 +2219,9 @@ local oldInvokeServer = nil
 
 local function stopRemoteSpy()
     remoteSpyEnabled = false
-    
-    -- [FIX #5] hookfunction cannot be truly unhooked; we stop logging via remoteSpyEnabled.
-    -- Setting these to nil removes our reference but the low-overhead hook wrapper remains.
-    -- The wrapper already checks `remoteSpyEnabled` before logging, so no output occurs.
     oldFireServer = nil
     oldInvokeServer = nil
-    
-    -- Clean up connections
+
     for _, conn in ipairs(remoteSpyConnections) do
         if conn then pcall(function() conn:Disconnect() end) end
     end
@@ -2469,12 +2236,10 @@ local function startRemoteSpy()
     remoteSpyLogs = {}
     
     Library:Notify({ Title = "Remote Spy", Description = "Enabled - Check console for remote calls", Time = 3 })
-    
-    -- Helper function to log remote calls
+
     local function logRemoteCall(remote, method, args)
         if not remoteSpyEnabled then return end
-        
-        -- Safely get remote info
+
         local success, name = pcall(function() return remote.Name end)
         local success2, path = pcall(function() return remote:GetFullName() end)
         local success3, className = pcall(function() return remote.ClassName end)
@@ -2489,16 +2254,14 @@ local function startRemoteSpy()
         }
         table.insert(remoteSpyLogs, logEntry)
         if #remoteSpyLogs > 100 then table.remove(remoteSpyLogs, 1) end
-        
-        -- Print to console with safe string conversion
+
         local argCount = args and #args or 0
         print(string.format("[RemoteSpy] %s.%s(%s) - %s", 
             success and name or "Unknown", method, 
             argCount > 0 and tostring(argCount) .. " args" or "no args",
             os.date("%H:%M:%S")))
     end
-    
-    -- Method 0: hookmetamethod (Potassium API) — purpose-built, safest
+
     if hookmetamethod then
         local success, err = pcall(function()
             local originalNamecall
@@ -2509,7 +2272,7 @@ local function startRemoteSpy()
                 end
                 return originalNamecall(self, ...)
             end))
-            oldFireServer = originalNamecall  -- store original ref; logging toggled via remoteSpyEnabled
+            oldFireServer = originalNamecall
         end)
         if success then
             Library:Notify({ Title = "Remote Spy", Description = "Hooked via hookmetamethod (Potassium)", Time = 2 })
@@ -2519,7 +2282,6 @@ local function startRemoteSpy()
         end
     end
 
-    -- Method 1: hookfunction (second best)
     if hookfunction then
         local success, err = pcall(function()
             local tempRemote = Instance.new("RemoteEvent")
@@ -2546,7 +2308,6 @@ local function startRemoteSpy()
         end
     end
 
-    -- Method 2: setreadonly namecall (fallback)
     if getrawmetatable and setreadonly then
         local mt = getrawmetatable(game)
         local oldNamecall = mt.__namecall
@@ -2574,10 +2335,8 @@ local function startRemoteSpy()
         end
     end
 
-    -- Method 3: Passive mode — scan and list remotes only (no hooks available)
     Library:Notify({ Title = "Remote Spy", Description = "Running in passive mode (no hooks available)", Time = 4 })
     
-    -- List all known remotes
     if Remotes then
         print("[RemoteSpy] === Available Remotes ===")
         for _, folder in ipairs(Remotes:GetChildren()) do
@@ -2599,31 +2358,9 @@ local function startRemoteSpy()
     end
 end
 
--- ============================================
--- AUTO PICKUP  (FE Multi-Vector, rebuilt)
--- Five independent pickup strategies, each toggle-able:
---
---  A  Remote     – FireServer(PickUpItem + AdjustBackpack) directly.
---                  Fast and clean; works when the server is lenient on
---                  distance checks or the item is already nearby.
---
---  B  Touch      – firetouchinterest(hrp, itemPart) — simulates the
---                  player's HumanoidRootPart physically touching the
---                  item part. Fires the Touched handler server-side in
---                  Potassium/synapse-compatible executors.
---
---  C  Prompt     – fireproximityprompt(prompt) — triggers ProximityPrompt
---                  on items that expose one instead of (or in addition to)
---                  a Touched handler.
---
---  D  Move       – Moves the item's BaseParts closer to the player
---                  client-side to help with pickup. Works with other methods.
---
--- Enable combinations to find the minimum set that works in STA.
--- ============================================
 local autoPickupActive  = false
 local autoPickupThread  = nil
-local autoPickupAttempts = {}  -- [item ref] = last attempt tick
+local autoPickupAttempts = {}
 
 local function stopAutoPickup()
     autoPickupActive = false
@@ -2631,7 +2368,6 @@ local function stopAutoPickup()
         pcall(function() task.cancel(autoPickupThread) end)
         autoPickupThread = nil
     end
-    -- Restore simulation radius in case Method A raised it
     pcall(function() if setsimulationradius then setsimulationradius(50, 300) end end)
     autoPickupAttempts = {}
 end
@@ -2640,8 +2376,6 @@ local function startAutoPickup()
     stopAutoPickup()
     autoPickupActive = true
 
-    -- [Method A] Raise simulation radius so the server accepts
-    -- PickUpItem calls from further away (Potassium executor API)
     pcall(function() if setsimulationradius then setsimulationradius(2048, 2048) end end)
 
     autoPickupThread = task.spawn(function()
@@ -2656,8 +2390,6 @@ local function startAutoPickup()
             local whitelist  = Options.AutoPickupWhitelist and Options.AutoPickupWhitelist.Value or {}
             local blacklist  = Options.AutoPickupBlacklist and Options.AutoPickupBlacklist.Value or {}
 
-            -- Pause inside workspace.Map.Tiles.Center (any height: above, on, below).
-            -- The toggle stays ON; we simply skip the entire sweep while inside.
             local centerTile = Workspace:FindFirstChild("Map")
                 and Workspace.Map:FindFirstChild("Tiles")
                 and Workspace.Map.Tiles:FindFirstChild("Center")
@@ -2666,12 +2398,11 @@ local function startAutoPickup()
                 if ok and cf and size then
                     local localPos = cf:PointToObjectSpace(myPos)
                     if math.abs(localPos.X) <= size.X / 2 and math.abs(localPos.Z) <= size.Z / 2 then
-                        task.wait(0.5) continue  -- inside Center tile, pause all methods
+                        task.wait(0.5) continue 
                     end
                 end
             end
 
-            -- Determine which methods are enabled (default all on if toggles not yet created)
             local useRemote = not Toggles.AutoPickupMethodRemote or Toggles.AutoPickupMethodRemote.Value
             local useTouch  = not Toggles.AutoPickupMethodTouch  or Toggles.AutoPickupMethodTouch.Value
             local usePrompt = not Toggles.AutoPickupMethodPrompt or Toggles.AutoPickupMethodPrompt.Value
@@ -2681,7 +2412,6 @@ local function startAutoPickup()
                 if not autoPickupActive then break end
                 if not item.Parent then continue end
 
-                -- Whitelist filter
                 if not allItems and not whitelist[item.Name] then continue end
 
                 local mainPart = item.PrimaryPart or getItemMainPart(item)
@@ -2690,16 +2420,10 @@ local function startAutoPickup()
                 local dist = (mainPart.Position - myPos).Magnitude
                 if dist > radius then continue end
 
-                -- Per-item rate-limit: don't hammer the same item every frame
                 local now = tick()
                 if autoPickupAttempts[item] and (now - autoPickupAttempts[item]) < 0.25 then continue end
                 autoPickupAttempts[item] = now
 
-                -- ==================================================
-                -- METHOD A: Direct PickUpItem + AdjustBackpack remote
-                -- Blacklist only blocks pickUpItemRemote (prevents eating food);
-                -- adjustBackpackRemote always fires so the item is still stored.
-                -- ==================================================
                 if useRemote then
                     if not blacklist[item.Name] then
                         pcall(function()
@@ -2709,16 +2433,12 @@ local function startAutoPickup()
                     pcall(function()
                         if adjustBackpackRemote then adjustBackpackRemote:FireServer(item) end
                     end)
-                    -- Retry for reliability
                     task.wait(0.05)
                     pcall(function()
                         if adjustBackpackRemote then adjustBackpackRemote:FireServer(item) end
                     end)
                 end
 
-                -- ==================================================
-                -- METHOD B: firetouchinterest (Touched event sim)
-                -- ==================================================
                 if useTouch then
                     pcall(function()
                         if firetouchinterest then
@@ -2728,9 +2448,6 @@ local function startAutoPickup()
                     end)
                 end
 
-                -- ==================================================
-                -- METHOD C: ProximityPrompt fire
-                -- ==================================================
                 if usePrompt then
                     pcall(function()
                         if fireproximityprompt then
@@ -2740,13 +2457,8 @@ local function startAutoPickup()
                     end)
                 end
 
-                -- ==================================================
-                -- METHOD D: Move item closer to player (aggressive method)
-                -- Only for items within half the pickup radius
-                -- ==================================================
                 if useMove and dist <= (radius / 2) then
                     pcall(function()
-                        -- Move item parts closer to player
                         local movePos = myPos + (mainPart.Position - myPos).Unit * 3
                         for _, part in ipairs(item:GetDescendants()) do
                             if part:IsA("BasePart") then
@@ -2756,17 +2468,16 @@ local function startAutoPickup()
                     end)
                 end
 
-                task.wait(0.02)  -- yield once per item to keep the game responsive
+                task.wait(0.02)
             end
 
-            -- Clean up attempt-map for items no longer in the world
             for itemRef in pairs(autoPickupAttempts) do
                 if not itemRef.Parent then
                     autoPickupAttempts[itemRef] = nil
                 end
             end
 
-            task.wait(0.1)  -- scan interval
+            task.wait(0.1)
         end
 
         autoPickupActive = false
@@ -2774,12 +2485,6 @@ local function startAutoPickup()
     end)
 end
 
--- ============================================
--- REPAIR AURA
--- Fires the "Repair" RemoteEvent found inside the equipped Repair Hammer.
--- Only activates when the Repair Hammer is held; targets the nearest
--- structure within 30 studs at a rate controlled by the slider.
--- ============================================
 local function stopRepairAura()
     if repairAuraConn then
         repairAuraConn:Disconnect()
@@ -2794,19 +2499,16 @@ local function startRepairAura()
     repairAuraConn = RunService.Heartbeat:Connect(function()
         if not Toggles.RepairAura or not Toggles.RepairAura.Value then return end
 
-        -- Rate limiter: honours the slider (1–10 fires per second)
         local rate     = Options.RepairAuraRate and Options.RepairAuraRate.Value or 1
         local interval = 1 / rate
         local now      = tick()
         if now - lastFire < interval then return end
 
-        -- Repair Hammer must be equipped
         local char = LocalPlayer.Character
         if not char then return end
         local tool = char:FindFirstChildOfClass("Tool")
         if not tool or tool.Name ~= "Repair Hammer" then return end
 
-        -- Look for the "Repair" RemoteEvent inside the tool
         local repairRemote = tool:FindFirstChild("Repair")
         if not repairRemote then return end
 
@@ -2815,7 +2517,6 @@ local function startRepairAura()
         local myPos   = hrp.Position
         local maxDist = Options.RepairAuraRange and Options.RepairAuraRange.Value or 30
 
-        -- Find the nearest structure within range
         if not structuresFolder then return end
         local nearest     = nil
         local nearestDist = math.huge
@@ -2841,10 +2542,6 @@ local function startRepairAura()
     end)
 end
 
--- ============================================
--- BRING PICKUP ITEM (FE Bypass v2)
--- Improved: Multiple pickup methods, better teleport, anti-cheat bypass
--- ============================================
 local bringPickupActive = false
 local bringPickupThread = nil
 
@@ -2860,11 +2557,10 @@ local function startBringPickup()
     stopBringPickup()
     bringPickupActive = true
 
-    -- Raise simulation radius for better pickup success
     pcall(function() if setsimulationradius then setsimulationradius(2048, 2048) end end)
 
     bringPickupThread = task.spawn(function()
-        local MAX_TIMEOUTS = 5  -- Increased from 3
+        local MAX_TIMEOUTS = 5
         local consecutiveTimeouts = 0
         local pickedUpCount = 0
 
@@ -2891,7 +2587,6 @@ local function startBringPickup()
             end
 
             if #targets == 0 then 
-                -- Reset timeout counter when no items to pick up
                 consecutiveTimeouts = 0
                 task.wait(0.5) 
                 continue 
@@ -2916,13 +2611,11 @@ local function startBringPickup()
                 local partRef = target.part
                 local itemPickedUp = false
                 
-                -- Phase 1: Teleport to item with offset
                 local targetPos = partRef.Position + Vector3.new(0, 1.5, 0)
                 local targetCF = CFrame.new(targetPos)
                 local originalCF = rootPart.CFrame
-                local deadline = tick() + 3.0  -- Increased timeout
+                local deadline = tick() + 3.0
 
-                -- Try multiple teleport positions
                 local teleportOffsets = {
                     Vector3.new(0, 1.5, 0),
                     Vector3.new(0, 2.5, 0),
@@ -2937,28 +2630,23 @@ local function startBringPickup()
                     
                     targetCF = CFrame.new(partRef.Position + offset)
                     
-                    -- Teleport with anti-cheat bypass
                     pcall(function()
                         rootPart.CFrame = targetCF
-                        -- Also set velocity to prevent rubber-banding
                         rootPart.Velocity = Vector3.new(0, 0, 0)
                     end)
 
-                    -- Method 1: Fire PickUpItem remote
                     pcall(function()
                         if pickUpItemRemote then 
                             pickUpItemRemote:FireServer(itemRef) 
                         end
                     end)
-
-                    -- Method 2: Fire AdjustBackpack remote
+    
                     pcall(function()
                         if adjustBackpackRemote then 
                             adjustBackpackRemote:FireServer(itemRef) 
                         end
                     end)
 
-                    -- Method 3: Touch interest (if available)
                     pcall(function()
                         if firetouchinterest then
                             firetouchinterest(rootPart, partRef, 0)
@@ -2966,7 +2654,6 @@ local function startBringPickup()
                         end
                     end)
 
-                    -- Method 4: Proximity prompt (if available)
                     pcall(function()
                         if fireproximityprompt then
                             local prompt = itemRef:FindFirstChildWhichIsA("ProximityPrompt", true)
@@ -2974,10 +2661,9 @@ local function startBringPickup()
                         end
                     end)
 
-                    task.wait(0.08)  -- Slightly longer wait for server sync
+                    task.wait(0.08)
                 end
 
-                -- Check if item was picked up
                 if not itemRef.Parent then
                     consecutiveTimeouts = 0
                     pickedUpCount = pickedUpCount + 1
@@ -2986,14 +2672,12 @@ local function startBringPickup()
                     consecutiveTimeouts = consecutiveTimeouts + 1
                 end
 
-                -- Return to original position if not picked up
                 if not itemPickedUp then
                     pcall(function()
                         rootPart.CFrame = originalCF
                     end)
                 end
 
-                -- Check for max timeouts
                 if consecutiveTimeouts >= MAX_TIMEOUTS then
                     bringPickupActive = false
                     task.defer(function()
@@ -3009,10 +2693,10 @@ local function startBringPickup()
                     return
                 end
                 
-                task.wait(0.1)  -- Brief pause between items
+                task.wait(0.1)
             end
             
-            task.wait(0.2)  -- Pause between cycles
+            task.wait(0.2)
         end
 
         bringPickupActive = false
@@ -3020,9 +2704,6 @@ local function startBringPickup()
     end)
 end
 
--- ============================================
--- PLAYER JOIN / LEAVE LISTENERS
--- ============================================
 local playerAddedConn = Players.PlayerAdded:Connect(function(player)
     if playerESPVars.ESP then
         task.wait(2)
@@ -3036,9 +2717,6 @@ local playerRemovingConn = Players.PlayerRemoving:Connect(function(player)
 end)
 table.insert(connections, playerRemovingConn)
 
--- ============================================
--- CHARACTER RESPAWN HANDLER
--- ============================================
 LocalPlayer.CharacterRemoving:Connect(function()
     if flyActive then stopFly() end
     if autoSprintActive then stopAutoSprint() end
@@ -3052,11 +2730,6 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     if Toggles.AutoPickup and Toggles.AutoPickup.Value then startAutoPickup() end
 end)
 
--- ============================================
--- ESP UTILITY FUNCTIONS
--- applyESPTextSize  – live-update all label font sizes
--- applyESPTransparency – live-update all highlight transparencies
--- ============================================
 local function applyESPTextSize(size)
     espConfig.textSize = size
     local small = math.max(size - 2, 8)
@@ -3099,10 +2772,7 @@ local function applyESPTransparency()
     for _, esp in pairs(playerESPInstances)    do updateH(esp) end
 end
 
--- ============================================
--- UI: INFO TAB
--- ============================================
-do -- Info Tab local scope
+do
 
 local info_user_group = info_tab:AddGroup({Name = "User", Side = "Left", Icon = "user"})
 local info_game_group = info_tab:AddGroup({Name = "Game", Side = "Left", Icon = "gamepad"})
