@@ -41,13 +41,13 @@ local Window = StreeHub:CreateWindow({
 
 
 local Tabs = {
-    local Home = Window:AddTab({Name = "Home", Icon = "house"})
-    local Main = Window:AddTab({Name = "Main", Icon = "landmark"})
-    local Combat = Window:AddTab({Name = "Combat", Icon = "sword"})
-    local Player = Window:AddTab({Name = "Player", Icon = "user"})
-    local Auto = Window:AddTab({Name = "Auto", Icon = "repeat-2"})
-    local Visual = Window:AddTab({Name = "Visual", Icon = "eye"})
-    local Misc = Window:AddTab({Name = "Misc", Icon = "layout-grid"})
+    Home = Window:Tab({Name = "Home", Icon = "house"})
+    Main = Window:Tab({Name = "Main", Icon = "landmark"})
+    Combat = Window:Tab({Name = "Combat", Icon = "sword"})
+    Player = Window:Tab({Name = "Player", Icon = "user"})
+    Auto = Window:Tab({Name = "Auto", Icon = "repeat-2"})
+    Visual = Window:Tab({Name = "Visual", Icon = "eye"})
+    Misc = Window:Tab({Name = "Misc", Icon = "layout-grid"})
 }
 
 
@@ -2786,21 +2786,21 @@ do
 Tabs.Home:Section({ Title = "User" })
 
 local executorName = (identifyexecutor and identifyexecutor() or "Unknown")
-Tabs.Home:Paragraph({Text = "<b>Executor:</b> " .. executorName })
-Tabs.Home:Paragraph({Text = "<b>Status:</b> <font color='#00FF00'>Working</font>" })
-Tabs.Home:Paragraph({Text = "<b>Player:</b> " .. LocalPlayer.Name })
-Tabs.Home:Paragraph({Text = "<b>User ID:</b> " .. LocalPlayer.UserId })
+Tabs.Home:Paragraph({ Title = "<b>Executor:</b> " .. executorName })
+Tabs.Home:Paragraph({ Title = "<b>Status:</b> <font color='#00FF00'>Working</font>" })
+Tabs.Home:Paragraph({ Title = "<b>Player:</b> " .. LocalPlayer.Name })
+Tabs.Home:Paragraph({ Title = "<b>User ID:</b> " .. LocalPlayer.UserId })
 
 Tabs.Home:Section({ Title = "Game" })
 
-Tabs.Home:Paragraph({Text = "<b>Game:</b> Survive The Apocalypse" })
-Tabs.Home:Paragraph({Text = "<b>Place ID:</b> " .. game.PlaceId })
-Tabs.Home:Paragraph({Text = "<b>Job ID:</b> " .. (game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown") })
+Tabs.Home:Paragraph({ Title = "<b>Game:</b> Survive The Apocalypse" })
+Tabs.Home:Paragraph({ Title = "<b>Place ID:</b> " .. game.PlaceId })
+Tabs.Home:Paragraph({ Title = "<b>Job ID:</b> " .. (game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown") })
 
 Tabs.Home:Section({ Title = "Information" })
 
-Tabs.Home:Paragraph({ Text = "<b>Community Support</b>" })
-Tabs.Home:Paragraph({ Text = "<b>Update:</b> Every time there is a game update or someone reports something, I will fix it as soon as possible." })
+Tabs.Home:Paragraph({ Title = "<b>Community Support</b>" })
+Tabs.Home:Paragraph({ Title = "<b>Update:</b> Every time there is a game update or someone reports something, I will fix it as soon as possible." })
 
 Tabs.Home:Button({
     Title = "Discord",
@@ -2825,19 +2825,17 @@ Tabs.Home:Button({
     end
 })
 
-end -- Info Tab local scope
+end
 
--- ============================================
--- UI: MAIN TAB
--- ============================================
-do -- Main Tab local scope
+
+do
 
 SaveManager:BuildConfigSection(main_tab)
 
-local home_info_group = main_tab:AddGroup({Name = "Info", Side = "Left", Icon = "info"})
+Tabs.Main:Section({ Title = "Information" })
 
-home_info_group:AddToggle({
-    Name = "Anti AFK",
+Tabs.Main:Toggle({
+    Title = "Anti AFK",
     Default = true,
     Callback = function(state)
         if state then
@@ -2848,11 +2846,9 @@ home_info_group:AddToggle({
     end
 })
 
-home_info_group:AddDivider()
+Tabs.Main:Section({ Title = "Visual Setting" })
 
-local home_visual_group = main_tab:AddGroup({Name = "Visual Setting", Side = "Right", Icon = "settings-2"})
-
-home_visual_group:AddToggle({
+Tabs.Main:AddToggle({
     Name = "Show FPS",
     Default = true,
     Callback = function(val)
@@ -2860,7 +2856,7 @@ home_visual_group:AddToggle({
     end
 })
 
-home_visual_group:AddToggle({
+Tabs.Main:AddToggle({
     Name = "Show Ping",
     Default = true,
     Callback = function(val)
@@ -2873,16 +2869,13 @@ home_visual_group:AddToggle({
     end
 })
 
-end -- Main Tab local scope
+end
 
--- ============================================
--- UI: VISUAL TAB
--- ============================================
-do -- Visual Tab local scope
+
+do
 
 SaveManager:BuildConfigSection(visual_tab)
 
--- Helper: apply Name/Distance to all ESP systems at once
 local function setAllESPNames(state)
     mobOptions.Name = state; refreshMobESP()
     playerESPVars.Name = state; refreshPlayerESP()
@@ -2896,56 +2889,79 @@ local function setAllESPDistance(state)
     for _, sys in pairs(espSystems) do sys.vars.Distance = state; sys.refresh() end
 end
 
--- ESP Settings (Left) — shared controls for all ESP systems
-local espSettingsGroup = visual_tab:AddGroup({Name = "ESP Settings", Side = "Left", Icon = "settings"})
+Tabs.Visual:Section({ Title = "ESP Setting" })
 
-espSettingsGroup:AddSlider({
-    Name = "Max Distance", Default = 300, Min = 50, Max = 2000, Increment = 1, Suffix = " studs",
+Tabs.Visual:Slider({
+    Title = "Max Distance",
+    Step = 1,
+    Value = { Min = 50, Max = 2000, Default = 300}
     Callback = function()
         refreshMobESP(); refreshPlayerESP(); refreshStructureESP()
         for _, sys in pairs(espSystems) do sys.refresh() end
     end,
 })
-espSettingsGroup:AddToggle({Name = "Show Names",    Default = false, Callback = function(s) setAllESPNames(s)     end })
-espSettingsGroup:AddToggle({Name = "Show Distance", Default = false, Callback = function(s) setAllESPDistance(s) end })
 
--- [FIX #3] Text Size slider — live-updates all ESP label sizes
-espSettingsGroup:AddSlider({
-    Name = "Text Size", Default = 10, Min = 8, Max = 24, Increment = 1, Suffix = "px",
-    Callback = function(v) applyESPTextSize(v) end,
-})
--- [FIX #4] Fill Transparency — controls how solid the Chams highlight fill is
-espSettingsGroup:AddSlider({
-    Name = "Fill Transparency", Default = 40, Min = 0, Max = 100, Increment = 1, Suffix = "%",
-    Callback = function(v) espConfig.fillTransparency = v / 100; applyESPTransparency() end,
-})
--- [FIX #4] Outline Transparency
-espSettingsGroup:AddSlider({
-    Name = "Outline Transparency", Default = 0, Min = 0, Max = 100, Increment = 1, Suffix = "%",
-    Callback = function(v) espConfig.outlineTransparency = v / 100; applyESPTransparency() end,
+Tabs.Visual:Toggle({
+    Title = "Show Names",
+    Default = false, 
+    Callback = function(s) 
+        setAllESPNames(s)     
+    end 
 })
 
--- Mob ESP (Left)
-local mobESPGroup = visual_tab:AddGroup({Name = "Mob ESP", Side = "Left", Icon = "eye"})
-mobESPGroup:AddToggle({Name = "Mob ESP", Default = false, Callback = function(s) mobOptions.ESP   = s; refreshMobESP() end })
-mobESPGroup:AddToggle({Name = "Chams", Default = false, Callback = function(s) mobOptions.Chams = s; refreshMobESP() end })
+Tabs.Visual:Toggle({
+    Title = "Show Distance",
+    Default = false,
+    Callback = function(s) 
+        setAllESPDistance(s) 
+    end 
+})
 
--- Player ESP (Left)
-local playerESPGroup = visual_tab:AddGroup({Name = "Player ESP", Side = "Left", Icon = "users"})
-playerESPGroup:AddToggle({Name = "Player ESP", Default = false, Callback = function(s) playerESPVars.ESP = s; refreshPlayerESP() end })
-playerESPGroup:AddToggle({Name = "Chams", Default = false, Callback = function(s) playerESPVars.Chams = s; refreshPlayerESP() end })
-playerESPGroup:AddToggle({Name = "Show Health", Default = false, Callback = function(s) playerESPVars.Health = s; refreshPlayerESP() end })
+Tabs.Visual:Slider({
+    Title = "Text Size",
+    Step = 1,
+    Value = { Min = 8, Max = 24, Default = 10 }
+    Callback = function(v) 
+        applyESPTextSize(v) 
+    end
+})
 
--- Item ESP (Right) — all categories + structures in one groupbox
-local itemESPGroup = visual_tab:AddGroup({Name = "Item ESP", Side = "Right", Icon = "package"})
+Tabs.Visual:Slider({
+    Title = "Fill Transparency",
+    Step = 1,
+    Value = { Default = 40Min = 0, Max = 100, Default = }
+    Callback = function(v) 
+        espConfig.fillTransparency = v / 100; applyESPTransparency() 
+    end
+})
 
-itemESPGroup:AddToggle({
-    Name = "Chams (All Categories)", Default = false,
+Tabs.Visual:Slider({
+    Title = "Outline Transparency", 
+    Step = 1, 
+    Value = { Min = 0, Max = 100, Default = 0 }
+    Callback = function(v) 
+        espConfig.outlineTransparency = v / 100; applyESPTransparency() 
+    end
+})
+
+Tabs.Visual:Section({ Title = "Mob ESP" })
+Tabs.Visual:Toggle({ Title = "Mob ESP", Default = false, Callback = function(s) mobOptions.ESP   = s; refreshMobESP() end })
+Tabs.Visual:Toggle({ Title = "Chams", Default = false, Callback = function(s) mobOptions.Chams = s; refreshMobESP() end })
+
+Tabs.Visual:Section({ Title = "Player ESP" })
+Tabs.Visual:Toggle({ Title = "Player ESP", Default = false, Callback = function(s) playerESPVars.ESP = s; refreshPlayerESP() end })
+Tabs.Visual:Toggle({ Title = "Chams", Default = false, Callback = function(s) playerESPVars.Chams = s; refreshPlayerESP() end })
+Tabs.Visual:Toggle({ Title = "Show Health", Default = false, Callback = function(s) playerESPVars.Health = s; refreshPlayerESP() end })
+
+Tabs.VisualSection({ Title = "Item ESP" })
+
+Tabs.Visual:Toggle({
+    Title = "Chams (All Categories)",
+    Default = false,
     Callback = function(s)
         for _, sys in pairs(espSystems) do sys.vars.Chams = s; sys.refresh() end
     end,
 })
-itemESPGroup:AddDivider()
 
 local itemESPDefs = {
     { key = "Gun",      text = "Gun ESP",        tip = "Guns (Red)" },
@@ -2958,12 +2974,11 @@ local itemESPDefs = {
     { key = "Ability",  text = "Abilities ESP",   tip = "Abilities (Purple)" },
 }
 for _, d in ipairs(itemESPDefs) do
-    -- [FIX #4] Color picker chained to each category toggle for live color control
-    itemESPGroup:AddToggle({
+    Tabs.Visual:Toggle({
         Name = d.text, Default = false,
         Callback = function(s) espSystems[d.key].vars.ESP = s; espSystems[d.key].refresh() end,
     })
-    itemESPGroup:AddColorPicker({
+    Tabs.Visual:ColorPicker({
         Name = d.key .. "ESPColor",
         Default = espSystems[d.key].colors.fill,
         Title = d.text .. " Color",
@@ -2977,10 +2992,9 @@ for _, d in ipairs(itemESPDefs) do
     })
 end
 
-itemESPGroup:AddDivider()
-itemESPGroup:AddLabel({ Text = "Structures" })
-itemESPGroup:AddToggle({Name = "Structure ESP", Default = false, Callback = function(s) structureESPVars.ESP = s; refreshStructureESP() end })
-itemESPGroup:AddToggle({Name = "Chams", Default = false, Callback = function(s) structureESPVars.Chams = s; refreshStructureESP() end })
+Tabs.Visual:Paragraph({ Title = "Structures" })
+Tabs.Visual:Toggle({ Title = "Structure ESP", Default = false, Callback = function(s) structureESPVars.ESP = s; refreshStructureESP() end })
+Tabs.Visual:Toggle({ Title = "Chams", Default = false, Callback = function(s) structureESPVars.Chams = s; refreshStructureESP() end })
 
 end -- Visuals Tab local scope
 
@@ -3568,43 +3582,43 @@ do
 Tabs.Misc:Section({ Title = "Utilities" })
 
 Tabs.Misc:Toggle({
-    Name = "Anti-AFK",
+    Title = "Anti-AFK",
     Default = true,
     Callback = function(state)
         if state then
             startAntiAFK()
-            Library:Notify({ Title = "Anti-AFK", Description = "Enabled - you won't be kicked for idling", Time = 2 })
+            StreeHub:Notify({ Title = "Anti-AFK", Description = "Enabled - you won't be kicked for idling", Time = 2 })
         else
             stopAntiAFK()
-            Library:Notify({ Title = "Anti-AFK", Description = "Disabled", Time = 2 })
+            StreeHub:Notify({ Title = "Anti-AFK", Description = "Disabled", Time = 2 })
         end
     end,
 })
 
 Tabs.Misc:Toggle({
-    Name = "Fullbright",
+    Title = "Fullbright",
     Default = false,
     Callback = function(state)
         if state then
             enableFullbright()
-            Library:Notify({ Title = "Fullbright", Description = "Enabled", Time = 2 })
+            StreeHub:Notify({ Title = "Fullbright", Description = "Enabled", Time = 2 })
         else
             disableFullbright()
-            Library:Notify({ Title = "Fullbright", Description = "Disabled - original lighting restored", Time = 2 })
+            StreeHub:Notify({ Title = "Fullbright", Description = "Disabled - original lighting restored", Time = 2 })
         end
     end,
 })
 
 Tabs.Misc:Toggle({
-    Name = "Remove Fog",
+    Title = "Remove Fog",
     Default = false,
     Callback = function(state)
         if state then
             enableRemoveFog()
-            Library:Notify({ Title = "Remove Fog", Description = "Enabled - fog removed for clear visibility", Time = 2 })
+            StreeHub:Notify({ Title = "Remove Fog", Description = "Enabled - fog removed for clear visibility", Time = 2 })
         else
             disableRemoveFog()
-            Library:Notify({ Title = "Remove Fog", Description = "Disabled - original fog restored", Time = 2 })
+            StreeHub:Notify({ Title = "Remove Fog", Description = "Disabled - original fog restored", Time = 2 })
         end
     end,
 })
@@ -3613,33 +3627,30 @@ Tabs.Misc:Toggle({
 Tabs.Misc:Section({ Title = "Server Tools" })
 
 Tabs.Misc:Button({
-    Name = "Server Hop",
+    Title = "Server Hop",
     Callback = function()
-        Library:Notify({ Title = "Server Hop", Description = "Finding new server...", Time = 2 })
+        StreeHub:Notify({ Title = "Server Hop", Description = "Finding new server...", Time = 2 })
         serverHop()
     end
 })
 
 Tabs.Misc:Button({
-    Name = "Rejoin Server",
+    Title = "Rejoin Server",
     Callback = function()
-        Library:Notify({ Title = "Rejoin", Description = "Rejoining server...", Time = 2 })
+        StreeHub:Notify({ Title = "Rejoin", Description = "Rejoining server...", Time = 2 })
         rejoinServer()
     end
 })
 
-Tabs.Misc:Paragraph({ Text = "Current Job ID:" })
-Tabs.Misc:Paragraph({ Text = game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown", Wrap = true })
+Tabs.Misc:Paragraph({ Title = "Current Job ID:" })
+Tabs.Misc:Paragraph({ Title = game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown" })
 
 Tabs.Misc:Section({ Title = "FPS Unlocker" })
 
 Tabs.Misc:Slider({
-    Name = "FPS Cap",
-    Default = 144,
-    Min = 30,
-    Max = 360,
-    Increment = 1,
-    Suffix = " fps",
+    Title = "FPS Cap",
+    Step = 1,
+    Value = { Min = 30, Max = 360, Default = 144 }
     Callback = function(value)
         if Toggles.FPSUnlock and Toggles.FPSUnlock.Value then
             pcall(function() if setfpscap then setfpscap(value) end end)
@@ -3648,7 +3659,7 @@ Tabs.Misc:Slider({
 })
 
 Tabs.Misc:Toggle({
-    Name = "Unlock FPS",
+    Title = "Unlock FPS",
     Default = false,
     Callback = function(state)
         pcall(function()
@@ -3656,13 +3667,13 @@ Tabs.Misc:Toggle({
                 if state then
                     local cap = Options.FPSCap and Options.FPSCap.Value or 144
                     setfpscap(cap)
-                    Library:Notify({ Title = "FPS Unlocker", Description = "FPS cap set to " .. cap, Time = 2 })
+                    StreeHub:Notify({ Title = "FPS Unlocker", Description = "FPS cap set to " .. cap, Time = 2 })
                 else
                     setfpscap(60)
-                    Library:Notify({ Title = "FPS Unlocker", Description = "FPS restored to 60", Time = 2 })
+                    StreeHub:Notify({ Title = "FPS Unlocker", Description = "FPS restored to 60", Time = 2 })
                 end
             else
-                Library:Notify({ Title = "FPS Unlocker", Description = "setfpscap() not available in this executor.", Time = 3 })
+                StreeHub:Notify({ Title = "FPS Unlocker", Description = "setfpscap() not available in this executor.", Time = 3 })
             end
         end)
     end,
@@ -3670,8 +3681,8 @@ Tabs.Misc:Toggle({
 
 end
 
-do
 
+do
 
 Tabs.Misc:Section({ Title = "Menu" })
 
