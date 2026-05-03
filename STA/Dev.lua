@@ -2953,7 +2953,7 @@ Tabs.Visual:Toggle({ Title = "Player ESP", Default = false, Callback = function(
 Tabs.Visual:Toggle({ Title = "Chams", Default = false, Callback = function(s) playerESPVars.Chams = s; refreshPlayerESP() end })
 Tabs.Visual:Toggle({ Title = "Show Health", Default = false, Callback = function(s) playerESPVars.Health = s; refreshPlayerESP() end })
 
-Tabs.VisualSection({ Title = "Item ESP" })
+Tabs.Visual:Section({ Title = "Item ESP" })
 
 Tabs.Visual:Toggle({
     Title = "Chams (All Categories)",
@@ -2975,13 +2975,12 @@ local itemESPDefs = {
 }
 for _, d in ipairs(itemESPDefs) do
     Tabs.Visual:Toggle({
-        Name = d.text, Default = false,
+        Title = d.text, Default = false,
         Callback = function(s) espSystems[d.key].vars.ESP = s; espSystems[d.key].refresh() end,
     })
     Tabs.Visual:ColorPicker({
-        Name = d.key .. "ESPColor",
+        Title = d.key .. "ESPColor",
         Default = espSystems[d.key].colors.fill,
-        Title = d.text .. " Color",
         Callback = function(c)
             espSystems[d.key].colors.fill = c
             for _, esp in pairs(espSystems[d.key].instances) do
@@ -2996,19 +2995,17 @@ Tabs.Visual:Paragraph({ Title = "Structures" })
 Tabs.Visual:Toggle({ Title = "Structure ESP", Default = false, Callback = function(s) structureESPVars.ESP = s; refreshStructureESP() end })
 Tabs.Visual:Toggle({ Title = "Chams", Default = false, Callback = function(s) structureESPVars.Chams = s; refreshStructureESP() end })
 
-end -- Visuals Tab local scope
+end
 
--- ============================================
--- UI: PLAYER TAB
--- ============================================
-do -- Player Tab local scope
+
+do
 
 SaveManager:BuildConfigSection(player_tab)
 
-local movementGroup = player_tab:AddGroup({Name = "Movement", Side = "Left", Icon = "move"})
+Tabs.Player:Section({ Title = "Movement" })
 
-movementGroup:AddToggle({
-    Name = "Speed Hack",
+Tabs.Player:Toggle({
+    Title = "Speed Hack",
     Flag = "SpeedHack",
     Default = false,
     Callback = function(state)
@@ -3021,7 +3018,7 @@ movementGroup:AddToggle({
                 end
             end
             startSpeedHack()
-            Library:Notify({ Title = "Speed Hack", Description = "Enabled (FE bypass active)", Time = 2 })
+            StreeHub:Notify({ Title = "Speed Hack", Description = "Enabled (FE bypass active)", Time = 2 })
         else
             stopSpeedHack()
             local char = LocalPlayer.Character
@@ -3031,27 +3028,25 @@ movementGroup:AddToggle({
                     humanoid.WalkSpeed = originalValues.walkSpeed or 16
                 end
             end
-            Library:Notify({ Title = "Speed Hack", Description = "Speed restored to " .. (originalValues.walkSpeed or 16), Time = 2 })
+            StreeHub:Notify({ Title = "Speed Hack", Description = "Speed restored to " .. (originalValues.walkSpeed or 16), Time = 2 })
         end
     end,
 })
 
-movementGroup:AddSlider({
-    Name = "Walk Speed",
-    Default = 50,
-    Min = 16,
-    Max = 200,
-    Increment = 1,
+Tabs.Player:Slider({
+    Title = "Walk Speed",
+    Step = 1,
+    Value = { Min = 16, Max = 200, Default = 50 },
     Suffix = " studs/s",
     Flag = "SpeedValue",
 })
 
-movementGroup:AddToggle({
-    Name = "Inf Jump",
+Tabs.Player:AddToggle({
+    Title = "Inf Jump",
     Flag = "InfJump",
     Default = false,
     Callback = function(state)
-        Library:Notify({
+        StreeHub:Notify({
             Title = "Inf Jump",
             Description = state and "Enabled - jump anywhere!" or "Disabled",
             Time = 2,
