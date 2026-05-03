@@ -3560,18 +3560,14 @@ repairAuraGroup:AddSlider({
 
 repairAuraGroup:AddLabel({ Text = "Requires: Repair Hammer equipped", Wrap = true })
 
-end -- Exploits Tab local scope
+end
 
--- ============================================
--- UI: MISC TAB
--- ============================================
-do -- Misc Tab local scope
 
-SaveManager:BuildConfigSection(misc_tab)
+do
 
-local utilityGroup = misc_tab:AddGroup({Name = "Utilities", Side = "Left", Icon = "shield-check"})
+Tabs.Misc:Section({ Title = "Utilities" })
 
-utilityGroup:AddToggle({
+Tabs.Misc:Toggle({
     Name = "Anti-AFK",
     Default = true,
     Callback = function(state)
@@ -3585,7 +3581,7 @@ utilityGroup:AddToggle({
     end,
 })
 
-utilityGroup:AddToggle({
+Tabs.Misc:Toggle({
     Name = "Fullbright",
     Default = false,
     Callback = function(state)
@@ -3599,7 +3595,7 @@ utilityGroup:AddToggle({
     end,
 })
 
-utilityGroup:AddToggle({
+Tabs.Misc:Toggle({
     Name = "Remove Fog",
     Default = false,
     Callback = function(state)
@@ -3613,10 +3609,10 @@ utilityGroup:AddToggle({
     end,
 })
 
--- [ADDED v7.3] Server Tools groupbox
-local serverGroup = misc_tab:AddGroup({Name = "Server Tools", Side = "Right", Icon = "server"})
 
-serverGroup:AddButton({
+Tabs.Misc:Section({ Title = "Server Tools" })
+
+Tabs.Misc:Button({
     Name = "Server Hop",
     Callback = function()
         Library:Notify({ Title = "Server Hop", Description = "Finding new server...", Time = 2 })
@@ -3624,7 +3620,7 @@ serverGroup:AddButton({
     end
 })
 
-serverGroup:AddButton({
+Tabs.Misc:Button({
     Name = "Rejoin Server",
     Callback = function()
         Library:Notify({ Title = "Rejoin", Description = "Rejoining server...", Time = 2 })
@@ -3632,30 +3628,12 @@ serverGroup:AddButton({
     end
 })
 
-serverGroup:AddDivider()
-serverGroup:AddLabel({ Text = "Current Job ID:" })
-serverGroup:AddLabel({ Text = game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown", Wrap = true })
+Tabs.Misc:Paragraph({ Text = "Current Job ID:" })
+Tabs.Misc:Paragraph({ Text = game.JobId ~= "" and game.JobId:sub(1, 30) .. "..." or "Unknown", Wrap = true })
 
-local remoteSpyGroup = misc_tab:AddGroup({Name = "Remote Spy", Side = "Right", Icon = "bug"})
+Tabs.Misc:Section({ Title = "FPS Unlocker" })
 
-remoteSpyGroup:AddToggle({
-    Name = "Enable Remote Spy",
-    Default = false,
-    Callback = function(state)
-        if state then
-            startRemoteSpy()
-        else
-            stopRemoteSpy()
-        end
-    end,
-})
-
-remoteSpyGroup:AddLabel({ Text = "Logs remote calls to console." })
-remoteSpyGroup:AddLabel({ Text = "Check Developer Console (F9)" })
-
-local fpsUnlockerGroup = misc_tab:AddGroup({Name = "FPS Unlocker", Side = "Right", Icon = "zap"})
-
-fpsUnlockerGroup:AddSlider({
+Tabs.Misc:Slider({
     Name = "FPS Cap",
     Default = 144,
     Min = 30,
@@ -3669,7 +3647,7 @@ fpsUnlockerGroup:AddSlider({
     end,
 })
 
-fpsUnlockerGroup:AddToggle({
+Tabs.Misc:Toggle({
     Name = "Unlock FPS",
     Default = false,
     Callback = function(state)
@@ -3694,12 +3672,11 @@ end
 
 do
 
-local MenuGroup = main_tab:AddGroup({Name = "Menu", Side = "Left", Icon = "wrench"})
 
+Tabs.Misc:Section({ Title = "Menu" })
 
-
-MenuGroup:AddToggle({
-    Name = "Custom Cursor",
+Tabs.Misc:Toggle({
+    Title = "Custom Cursor",
     Default = true,
     Callback = function(Value)
         if Library.ShowCustomCursor ~= nil then
@@ -3708,21 +3685,10 @@ MenuGroup:AddToggle({
     end,
 })
 
-MenuGroup:AddDropdown({
-    Options = { "Left", "Right" },
-    Default = "Right",
-    Name = "Notification Side",
-    Callback = function(Value)
-        if Library.SetNotifySide then
-            Library:SetNotifySide(Value)
-        end
-    end,
-})
-
-MenuGroup:AddDropdown({
-    Options = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
-    Default = "100%",
-    Name = "DPI Scale",
+Tabs.Misc:Dropdown({
+    Title = "DPI Scale",
+    Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
+    Value = "100%",
     Callback = function(Value)
         Value = Value:gsub("%%", "")
         local DPI = tonumber(Value)
@@ -3732,12 +3698,10 @@ MenuGroup:AddDropdown({
     end,
 })
 
-MenuGroup:AddSlider({
-    Name = "Corner Radius",
-    Default = 4,
-    Min = 0,
-    Max = 20,
-    Increment = 1,
+Tabs.Misc:Slider({
+    Title = "Corner Radius",
+    Step = 1,
+    Value = { Min = 0, Max = 20, Default = 4 }
     Callback = function(value)
         if Window and Window.SetCornerRadius then
             Window:SetCornerRadius(value)
@@ -3745,10 +3709,9 @@ MenuGroup:AddSlider({
     end,
 })
 
-Library:Notify({ Title = "VoraHub v8.2", Description = "Script Loaded! Gun|Melee|Medical|Armor|Food|Resources\nRight Shift = toggle menu.", Time = 5 })
+StreeHub:Notify({ Title = "StreeHub v1.0.0", Description = "Script Loaded! Gun|Melee|Medical|Armor|Food|Resources\nRight Shift = toggle menu.", Time = 5 })
 
 local espCounts = { Gun="Red", Melee="Orange", Medical="Green", Armor="Blue", Food="Lime", Resource="Silver" }
-print("VoraHub v8.2 loaded | " .. #itemNames .. " items tracked | Right Shift = menu")
 for cat, col in pairs(espCounts) do
     print(string.format("  %s ESP (%s) - %d items", cat, col, #espSystems[cat].items))
 end
