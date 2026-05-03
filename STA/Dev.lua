@@ -3041,7 +3041,7 @@ Tabs.Player:Slider({
     Flag = "SpeedValue",
 })
 
-Tabs.Player:AddToggle({
+Tabs.Player:Toggle({
     Title = "Inf Jump",
     Flag = "InfJump",
     Default = false,
@@ -3054,22 +3054,16 @@ Tabs.Player:AddToggle({
     end,
 })
 
--- ============================================
--- INF JUMP (FE Bypass v2)
--- Improved: Uses multiple methods for maximum compatibility
--- ============================================
 local infJumpEnabled = false
 local infJumpThread = nil
 local spacePressed = false
 
--- Method 1: JumpRequest event (original)
 local jumpConn = UserInputService.JumpRequest:Connect(function()
     if Toggles.InfJump and Toggles.InfJump.Value then
         local char = LocalPlayer.Character
         if char then
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
-                -- Multiple jump methods for bypass
                 pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
                 pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Freefall) end)
                 pcall(function() humanoid.Jump = true end)
@@ -3079,7 +3073,6 @@ local jumpConn = UserInputService.JumpRequest:Connect(function()
 end)
 table.insert(connections, jumpConn)
 
--- Method 2: InputBegan for spacebar detection (alternative bypass)
 local infJumpInputConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not Toggles.InfJump or not Toggles.InfJump.Value then return end
     if gameProcessed then return end
@@ -3091,10 +3084,8 @@ local infJumpInputConn = UserInputService.InputBegan:Connect(function(input, gam
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             local root = char:FindFirstChild("HumanoidRootPart")
             if humanoid and root then
-                -- Force jump state
                 pcall(function()
                     humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                    -- Small upward velocity boost for anti-cheat bypass
                     root.Velocity = Vector3.new(root.Velocity.X, 50, root.Velocity.Z)
                 end)
             end
@@ -3110,7 +3101,6 @@ local infJumpInputEndedConn = UserInputService.InputEnded:Connect(function(input
 end)
 table.insert(connections, infJumpInputEndedConn)
 
--- Method 3: Heartbeat loop for continuous jump when holding space
 local infJumpHeartbeatConn = RunService.Heartbeat:Connect(function()
     if not Toggles.InfJump or not Toggles.InfJump.Value then return end
     if not spacePressed then return end
@@ -3121,7 +3111,6 @@ local infJumpHeartbeatConn = RunService.Heartbeat:Connect(function()
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
     
-    -- Only apply if on ground or already jumping
     local state = humanoid:GetState()
     if state == Enum.HumanoidStateType.Running or state == Enum.HumanoidStateType.RunningNoPhysics then
         pcall(function()
@@ -3131,8 +3120,8 @@ local infJumpHeartbeatConn = RunService.Heartbeat:Connect(function()
 end)
 table.insert(connections, infJumpHeartbeatConn)
 
-movementGroup:AddToggle({
-    Name = "NoClip",
+Tabs.Player:Toggle({
+    Title = "NoClip",
     Flag = "NoClip",
     Default = false,
     Callback = function(state)
@@ -3144,8 +3133,8 @@ movementGroup:AddToggle({
     end,
 })
 
-movementGroup:AddToggle({
-    Name = "Fly",
+Tabs.Player:Toggle({
+    Title = "Fly",
     Flag = "Fly",
     Default = false,
     Callback = function(state)
@@ -3159,50 +3148,45 @@ movementGroup:AddToggle({
     end,
 })
 
-movementGroup:AddSlider({
-    Name = "Fly Speed",
-    Default = 50,
-    Min = 10,
-    Max = 300,
-    Increment = 1,
-    Suffix = " studs/s",
+Tabs.Player:Slider({
+    Title = "Fly Speed",
+    Step = 1,
+    Value = { Min = 10, Max = 300, Default = 50 },
 })
 
-movementGroup:AddToggle({
-    Name = "Auto Sprint",
+Tabs.Player:Toggle({
+    Title = "Auto Sprint",
     Flag = "AutoSprint",
     Default = false,
     Callback = function(state)
         if state then
             startAutoSprint()
-            Library:Notify({ Title = "Auto Sprint", Description = "Enabled (holding LeftShift)", Time = 2 })
+            StreeHub:Notify({ Title = "Auto Sprint", Content = "Enabled (holding LeftShift)", Time = 2 })
         else
             stopAutoSprint()
-            Library:Notify({ Title = "Auto Sprint", Description = "Disabled", Time = 2 })
+            StreeHub:Notify({ Title = "Auto Sprint", Content = "Disabled", Time = 2 })
         end
     end,
 })
 
--- [ADDED v7.3] Bunny Hop toggle
-movementGroup:AddToggle({
-    Name = "Bunny Hop",
+Tabs.Player:AddToggle({
+    StreeHub = "Bunny Hop",
     Flag = "BunnyHop",
     Default = false,
     Callback = function(state)
         if state then
             startBhop()
-            Library:Notify({ Title = "Bunny Hop", Description = "Enabled - jump while moving!", Time = 2 })
+            StreeHub:Notify({ Title = "Bunny Hop", Description = "Enabled - jump while moving!", Time = 2 })
         else
             stopBhop()
-            Library:Notify({ Title = "Bunny Hop", Description = "Disabled", Time = 2 })
+            StreeHub:Notify({ Title = "Bunny Hop", Description = "Disabled", Time = 2 })
         end
     end,
 })
 
--- [ADDED] Funny Dance FE groupbox
 local danceGroup = player_tab:AddGroup({Name = "Funny Dance FE", Side = "Right", Icon = "music"})
 
-danceGroup:AddToggle({
+Tabs.Player:AddToggle({
     Name = "Funny Dance",
     Default = false,
     Callback = function(state)
@@ -3216,25 +3200,23 @@ danceGroup:AddToggle({
     end,
 })
 
-danceGroup:AddDropdown({
+Tabs.Player:Dropdown({
+    Title = "Dance Style",
     Options = { "Shuffle (Dance 1)", "Twist (Dance 2)", "Robot (Dance 3)" },
     Default = 1,
-    Name = "Dance Style",
 })
 
-end -- Player Tab local scope
+end
 
--- ============================================
--- UI: COMBAT TAB
--- ============================================
-do -- Combat Tab local scope
+
+do
 
 SaveManager:BuildConfigSection(combat_tab)
 
-local killAuraGroup = combat_tab:AddGroup({Name = "Kill Aura", Side = "Left", Icon = "target"})
+Tabs.Combat:Section({ Title = "Kill Aura" })
 
-killAuraGroup:AddToggle({
-    Name = "Kill Aura",
+Tabs.Combat:Toggle({
+    Title = "Kill Aura",
     Flag = "KillAura",
     Default = false,
     Callback = function(state)
@@ -3248,71 +3230,63 @@ killAuraGroup:AddToggle({
     end,
 })
 
-killAuraGroup:AddDropdown({
+Tabs.Combat:Dropdown({
+    Title = "Target Priority",
     Options = {"Nearest", "Lowest HP", "Highest HP"},
     Default = 1,
     Flag = "KillAuraPriority",
-    Name = "Target Priority",
 })
 
-killAuraGroup:AddToggle({
-    Name = "Auto-Equip Weapon",
+Tabs.Combat:Toggle({
+    Title = "Auto-Equip Weapon",
     Flag = "KillAuraAutoEquip",
     Default = false,
 })
 
-killAuraGroup:AddToggle({
-    Name = "Show Target Indicator",
+Tabs.Combat:Toggle({
+    Title = "Show Target Indicator",
     Flag = "KillAuraShowIndicator",
     Default = true,
 })
 
-killAuraGroup:AddToggle({
-    Name = "Extended Range (+20 studs)",
+Tabs.Combat:Toggle({
+    Title = "Extended Range (+20 studs)",
     Flag = "KillAuraExtendedRange",
     Default = true,
 })
 
-killAuraGroup:AddSlider({
-    Name = "Base Range",
+Tabs.Combat:Slider({
+    Title = "Base Range",
     Flag = "KillAuraRange",
-    Default = 10,
-    Min = 1,
-    Max = 100,
-    Increment = 1,
+    Step = 1,
+    Value = { Min = 1, Max = 100, Default = 10 },
     Suffix = " studs",
 })
 
-killAuraGroup:AddSlider({
-    Name = "Swing Delay",
+Tabs.Combat:Slider({
+    Title = "Swing Delay",
     Flag = "KillAuraSwingRate",
-    Default = 0.1,
-    Min = 0.05,
-    Max = 1.0,
-    Increment = 0.01,
+    Step = 0.01,
+    Value = { Min = 0.05, Max = 1.0, Default = 0.1 },
     Suffix = " s",
 })
 
-killAuraGroup:AddToggle({
-    Name = "Massacre Mode (No Cooldown)",
+Tabs.Combat:Toggle({
+    Title = "Massacre Mode (No Cooldown)",
     Flag = "KillAuraMassacre",
     Default = false,
 })
 
-killAuraGroup:AddLabel({ Text = "Weapon Speeds (Enhanced):", Wrap = true })
-killAuraGroup:AddLabel({ Text = "  Knife/Dagger: 0.12-0.15s", Wrap = true })
-killAuraGroup:AddLabel({ Text = "  Katana/Machete: 0.18-0.25s", Wrap = true })
-killAuraGroup:AddLabel({ Text = "  Bat/Spiked Bat: 0.35s", Wrap = true })
-killAuraGroup:AddLabel({ Text = "  Fire Axe/Sledge: 0.45-0.55s", Wrap = true })
+Tabs.Combat:Paragraph({ Title = "Weapon Speeds (Enhanced):" })
+Tabs.Combat:Paragraph({ Title = "  Knife/Dagger: 0.12-0.15s" })
+Tabs.Combat:Paragraph({ Title = "  Katana/Machete: 0.18-0.25s" })
+Tabs.Combat:Paragraph({ Title = "  Bat/Spiked Bat: 0.35s" })
+Tabs.Combat:Paragraph({ Title = "  Fire Axe/Sledge: 0.45-0.55s" })
 
--- ============================================
--- AIMBOT UI
--- [ADDED v7.3] Combat tab - Aimbot controls
--- ============================================
-local aimbotGroup = combat_tab:AddGroup({Name = "Aimbot", Side = "Right", Icon = "crosshair"})
+Tabs.Combat:Section({ Title = "Aimbot" })
 
-aimbotGroup:AddToggle({
-    Name = "Aimbot",
+Tabs.Combat:Toggle({
+    Title = "Aimbot",
     Default = false,
     Callback = function(state)
         if state then
@@ -3325,68 +3299,59 @@ aimbotGroup:AddToggle({
     end,
 })
 
-aimbotGroup:AddDropdown({
-    Name = "Target Mode",
+Tabs.Combat:Dropdown({
+    Title = "Target Mode",
     Default = "Mobs",
     Options = {"Mobs", "Players", "Both"},
 })
 
-aimbotGroup:AddDropdown({
-    Name = "Aim Part",
+Tabs.Combat:Dropdown({
+    Title = "Aim Part",
     Default = "Head",
     Options = {"Head", "HumanoidRootPart", "Torso", "UpperTorso"},
 })
 
-aimbotGroup:AddDropdown({
-    Name = "Target Priority",
+Tabs.Combat:Dropdown({
+    Title = "Target Priority",
     Default = "Distance",
     Options = {"Distance", "FOV"},
 })
 
-aimbotGroup:AddSlider({
-    Name = "Max Range",
-    Default = 200,
-    Min = 50,
-    Max = 1000,
-    Increment = 1,
+Tabs.Combat:Slider({
+    Title = "Max Range",
+    Step = 1,
+    Value = { Min = 50, Max = 1000, Default = 200 },
     Suffix = " studs",
 })
 
-aimbotGroup:AddSlider({
-    Name = "FOV Radius",
-    Default = 100,
-    Min = 10,
-    Max = 500,
-    Increment = 1,
+Tabs.Combat:Slider({
+    Title = "FOV Radius",
+    Step = 1,
+    Value = { Min = 10, Max = 500, Default = 100 },
     Suffix = " px",
 })
 
-aimbotGroup:AddSlider({
-    Name = "Smoothness",
+Tabs.Combat:Slider({
+    Title = "Smoothness",
+    Step = 0.01,
+    Value = { Min = 0, Max = 1, Default = 0.3 },
     Default = 0.3,
-    Min = 0,
-    Max = 1,
-    Increment = 0.01,
 })
 
-aimbotGroup:AddToggle({
-    Name = "Velocity Prediction",
+Tabs.Combat:Toggle({
+    Title = "Velocity Prediction",
     Default = false,
 })
 
-aimbotGroup:AddSlider({
-    Name = "Prediction Amount",
-    Default = 0.15,
-    Min = 0.05,
-    Max = 0.5,
-    Increment = 0.01,
+Tabs.Combat:Slider({
+    Title = "Prediction Amount",
+    Step = 0.01,
+    Value = { Min = 0.05, Max = 0.5, Default = 0.15 },
     Suffix = " s",
 })
 
-aimbotGroup:AddDivider()
-
-aimbotGroup:AddToggle({
-    Name = "FOV Circle",
+Tabs.Combat:Toggle({
+    Title = "FOV Circle",
     Default = false,
 })
 
@@ -3433,7 +3398,6 @@ autoPickupGroup:AddToggle({
     Default = false,
 })
 
-autoPickupGroup:AddDivider()
 autoPickupGroup:AddLabel({ Text = "FE Methods (combine to test)", Wrap = true })
 
 autoPickupGroup:AddToggle({
@@ -3470,7 +3434,6 @@ autoPickupGroup:AddDropdown({
     Searchable = true,
 })
 
-autoPickupGroup:AddDivider()
 autoPickupGroup:AddLabel({ Text = "Blacklist (blocks PickUpItem remote)" })
 autoPickupGroup:AddDropdown({
     Options = itemNames,
@@ -3522,7 +3485,6 @@ bringPickupGroup:AddDropdown({
     Name = "Sort Order",
 })
 
-bringPickupGroup:AddDivider()
 bringPickupGroup:AddLabel({ Text = "Filter (" .. #pickupItemNames .. " Items)" })
 bringPickupGroup:AddDropdown({
     Options = pickupItemNames,
