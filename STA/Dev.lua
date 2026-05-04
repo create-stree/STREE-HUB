@@ -3355,181 +3355,168 @@ Tabs.Combat:Toggle({
     Default = false,
 })
 
-end -- Combat Tab local scope
+end
 
--- ============================================
--- UI: EXPLOITS TAB
--- ============================================
-do -- Exploits Tab local scope
+do
 
 SaveManager:BuildConfigSection(auto_tab)
 
--- LEFT: Auto Pickup (proximity-based, no player teleport)
-local autoPickupGroup = auto_tab:AddGroup({Name = "Auto Pickup", Side = "Left", Icon = "magnet"})
+Tabs.Auto:Section({ Title = "Kill Aura" })
 
-autoPickupGroup:AddToggle({
-    Name = "Auto Pickup",
+Tabs.Auto:Toggle({
+    Title = "Auto Pickup",
     Flag = "AutoPickup",
     Default = false,
     Callback = function(state)
         if state then
             startAutoPickup()
-            Library:Notify({ Title = "Auto Pickup", Description = "Active – " .. (Options.AutoPickupRadius and Options.AutoPickupRadius.Value or 20) .. " stud radius", Time = 2 })
+            StreeHub:Notify({ Title = "Auto Pickup", Content = "Active – " .. (Options.AutoPickupRadius and Options.AutoPickupRadius.Value or 20) .. " stud radius", Duration = 2 })
         else
             stopAutoPickup()
-            Library:Notify({ Title = "Auto Pickup", Description = "Stopped", Time = 2 })
+            StreeHub:Notify({ Title = "Auto Pickup", Content = "Stopped", Duration = 2 })
         end
     end,
 })
 
-autoPickupGroup:AddSlider({
-    Name = "Radius",
+Tabs.Auto:Slider({
+    Title = "Radius",
     Flag = "AutoPickupRadius",
-    Default = 20,
-    Min = 5,
-    Max = 100,
-    Increment = 1,
+    Value = {
+        Default = 20,
+        Min = 5,
+        Max = 100,
+    },
+    Step = 1,
     Suffix = " studs",
 })
 
-autoPickupGroup:AddToggle({
-    Name = "All Items",
+Tabs.Auto:Toggle({
+    Title = "All Items",
     Flag = "AutoPickupAll",
     Default = false,
 })
 
-autoPickupGroup:AddLabel({ Text = "FE Methods (combine to test)", Wrap = true })
+Tabs.Auto:Paragraph({ Title = "FE Methods (combine to test)" })
 
-autoPickupGroup:AddToggle({
-    Name = "A – Remote (PickUpItem)",
+Tabs.Auto:Toggle({
+    Title = "A – Remote (PickUpItem)",
     Flag = "AutoPickupMethodRemote",
     Default = true,
 })
 
-autoPickupGroup:AddToggle({
-    Name = "B – Touch Simulate",
+Tabs.Auto:Toggle({
+    Title = "B – Touch Simulate",
     Flag = "AutoPickupMethodTouch",
     Default = true,
 })
 
-autoPickupGroup:AddToggle({
-    Name = "C – ProximityPrompt",
+Tabs.Auto:Toggle({
+    Title = "C – ProximityPrompt",
     Flag = "AutoPickupMethodPrompt",
     Default = true,
 })
 
-autoPickupGroup:AddToggle({
-    Name = "D – Move Items (Aggressive)",
+Tabs.Auto:AddToggle({
+    Title = "D – Move Items (Aggressive)",
     Flag = "AutoPickupMethodMove",
     Default = true,
 })
 
-autoPickupGroup:AddDivider()
-autoPickupGroup:AddLabel({ Text = "Item Whitelist (when All Items is off)" })
-autoPickupGroup:AddDropdown({
+Tabs.Auto:Paragraph({ Title = "Item Whitelist (when All Items is off)" })
+Tabs.Auto:Dropdown({
     Options = itemNames,
     Default = {},
     Multi = true,
-    Name = "Whitelist",
+    Title = "Whitelist",
     Searchable = true,
 })
 
-autoPickupGroup:AddLabel({ Text = "Blacklist (blocks PickUpItem remote)" })
-autoPickupGroup:AddDropdown({
+Tabs.Auto:Paragraph({ Title = "Blacklist (blocks PickUpItem remote)" })
+Tabs.Auto:Dropdown({
     Options = itemNames,
     Default = {
-        -- Food (auto-consume on pickup)
         "Chips", "Carrot", "Bloxiade", "Beans", "MRE", "Bloxy Cola",
-        -- Fuel
         "Nuclear Fuel", "Refined Fuel", "Fuel",
-        -- Misc (not in Bring Pickup)
         "Power Armor Arm", "Power Armor Core", "Radio Tower Part",
-        -- Resources
         "AC", "Battery", "Battery Pack", "Bucket", "Dumbell", "Exhaust Pipe",
         "Reactor Component", "Refined Metal", "Satellite Dish", "Scrap", "Screws",
         "Spatula", "Tray", "TV", "Watch", "Zombie Heart",
-        -- Abilities
         "Airstrike", "Attack Order", "Call of the Dead", "Summon Brute",
         "Summon Zombies", "Taunt", "The Future", "The Past", "The Present",
     },
     Multi = true,
-    Name = "Blacklist",
+    Title = "Blacklist",
     Searchable = true,
 })
 
--- RIGHT: Bring Pickup Item (E-key items: Guns, Melee, Medical, Ammo, etc.)
-local bringPickupGroup = auto_tab:AddGroup({Name = "Bring Pickup Item", Side = "Right", Icon = "download"})
+Tabs.Auto:Section({ Title = "Bring Pickup Item" })
 
-bringPickupGroup:AddToggle({
-    Name = "Bring Pickup Item",
+Tabs.Auto:Toggle({
+    Title = "Bring Pickup Item",
     Default = false,
     Callback = function(state)
         if state then
             startBringPickup()
-            Library:Notify({ Title = "Bring Pickup Item", Description = "Enabled!", Time = 2 })
+            StreeHub:Notify({ Title = "Bring Pickup Item", Content = "Enabled!", Duration = 2 })
         else
             stopBringPickup()
-            Library:Notify({ Title = "Bring Pickup Item", Description = "Disabled", Time = 2 })
+            StreeHub:Notify({ Title = "Bring Pickup Item", Content = "Disabled", Duration = 2 })
         end
     end,
 })
 
-bringPickupGroup:AddToggle({
-    Name = "All Pickup Items",
+Tabs.Auto:Toggle({
+    Title = "All Pickup Items",
     Default = false,
 })
 
-bringPickupGroup:AddDropdown({
+Tabs.Auto:Dropdown({
     Options = {"Nearest First", "Farthest First", "Alphabetical", "Reverse Alphabetical"},
     Default = 1,
-    Name = "Sort Order",
+    Title = "Sort Order",
 })
 
-bringPickupGroup:AddLabel({ Text = "Filter (" .. #pickupItemNames .. " Items)" })
-bringPickupGroup:AddDropdown({
+Tabs.Auto:Paragraph({ Title = "Filter (" .. #pickupItemNames .. " Items)" })
+
+Tabs.Auto:Dropdown({
     Options = pickupItemNames,
     Default = {},
     Multi = true,
-    Name = "Item Filter",
+    Title = "Item Filter",
     Searchable = true,
 })
 
--- RIGHT (second): Repair Aura
-local repairAuraGroup = auto_tab:AddGroup({Name = "Repair Aura", Side = "Right", Icon = "wrench"})
+Tabs.Auto:Section({ Title = "Repair Aura" })
 
-repairAuraGroup:AddToggle({
-    Name = "Repair Aura",
+Tabs.Auto:Toggle({
+    Title = "Repair Aura",
     Default = false,
     Callback = function(state)
         if state then
             startRepairAura()
-            Library:Notify({ Title = "Repair Aura", Description = "Active – repairing structures within " .. (Options.RepairAuraRange and Options.RepairAuraRange.Value or 30) .. " studs", Time = 2 })
+            StreeHub:Notify({ Title = "Repair Aura", Content = "Active – repairing structures within " .. (Options.RepairAuraRange and Options.RepairAuraRange.Value or 30) .. " studs", Duration = 2 })
         else
             stopRepairAura()
-            Library:Notify({ Title = "Repair Aura", Description = "Stopped", Time = 2 })
+            StreeHub:Notify({ Title = "Repair Aura", Content = "Stopped", Duration = 2 })
         end
     end,
 })
 
-repairAuraGroup:AddSlider({
-    Name = "Range",
-    Default = 30,
-    Min = 5,
-    Max = 30,
-    Increment = 1,
+Tabs.Auto:Slider({
+    Title = "Range",
+    Value = { Default = 30, Min = 5, Max = 30 },
+    Step = 1,
     Suffix = " studs",
 })
 
-repairAuraGroup:AddSlider({
-    Name = "Rate",
-    Default = 1,
-    Min = 1,
-    Max = 10,
-    Increment = 1,
+Tabs.Auto:Slider({
+    Title = "Rate",
+    Value = { Default = 1, Min = 1, Max = 10, }
+    Step = 1,
     Suffix = "/s",
 })
 
-repairAuraGroup:AddLabel({ Text = "Requires: Repair Hammer equipped", Wrap = true })
+Tabs.Auto:Paragraph({ Title = "Requires: Repair Hammer equipped" })
 
 end
 
@@ -3677,7 +3664,7 @@ Tabs.Misc:Slider({
     end,
 })
 
-StreeHub:Notify({ Title = "StreeHub v1.0.0", Description = "Script Loaded! Gun|Melee|Medical|Armor|Food|Resources\nRight Shift = toggle menu.", Time = 5 })
+StreeHub:Notify({ Title = "StreeHub v1.0.0", Content = "Script Loaded! Gun|Melee|Medical|Armor|Food|Resources\nRight Shift = toggle menu.", Duration = 4 })
 
 local espCounts = { Gun="Red", Melee="Orange", Medical="Green", Armor="Blue", Food="Lime", Resource="Silver" }
 for cat, col in pairs(espCounts) do
