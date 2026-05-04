@@ -2848,7 +2848,7 @@ Tabs.Main:Toggle({
 
 Tabs.Main:Section({ Title = "Visual Setting" })
 
-Tabs.Main:AddToggle({
+Tabs.Main:Toggle({
     Name = "Show FPS",
     Default = true,
     Callback = function(val)
@@ -2856,7 +2856,7 @@ Tabs.Main:AddToggle({
     end
 })
 
-Tabs.Main:AddToggle({
+Tabs.Main:Toggle({
     Name = "Show Ping",
     Default = true,
     Callback = function(val)
@@ -2894,7 +2894,7 @@ Tabs.Visual:Section({ Title = "ESP Setting" })
 Tabs.Visual:Slider({
     Title = "Max Distance",
     Step = 1,
-    Value = { Min = 50, Max = 2000, Default = 300}
+    Value = { Min = 50, Max = 2000, Default = 300},
     Callback = function()
         refreshMobESP(); refreshPlayerESP(); refreshStructureESP()
         for _, sys in pairs(espSystems) do sys.refresh() end
@@ -2920,7 +2920,7 @@ Tabs.Visual:Toggle({
 Tabs.Visual:Slider({
     Title = "Text Size",
     Step = 1,
-    Value = { Min = 8, Max = 24, Default = 10 }
+    Value = { Min = 8, Max = 24, Default = 10 },
     Callback = function(v) 
         applyESPTextSize(v) 
     end
@@ -2929,7 +2929,7 @@ Tabs.Visual:Slider({
 Tabs.Visual:Slider({
     Title = "Fill Transparency",
     Step = 1,
-    Value = { Default = 40Min = 0, Max = 100, Default = }
+    Value = { Default = 40Min = 0, Max = 100, Default = },
     Callback = function(v) 
         espConfig.fillTransparency = v / 100; applyESPTransparency() 
     end
@@ -2938,7 +2938,7 @@ Tabs.Visual:Slider({
 Tabs.Visual:Slider({
     Title = "Outline Transparency", 
     Step = 1, 
-    Value = { Min = 0, Max = 100, Default = 0 }
+    Value = { Min = 0, Max = 100, Default = 0 },
     Callback = function(v) 
         espConfig.outlineTransparency = v / 100; applyESPTransparency() 
     end
