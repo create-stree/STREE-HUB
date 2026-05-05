@@ -2458,7 +2458,9 @@ end
 
 Tabs.Main:Section({ Title = "Extra ESP" })
 
-local espMaxDistSlider = Tabs.Main:Slider({
+Options.ESPMaxDistance = Options.ESPMaxDistance or { Value = 500 }
+
+Tabs.Main:Slider({
     Title = "Max ESP Distance",
     Step = 50,
     Value = { Min = 50, Max = 1000, Default = 500 },
@@ -2466,7 +2468,6 @@ local espMaxDistSlider = Tabs.Main:Slider({
         Options.ESPMaxDistance = { Value = val }
     end
 })
-Options.ESPMaxDistance = { Value = espMaxDistSlider.Value }
 
 Tabs.Main:Slider({
     Title = "Text Size ESP",
