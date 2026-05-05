@@ -1463,3 +1463,582 @@ local function startKillAura()
         end
     end)
 end
+
+
+local function stopAimbot()
+    if aimbotConn then
+        aimbotConn:Disconnect()
+        aimbotConn = nil
+    end
+    aimbotTarget = nil
+    if fovCircle then fovCircle.Visible = false end
+end
+
+local function getAimbotTarget()
+    local char = LocalPlayer.Character
+    if not char then return nil end
+    local myRoot = char:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    local camera = Workspace.CurrentCamera
+    if not camera then return nil end
+
+    local viewportSize = camera.ViewportSize
+    local screenCenter = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+
+    local fov = Options.AimbotFOV and Options.AimbotFOV.Value or 100
+    local maxRange = Options.AimbotRange and Options.AimbotRange.Value or 500
+    local targetMode = Options.AimbotTarget and Options.AimbotTarget.Value or "Mobs"
+    local aimPart = Options.AimbotPart and Options.AimbotPart.Value or "Head"
+
+    local bestTarget = nil
+    local bestScore = math.huge
+
+    local function isValidTarget(targetChar, targetRoot)
+        if not targetChar or not targetRoot then return false end
+        if targetChar == char then return false end
+
+        local dist = (targetRoot.Position - myRoot.Position).Magnitude
+        if dist > maxRange then return false end
+
+        local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.Health <= 0 then return false end
+
+        local screenPos, onScreen = camera:WorldToViewportPoint(targetRoot.Position)
+        if not onScreen then return false end
+
+        local fovDist = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+        if fovDist > fov then return false end
+
+        return true, dist, fovDist, screenPos
+    end
+
+    if targetMode == "Mobs" or targetMode == "Both" then
+        if charactersFolder then
+            for _, mob in ipairs(charactersFolder:GetChildren()) do
+                if table.find(mobNames, mob.Name) then
+                    local mobRoot = mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("Torso") or mob:FindFirstChild("UpperTorso")
+                    local valid, dist, fovDist = isValidTarget(mob, mobRoot)
+                    if valid then
+                        local score = Options.AimbotPriority and Options.AimbotPriority.Value == "FOV" and fovDist or dist
+                        if score < bestScore then
+                            bestScore = score
+                            bestTarget = {character = mob, rootPart = mobRoot}
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if targetMode == "Players" or targetMode == "Both" then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                local pChar = player.Character
+                if pChar then
+                    local pRoot = pChar:FindFirstChild("HumanoidRootPart")
+                    local valid, dist, fovDist = isValidTarget(pChar, pRoot)
+                    if valid then
+                        local score = Options.AimbotPriority and Options.AimbotPriority.Value == "FOV" and fovDist or dist
+                        if score < bestScore then
+                            bestScore = score
+                            bestTarget = {character = pChar, rootPart = pRoot}
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return bestTarget
+end
+
+local function startAimbot()
+    stopAimbot()
+    aimbotConn = RunService.RenderStepped:Connect(function()
+        if not Toggles.Aimbot or not Toggles.Aimbot.Value then
+            if fovCircle then fovCircle.Visible = false end
+            return
+        end
+
+        local char = LocalPlayer.Character
+        if not char then return end
+
+        local camera = Workspace.CurrentCamera
+        if not camera then return end
+
+        local target = getAimbotTarget()
+        aimbotTarget = target
+
+        if not fovCircle then
+            fovCircle = Drawing.new("Circle")
+            fovCircle.Filled = false
+            fovCircle.NumSides = 64
+            fovCircle.Thickness = 1.5
+            fovCircle.Transparency = 1
+        end
+        if Toggles.AimbotFOVCircle and Toggles.AimbotFOVCircle.Value then
+            local vp = camera.ViewportSize
+            fovCircle.Position = Vector2.new(vp.X / 2, vp.Y / 2)
+            fovCircle.Radius = Options.AimbotFOV and Options.AimbotFOV.Value or 100
+            fovCircle.Color = Color3.fromRGB(255, 255, 255)
+            fovCircle.Visible = true
+        else
+            fovCircle.Visible = false
+        end
+
+        if not target then return end
+
+        local aimPartName = Options.AimbotPart and Options.AimbotPart.Value or "Head"
+        local targetPart = target.character:FindFirstChild(aimPartName)
+
+        if not targetPart or not targetPart:IsA("BasePart") then
+            targetPart = target.rootPart
+        end
+
+        if not targetPart then return end
+
+        local targetPos = targetPart.Position
+        if Toggles.AimbotPrediction and Toggles.AimbotPrediction.Value then
+            local velocity = targetPart.AssemblyLinearVelocity
+            local predictionAmount = Options.AimbotPredictionAmount and Options.AimbotPredictionAmount.Value or 0.1
+            targetPos = targetPos + (velocity * predictionAmount)
+        end
+
+        local myRoot = char:FindFirstChild("HumanoidRootPart")
+        if not myRoot then return end
+
+        local myHead = char:FindFirstChild("Head")
+        if not myHead then return end
+
+        local aimPos = targetPos
+        if aimPartName == "Head" then
+
+            aimPos = targetPos + Vector3.new(0, 0.5, 0)
+        end
+
+        local smoothness = Options.AimbotSmoothness and Options.AimbotSmoothness.Value or 0.5
+        local smoothFactor = 1 - (smoothness * 0.95)
+
+        local targetCFrame = CFrame.lookAt(myHead.Position, aimPos)
+
+        if smoothness > 0 then
+            targetCFrame = camera.CFrame:Lerp(targetCFrame, smoothFactor)
+        end
+
+        camera.CFrame = targetCFrame
+    end)
+end
+
+
+local fogOriginalStates = {}
+local fogObjects = {}
+local fogFEConns  = {}
+
+local function makeFogObjectInvisible(obj)
+    local success, err = pcall(function()
+        local originalState = {}
+        
+        if obj:IsA("BasePart") then
+            originalState.Transparency = obj.Transparency
+            originalState.Material = obj.Material
+            obj.Transparency = 1
+            obj.Material = Enum.Material.Air
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("ParticleEmitter") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Beam") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Trail") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Smoke") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Fire") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Sparkles") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Explosion") then
+            originalState.Visible = obj.Visible
+            obj.Visible = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            originalState.Transparency = obj.Transparency
+            obj.Transparency = 1
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Light") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Highlight") then
+            originalState.Enabled = obj.Enabled
+            obj.Enabled = false
+            fogOriginalStates[obj] = originalState
+        elseif obj:IsA("Folder") or obj:IsA("Model") then
+            for _, child in ipairs(obj:GetDescendants()) do
+                makeFogObjectInvisible(child)
+            end
+        end
+    end)
+    if not success then
+        warn("[RemoveFog] Failed to process object: " .. tostring(err))
+    end
+end
+
+local function restoreFogObjectVisibility(obj)
+    if fogOriginalStates[obj] then
+        pcall(function()
+            local state = fogOriginalStates[obj]
+            if obj:IsA("BasePart") then
+                obj.Transparency = state.Transparency
+                obj.Material = state.Material
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Trail") 
+                or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") 
+                or obj:IsA("Light") or obj:IsA("Highlight") then
+                obj.Enabled = state.Enabled
+            elseif obj:IsA("Explosion") then
+                obj.Visible = state.Visible
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                obj.Transparency = state.Transparency
+            end
+        end)
+    end
+end
+
+local function enableRemoveFog()
+    if not originalFog.stored then
+        originalFog.FogEnd   = Lighting.FogEnd
+        originalFog.FogStart = Lighting.FogStart
+        originalFog.stored   = true
+    end
+    Lighting.FogEnd   = 100000
+    Lighting.FogStart = 0
+
+    local atm = Lighting:FindFirstChildOfClass("Atmosphere")
+    if atm then
+        if originalFog.AtmDensity == nil then
+            originalFog.AtmDensity = atm.Density
+            originalFog.AtmHaze    = atm.Haze
+            originalFog.AtmGlare   = atm.Glare
+        end
+        atm.Density = 0
+        atm.Haze    = 0
+        atm.Glare   = 0
+    end
+
+    for _, conn in ipairs(fogFEConns) do pcall(function() conn:Disconnect() end) end
+    fogFEConns = {}
+
+    table.insert(fogFEConns, Lighting.Changed:Connect(function(prop)
+        if not (Toggles.RemoveFog and Toggles.RemoveFog.Value) then return end
+        if prop == "FogEnd"   then Lighting.FogEnd   = 100000 end
+        if prop == "FogStart" then Lighting.FogStart = 0      end
+    end))
+
+    local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
+    if atmosphere then
+        table.insert(fogFEConns, atmosphere.Changed:Connect(function(prop)
+            if not (Toggles.RemoveFog and Toggles.RemoveFog.Value) then return end
+            if prop == "Density" then atmosphere.Density = 0 end
+            if prop == "Haze"    then atmosphere.Haze    = 0 end
+            if prop == "Glare"   then atmosphere.Glare   = 0 end
+        end))
+    end
+
+    local fogFolder = Workspace:FindFirstChild("Fog")
+    if fogFolder then
+        fogOriginalStates = {}
+        fogObjects = {}
+
+        for _, child in ipairs(fogFolder:GetChildren()) do
+            table.insert(fogObjects, child)
+            makeFogObjectInvisible(child)
+        end
+        for _, descendant in ipairs(fogFolder:GetDescendants()) do
+            if not fogOriginalStates[descendant] then
+                makeFogObjectInvisible(descendant)
+            end
+        end
+
+        table.insert(fogFEConns, fogFolder.ChildAdded:Connect(function(child)
+            if not (Toggles.RemoveFog and Toggles.RemoveFog.Value) then return end
+            makeFogObjectInvisible(child)
+            for _, desc in ipairs(child:GetDescendants()) do
+                makeFogObjectInvisible(desc)
+            end
+        end))
+
+        StreeHub:Notify({ Title = "Remove Fog", Content = "Enabled – " .. #fogObjects .. " fog objects hidden", Duration = 2 })
+    else
+        StreeHub:Notify({ Title = "Remove Fog", Content = "Enabled – Lighting fog cleared (no Fog folder found)", Duration = 2 })
+    end
+end
+
+local function disableRemoveFog()
+    for _, conn in ipairs(fogFEConns) do pcall(function() conn:Disconnect() end) end
+    fogFEConns = {}
+
+    if originalFog.stored then
+        Lighting.FogEnd   = originalFog.FogEnd
+        Lighting.FogStart = originalFog.FogStart
+    end
+
+    local atm = Lighting:FindFirstChildOfClass("Atmosphere")
+    if atm and originalFog.AtmDensity ~= nil then
+        atm.Density = originalFog.AtmDensity
+        atm.Haze    = originalFog.AtmHaze
+        atm.Glare   = originalFog.AtmGlare
+        originalFog.AtmDensity = nil
+        originalFog.AtmHaze    = nil
+        originalFog.AtmGlare   = nil
+    end
+
+    for obj, _ in pairs(fogOriginalStates) do
+        restoreFogObjectVisibility(obj)
+    end
+
+    fogOriginalStates = {}
+    fogObjects = {}
+
+    StreeHub:Notify({ Title = "Remove Fog", Content = "Disabled – fog restored", Duration = 2 })
+end
+
+
+local function stopBhop()
+    if bhopConn then
+        bhopConn:Disconnect()
+        bhopConn = nil
+    end
+    bhopActive = false
+end
+
+local function startBhop()
+    stopBhop()
+    bhopActive = true
+    
+    bhopConn = RunService.RenderStepped:Connect(function()
+        if not Toggles.BunnyHop or not Toggles.BunnyHop.Value then return end
+        
+        local char = LocalPlayer.Character
+        if not char then return end
+        
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        local root = char:FindFirstChild("HumanoidRootPart")
+        
+        if not humanoid or not root then return end
+        
+        local moveDir = humanoid.MoveDirection
+        if moveDir.Magnitude > 0.1 then
+            local state = humanoid:GetState()
+            if state == Enum.HumanoidStateType.Running or state == Enum.HumanoidStateType.RunningNoPhysics then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
+end
+
+local funnyDanceTrack = nil
+local funnyDanceConn  = nil
+
+local DANCE_ANIM_IDS = {
+    507770723,
+    507772104,
+    507771281,
+}
+
+local function stopFunnyDance()
+    if funnyDanceConn then
+        funnyDanceConn:Disconnect()
+        funnyDanceConn = nil
+    end
+    if funnyDanceTrack then
+        if funnyDanceTrack ~= "PHYS" then
+            pcall(function() funnyDanceTrack:Stop(0.3) end)
+        end
+        funnyDanceTrack = nil
+    end
+end
+
+local function startFunnyDance()
+    stopFunnyDance()
+
+    local selectedIdx = Options.DanceStyle and Options.DanceStyle.Value or 1
+    local selectedId  = DANCE_ANIM_IDS[selectedIdx] or DANCE_ANIM_IDS[1]
+
+    local physDanceConn = nil
+
+    local function stopPhysDance()
+        if physDanceConn then
+            physDanceConn:Disconnect()
+            physDanceConn = nil
+        end
+    end
+
+    local function startPhysDance(char)
+        stopPhysDance()
+        local t = 0
+        local spinDir = (selectedIdx % 2 == 0) and 1 or -1
+        physDanceConn = RunService.Heartbeat:Connect(function(dt)
+            if not Toggles.FunnyDance or not Toggles.FunnyDance.Value then
+                stopPhysDance()
+                return
+            end
+            local c = char or LocalPlayer.Character
+            if not c then return end
+            local root = c:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            local hum = c:FindFirstChildOfClass("Humanoid")
+            if not hum or hum.Health <= 0 then return end
+            t = t + dt
+            local spin = CFrame.Angles(0, spinDir * dt * (2.5 + selectedIdx * 0.4), 0)
+            local bob  = Vector3.new(0, math.sin(t * 4) * 0.08, 0)
+            root.CFrame = CFrame.new(root.Position + bob) * (root.CFrame - root.CFrame.Position) * spin
+        end)
+        funnyDanceTrack = "PHYS"
+    end
+
+    local function applyDance(char)
+        char = char or LocalPlayer.Character
+        if not char then return end
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if not animator then
+            animator = Instance.new("Animator")
+            animator.Parent = humanoid
+        end
+        if funnyDanceTrack then
+            if funnyDanceTrack == "PHYS" then
+                stopPhysDance()
+            else
+                pcall(function() funnyDanceTrack:Stop(0) end)
+            end
+            funnyDanceTrack = nil
+        end
+
+        local function findNativeAnim()
+            local animateScript = char:FindFirstChild("Animate")
+            if not animateScript then return nil end
+            local danceVariants = {
+                { "dance",  "dance2", "dance3"  },
+                { "Dance",  "Dance2", "Dance3"  },
+                { "emote",  "emote2", "emote3"  },
+                { "Emote",  "Emote2", "Emote3"  },
+            }
+            for _, variants in ipairs(danceVariants) do
+                local folderName = variants[selectedIdx] or variants[1]
+                local folder = animateScript:FindFirstChild(folderName)
+                if folder then
+                    local anim = folder:FindFirstChildOfClass("Animation")
+                    if anim then return anim end
+                end
+            end
+            for _, desc in ipairs(animateScript:GetDescendants()) do
+                if desc:IsA("Animation") then return desc end
+            end
+            return nil
+        end
+
+        local nativeAnim = findNativeAnim()
+        if nativeAnim then
+            local ok, track = pcall(function() return animator:LoadAnimation(nativeAnim) end)
+            if ok and track then
+                track.Priority = Enum.AnimationPriority.Action4
+                track.Looped   = true
+                track:Play(0.15)
+                funnyDanceTrack = track
+                return
+            end
+        end
+
+        local ok2, results = pcall(function()
+            return game:GetObjects("rbxassetid://" .. tostring(selectedId))
+        end)
+        if ok2 and results and results[1] and results[1]:IsA("Animation") then
+            local ok3, track = pcall(function() return animator:LoadAnimation(results[1]) end)
+            if ok3 and track then
+                track.Priority = Enum.AnimationPriority.Action4
+                track.Looped   = true
+                track:Play(0.15)
+                funnyDanceTrack = track
+                return
+            end
+        end
+
+        StreeHub:Notify({ Title = "Funny Dance", Content = "Animation blocked by game – using physics dance instead.", Duration = 3 })
+        startPhysDance(char)
+    end
+
+    applyDance()
+
+    funnyDanceConn = LocalPlayer.CharacterAdded:Connect(function(newChar)
+        task.delay(0.5, function()
+            if Toggles.FunnyDance and Toggles.FunnyDance.Value then
+                selectedIdx = Options.DanceStyle and Options.DanceStyle.Value or 1
+                selectedId  = DANCE_ANIM_IDS[selectedIdx] or DANCE_ANIM_IDS[1]
+                if physDanceConn then stopPhysDance() end
+                applyDance(newChar)
+            end
+        end)
+    end)
+end
+
+
+local function serverHop()
+    local placeId = game.PlaceId
+    local servers = {}
+    local req = syn and syn.request or http_request or request or httprequest
+
+    if req then
+        local sortOrder = math.random(0, 1) == 0 and "Asc" or "Desc"
+        local cursor = ""
+        local maxPages = 3
+
+        for _ = 1, maxPages do
+            local url = "https://games.roblox.com/v1/games/" .. placeId
+                .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
+                .. (cursor ~= "" and ("&cursor=" .. cursor) or "")
+
+            local ok, response = pcall(req, { Url = url, Method = "GET" })
+            if not ok or not response or not response.Body then break end
+
+            local ok2, data = pcall(function()
+                return game:GetService("HttpService"):JSONDecode(response.Body)
+            end)
+            if not ok2 or not data or not data.data then break end
+
+            for _, server in ipairs(data.data) do
+                if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                    table.insert(servers, server.id)
+                end
+            end
+
+            local nextCursor = data.nextPageCursor
+            if not nextCursor or nextCursor == "" or nextCursor == "null" then break end
+            cursor = tostring(nextCursor)
+        end
+    end
+
+    if #servers > 0 then
+        for i = #servers, 2, -1 do
+            local j = math.random(1, i)
+            servers[i], servers[j] = servers[j], servers[i]
+        end
+        TeleportService:TeleportToPlaceInstance(placeId, servers[1], LocalPlayer)
+        StreeHub:Notify({ Title = "Server Hop", Content = "Joining 1 of " .. #servers .. " servers found...", Duration = 3 })
+    else
+        TeleportService:Teleport(placeId, LocalPlayer)
+        StreeHub:Notify({ Title = "Server Hop", Content = "No other servers found, re-matchmaking...", Duration = 3 })
+    end
+end
