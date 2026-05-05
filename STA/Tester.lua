@@ -2042,3 +2042,418 @@ local function serverHop()
         StreeHub:Notify({ Title = "Server Hop", Content = "No other servers found, re-matchmaking...", Duration = 3 })
     end
 end
+
+
+local function rejoinServer()
+    local placeId = game.PlaceId
+    local jobId   = game.JobId
+
+    if not jobId or jobId == "" then
+        pcall(function() TeleportService:Teleport(placeId, LocalPlayer) end)
+        StreeHub:Notify({ Title = "Rejoin", Content = "No JobId – rejoining via matchmaking...", Duratiom = 3 })
+        return
+    end
+
+    StreeHubNotify({ Title = "Rejoin", Comtent = "Rejoining server...", Duration = 2 })
+
+    local ok1, err1 = pcall(function()
+        local opts = Instance.new("TeleportOptions")
+        opts.ServerInstanceId = jobId
+        TeleportService:TeleportAsync(placeId, { LocalPlayer }, opts)
+    end)
+    if ok1 then return end
+    warn("[Rejoin] TeleportAsync failed: " .. tostring(err1))
+
+    local ok2, err2 = pcall(function()
+        TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+    end)
+    if ok2 then return end
+    warn("[Rejoin] TeleportToPlaceInstance failed: " .. tostring(err2))
+
+    pcall(function() TeleportService:Teleport(placeId, LocalPlayer) end)
+    StreeHub:Notify({ Title = "Rejoin", Content = "Server unavailable – rejoining via matchmaking...", Duration = 3 })
+end
+
+
+local remoteSpyConnections = {}
+local oldFireServer = nil
+local oldInvokeServer = nil
+
+local function stopRemoteSpy()
+    remoteSpyEnabled = false
+
+    oldFireServer = nil
+    oldInvokeServer = nil
+
+    for _, conn in ipairs(remoteSpyConnections) do
+        if conn then pcall(function() conn:Disconnect() end) end
+    end
+    remoteSpyConnections = {}
+    
+    StreeHub:Notify({ Title = "Remote Spy", Content = "Disabled", Duration = 2 })
+end
+
+local function startRemoteSpy()
+    stopRemoteSpy()
+    remoteSpyEnabled = true
+    remoteSpyLogs = {}
+    
+    StreeHub:Notify({ Title = "Remote Spy", Content = "Enabled - Check console for remote calls", Duration = 3 })
+
+    local function logRemoteCall(remote, method, args)
+        if not remoteSpyEnabled then return end
+
+        local success, name = pcall(function() return remote.Name end)
+        local success2, path = pcall(function() return remote:GetFullName() end)
+        local success3, className = pcall(function() return remote.ClassName end)
+        
+        local logEntry = {
+            Type = success3 and className or "Unknown",
+            Method = method,
+            Name = success and name or "Unknown",
+            Path = success2 and path or "Unknown",
+            Args = args,
+            Time = os.date("%H:%M:%S")
+        }
+        table.insert(remoteSpyLogs, logEntry)
+        if #remoteSpyLogs > 100 then table.remove(remoteSpyLogs, 1) end
+
+        local argCount = args and #args or 0
+        print(string.format("[RemoteSpy] %s.%s(%s) - %s", 
+            success and name or "Unknown", method, 
+            argCount > 0 and tostring(argCount) .. " args" or "no args",
+            os.date("%H:%M:%S")))
+    end
+
+    if hookmetamethod then
+        local success, err = pcall(function()
+            local originalNamecall
+            originalNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+                local method = getnamecallmethod()
+                if remoteSpyEnabled and (method == "FireServer" or method == "InvokeServer") then
+                    logRemoteCall(self, method, {...})
+                end
+                return originalNamecall(self, ...)
+            end))
+            oldFireServer = originalNamecall
+        end)
+        if success then
+            StreeHub:Notify({ Title = "Remote Spy", Content = "Hooked via hookmetamethod (Potassium)", Duration = 2 })
+            return
+        else
+            warn("[RemoteSpy] hookmetamethod failed: " .. tostring(err))
+        end
+    end
+
+    if hookfunction then
+        local success, err = pcall(function()
+            local tempRemote = Instance.new("RemoteEvent")
+            local tempFunc = Instance.new("RemoteFunction")
+
+            oldFireServer = hookfunction(tempRemote.FireServer, function(self, ...)
+                if remoteSpyEnabled then logRemoteCall(self, "FireServer", {...}) end
+                return oldFireServer(self, ...)
+            end)
+
+            oldInvokeServer = hookfunction(tempFunc.InvokeServer, function(self, ...)
+                if remoteSpyEnabled then logRemoteCall(self, "InvokeServer", {...}) end
+                return oldInvokeServer(self, ...)
+            end)
+
+            tempRemote:Destroy()
+            tempFunc:Destroy()
+        end)
+        if success then
+            StreeHub:Notify({ Title = "Remote Spy", Content = "Hooked via hookfunction", Duration = 2 })
+            return
+        else
+            warn("[RemoteSpy] hookfunction failed: " .. tostring(err))
+        end
+    end
+
+    if getrawmetatable and setreadonly then
+        local mt = getrawmetatable(game)
+        local oldNamecall = mt.__namecall
+        local success, err = pcall(function()
+            setreadonly(mt, false)
+            mt.__namecall = newcclosure(function(self, ...)
+                local method = getnamecallmethod()
+                if remoteSpyEnabled and (method == "FireServer" or method == "InvokeServer") then
+                    logRemoteCall(self, method, {...})
+                end
+                return oldNamecall(self, ...)
+            end)
+            setreadonly(mt, true)
+        end)
+        if success then
+            StreeHub:Notify({ Title = "Remote Spy", Content = "Hooked via namecall", Duration = 2 })
+            return
+        else
+            warn("[RemoteSpy] namecall hook failed: " .. tostring(err))
+            pcall(function()
+                setreadonly(mt, false)
+                mt.__namecall = oldNamecall
+                setreadonly(mt, true)
+            end)
+        end
+    end
+
+    StreeHub:Notify({ Title = "Remote Spy", Content= "Running in passive mode (no hooks available)", Duration= 4 })
+
+    if Remotes then
+        print("[RemoteSpy] === Available Remotes ===")
+        for _, folder in ipairs(Remotes:GetChildren()) do
+            for _, remote in ipairs(folder:GetChildren()) do
+                if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
+                    print(string.format("[RemoteSpy] %s: %s", remote.ClassName, remote:GetFullName()))
+                    table.insert(remoteSpyLogs, {
+                        Type = remote.ClassName,
+                        Method = "Discovered",
+                        Name = remote.Name,
+                        Path = remote:GetFullName(),
+                        Args = {},
+                        Time = os.date("%H:%M:%S")
+                    })
+                end
+            end
+        end
+        print("[RemoteSpy] === End of Remote List ===")
+    end
+end
+
+local autoPickupActive  = false
+local autoPickupThread  = nil
+local autoPickupAttempts = {}
+
+local function stopAutoPickup()
+    autoPickupActive = false
+    if autoPickupThread then
+        pcall(function() task.cancel(autoPickupThread) end)
+        autoPickupThread = nil
+    end
+    pcall(function() if setsimulationradius then setsimulationradius(50, 300) end end)
+    autoPickupAttempts = {}
+end
+
+local function startAutoPickup()
+    stopAutoPickup()
+    autoPickupActive = true
+
+    pcall(function() if setsimulationradius then setsimulationradius(2048, 2048) end end)
+
+    autoPickupThread = task.spawn(function()
+        while autoPickupActive and Toggles.AutoPickup and Toggles.AutoPickup.Value do
+            local char = LocalPlayer.Character
+            local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+            if not hrp or not droppedItemsFolder then task.wait(0.5) continue end
+
+            local myPos    = hrp.Position
+            local radius   = Options.AutoPickupRadius  and Options.AutoPickupRadius.Value  or 20
+            local allItems = Toggles.AutoPickupAll     and Toggles.AutoPickupAll.Value
+            local whitelist  = Options.AutoPickupWhitelist and Options.AutoPickupWhitelist.Value or {}
+            local blacklist  = Options.AutoPickupBlacklist and Options.AutoPickupBlacklist.Value or {}
+
+            local centerTile = Workspace:FindFirstChild("Map")
+                and Workspace.Map:FindFirstChild("Tiles")
+                and Workspace.Map.Tiles:FindFirstChild("Center")
+            if centerTile then
+                local ok, cf, size = pcall(function() return centerTile:GetBoundingBox() end)
+                if ok and cf and size then
+                    local localPos = cf:PointToObjectSpace(myPos)
+                    if math.abs(localPos.X) <= size.X / 2 and math.abs(localPos.Z) <= size.Z / 2 then
+                        task.wait(0.5) continue
+                    end
+                end
+            end
+
+            local useRemote = not Toggles.AutoPickupMethodRemote or Toggles.AutoPickupMethodRemote.Value
+            local useTouch  = not Toggles.AutoPickupMethodTouch  or Toggles.AutoPickupMethodTouch.Value
+            local usePrompt = not Toggles.AutoPickupMethodPrompt or Toggles.AutoPickupMethodPrompt.Value
+
+            for _, item in ipairs(droppedItemsFolder:GetChildren()) do
+                if not autoPickupActive then break end
+                if not item.Parent then continue end
+
+                if not allItems and not whitelist[item.Name] then continue end
+
+                local mainPart = item.PrimaryPart or getItemMainPart(item)
+                if not mainPart then continue end
+
+                local dist = (mainPart.Position - myPos).Magnitude
+                if dist > radius then continue end
+
+                local now = tick()
+                if autoPickupAttempts[item] and (now - autoPickupAttempts[item]) < 0.35 then continue end
+                autoPickupAttempts[item] = now
+
+                if useRemote then
+                    if not blacklist[item.Name] then
+                        pcall(function()
+                            if pickUpItemRemote then pickUpItemRemote:FireServer(item) end
+                        end)
+                    end
+                    pcall(function()
+                        if adjustBackpackRemote then adjustBackpackRemote:FireServer(item) end
+                    end)
+                end
+
+                if useTouch then
+                    pcall(function()
+                        if firetouchinterest then
+                            firetouchinterest(hrp, mainPart, 0)
+                            firetouchinterest(hrp, mainPart, 1)
+                        end
+                    end)
+                end
+
+                if usePrompt then
+                    pcall(function()
+                        if fireproximityprompt then
+                            local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
+                            if prompt then fireproximityprompt(prompt) end
+                        end
+                    end)
+                end
+
+                task.wait()
+            end
+
+            for itemRef in pairs(autoPickupAttempts) do
+                if not itemRef.Parent then
+                    autoPickupAttempts[itemRef] = nil
+                end
+            end
+
+            task.wait(0.1)
+        end
+
+        autoPickupActive = false
+        pcall(function() if setsimulationradius then setsimulationradius(50, 300) end end)
+    end)
+end
+
+local function stopRepairAura()
+    if repairAuraConn then
+        repairAuraConn:Disconnect()
+        repairAuraConn = nil
+    end
+end
+
+local function startRepairAura()
+    stopRepairAura()
+    local lastFire = 0
+
+    repairAuraConn = RunService.Heartbeat:Connect(function()
+        if not Toggles.RepairAura or not Toggles.RepairAura.Value then return end
+
+        local rate     = Options.RepairAuraRate and Options.RepairAuraRate.Value or 1
+        local interval = 1 / rate
+        local now      = tick()
+        if now - lastFire < interval then return end
+
+        local char = LocalPlayer.Character
+        if not char then return end
+        local tool = char:FindFirstChildOfClass("Tool")
+        if not tool or tool.Name ~= "Repair Hammer" then return end
+
+        local repairRemote = tool:FindFirstChild("Repair")
+        if not repairRemote then return end
+
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        local myPos   = hrp.Position
+        local maxDist = Options.RepairAuraRange and Options.RepairAuraRange.Value or 30
+
+        if not structuresFolder then return end
+        local nearest     = nil
+        local nearestDist = math.huge
+        for _, child in ipairs(structuresFolder:GetDescendants()) do
+            if child:IsA("Model") then
+                local part = child.PrimaryPart or getItemMainPart(child)
+                if part then
+                    local dist = (myPos - part.Position).Magnitude
+                    if dist <= maxDist and dist < nearestDist then
+                        nearestDist = dist
+                        nearest     = child
+                    end
+                end
+            end
+        end
+
+        if nearest then
+            lastFire = now
+            pcall(function()
+                repairRemote:FireServer(nearest)
+            end)
+        end
+    end)
+end
+
+
+local playerAddedConn = Players.PlayerAdded:Connect(function(player)
+    if playerESPVars.ESP then
+        task.wait(2)
+        createPlayerESP(player)
+    end
+end)
+table.insert(connections, playerAddedConn)
+
+local playerRemovingConn = Players.PlayerRemoving:Connect(function(player)
+    removePlayerESP(player)
+end)
+table.insert(connections, playerRemovingConn)
+
+
+LocalPlayer.CharacterRemoving:Connect(function()
+    if autoSprintActive then stopAutoSprint() end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    char:WaitForChild("HumanoidRootPart", 10)
+    task.wait(0.5)
+    if Toggles.AutoSprint and Toggles.AutoSprint.Value then startAutoSprint() end
+    if Toggles.AutoPickup and Toggles.AutoPickup.Value then startAutoPickup() end
+end)
+
+
+local function applyESPTextSize(size)
+    espConfig.textSize = size
+    local small = math.max(size - 2, 8)
+    for _, sys in pairs(espSystems) do
+        for _, esp in pairs(sys.instances) do
+            if esp.NameLabel then esp.NameLabel.TextSize = size end
+            if esp.DistLabel  then esp.DistLabel.TextSize  = small end
+        end
+    end
+    for _, esp in pairs(mobESPInstances) do
+        if esp.NameLabel then esp.NameLabel.TextSize = size end
+        if esp.DistLabel  then esp.DistLabel.TextSize  = small end
+    end
+    for _, esp in pairs(structureESPInstances) do
+        if esp.NameLabel then esp.NameLabel.TextSize = size end
+        if esp.DistLabel  then esp.DistLabel.TextSize  = small end
+    end
+    for _, esp in pairs(playerESPInstances) do
+        if esp.NameLabel   then esp.NameLabel.TextSize   = size  end
+        if esp.ToolLabel   then esp.ToolLabel.TextSize   = small end
+        if esp.HealthLabel then esp.HealthLabel.TextSize = small end
+        if esp.DistLabel   then esp.DistLabel.TextSize   = small end
+    end
+end
+
+local function applyESPTransparency()
+    local fillT    = espConfig.fillTransparency
+    local outlineT = espConfig.outlineTransparency
+    local function updateH(esp)
+        if esp.Highlight and esp.Highlight.Parent then
+            esp.Highlight.FillTransparency    = fillT
+            esp.Highlight.OutlineTransparency = outlineT
+        end
+    end
+    for _, sys in pairs(espSystems) do
+        for _, esp in pairs(sys.instances) do updateH(esp) end
+    end
+    for _, esp in pairs(mobESPInstances)       do updateH(esp) end
+    for _, esp in pairs(structureESPInstances) do updateH(esp) end
+    for _, esp in pairs(playerESPInstances)    do updateH(esp) end
+end
