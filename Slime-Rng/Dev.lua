@@ -1,6 +1,5 @@
 repeat task.wait() until game:IsLoaded()
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -160,7 +159,7 @@ end
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = (premium and "Premium" or "Slime Rng") .. " - " .. version,
+    Author = "Slime Rng",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
@@ -372,6 +371,36 @@ local autoPotionsToggle = Tabs.Main:Toggle({
                 end
             end)
         end
+    end
+})
+
+Tabs.Main:Section({ Title = "Manual" })
+
+Tabs.Main:Button({
+    Title = "Equip Best",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.InventoryService.RemoteFunction:InvokeServer("requestEquipBest")
+    end
+})
+
+Tabs.Main:Button({
+    Title = "Purchase Zone",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.ZonesService.RemoteFunction:InvokeServer("requestPurchaseZone")
+    end
+})
+
+Tabs.Main:Button({
+    Title = "Unlock Machine",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.CraftingService.RemoteFunction:InvokeServer("requestUnlockMachine")
+    end
+})
+
+Tabs.Main:Button({
+    Title = "Claim Offline",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.OfflineEarningsService.RemoteFunction:InvokeServer("requestClaim")
     end
 })
 
@@ -639,7 +668,6 @@ Tabs.Settings:Paragraph({
 
 Tabs.Settings:Dropdown({
     Title = "Select Server",
-    Desc = "Choose a saved server to teleport",
     Values = (function()
         local v = {}
         for _, id in ipairs(savedServers) do
@@ -660,7 +688,6 @@ Tabs.Settings:Dropdown({
 
 Tabs.Settings:Input({
     Title = "Target Server ID",
-    Desc = "Type a server ID and press Enter to save it",
     Default = "",
     Placeholder = "Enter JobId...",
     MultiLine = false,
@@ -683,7 +710,6 @@ Tabs.Settings:Input({
 
 Tabs.Settings:Button({
     Title = "Teleport",
-    Desc = "Teleport to the entered / selected server",
     Callback = function()
         local target
         if inputObj and inputObj.GetValue then
