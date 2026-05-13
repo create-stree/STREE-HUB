@@ -2792,10 +2792,6 @@ local function HookIncomingSkillCheck()
 end
 task.spawn(HookIncomingSkillCheck)
 
--- =====================================================
--- FORCE LEAVE GENERATOR (Cancel generator interaction)
--- Tekan X (PC) atau klik tombol di UI untuk keluar dari generator
--- =====================================================
 function NEX_ForceLeaveGenerator()
     local root = Root
     if not root then return end
@@ -2804,30 +2800,25 @@ function NEX_ForceLeaveGenerator()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
 
-    -- Simpan state dan matikan auto skill check
     local wasAutoSC = VD.AUTO_SkillCheck
     VD.AUTO_SkillCheck = false
 
     task.spawn(function()
-        -- Step 1: Fire RepairEvent dengan false untuk cancel generator
         pcall(function()
             local remotes = ReplicatedStorage:FindFirstChild("Remotes")
             local genRemotes = remotes and remotes:FindFirstChild("Generator")
             if genRemotes then
                 local repairEvent = genRemotes:FindFirstChild("RepairEvent")
                 if repairEvent then
-                    -- Coba fire untuk ActiveQTEPoint jika ada
                     if ActiveQTEPoint then
                         repairEvent:FireServer(ActiveQTEPoint, false)
                     end
-                    
-                    -- Coba fire untuk semua Generator dekat pemain sebagai fallback
+
                     if NEX_Cache and NEX_Cache.Generators then
                         for _, gen in ipairs(NEX_Cache.Generators) do
                             if gen.part and (gen.part.Position - root.Position).Magnitude < 15 then
                                 repairEvent:FireServer(gen.part, false)
                                 
-                                -- Kadang point bernama GeneratorPoint1, GeneratorPoint2, dst
                                 local parent = gen.part.Parent
                                 if parent then
                                     for _, child in ipairs(parent:GetChildren()) do
@@ -2843,11 +2834,9 @@ function NEX_ForceLeaveGenerator()
             end
         end)
 
-        -- Bersihkan state QTE aktif
         ActiveQTEGenerator = nil
         ActiveQTEPoint = nil
 
-        -- Step 2: Mundur sedikit dengan menggerakkan Humanoid langsung
         pcall(function()
             hum:Move(Vector3.new(0, 0, -1), true)
         end)
@@ -2856,7 +2845,6 @@ function NEX_ForceLeaveGenerator()
             hum:Move(Vector3.new(0, 0, 0), true)
         end)
 
-        -- Step 3: Sembunyikan UI skill check
         pcall(function()
             local pg = LocalPlayer:FindFirstChild("PlayerGui")
             if pg then
@@ -2869,7 +2857,6 @@ function NEX_ForceLeaveGenerator()
 
         print("[VD] Force Leave Generator executed")
 
-        -- Re-enable auto skill check setelah delay
         if wasAutoSC then
             task.delay(1.5, function()
                 VD.AUTO_SkillCheck = true
@@ -2879,7 +2866,6 @@ function NEX_ForceLeaveGenerator()
     end)
 end
 
--- Keybind X untuk force leave generator (PC only)
 if not isMobile then
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end
@@ -2920,9 +2906,6 @@ function SetupSkillCheckNamecallHook()
 end
 pcall(SetupSkillCheckNamecallHook)
 
--- =====================================================
--- NO PALLET STUN (metamethod hook)
--- =====================================================
 function SetupNoPalletStun()
     pcall(function()
         local r = ReplicatedStorage:FindFirstChild("Remotes")
@@ -2952,9 +2935,6 @@ function SetupNoPalletStun()
 end
 pcall(SetupNoPalletStun)
 
--- =====================================================
--- ANTI FALL DAMAGE (metamethod hook)
--- =====================================================
 function SetupAntiFallDamage()
     pcall(function()
         local r = ReplicatedStorage:FindFirstChild("Remotes")
@@ -2972,7 +2952,7 @@ function SetupAntiFallDamage()
                     if not checkcaller() and VD.SURV_NoFall and self == fallEvent then
                         local method = getnamecallmethod()
                         if method == "FireServer" then
-                            return nil -- Block fall damage report ke server
+                            return nil
                         end
                     end
                     return old(self, ...)
@@ -2982,9 +2962,7 @@ function SetupAntiFallDamage()
         end
     end)
 end
-pcall(SetupAntiFallDamage)-- =====================================================
--- ANTI BLIND (Flashlight)
--- =====================================================
+pcall(SetupAntiFallDamage)
 function SetupAntiBlind()
     pcall(function()
         local r  = ReplicatedStorage:FindFirstChild("Remotes")
@@ -3002,7 +2980,7 @@ function SetupAntiBlind()
                     if not checkcaller() and VD.KILLER_AntiBlind and self == gb then
                         local method = getnamecallmethod()
                         if method == "FireServer" and GetRole() == "Killer" then
-                            return nil -- Block pengiriman sinyal buta
+                            return nil
                         end
                     end
                     return old(self, ...)
@@ -3014,9 +2992,6 @@ function SetupAntiBlind()
 end
 pcall(SetupAntiBlind)
 
--- =====================================================
--- CAMERA / FOV / THIRD PERSON / SHIFT LOCK
--- =====================================================
 local OriginalFOV          = nil
 local OriginalCameraType   = nil
 local ThirdPersonWasActive = false
@@ -3061,9 +3036,6 @@ local function UpdateShiftLock()
     root.CFrame    = CFrame.new(root.Position, root.Position + flatLook)
 end
 
--- =====================================================
--- NO FOG
--- =====================================================
 local FogCache = {}
 
 local function RemoveFog()
@@ -3109,9 +3081,6 @@ local function RestoreFog()
     end)
 end
 
--- =====================================================
--- NO FALL / NO SLOWDOWN
--- =====================================================
 local function UpdateNoFall()
     if not VD.SURV_NoFall then return end
     local char = LocalPlayer.Character
@@ -3131,9 +3100,6 @@ local function UpdateNoSlowdown()
     if hum and hum.WalkSpeed < 16 then hum.WalkSpeed = VD.SPEED_Value or 16 end
 end
 
--- =====================================================
--- KUNCI KECEPATAN / ANTI BEKU (__newindex Hook)
--- =====================================================
 function SetupAntiStunSlowdown()
     pcall(function()
         local ok, mt = pcall(function() return getrawmetatable(game) end)
@@ -3143,11 +3109,9 @@ function SetupAntiStunSlowdown()
                 local oldNI = mt.__newindex
                 mt.__newindex = newcclosure(function(t, k, v)
                     if not checkcaller() and VD.KILLER_NoSlowdown and GetRole() == "Killer" then
-                        -- Cegah perintah yang mengurangi WalkSpeed drastis (Efek Stun/Kesandung)
                         if k == "WalkSpeed" and typeof(v) == "number" and v < 16 and typeof(t) == "Instance" and t:IsA("Humanoid") then
                             return oldNI(t, k, VD.SPEED_Value or 16)
                         end
-                        -- Cegah perintah yang membekukan posisi karakter (Anchored Stun)
                         if k == "Anchored" and v == true and typeof(t) == "Instance" and t:IsA("BasePart") and t.Name == "HumanoidRootPart" then
                             return oldNI(t, k, false)
                         end
@@ -3161,9 +3125,6 @@ function SetupAntiStunSlowdown()
 end
 task.spawn(SetupAntiStunSlowdown)
 
--- =====================================================
--- FLY
--- =====================================================
 local FlyBodyVelocity = nil
 local FlyBodyGyro     = nil
 
@@ -3219,9 +3180,6 @@ local function UpdateFly()
     end
 end
 
--- =====================================================
--- FOV CIRCLE
--- =====================================================
 local FOVCircle = nil
 if DrawingAvailable then
     FOVCircle = SafeDrawing("Circle")
@@ -3235,9 +3193,6 @@ if DrawingAvailable then
     end
 end
 
--- =====================================================
--- RENDERSTEP: Drawing ESP / Radar / Aimbot / Camera
--- =====================================================
 local function OnRenderStep()
     if VD.Destroyed then
         if DrawingAvailable then
@@ -3268,12 +3223,10 @@ local function OnRenderStep()
     local screenSize   = cam.ViewportSize
     local screenCenter = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
 
-    -- Drawing ESP & Chams
     if DrawingAvailable then
         if VD.DRAWING_ESP then
             DrawingESP_cleanup()
 
-            -- Players
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     if not DrawingESP.cache[player] then
@@ -3284,7 +3237,6 @@ local function OnRenderStep()
                 end
             end
 
-            -- Object ESP helper
             local function renderObj(cacheList, objList, label, fillCol, outlineCol, fillTrans, espCol)
                 for _, obj in ipairs(objList) do
                     local target = obj.model or obj.part
@@ -3319,7 +3271,6 @@ local function OnRenderStep()
             renderObj(oc, NEX_Cache.Windows, "WINDOW", Color3.fromRGB(60, 140, 200), Color3.fromRGB(120, 200, 255), 0.5,
                 Color3.fromRGB(100, 180, 255))
 
-            -- Hooks (special: closest gets different color/label)
             for _, obj in ipairs(NEX_Cache.Hooks) do
                 local target    = obj.model or obj.part
                 local isClosest = VD.ESP_ClosestHook and obj == NEX_Cache.ClosestHook
@@ -3348,7 +3299,6 @@ local function OnRenderStep()
                 end
             end
         else
-            -- Clear all drawing objects when Drawing ESP is disabled
             for _, esp in pairs(DrawingESP.cache) do
                 if esp then
                     pcall(function()
@@ -3366,8 +3316,6 @@ local function OnRenderStep()
             end
             DrawingESP.cache       = {}
             DrawingESP.objectCache = {}
-            -- JANGAN clear Chams disini: dikelola oleh UpdateObjectChams() di Heartbeat
-            -- Chams.ClearAll() -- ini penyebab Object Chams hilang di PC
         end
 
         Radar_step(cam)
@@ -3376,7 +3324,6 @@ local function OnRenderStep()
         if DrawingAvailable then Radar_hideAll() end
     end
 
-    -- Aimbot
     pcall(function()
         if VD.AIM_Enabled then
             Aimbot.Update(cam, cam.ViewportSize, Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2))
@@ -3388,7 +3335,6 @@ local function OnRenderStep()
     UpdateThirdPerson()
     UpdateShiftLock()
 
-    -- FOV circle
     if FOVCircle and DrawingAvailable then
         if VD.AIM_Enabled and VD.AIM_ShowFOV then
             FOVCircle.Position = screenCenter
@@ -3401,9 +3347,6 @@ local function OnRenderStep()
     end
 end
 
--- =====================================================
--- OBJECT CHAMS UPDATE (Highlight-based, bekerja di PC & Mobile)
--- =====================================================
 local function UpdateObjectChams()
     if not VD.ESP_ObjectChams then
         Chams.ClearAll(); return
@@ -3441,7 +3384,6 @@ local function UpdateObjectChams()
     chamObj(NEX_Cache.Pallets,    VD.ESP_Obj_Pallet,    Color3.fromRGB(180,140,70),  Color3.fromRGB(255,210,130), 0.5)
     chamObj(NEX_Cache.Windows,    VD.ESP_Obj_Window,    Color3.fromRGB(60,140,200),  Color3.fromRGB(120,200,255), 0.5)
 
-    -- Hook has logic for closest hook
     for _, obj in ipairs(NEX_Cache.Hooks) do
         local target = obj.model or obj.part
         if VD.ESP_Obj_Hook and target and target.Parent then
@@ -3460,16 +3402,12 @@ local function UpdateObjectChams()
     end
 end
 
--- =====================================================
--- MOBILE GUI (Radar + Aimbot Button + FOV Circle)
--- =====================================================
 local MobileGui = { RadarFrame=nil, RadarDots={}, RadarObjDots={}, AimBtn=nil, FOVFrame=nil, FOVStroke=nil }
 
 local function CreateMobileUI()
     local pg = GetSafeGuiParent()
     if not pg then return end
 
-    -- === MAIN SCREENGUI ===
     local sg = Instance.new("ScreenGui")
     sg.Name           = "NEX_MobileUI"
     sg.ResetOnSpawn   = false
@@ -3478,12 +3416,11 @@ local function CreateMobileUI()
     sg.DisplayOrder   = 100
     sg.Parent         = pg
 
-    -- === RADAR ===
     local RS = VD.RADAR_Size or 130
     local radarF = Instance.new("Frame")
     radarF.Name                    = "Radar"
     radarF.Size                    = UDim2.new(0, RS, 0, RS)
-    radarF.Position                = UDim2.new(0, 20, 0, 120) -- Pindah ke Kiri agar tak tertutup Perks
+    radarF.Position                = UDim2.new(0, 20, 0, 120)
     radarF.BackgroundColor3        = Color3.fromRGB(15,15,15)
     radarF.BackgroundTransparency  = 0.3
     radarF.BorderSizePixel         = 0
@@ -3491,24 +3428,21 @@ local function CreateMobileUI()
     radarF.Parent                  = sg
     local radarCorner = Instance.new("UICorner", radarF)
     radarCorner.Name = "RCorner"
-    radarCorner.CornerRadius = UDim.new(0, 5) -- Default kotak
+    radarCorner.CornerRadius = UDim.new(0, 5)
     local rStroke = Instance.new("UIStroke")
     rStroke.Color = Color3.fromRGB(220,60,60); rStroke.Thickness = 2; rStroke.Parent = radarF
-    -- Crosshair
     local ch = Instance.new("Frame")
     ch.Size = UDim2.new(1,-20,0,1); ch.Position = UDim2.new(0,10,0.5,0)
     ch.BackgroundColor3 = Color3.fromRGB(45,45,45); ch.BorderSizePixel = 0; ch.Parent = radarF
     local cv = Instance.new("Frame")
     cv.Size = UDim2.new(0,1,1,-20); cv.Position = UDim2.new(0.5,0,0,10)
     cv.BackgroundColor3 = Color3.fromRGB(45,45,45); cv.BorderSizePixel = 0; cv.Parent = radarF
-    -- Center player dot
     local cdot = Instance.new("Frame")
     cdot.Size = UDim2.new(0,10,0,10); cdot.Position = UDim2.new(0.5,-5,0.5,-5)
     cdot.BackgroundColor3 = Color3.fromRGB(0,255,0); cdot.BorderSizePixel = 0
     cdot.ZIndex = 5; cdot.Parent = radarF
     Instance.new("UICorner", cdot).CornerRadius = UDim.new(1,0)
     MobileGui.RadarFrame = radarF
-    -- Player dots (20)
     for i = 1, 20 do
         local d = Instance.new("Frame")
         d.Size = UDim2.new(0,8,0,8); d.BackgroundColor3 = Color3.fromRGB(255,65,65)
@@ -3516,7 +3450,6 @@ local function CreateMobileUI()
         Instance.new("UICorner", d).CornerRadius = UDim.new(1,0)
         MobileGui.RadarDots[i] = d
     end
-    -- Object dots (30)
     for i = 1, 30 do
         local d = Instance.new("Frame")
         d.Size = UDim2.new(0,6,0,6); d.BackgroundColor3 = Color3.fromRGB(255,180,50)
@@ -3525,7 +3458,6 @@ local function CreateMobileUI()
         MobileGui.RadarObjDots[i] = d
     end
 
-    -- === FOV CIRCLE ===
     local fovF = Instance.new("Frame")
     fovF.Name                 = "FOVCircle"
     fovF.BackgroundTransparency = 1
@@ -3540,7 +3472,6 @@ local function CreateMobileUI()
     fovStk.Parent = fovF
     MobileGui.FOVFrame = fovF; MobileGui.FOVStroke = fovStk
 
-    -- === AIMBOT BUTTON (ScreenGui terpisah agar AlwaysOnTop) ===
     local aimSG = Instance.new("ScreenGui")
     aimSG.Name           = "NEX_AimBtn"
     aimSG.ResetOnSpawn   = false
@@ -3703,16 +3634,10 @@ task.spawn(function()
     pcall(CreateMobileUI)
 end)
 
--- =====================================================
--- RENDER LOOP: PC (RenderStepped, pakai Drawing)
--- =====================================================
 if DrawingAvailable then
     RunService.RenderStepped:Connect(OnRenderStep)
 end
 
--- =====================================================
--- HEARTBEAT UNIVERSAL: Berjalan di PC & Mobile
--- =====================================================
 RunService.Heartbeat:Connect(function()
     if VD.Destroyed then return end
     local cam = workspace.CurrentCamera
