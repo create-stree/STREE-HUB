@@ -60,6 +60,7 @@ local premiumKeys = {
     "XcVbNmLpQrTyUiOpAsDfGhJkLmNbVcXs",
     "sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig",
     "HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp",
+    "STRE-6SSR-5GWR-M0TW",
     "STRE-RSBD-LOOH-RBKS",
     "developer_access",
     "team_access",
