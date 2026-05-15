@@ -60,6 +60,7 @@ local premiumKeys = {
     "XcVbNmLpQrTyUiOpAsDfGhJkLmNbVcXs",
     "sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig",
     "HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp",
+    "STRE-RSBD-LOOH-RBKS",
     "developer_access",
     "team_access",
 }
@@ -122,6 +123,10 @@ local gameScripts = {
     [89469502395769] = {
         name = "Kick A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Premium.lua"
+    },
+    [92416421522960] = {
+        name = "Slime RNG",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Slime-Rng/Premium.lua"
     },
     [136599248168660] = {
         name = "Solo Hunter",
