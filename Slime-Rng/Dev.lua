@@ -520,8 +520,38 @@ Tabs.Main:Toggle({
         if state then
             task.spawn(function()
                 while autoShootEnabled do
-                    Event_SlimeGun:InvokeServer("tryFireSlimeGun", shootRadius)
-                    task.wait(0.15)
+                    local myPos = clientHRP.Position
+                    local nearestSlime = nil
+                    local nearestDist = math.huge
+
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("Model") and obj.Name:lower():find("slime") then
+                            local hrp = obj:FindFirstChild("HumanoidRootPart") or obj.PrimaryPart
+                            if hrp then
+                                local dist = (hrp.Position - myPos).Magnitude
+                                if dist < nearestDist then
+                                    nearestDist = dist
+                                    nearestSlime = obj
+                                end
+                            end
+                        end
+                    end
+
+                    if nearestSlime and nearestDist <= shootRadius then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage")
+                                :WaitForChild("Packages")
+                                :WaitForChild("_Index")
+                                :WaitForChild("leifstout_networker@0.3.1")
+                                :WaitForChild("networker")
+                                :WaitForChild("_remotes")
+                                :WaitForChild("SlimeGunService")
+                                :WaitForChild("RemoteFunction")
+                                :InvokeServer("tryFireSlimeGun", shootRadius)
+                        end)
+                    end
+
+                    task.wait(0.1)
                 end
             end)
         end
