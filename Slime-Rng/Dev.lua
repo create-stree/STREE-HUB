@@ -208,6 +208,7 @@ local shootRadius = 17
 local hideRollEnabled = false
 local slimeMagnetEnabled = false
 
+
 Tabs.Home:Section({ Title = "Information" })
 
 Tabs.Home:Button({
@@ -639,6 +640,20 @@ Tabs.Automatically:Toggle({
     Title = "Auto Claim Offline Earnings",
     Default = false,
     Callback = function(state)
+        autoClaimOfflineEnabled = state
+        if state then
+            task.spawn(function()
+                while autoClaimOfflineEnabled do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage")
+                            .Packages._Index["leifstout_networker@0.3.1"]
+                            .networker._remotes.OfflineEarningsService.RemoteFunction
+                            :InvokeServer("requestClaim")
+                    end)
+                    task.wait(1)
+                end
+            end)
+        end
     end
 })
 
