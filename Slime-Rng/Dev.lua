@@ -14,7 +14,6 @@ local VirtualUser = game:GetService("VirtualUser")
 local localPlayer = players.LocalPlayer
 local client = workspace:FindFirstChild(localPlayer.Name)
 local clientHRP = client.HumanoidRootPart
-local mouse = localPlayer:GetMouse()
 
 localPlayer.Idled:Connect(function()
     VirtualUser:CaptureController()
@@ -194,12 +193,6 @@ local autoBuyZoneEnabled = false
 local autoRebirthEnabled = false
 local autoPotionsEnabled = false
 local autoEquipBestEnabled = false
-local autoShootEnabled = false
-local shootRadius = 1000
-local slimeMagnetEnabled = false
-local autoLootEnabled = false
-local autoClaimOfflineEnabled = false
-local hideRollEnabled = false
 local webhookEnabled = false
 local webhookUrl = ""
 local webhookInterval = 30
@@ -209,7 +202,11 @@ local antiAFK = false
 local afkConnection
 local autoReconnect = false
 local savedServers = {}
-
+local autoShootEnabled = false
+local autoLootEnabled = false
+local shootRadius = 17
+local hideRollEnabled = false
+local slimeMagnetEnabled = false
 
 Tabs.Home:Section({ Title = "Information" })
 
@@ -242,7 +239,8 @@ Tabs.Home:Slider({
     Value = { Min = 0, Max = 100, Default = defaultWalk },
     Callback = function(value)
         currentWalk = value
-        local char = localPlayer.Character
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
         if char and char:FindFirstChild("Humanoid") then
             char.Humanoid.WalkSpeed = value
         end
@@ -255,7 +253,8 @@ Tabs.Home:Slider({
     Value = { Min = 0, Max = 150, Default = defaultJump },
     Callback = function(value)
         currentJump = value
-        local char = localPlayer.Character
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
         if char and char:FindFirstChild("Humanoid") then
             char.Humanoid.JumpPower = value
         end
@@ -267,7 +266,8 @@ Tabs.Home:Button({
     Callback = function()
         currentWalk = defaultWalk
         currentJump = defaultJump
-        local char = localPlayer.Character
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
         if char and char:FindFirstChild("Humanoid") then
             char.Humanoid.WalkSpeed = defaultWalk
             char.Humanoid.JumpPower = defaultJump
@@ -286,7 +286,7 @@ Tabs.Main:Toggle({
         if state then
             task.spawn(function()
                 while autoRollEnabled do
-                    local rollSpeedText = localPlayer.PlayerGui.Root.BottomBarStats.StatsList.RollSpeedStat.Content.Value.TextLabel.Text
+                    local rollSpeedText = game:GetService("Players").LocalPlayer.PlayerGui.Root.BottomBarStats.StatsList.RollSpeedStat.Content.Value.TextLabel.Text
                     task.wait(tonumber(string.match(rollSpeedText, "[%d%.]+")) or 1)
                     Roll()
                 end
@@ -303,7 +303,7 @@ Tabs.Main:Toggle({
         if state then
             task.spawn(function()
                 while autoRollEnabled do
-                    local rollSpeedText = localPlayer.PlayerGui.Root.BottomBarStats.StatsList.RollSpeedStat.Content.Value.TextLabel.Text
+                    local rollSpeedText = game:GetService("Players").LocalPlayer.PlayerGui.Root.BottomBarStats.StatsList.RollSpeedStat.Content.Value.TextLabel.Text
                     task.wait(tonumber(string.match(rollSpeedText, "[%d%.]+")) or 1)
                     Roll()
                 end
@@ -316,10 +316,7 @@ Tabs.Main:Button({
     Title = "Hide Roll Games",
     Callback = function()
         hideRollEnabled = not hideRollEnabled
-        local rollScreen = localPlayer.PlayerGui:FindFirstChild("Root") and localPlayer.PlayerGui.Root:FindFirstChild("RollScreen")
-        if rollScreen then
-            rollScreen.Visible = not hideRollEnabled
-        end
+        game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.SettingsService.RemoteEvent:FireServer("set", "hideRoll", hideRollEnabled)
     end
 })
 
@@ -367,7 +364,7 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Toggle({
+local autoTeleportBestZoneToggle = Tabs.Main:Toggle({
     Title = "Auto Best Zone",
     Default = false,
     Callback = function(state)
@@ -383,7 +380,7 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Input({
+local autoBestZoneIntervalInput = Tabs.Main:Input({
     Title = "Best Zone Interval",
     Default = "30",
     Placeholder = "Seconds",
@@ -393,7 +390,7 @@ Tabs.Main:Input({
     end
 })
 
-Tabs.Main:Toggle({
+local autoPotionsToggle = Tabs.Main:Toggle({
     Title = "Auto Potions",
     Default = false,
     Callback = function(state)
@@ -412,32 +409,45 @@ Tabs.Main:Toggle({
 Tabs.Main:Section({ Title = "Combat" })
 
 Tabs.Main:Toggle({
-    Title = "Auto Shoot (Mouse Target)",
+    Title = "Auto Shoot",
     Default = false,
     Callback = function(state)
         autoShootEnabled = state
         if state then
             task.spawn(function()
                 while autoShootEnabled do
-                    local target = mouse.Target
-                    if target then
-                        local isSlime = false
-                        local obj = target
-                        while obj do
-                            if obj:IsA("Model") and obj.Name:lower():find("slime") then
-                                isSlime = true
-                                break
+                    game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.SlimeGunService.RemoteFunction:InvokeServer("tryFireSlimeGun", shootRadius)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Main:Toggle({
+    Title = "Slime Magnet",
+    Default = false,
+    Callback = function(state)
+        slimeMagnetEnabled = state
+        if state then
+            task.spawn(function()
+                while slimeMagnetEnabled do
+                    local radius = shootRadius
+                    for _, obj in ipairs(workspace:GetChildren()) do
+                        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+                            local player = game.Players:GetPlayerFromCharacter(obj)
+                            if not player then
+                                local hrp = obj.HumanoidRootPart
+                                local offset = Vector3.new(
+                                    math.random(-radius, radius) / 2,
+                                    0,
+                                    math.random(-radius, radius) / 2
+                                )
+                                hrp.CFrame = CFrame.new(clientHRP.Position + offset)
                             end
-                            obj = obj.Parent
-                        end
-                        if isSlime then
-                            pcall(function()
-                                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("leifstout_networker@0.3.1"):WaitForChild("networker"):WaitForChild("_remotes"):WaitForChild("SlimeGunService"):WaitForChild("RemoteFunction"):InvokeServer("tryFireSlimeGun", shootRadius)
-                            end)
-                            task.wait(0.5)
                         end
                     end
-                    task.wait(0.05)
+                    task.wait(0.2)
                 end
             end)
         end
@@ -446,11 +456,13 @@ Tabs.Main:Toggle({
 
 Tabs.Main:Input({
     Title = "Radius Shoot",
-    Default = "1000",
-    Placeholder = "1000",
+    Default = "",
+    Placeholder = "17",
     Callback = function(value)
         local num = tonumber(value)
-        if num then shootRadius = num end
+        if num then
+            shootRadius = num
+        end
     end
 })
 
@@ -601,14 +613,13 @@ Tabs.Automatically:Toggle({
             task.spawn(function()
                 while autoLootEnabled do
                     for _, loot in ipairs(workspace.Loot:GetChildren()) do
-                        if loot:IsA("Model") and loot.Name:match("%x+-%x+-%x+-%x+-%x+") then
+                        if loot:IsA("Model") then
                             pcall(function()
-                                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("leifstout_networker@0.3.1"):WaitForChild("networker"):WaitForChild("_remotes"):WaitForChild("LootService"):WaitForChild("RemoteFunction"):InvokeServer("requestCollect", loot.Name)
+                                game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.LootService.RemoteFunction:InvokeServer("requestCollect", loot.Name)
                             end)
-                            task.wait(0.2)
                         end
                     end
-                    task.wait(1)
+                    task.wait(0.5)
                 end
             end)
         end
@@ -619,15 +630,6 @@ Tabs.Automatically:Toggle({
     Title = "Auto Claim Offline Earnings",
     Default = false,
     Callback = function(state)
-        autoClaimOfflineEnabled = state
-        if state then
-            task.spawn(function()
-                while autoClaimOfflineEnabled do
-                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("leifstout_networker@0.3.1"):WaitForChild("networker"):WaitForChild("_remotes"):WaitForChild("OfflineEarningsService"):WaitForChild("RemoteFunction"):InvokeServer("requestClaim")
-                    task.wait(60)
-                end
-            end)
-        end
     end
 })
 
@@ -683,7 +685,7 @@ Tabs.Misc:Toggle({
 
 game:GetService("UserInputService").JumpRequest:Connect(function()
     if infJump then
-        local char = localPlayer.Character
+        local char = game.Players.LocalPlayer.Character
         if char and char:FindFirstChildOfClass("Humanoid") then
             char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
@@ -717,7 +719,7 @@ Tabs.Misc:Toggle({
 
 game:GetService("RunService").Stepped:Connect(function()
     if noclip then
-        local char = localPlayer.Character
+        local char = game.Players.LocalPlayer.Character
         if char then
             for _, v in pairs(char:GetDescendants()) do
                 if v:IsA("BasePart") then
@@ -735,7 +737,7 @@ Tabs.Misc:Toggle({
         autoReconnect = state
         if autoReconnect then
             local ts = game:GetService("TeleportService")
-            local player = localPlayer
+            local player = game.Players.LocalPlayer
             game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
                 if autoReconnect and child.Name == "ErrorPrompt" then
                     task.wait(2)
@@ -753,7 +755,7 @@ Tabs.Misc:Toggle({
         antiAFK = state
         if antiAFK then
             local vu = game:GetService("VirtualUser")
-            afkConnection = localPlayer.Idled:Connect(function()
+            afkConnection = game.Players.LocalPlayer.Idled:Connect(function()
                 vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
                 task.wait(1)
                 vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
@@ -772,7 +774,7 @@ Tabs.Settings:Button({
     Title = "Rejoin",
     Callback = function()
         local ts = game:GetService("TeleportService")
-        local player = localPlayer
+        local player = game.Players.LocalPlayer
         ts:Teleport(game.PlaceId, player)
     end
 })
@@ -781,7 +783,7 @@ Tabs.Settings:Button({
     Title = "Server Hop",
     Callback = function()
         local ts = game:GetService("TeleportService")
-        local player = localPlayer
+        local player = game.Players.LocalPlayer
         local placeId = game.PlaceId
         local servers = game:GetService("HttpService"):JSONDecode(
             game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
@@ -794,6 +796,19 @@ Tabs.Settings:Button({
         end
     end
 })
+
+local function refreshDropdown()
+    if dropdownObj and dropdownObj.SetValues then
+        local values = {}
+        for _, id in ipairs(savedServers) do
+            values[#values + 1] = id
+        end
+        if #values == 0 then
+            values = {"No saved servers"}
+        end
+        dropdownObj:SetValues(values)
+    end
+end
 
 Tabs.Settings:Paragraph({
     Title = "Current Server",
@@ -816,6 +831,7 @@ Tabs.Settings:Input({
             end
             if not found then
                 table.insert(savedServers, 1, input)
+                refreshDropdown()
             end
         end
     end
@@ -824,7 +840,10 @@ Tabs.Settings:Input({
 Tabs.Settings:Button({
     Title = "Teleport",
     Callback = function()
-        local target = savedServers[1]
+        local target
+        if inputObj and inputObj.GetValue then
+            target = inputObj:GetValue()
+        end
         if target and target ~= "" then
             pcall(function()
                 game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, target)
@@ -832,6 +851,7 @@ Tabs.Settings:Button({
         end
     end
 })
+
 
 StreeHub:Notify({
     Title = "StreeHub",
