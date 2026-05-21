@@ -1,11 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
-local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
-local StreeHub = loadstring(StreeHub)()
-local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
-local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
-
+local ModernV2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/opsidian279/Moded/refs/heads/main/MainV2.lua"))()
 
 local players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
@@ -157,24 +152,66 @@ function Teleport(worldNum)
 end
 
 
-local Window = StreeHub:CreateWindow({
-    Title = "StreeHub",
-    Icon = "rbxassetid://99948086845842",
-    Author = (premium and "Premium" or "Slime RNG") .. " - " .. version,
-    Folder = "StreeHub",
-    Size = WindowSize,
-    LiveSearchDropdown = true,
-    FileSaveName = "StreeHub/config.json"
+ModernV2:AddTheme({
+    Name = "StreeHub",
+    Accent = Color3.fromRGB(57, 255, 20),
+    Background = Color3.fromRGB(0, 0, 0),
+    Surface = Color3.fromRGB(30, 30, 35),
+    Outline = Color3.fromRGB(70, 70, 80),
+    Text = Color3.fromRGB(220, 220, 220),
+    Placeholder = Color3.fromRGB(100, 100, 110),
+    Button = Color3.fromRGB(57, 255, 20),
+    Icon = Color3.fromRGB(57, 255, 20),
 })
 
 
+local MenuIcon = ModernV2:CreateMenuIcon({
+    Image = "grid",
+    Size = 48,
+    IconColor = Color3.fromRGB(57, 255, 20),
+    BGColor = Color3.fromRGB(20, 20, 25),
+    StrokeColor = Color3.fromRGB(57, 255, 20),
+    StrokeThick = 1.5,
+    Draggable = true,
+})
+
+
+local window = ModernV2:Window({
+	Title = "StreeHub",
+	Content = "Slime RNG",
+	Image = "99948086845842",
+	Color = Color3.fromRGB(57, 255, 20),
+	Uitransparent = 0.12,
+	ShowUser = false,
+	Search = true,
+	ConfigEnabled = true,
+	NotifyOnCallbackError = false,
+	Loadingscreen = false,
+	Enable3DRenderer = false,
+	Keybind = "RightControl",
+	Config = {
+		ConfigFolder = "ModernV2Example",
+		AutoSaveFile = "Default",
+		AutoSave = true,
+		AutoLoad = true,
+		Overwrite = true,
+		Format = "JSON",
+		ShowAutoSaveToggle = true,
+		TextGradient = true,
+	},
+})
+
+window:AttachMenuIcon(MenuIcon)
+
+window:OnDestroy(function()
+
 local Tabs = {
-    Home = Window:Tab({ Title = "Home", Icon = "house" }),
-    Main = Window:Tab({ Title = "Main", Icon = "landmark" }),
-    Automatically = Window:Tab({ Title = "Automatically", Icon = "play" }),
-    Webhook = Window:Tab({ Title = "Webhook", Icon = "webhook" }),
-    Misc = Window:Tab({ Title = "Misc", Icon = "layout-grid" }),
-    Settings = Window:Tab({ Title = "Settings", Icon = "settings" })
+    Home = Window:Tab({ Title = "Home", Icon = "lucide:scan-face" }),
+    Main = Window:Tab({ Title = "Main", Icon = "lucide:landmark" }),
+    Automatically = Window:Tab({ Title = "Automatically", Icon = "lucide:play" }),
+    Webhook = Window:Tab({ Title = "Webhook", Icon = "lucide:webhook" }),
+    Misc = Window:Tab({ Title = "Misc", Icon = "lucide:layout-grid" }),
+    Settings = Window:Tab({ Title = "Settings", Icon = "lucide:settings" })
 }
 
 
@@ -877,9 +914,9 @@ Tabs.Settings:Button({
 })
 
 
-StreeHub:Notify({
+window:Notify({
     Title = "StreeHub",
     Content = "Script loaded successfully",
-    Icon = "bell-ring",
+    Icon = "lucide:bell-ring",
     Duration = 4
 })
