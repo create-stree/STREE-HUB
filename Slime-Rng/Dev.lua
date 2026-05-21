@@ -415,9 +415,18 @@ Tabs.Main:Toggle({
         autoShootEnabled = state
         if state then
             task.spawn(function()
+                local vu = game:GetService("VirtualUser")
                 while autoShootEnabled do
-                    game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.SlimeGunService.RemoteFunction:InvokeServer("tryFireSlimeGun", shootRadius)
-                    task.wait(0.1)
+                    local gui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("ClickToShootIndicator")
+                    if gui and gui.Enabled then
+                        local absSize = gui.AbsoluteSize
+                        local absPos = gui.AbsolutePosition
+                        local clickPos = Vector2.new(absPos.X + absSize.X/2, absPos.Y + absSize.Y/2)
+                        vu:Button1Down(clickPos)
+                        task.wait(0.05)
+                        vu:Button1Up(clickPos)
+                    end
+                    task.wait(0.2)
                 end
             end)
         end
