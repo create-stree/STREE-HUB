@@ -452,7 +452,7 @@ local autoPotionsToggle = Farm:AddToggle({
     end
 })
 
-local Combat = Tabs.Main:AddSection({ Title = "Combat", Position = "Center" })
+local Combat = Tabs.Main:AddSection({ Name = "Combat", Position = "Center" })
 
 Combat:AddToggle({
     Name = "Auto Shoot",
@@ -583,10 +583,10 @@ Code:AddButton({
 })
 
 
-Tabs.Automatically:Section({ Title = "Upgrades Automatically" })
+local Upgrade = Tabs.Automatically:AddSection({ Name = "Upgrades Automatically", Position = "Center" })
 
-Tabs.Automatically:Toggle({
-    Title = "Auto Upgrade",
+Upgrade:AddToggle({
+    Name = "Auto Upgrade",
     Default = false,
     Callback = function(state)
         autoUpgradeEnabled = state
