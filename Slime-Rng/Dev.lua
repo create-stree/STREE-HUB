@@ -270,7 +270,7 @@ Infomation:AddParagraph({
     Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
-local Players = Tabs.Home:AddSection({ Title = "Local Player" })
+local Players = Tabs.Home:AddSection({ Name = "Local Player", Position = "Center" })
 
 Players:AddSlider({
     Name = "WalkSpeed",
@@ -306,6 +306,7 @@ Players:AddSlider({
 
 Players:AddButton({
     Name = "Reset Default",
+	Icon = "lucide:mouse",
     Callback = function()
         currentWalk = defaultWalk
         currentJump = defaultJump
@@ -319,10 +320,10 @@ Players:AddButton({
 })
 
 
-local Rolls Tabs.Main:Section({ Title = "Rolling" })
+local Rolls Tabs.Main:Section({ Name = "Rolling", Position = "Center" })
 
 Rolls:Toggle({
-    Title = "Auto Roll",
+    Name = "Auto Roll",
     Default = false,
     Callback = function(state)
         autoRollEnabled = state
@@ -339,7 +340,7 @@ Rolls:Toggle({
 })
 
 Rolls:Toggle({
-    Title = "Auto Roll Games (smooth)",
+    Name = "Auto Roll Games (smooth)",
     Default = false,
     Callback = function(state)
         autoRollEnabled = state
@@ -356,7 +357,7 @@ Rolls:Toggle({
 })
 
 Rolls:Button({
-    Title = "Hide Roll Games",
+    Name = "Hide Roll Games",
     Callback = function()
         hideRollEnabled = not hideRollEnabled
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.SettingsService.RemoteEvent:FireServer("set", "hideRoll", hideRollEnabled)
