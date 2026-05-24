@@ -247,9 +247,9 @@ local slimeMagnetEnabled = false
 local autoClaimOfflineEnabled = false
 
 
-Tabs.Home:AddSection({ Name = "Information", Position = "Center" })
+local Infomation = Tabs.Home:AddSection({ Name = "Information", Position = "Center" })
 
-Tabs.Home:AddButton({
+local Infomation = Tabs.Home:AddButton({
     Name = "Copy Discord Link",
     Icon = "lucide:mouse",
     Desc = "Copy Discord Link",
@@ -261,12 +261,12 @@ Tabs.Home:AddButton({
     end
 })
 
-Tabs.Home:AddParagraph({
+local Infomation = Tabs.Home:AddParagraph({
     Title = "Join Us",
     Desc = "Every Update Will Be On Discord"
 })
 
-Tabs.Home:AddParagraph({
+local Infomation = Tabs.Home:AddParagraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
