@@ -166,7 +166,7 @@ ModernV2:AddTheme({
 
 
 local MenuIcon = ModernV2:CreateMenuIcon({
-    Image = "grid",
+    Image = "99948086845842",
     Size = 48,
     IconColor = Color3.fromRGB(57, 255, 20),
     BGColor = Color3.fromRGB(20, 20, 25),
@@ -601,8 +601,8 @@ Upgrade:AddToggle({
     end
 })
 
-Tabs.Automatically:Input({
-    Title = "Upgrade Interval",
+Upgrade:AddTextInput({
+    Namd = "Upgrade Interval",
     Default = "30",
     Placeholder = "Seconds",
     Callback = function(value)
@@ -611,8 +611,8 @@ Tabs.Automatically:Input({
     end
 })
 
-Tabs.Automatically:Toggle({
-    Title = "Auto Buy Zone",
+Upgrade:AddToggle({
+    Name = "Auto Buy Zone",
     Default = false,
     Callback = function(state)
         autoBuyZoneEnabled = state
@@ -628,8 +628,8 @@ Tabs.Automatically:Toggle({
     end
 })
 
-Tabs.Automatically:Toggle({
-    Title = "Auto Rebirth",
+Upgrade:AddToggle({
+    Name = "Auto Rebirth",
     Default = false,
     Callback = function(state)
         autoRebirthEnabled = state
@@ -645,8 +645,8 @@ Tabs.Automatically:Toggle({
     end
 })
 
-Tabs.Automatically:Toggle({
-    Title = "Auto Equip Best",
+Upgrade:AddToggle({
+    Name = "Auto Equip Best",
     Default = false,
     Callback = function(state)
         autoEquipBestEnabled = state
@@ -662,10 +662,10 @@ Tabs.Automatically:Toggle({
     end
 })
 
-Tabs.Automatically:Section({ Title = "Collect Automatically" })
+local Collection = Tabs.Automatically:AddSection({ Name = "Collect Automatically", Position = "Center" })
 
-Tabs.Automatically:Toggle({
-    Title = "Auto Loot",
+Collection:AddToggle({
+    Name = "Auto Loot",
     Default = false,
     Callback = function(state)
         autoLootEnabled = state
@@ -686,8 +686,8 @@ Tabs.Automatically:Toggle({
     end
 })
 
-Tabs.Automatically:Toggle({
-    Title = "Auto Claim Offline Earnings",
+Collection:AddToggle({
+    Name = "Auto Claim Offline Earnings",
     Default = false,
     Callback = function(state)
         autoClaimOfflineEnabled = state
@@ -708,10 +708,10 @@ Tabs.Automatically:Toggle({
 })
 
 
-Tabs.Webhook:Section({ Title = "Discord Webhook" })
+local WebDC = Tabs.Webhook:AddSection({ Name = "Discord Webhook", Position = "Center" })
 
-Tabs.Webhook:Input({
-    Title = "Webhook URL",
+WebDC:AddTextInput({
+    Name = "Webhook URL",
     Default = "",
     Placeholder = "https://discord.com/api/webhooks/...",
     Callback = function(value)
@@ -719,8 +719,8 @@ Tabs.Webhook:Input({
     end
 })
 
-Tabs.Webhook:Toggle({
-    Title = "Enable Webhook",
+WebDC:AddToggle({
+    Name = "Enable Webhook",
     Default = false,
     Callback = function(state)
         webhookEnabled = state
@@ -738,8 +738,8 @@ Tabs.Webhook:Toggle({
     end
 })
 
-Tabs.Webhook:Input({
-    Title = "Webhook Interval",
+WebDC:AddInput({
+    Name = "Webhook Interval",
     Default = "30",
     Placeholder = "Seconds",
     Callback = function(value)
