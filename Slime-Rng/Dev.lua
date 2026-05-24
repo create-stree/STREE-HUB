@@ -204,14 +204,15 @@ local window = ModernV2:Window({
 window:AttachMenuIcon(MenuIcon)
 
 window:OnDestroy(function()
+end)
 
 local Tabs = {
-    Home = Window:Tab({ Title = "Home", Icon = "lucide:scan-face" }),
-    Main = Window:Tab({ Title = "Main", Icon = "lucide:landmark" }),
-    Automatically = Window:Tab({ Title = "Automatically", Icon = "lucide:play" }),
-    Webhook = Window:Tab({ Title = "Webhook", Icon = "lucide:webhook" }),
-    Misc = Window:Tab({ Title = "Misc", Icon = "lucide:layout-grid" }),
-    Settings = Window:Tab({ Title = "Settings", Icon = "lucide:settings" })
+    Home = window:Tab({ Title = "Home", Icon = "lucide:scan-face" }),
+    Main = window:Tab({ Title = "Main", Icon = "lucide:landmark" }),
+    Automatically = window:Tab({ Title = "Automatically", Icon = "lucide:play" }),
+    Webhook = window:Tab({ Title = "Webhook", Icon = "lucide:webhook" }),
+    Misc = window:Tab({ Title = "Misc", Icon = "lucide:layout-grid" }),
+    Settings = window:Tab({ Title = "Settings", Icon = "lucide:settings" })
 }
 
 
@@ -244,6 +245,7 @@ local autoLootEnabled = false
 local shootRadius = 17
 local hideRollEnabled = false
 local slimeMagnetEnabled = false
+local autoClaimOfflineEnabled = false
 
 
 Tabs.Home:Section({ Title = "Information" })
