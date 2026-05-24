@@ -206,12 +206,12 @@ window:AttachMenuIcon(MenuIcon)
 window:OnDestroy(function() end)
 
 local Tabs = {
-    Home = window:AddTab({ Title = "Home", Icon = "lucide:scan-face" }),
-    Main = window:AddTab({ Title = "Main", Icon = "lucide:landmark" }),
-    Automatically = window:AddTab({ Title = "Automatically", Icon = "lucide:play" }),
-    Webhook = window:AddTab({ Title = "Webhook", Icon = "lucide:webhook" }),
-    Misc = window:AddTab({ Title = "Misc", Icon = "lucide:layout-grid" }),
-    Settings = window:AddTab({ Title = "Settings", Icon = "lucide:settings" })
+    Home = window:AddTab({ Name = "Home", Icon = "lucide:scan-face" }),
+    Main = window:AddTab({ Name = "Main", Icon = "lucide:landmark" }),
+    Automatically = window:AddTab({ Name = "Automatically", Icon = "lucide:play" }),
+    Webhook = window:AddTab({ Name = "Webhook", Icon = "lucide:webhook" }),
+    Misc = window:AddTab({ Name = "Misc", Icon = "lucide:layout-grid" }),
+    Settings = window:AddTab({ Name = "Settings", Icon = "lucide:settings" })
 }
 
 
