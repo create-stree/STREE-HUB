@@ -425,10 +425,11 @@ local autoTeleportBestZoneToggle = Farm:AddToggle({
     end
 })
 
-local autoBestZoneIntervalInput = Farm:AddInput({
-    Name = "Best Zone Interval",
+local autoBestZoneIntervalInput = Farm:AddTextInput({
+    Name = "Numeric Input",
     Default = "30",
     Placeholder = "Seconds",
+    Numeric = true,
     Callback = function(value)
         local num = tonumber(value)
         if num then autoBestZoneInterval = num end
@@ -508,7 +509,7 @@ Combat:AddToggle({
     end
 })
 
-Combat:AddInput({
+Combat:AddTextInput({
     Name = "Radius Shoot",
     Default = "",
     Placeholder = "17",
