@@ -247,10 +247,11 @@ local slimeMagnetEnabled = false
 local autoClaimOfflineEnabled = false
 
 
-Tabs.Home:Section({ Title = "Information" })
+Tabs.Home:Section({ Name = "Information" })
 
 Tabs.Home:Button({
-    Title = "Discord",
+    Name = "Copy Discord Link",
+    Icon = "lucide:mouse",
     Desc = "Copy Discord Link",
     Callback = function()
         local link = "https://discord.gg/jdmX43t5mY"
