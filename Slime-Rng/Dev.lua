@@ -270,12 +270,14 @@ Infomation:AddParagraph({
     Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
-Tabs.Home:AddSection({ Title = "Local Player" })
+local Players = Tabs.Home:AddSection({ Title = "Local Player" })
 
-Tabs.Home:AddSlider({
-    Title = "WalkSpeed",
-    Step = 1,
-    Value = { Min = 0, Max = 100, Default = defaultWalk },
+Players:AddSlider({
+    Name = "WalkSpeed",
+    Default = 16,
+    Min = 10,
+    Max = 100,
+    Type = "",
     Callback = function(value)
         currentWalk = value
         local player = game:GetService("Players").LocalPlayer
@@ -286,10 +288,12 @@ Tabs.Home:AddSlider({
     end
 })
 
-Tabs.Home:AddSlider({
-    Title = "JumpPower",
-    Step = 1,
-    Value = { Min = 0, Max = 150, Default = defaultJump },
+Players:AddSlider({
+    Name = "JumpPower",
+    Default = 50,
+    Min = 10,
+    Max = 100,
+    Type = "",
     Callback = function(value)
         currentJump = value
         local player = game:GetService("Players").LocalPlayer
@@ -300,8 +304,8 @@ Tabs.Home:AddSlider({
     end
 })
 
-Tabs.Home:AddButton({
-    Title = "Reset Default",
+Players:AddButton({
+    Name = "Reset Default",
     Callback = function()
         currentWalk = defaultWalk
         currentJump = defaultJump
@@ -315,9 +319,9 @@ Tabs.Home:AddButton({
 })
 
 
-Tabs.Main:Section({ Title = "Rolling" })
+local Rolls Tabs.Main:Section({ Title = "Rolling" })
 
-Tabs.Main:Toggle({
+Rolls:Toggle({
     Title = "Auto Roll",
     Default = false,
     Callback = function(state)
@@ -334,7 +338,7 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Toggle({
+Rolls:Toggle({
     Title = "Auto Roll Games (smooth)",
     Default = false,
     Callback = function(state)
@@ -351,7 +355,7 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Button({
+Rolls:Button({
     Title = "Hide Roll Games",
     Callback = function()
         hideRollEnabled = not hideRollEnabled
