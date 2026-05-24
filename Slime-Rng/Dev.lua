@@ -210,7 +210,7 @@ local Tabs = {
     Main = window:AddTab({ Name = "Main", Icon = "lucide:landmark" }),
     Automatically = window:AddTab({ Name = "Automatically", Icon = "lucide:play" }),
     Webhook = window:AddTab({ Name = "Webhook", Icon = "lucide:webhook" }),
-    Misc = window:AddTab({ Name = "Misc", Icon = "lucide:layout-grid" }),
+    Miscellaneous = window:AddTab({ Name = "Miscellaneous", Icon = "lucide:layout-grid" }),
     Settings = window:AddTab({ Name = "Settings", Icon = "lucide:settings" })
 }
 
@@ -749,7 +749,9 @@ WebDC:AddTextInput({
 })
 
 
-Tabs.Misc:AddToggle({
+local Misc = Tabs.Miscellaneous:AddSection({ Name = "Miscellaneous", Position = "Center" })
+
+Misc:AddToggle({
     Name = "Infinite Jump",
     Default = false,
     Callback = function(state)
@@ -766,7 +768,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-Tabs.Misc:AddButton({
+Misc:AddButton({
     Name = "FPS Boost",
 	Icon = "lucide:mouse",
     Callback = function()
@@ -784,7 +786,7 @@ Tabs.Misc:AddButton({
     end
 })
 
-Tabs.Misc:AddToggle({
+Misc:AddToggle({
     Name = "Noclip",
     Default = false,
     Callback = function(state)
@@ -805,7 +807,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-Tabs.Misc:AddToggle({
+Misc:AddToggle({
     Name = "Auto Reconnect",
     Default = false,
     Callback = function(state)
@@ -823,7 +825,7 @@ Tabs.Misc:AddToggle({
     end
 })
 
-Tabs.Misc:AddToggle({
+Misc:AddToggle({
     Name = "Anti AFK",
     Default = false,
     Callback = function(state)
@@ -845,7 +847,9 @@ Tabs.Misc:AddToggle({
 })
 
 
-Tabs.Settings:AddButton({
+local Settings = Tabs.Settings:AddSection({ Name = "Settings", Position = "Center" })
+
+Settings:AddButton({
     Name = "Rejoin",
 	Icon = "lucide:mouse",
     Callback = function()
@@ -855,7 +859,7 @@ Tabs.Settings:AddButton({
     end
 })
 
-Tabs.Settings:AddButton({
+Settings:AddButton({
     Name = "Server Hop",
 	Icon = "lucide:mouse",
     Callback = function()
@@ -887,12 +891,12 @@ local function refreshDropdown()
     end
 end
 
-Tabs.Settings:AddParagraph({
+Settings:AddParagraph({
     Name = "Current Server",
     Desc = "You are in server: " .. game.JobId
 })
 
-Tabs.Settings:AddTextInput({
+Settings:AddTextInput({
     Name = "Target Server ID",
     Default = "",
     Placeholder = "Enter JobId...",
@@ -914,8 +918,9 @@ Tabs.Settings:AddTextInput({
     end
 })
 
-Tabs.Settings:AddButton({
+Settings:AddButton({
     Name = "Teleport",
+	Icon = "lucide:mouse",
     Callback = function()
         local target
         if inputObj and inputObj.GetValue then
