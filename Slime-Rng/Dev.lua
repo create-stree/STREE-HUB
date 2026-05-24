@@ -247,9 +247,9 @@ local slimeMagnetEnabled = false
 local autoClaimOfflineEnabled = false
 
 
-Tabs.Home:Section({ Name = "Information" })
+Tabs.Home:AddSection({ Name = "Information", Position = "Center" })
 
-Tabs.Home:Button({
+Tabs.Home:AddButton({
     Name = "Copy Discord Link",
     Icon = "lucide:mouse",
     Desc = "Copy Discord Link",
@@ -261,19 +261,19 @@ Tabs.Home:Button({
     end
 })
 
-Tabs.Home:Paragraph({
+Tabs.Home:AddParagraph({
     Title = "Join Us",
     Desc = "Every Update Will Be On Discord"
 })
 
-Tabs.Home:Paragraph({
+Tabs.Home:AddParagraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
-Tabs.Home:Section({ Title = "Local Player" })
+Tabs.Home:AddSection({ Title = "Local Player" })
 
-Tabs.Home:Slider({
+Tabs.Home:AddSlider({
     Title = "WalkSpeed",
     Step = 1,
     Value = { Min = 0, Max = 100, Default = defaultWalk },
@@ -287,7 +287,7 @@ Tabs.Home:Slider({
     end
 })
 
-Tabs.Home:Slider({
+Tabs.Home:AddSlider({
     Title = "JumpPower",
     Step = 1,
     Value = { Min = 0, Max = 150, Default = defaultJump },
@@ -301,7 +301,7 @@ Tabs.Home:Slider({
     end
 })
 
-Tabs.Home:Button({
+Tabs.Home:AddButton({
     Title = "Reset Default",
     Callback = function()
         currentWalk = defaultWalk
