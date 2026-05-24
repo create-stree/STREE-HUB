@@ -602,7 +602,7 @@ Upgrade:AddToggle({
 })
 
 Upgrade:AddTextInput({
-    Namd = "Upgrade Interval",
+    Name = "Upgrade Interval",
     Default = "30",
     Placeholder = "Seconds",
     Callback = function(value)
