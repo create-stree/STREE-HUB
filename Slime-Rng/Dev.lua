@@ -203,16 +203,15 @@ local window = ModernV2:Window({
 
 window:AttachMenuIcon(MenuIcon)
 
-window:OnDestroy(function()
-end)
+window:OnDestroy(function() end)
 
 local Tabs = {
-    Home = window:Tab({ Title = "Home", Icon = "lucide:scan-face" }),
-    Main = window:Tab({ Title = "Main", Icon = "lucide:landmark" }),
-    Automatically = window:Tab({ Title = "Automatically", Icon = "lucide:play" }),
-    Webhook = window:Tab({ Title = "Webhook", Icon = "lucide:webhook" }),
-    Misc = window:Tab({ Title = "Misc", Icon = "lucide:layout-grid" }),
-    Settings = window:Tab({ Title = "Settings", Icon = "lucide:settings" })
+    Home = window:AddTab({ Title = "Home", Icon = "lucide:scan-face" }),
+    Main = window:AddTab({ Title = "Main", Icon = "lucide:landmark" }),
+    Automatically = window:AddTab({ Title = "Automatically", Icon = "lucide:play" }),
+    Webhook = window:AddTab({ Title = "Webhook", Icon = "lucide:webhook" }),
+    Misc = window:AddTab({ Title = "Misc", Icon = "lucide:layout-grid" }),
+    Settings = window:AddTab({ Title = "Settings", Icon = "lucide:settings" })
 }
 
 
