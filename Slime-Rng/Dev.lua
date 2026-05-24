@@ -749,8 +749,8 @@ WebDC:AddTextInput({
 })
 
 
-Tabs.Misc:Toggle({
-    Title = "Infinite Jump",
+Tabs.Misc:AddToggle({
+    Name = "Infinite Jump",
     Default = false,
     Callback = function(state)
         infJump = state
@@ -766,8 +766,9 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-Tabs.Misc:Button({
-    Title = "FPS Boost",
+Tabs.Misc:AddButton({
+    Name = "FPS Boost",
+	Icon = "lucide:mouse",
     Callback = function()
         for _, v in pairs(game:GetDescendants()) do
             if v:IsA("BasePart") then
@@ -783,8 +784,8 @@ Tabs.Misc:Button({
     end
 })
 
-Tabs.Misc:Toggle({
-    Title = "Noclip",
+Tabs.Misc:AddToggle({
+    Name = "Noclip",
     Default = false,
     Callback = function(state)
         noclip = state
@@ -804,8 +805,8 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-Tabs.Misc:Toggle({
-    Title = "Auto Reconnect",
+Tabs.Misc:AddToggle({
+    Name = "Auto Reconnect",
     Default = false,
     Callback = function(state)
         autoReconnect = state
@@ -822,8 +823,8 @@ Tabs.Misc:Toggle({
     end
 })
 
-Tabs.Misc:Toggle({
-    Title = "Anti AFK",
+Tabs.Misc:AddToggle({
+    Name = "Anti AFK",
     Default = false,
     Callback = function(state)
         antiAFK = state
@@ -844,8 +845,9 @@ Tabs.Misc:Toggle({
 })
 
 
-Tabs.Settings:Button({
-    Title = "Rejoin",
+Tabs.Settings:AddButton({
+    Name = "Rejoin",
+	Icon = "lucide:mouse",
     Callback = function()
         local ts = game:GetService("TeleportService")
         local player = game.Players.LocalPlayer
@@ -853,8 +855,9 @@ Tabs.Settings:Button({
     end
 })
 
-Tabs.Settings:Button({
-    Title = "Server Hop",
+Tabs.Settings:AddButton({
+    Name = "Server Hop",
+	Icon = "lucide:mouse",
     Callback = function()
         local ts = game:GetService("TeleportService")
         local player = game.Players.LocalPlayer
@@ -884,13 +887,13 @@ local function refreshDropdown()
     end
 end
 
-Tabs.Settings:Paragraph({
-    Title = "Current Server",
+Tabs.Settings:AddParagraph({
+    Name = "Current Server",
     Desc = "You are in server: " .. game.JobId
 })
 
-Tabs.Settings:Input({
-    Title = "Target Server ID",
+Tabs.Settings:AddTextInput({
+    Name = "Target Server ID",
     Default = "",
     Placeholder = "Enter JobId...",
     MultiLine = false,
@@ -911,8 +914,8 @@ Tabs.Settings:Input({
     end
 })
 
-Tabs.Settings:Button({
-    Title = "Teleport",
+Tabs.Settings:AddButton({
+    Name = "Teleport",
     Callback = function()
         local target
         if inputObj and inputObj.GetValue then
