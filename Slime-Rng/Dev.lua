@@ -521,10 +521,10 @@ Combat:AddTextInput({
     end
 })
 
-local Manual = Tabs.Main:AddSection({ Title = "Manual", Position = "Center" })
+local Manual = Tabs.Main:AddSection({ Name = "Manual", Position = "Center" })
 
 Manual:AddButton({
-    Namd = "Equip Best",
+    Name = "Equip Best",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.InventoryService.RemoteFunction:InvokeServer("requestEquipBest")
     end
