@@ -521,7 +521,7 @@ Combat:AddTextInput({
     end
 })
 
-local Manual = Tabs.Main:Section({ Title = "Manual", Position = "Center" })
+local Manual = Tabs.Main:AddSection({ Title = "Manual", Position = "Center" })
 
 Manual:AddButton({
     Namd = "Equip Best",
