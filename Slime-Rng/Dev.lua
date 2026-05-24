@@ -555,7 +555,7 @@ Manual:AddButton({
     end
 })
 
-local Code = Tabs.Main:AddSection({ Title = "Redeem Code", Position = "Center" })
+local Code = Tabs.Main:AddSection({ Name = "Redeem Code", Position = "Center" })
 
 local RS = game:GetService("ReplicatedStorage")
 local CodeRemote = RS.Packages._Index["leifstout_networker@0.3.1"]
