@@ -738,7 +738,7 @@ WebDC:AddToggle({
     end
 })
 
-WebDC:AddInput({
+WebDC:AddTextInput({
     Name = "Webhook Interval",
     Default = "30",
     Placeholder = "Seconds",
