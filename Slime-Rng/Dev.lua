@@ -261,13 +261,13 @@ Infomation:AddButton({
 })
 
 Infomation:AddParagraph({
-    Title = "Join Us",
-    Desc = "Every Update Will Be On Discord"
+    Name = "Join Us",
+    Content = "Every Update Will Be On Discord"
 })
 
 Infomation:AddParagraph({
-    Title = "Support",
-    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+    Name = "Support",
+    Content = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
 Tabs.Home:AddSection({ Title = "Local Player" })
