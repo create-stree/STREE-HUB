@@ -320,9 +320,9 @@ Players:AddButton({
 })
 
 
-local Rolls Tabs.Main:Section({ Name = "Rolling", Position = "Center" })
+local Rolls = Tabs.Main:AddSection({ Name = "Rolling", Position = "Center" })
 
-Rolls:Toggle({
+Rolls:AddToggle({
     Name = "Auto Roll",
     Default = false,
     Callback = function(state)
@@ -339,7 +339,7 @@ Rolls:Toggle({
     end
 })
 
-Rolls:Toggle({
+Rolls:AddToggle({
     Name = "Auto Roll Games (smooth)",
     Default = false,
     Callback = function(state)
@@ -356,7 +356,7 @@ Rolls:Toggle({
     end
 })
 
-Rolls:Button({
+Rolls:AddButton({
     Name = "Hide Roll Games",
     Callback = function()
         hideRollEnabled = not hideRollEnabled
