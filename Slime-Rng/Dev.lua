@@ -190,7 +190,7 @@ local window = ModernV2:Window({
 	Enable3DRenderer = false,
 	Keybind = "RightControl",
 	Config = {
-		ConfigFolder = "ModernV2Example",
+		ConfigFolder = "StreeExample",
 		AutoSaveFile = "Default",
 		AutoSave = true,
 		AutoLoad = true,
@@ -358,16 +358,17 @@ Rolls:AddToggle({
 
 Rolls:AddButton({
     Name = "Hide Roll Games",
+	Icon = "lucide:mouse",
     Callback = function()
         hideRollEnabled = not hideRollEnabled
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.SettingsService.RemoteEvent:FireServer("set", "hideRoll", hideRollEnabled)
     end
 })
 
-Tabs.Main:Section({ Title = "Farming" })
+local Farm = Tabs.Main:AddSection({ Name = "Farming", Position = "Center" })
 
-Tabs.Main:Toggle({
-    Title = "Auto Index",
+Farm:AddToggle({
+    Name = "Auto Index",
     Default = false,
     Callback = function(state)
         autoIndexEnabled = state
@@ -382,8 +383,8 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Toggle({
-    Title = "Auto Farm",
+Farm:AddToggle({
+    Name = "Auto Farm",
     Default = false,
     Callback = function(state)
         autoFarmEnabled = state
@@ -408,8 +409,8 @@ Tabs.Main:Toggle({
     end
 })
 
-local autoTeleportBestZoneToggle = Tabs.Main:Toggle({
-    Title = "Auto Best Zone",
+local autoTeleportBestZoneToggle = Farm:AddToggle({
+    Name = "Auto Best Zone",
     Default = false,
     Callback = function(state)
         autoTeleportBestZoneEnabled = state
@@ -424,8 +425,8 @@ local autoTeleportBestZoneToggle = Tabs.Main:Toggle({
     end
 })
 
-local autoBestZoneIntervalInput = Tabs.Main:Input({
-    Title = "Best Zone Interval",
+local autoBestZoneIntervalInput = Farm:AddInput({
+    Name = "Best Zone Interval",
     Default = "30",
     Placeholder = "Seconds",
     Callback = function(value)
@@ -434,8 +435,8 @@ local autoBestZoneIntervalInput = Tabs.Main:Input({
     end
 })
 
-local autoPotionsToggle = Tabs.Main:Toggle({
-    Title = "Auto Potions",
+local autoPotionsToggle = Farm:AddToggle({
+    Name = "Auto Potions",
     Default = false,
     Callback = function(state)
         autoPotionsEnabled = state
@@ -450,10 +451,10 @@ local autoPotionsToggle = Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Section({ Title = "Combat" })
+local Combat = Tabs.Main:AddSection({ Title = "Combat", Position = "Center" })
 
-Tabs.Main:Toggle({
-    Title = "Auto Shoot",
+Combat:AddToggle({
+    Name = "Auto Shoot",
     Default = false,
     Callback = function(state)
         autoShootEnabled = state
@@ -477,8 +478,8 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Toggle({
-    Title = "Slime Magnet",
+Combat:AddToggle({
+    Name = "Slime Magnet",
     Default = false,
     Callback = function(state)
         slimeMagnetEnabled = state
@@ -507,8 +508,8 @@ Tabs.Main:Toggle({
     end
 })
 
-Tabs.Main:Input({
-    Title = "Radius Shoot",
+Combat:AddInput({
+    Name = "Radius Shoot",
     Default = "",
     Placeholder = "17",
     Callback = function(value)
@@ -519,37 +520,37 @@ Tabs.Main:Input({
     end
 })
 
-Tabs.Main:Section({ Title = "Manual" })
+local Manual = Tabs.Main:Section({ Title = "Manual", Position = "Center" })
 
-Tabs.Main:Button({
-    Title = "Equip Best",
+Manual:AddButton({
+    Namd = "Equip Best",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.InventoryService.RemoteFunction:InvokeServer("requestEquipBest")
     end
 })
 
-Tabs.Main:Button({
-    Title = "Purchase Zone",
+Manual:AddButton({
+    Name = "Purchase Zone",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.ZonesService.RemoteFunction:InvokeServer("requestPurchaseZone")
     end
 })
 
-Tabs.Main:Button({
-    Title = "Unlock Machine",
+Manual:AddButton({
+    Name = "Unlock Machine",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.CraftingService.RemoteFunction:InvokeServer("requestUnlockMachine")
     end
 })
 
-Tabs.Main:Button({
-    Title = "Claim Offline",
+Manual:AddButton({
+    Name = "Claim Offline",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.OfflineEarningsService.RemoteFunction:InvokeServer("requestClaim")
     end
 })
 
-Tabs.Main:Section({ Title = "Redeem Code" })
+local Code = Tabs.Main:AddSection({ Title = "Redeem Code", Position = "Center" })
 
 local RS = game:GetService("ReplicatedStorage")
 local CodeRemote = RS.Packages._Index["leifstout_networker@0.3.1"]
@@ -563,8 +564,8 @@ local CodeList = {
     "giveMeLuckNOW"
 }
 
-Tabs.Main:Button({
-    Title = "Redeem All Codes",
+Code:AddButton({
+    Name = "Redeem All Codes",
     Callback = function()
         for _, code in ipairs(CodeList) do
             pcall(function()
