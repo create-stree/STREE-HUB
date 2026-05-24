@@ -249,10 +249,9 @@ local autoClaimOfflineEnabled = false
 
 local Infomation = Tabs.Home:AddSection({ Name = "Information", Position = "Center" })
 
-local Infomation = Tabs.Home:AddButton({
+Infomation:AddButton({
     Name = "Copy Discord Link",
     Icon = "lucide:mouse",
-    Desc = "Copy Discord Link",
     Callback = function()
         local link = "https://discord.gg/jdmX43t5mY"
         if setclipboard then
@@ -261,12 +260,12 @@ local Infomation = Tabs.Home:AddButton({
     end
 })
 
-local Infomation = Tabs.Home:AddParagraph({
+Infomation:AddParagraph({
     Title = "Join Us",
     Desc = "Every Update Will Be On Discord"
 })
 
-local Infomation = Tabs.Home:AddParagraph({
+Infomation:AddParagraph({
     Title = "Support",
     Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
