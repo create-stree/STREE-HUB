@@ -525,6 +525,7 @@ local Manual = Tabs.Main:AddSection({ Name = "Manual", Position = "Center" })
 
 Manual:AddButton({
     Name = "Equip Best",
+	Icon = "lucide:mouse",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.InventoryService.RemoteFunction:InvokeServer("requestEquipBest")
     end
@@ -532,6 +533,7 @@ Manual:AddButton({
 
 Manual:AddButton({
     Name = "Purchase Zone",
+	Icon = "lucide:mouse",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.ZonesService.RemoteFunction:InvokeServer("requestPurchaseZone")
     end
@@ -539,6 +541,7 @@ Manual:AddButton({
 
 Manual:AddButton({
     Name = "Unlock Machine",
+	Icon = "lucide:mouse",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.CraftingService.RemoteFunction:InvokeServer("requestUnlockMachine")
     end
@@ -546,6 +549,7 @@ Manual:AddButton({
 
 Manual:AddButton({
     Name = "Claim Offline",
+	Icon = "lucide:mouse",
     Callback = function()
         game:GetService("ReplicatedStorage").Packages._Index["leifstout_networker@0.3.1"].networker._remotes.OfflineEarningsService.RemoteFunction:InvokeServer("requestClaim")
     end
@@ -567,6 +571,7 @@ local CodeList = {
 
 Code:AddButton({
     Name = "Redeem All Codes",
+	Icon = "lucide:mouse",
     Callback = function()
         for _, code in ipairs(CodeList) do
             pcall(function()
