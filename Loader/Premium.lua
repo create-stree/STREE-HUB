@@ -1,7 +1,7 @@
 repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 if not game:IsLoaded() then game.Loaded:Wait() end
 
-local placeId = game.PlaceId
+local gameId = game.GameId
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
@@ -81,59 +81,59 @@ if not isPremiumKey(_G.scripts_key) then
 end
 
 local gameScripts = {
-    [126509999114328] = {
+    [7326934954] = {
         name = "99 Night In The Forest",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/99NITF/Premium.lua"
     },
-    [127794225497302] = {
+    [8144728961] = {
         name = "Abyss",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Premium.lua"
     },
-    [286090429] = {
+    [111958650] = {
         name = "Arsenal",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Premium.lua"
     },
-    [2753915549] = {
+    [994732206] = {
         name = "Blox Fruit",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Blox-Fruit/Dev.lua"
     },
-    [124311897657957] = {
+    [9344307274] = {
         name = "Break A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
     },
-    [123921593837160] = {
+    [7474367816] = {
         name = "Climb and Jump Tower",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
     },
-    [131623223084840] = {
+    [9363735110] = {
         name = "Escape Tsunami For Brainrot",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Premium.lua"
     },
-    [121864768012064] = {
+    [6701277882] = {
         name = "Fish It",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
     },
-    [18687417158] = {
+    [6331902150] = {
         name = "Forsaken",
         premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
     },
-    [130594398886540] = {
+    [9509842868] = {
         name = "Garden Horizons",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Premium.lua"
     },
-    [89469502395769] = {
+    [10004244222] = {
         name = "Kick A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Premium.lua"
     },
-    [92416421522960] = {
+    [9792947201] = {
         name = "Slime RNG",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Slime-Rng/Premium.lua"
     },
-    [136599248168660] = {
+    [7394964165] = {
         name = "Solo Hunter",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
     },
-    [93978595733734] = {
+    [6739698191] = {
         name = "Violence Districk",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Dev.lua"
     }
