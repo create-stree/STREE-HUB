@@ -2606,7 +2606,7 @@ local v1 = Window:MakeTab({
 })
 local v2 = Window:MakeTab({
     Title = "Farming",
-    Icon = "zap"
+    Icon = "landmark"
 })
 local v3 = Window:MakeTab({
     Title = "Quests/Other",
@@ -2659,7 +2659,7 @@ local v14 = Window:MakeTab({
 })
 local v15 = Window:MakeTab({
     Title = "Settings",
-    Icon = "sliders"
+    Icon = "settings"
 })
 
 v0:AddParagraph({
