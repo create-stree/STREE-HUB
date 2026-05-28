@@ -2642,7 +2642,7 @@ local v10 = Window:MakeTab({
 })
 local v11 = Window:MakeTab({
     Title = "Teleport",
-    Icon = "door-open"
+    Icon = "rbxassetid://91306356501736"
 })
 local v12 = Window:MakeTab({
     Title = "PvP",
