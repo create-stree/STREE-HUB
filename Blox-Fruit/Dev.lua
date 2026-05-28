@@ -297,7 +297,7 @@ local w = {
 		["Chocolate Bar Battler"] = CFrame.new(647, 42, -12401),
 		["Sweet Thief"] = CFrame.new(116, 36, -12478),
 		["Candy Rebel"] = CFrame.new(47, 61, -12889),
-		Ghost = CFrame.new(5251, 5, 1111),
+		["Ghost"] = CFrame.new(5251, 5, 1111),
 	};
 EquipWeapon = function(I)
 		if not I then
@@ -2642,7 +2642,7 @@ local v10 = Window:MakeTab({
 })
 local v11 = Window:MakeTab({
     Title = "Teleport",
-    Icon = "rbxassetid://120978111007514"
+    Icon = "door-open"
 })
 local v12 = Window:MakeTab({
     Title = "PvP",
