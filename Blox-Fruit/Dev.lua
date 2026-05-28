@@ -10859,10 +10859,10 @@ local World1 = World1 or false
 local World2 = World2 or false
 local World3 = World3 or false
 
-v14:AddSection("Mua Melee V1")
+v14:AddSection("Purchase Melee V1")
 
 local MeleeCoords = {
-    ["Dark Step (Chân Đen)"] = {
+    ["Dark Step"] = {
         Key = "BuyBlackLeg",
         NPC = "Dark Step Teacher",
         Pos = World1 and CFrame.new(-985, 13, 3988)
@@ -10870,7 +10870,7 @@ local MeleeCoords = {
             or World3 and CFrame.new(-5045, 371, -3181)
             or nil
     },
-    ["Electric (Điện)"] = {
+    ["Electric"] = {
         Key = "BuyElectro",
         NPC = "Mad Scientist",
         Pos = World1 and CFrame.new(-5384, 13, -2148)
@@ -10878,7 +10878,7 @@ local MeleeCoords = {
             or World3 and CFrame.new(-4995, 314, -3203)
             or nil
     },
-    ["Water Kung Fu (Võ Cá)"] = {
+    ["Water Kung Fu"] = {
         Key = "BuyFishmanKarate",
         NPC = "Water Kung Fu Teacher",
         Pos = World1 and CFrame.new(61585, 18, 987)
@@ -10886,7 +10886,7 @@ local MeleeCoords = {
             or World3 and CFrame.new(-5023, 371, -3190)
             or nil
     },
-    ["Dragon Breath (Hơi Thở Rồng)"] = {
+    ["Dragon Breath"] = {
         Key = "BuyDragonClaw",
         NPC = "Sabi",
         Pos = World2 and CFrame.new(701, 187, 655)
@@ -10900,26 +10900,26 @@ local MeleeCoords = {
             or World3 and CFrame.new(-5004, 371, -3198)
             or nil
     },
-    ["Death Step (Chân Đen V2)"] = {
+    ["Death Step V2"] = {
         Key = "BuyDeathStep",
         NPC = "Phoeyu, the Reformed",
         Pos = World2 and CFrame.new(6357, 296, -6762)
             or World3 and CFrame.new(-4999, 314, -3221)
             or nil
     },
-    ["Sharkman Karate (Võ Cá V2)"] = {
+    ["Sharkman Karate V2"] = {
         Key = "BuySharkmanKarate",
         NPC = "Daigrock, the Sharkman",
         Pos = World2 and CFrame.new(-2602, 238, -10316)
             or World3 and CFrame.new(-4972, 314, -3222)
             or nil
     },
-    ["Dragon Talon (Rồng V2)"] = {
+    ["Dragon Talon V2"] = {
         Key = "BuyDragonTalon",
         NPC = "Uzoth",
         Pos = World3 and CFrame.new(5661, 1211, 865) or nil
     },
-    ["Electric Claw (Điện V2)"] = {
+    ["Electric Claw V2"] = {
         Key = "BuyElectricClaw",
         NPC = "Previous Hero",
         Pos = World3 and CFrame.new(-10371, 331, -10131) or nil
@@ -10929,14 +10929,14 @@ local MeleeCoords = {
         NPC = "Ancient Monk",
         Pos = World3 and CFrame.new(-13776, 334, -9879) or nil
     },
-    ["Sanguine Art (Võ Quỷ)"] = {
+    ["Sanguine Art"] = {
         Key = "BuySanguineArt",
         NPC = "Shafi",
         Pos = World3 and CFrame.new(-16353, 160, 99) or nil
     }
 }
 
-local SelectedMelee = "Dark Step (Chân Đen)"
+local SelectedMelee = "Dark Step (Choose Melee)"
 
 local function GetAvailableMeleeOptions()
     local list = {}
@@ -10950,16 +10950,16 @@ local function GetAvailableMeleeOptions()
 end
 
 v14:AddDropdown({
-    Name = "Chọn Melee Cần Mua",
+    Name = "Choose Melee to Buy",
     Options = GetAvailableMeleeOptions(),
-    Default = "Dark Step (Chân Đen)",
+    Default = "Dark Step (Choose Melee)",
     Callback = function(Value)
         SelectedMelee = Value
     end
 })
 
 v14:AddToggle({
-    Name = "Auto Mua (Bật/Tắt)",
+    Name = "Auto Buy",
     Default = GetSetting("AutoBuyMelee_Save", false),
     Callback = function(Value)
         _G.AutoBuyMelee = Value
@@ -11002,8 +11002,8 @@ v14:AddToggle({
                 local data = MeleeCoords[SelectedMelee]
                 if not data or not data.Pos then
                     StreeLib:Notify({
-                        Title = "Bear Hub",
-                        Message = "Lỗi: Không tìm thấy toạ độ cho Melee này ở Sea hiện tại!",
+                        Title = "Stree Hub",
+                        Message = "Error: No coordinates found for this Melee in the current Sea!",
                         Duration = 3
                     })
                     _G.AutoBuyMelee = false
@@ -11027,8 +11027,8 @@ v14:AddToggle({
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", data.Key)
 
                         StreeLib:Notify({
-                            Title = "Bear Hub",
-                            Message = "Đã mua: " .. SelectedMelee,
+                            Title = "Stree Hub",
+                            Message = "Purchased: " .. SelectedMelee,
                             Duration = 2
                         })
                         task.wait(1)
@@ -11039,13 +11039,13 @@ v14:AddToggle({
     end
 })
 
-v14:AddSection("Mua Đồ Craft Sea Event")
+v14:AddSection("Purchase Craft Sea Event Items")
 
 v14:AddButton({
     Name = "Craft Dragonheart",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "Dragonheart")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft Dragonheart", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted Dragonheart", Duration = 2})
     end
 })
 
@@ -11053,7 +11053,7 @@ v14:AddButton({
     Name = "Craft Dragonstorm",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "Dragonstorm")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft Dragonstorm", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted Dragonstorm", Duration = 2})
     end
 })
 
@@ -11061,7 +11061,7 @@ v14:AddButton({
     Name = "Craft DinoHood",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "DinoHood")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft DinoHood", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted DinoHood", Duration = 2})
     end
 })
 
@@ -11069,7 +11069,7 @@ v14:AddButton({
     Name = "Craft SharkTooth",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "SharkTooth")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft SharkTooth", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted SharkTooth", Duration = 2})
     end
 })
 
@@ -11077,7 +11077,7 @@ v14:AddButton({
     Name = "Craft TerrorJaw",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "TerrorJaw")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft TerrorJaw", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted TerrorJaw", Duration = 2})
     end
 })
 
@@ -11085,7 +11085,7 @@ v14:AddButton({
     Name = "Craft SharkAnchor",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "SharkAnchor")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft SharkAnchor", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted SharkAnchor", Duration = 2})
     end
 })
 
@@ -11093,7 +11093,7 @@ v14:AddButton({
     Name = "Craft LeviathanCrown",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LeviathanCrown")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft LeviathanCrown", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted LeviathanCrown", Duration = 2})
     end
 })
 
@@ -11101,7 +11101,7 @@ v14:AddButton({
     Name = "Craft LeviathanShield",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LeviathanShield")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft LeviathanShield", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted LeviathanShield", Duration = 2})
     end
 })
 
@@ -11109,7 +11109,7 @@ v14:AddButton({
     Name = "Craft LeviathanBoat",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LeviathanBoat")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft LeviathanBoat", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted LeviathanBoat", Duration = 2})
     end
 })
 
@@ -11117,7 +11117,7 @@ v14:AddButton({
     Name = "Craft LegendaryScroll",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LegendaryScroll")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft LegendaryScroll", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted LegendaryScroll", Duration = 2})
     end
 })
 
@@ -11125,17 +11125,17 @@ v14:AddButton({
     Name = "Craft MythicalScroll",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "MythicalScroll")
-        StreeLib:Notify({Title = "Craft", Message = "Đã craft MythicalScroll", Duration = 2})
+        StreeLib:Notify({Title = "Craft", Message = "Crafted MythicalScroll", Duration = 2})
     end
 })
 
-v14:AddSection("Mua Haki, Soru, Geppo")
+v14:AddSection("Purchase Haki, Soru, Geppo")
 
 v14:AddButton({
     Name = "Buy Geppo $10,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyHaki", "Geppo")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Geppo", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Geppo", Duration = 2})
     end
 })
 
@@ -11143,7 +11143,7 @@ v14:AddButton({
     Name = "Buy Buso Haki $25,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyHaki", "Buso")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Buso Haki", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Buso Haki", Duration = 2})
     end
 })
 
@@ -11151,7 +11151,7 @@ v14:AddButton({
     Name = "Buy Soru $25,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyHaki", "Soru")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Soru", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Soru", Duration = 2})
     end
 })
 
@@ -11159,17 +11159,17 @@ v14:AddButton({
     Name = "Buy Observation Haki $750,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("KenTalk", "Buy")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Observation Haki", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Observation Haki", Duration = 2})
     end
 })
 
-v14:AddSection("Mua Kiếm, Súng")
+v14:AddSection("Purchase Sword and Gun")
 
 v14:AddButton({
     Name = "Buy Cutlass $1,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Cutlass")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Cutlass", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Cutlass", Duration = 2})
     end
 })
 
@@ -11177,7 +11177,7 @@ v14:AddButton({
     Name = "Buy Katana $1,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Katana")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Katana", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Katana", Duration = 2})
     end
 })
 
@@ -11185,7 +11185,7 @@ v14:AddButton({
     Name = "Buy Iron Mace $25,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Iron Mace")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Iron Mace", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Iron Mace", Duration = 2})
     end
 })
 
@@ -11193,7 +11193,7 @@ v14:AddButton({
     Name = "Buy Dual Katana $12,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Duel Katana")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Dual Katana", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Dual Katana", Duration = 2})
     end
 })
 
@@ -11201,7 +11201,7 @@ v14:AddButton({
     Name = "Buy Triple Katana $60,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Triple Katana")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Triple Katana", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Triple Katana", Duration = 2})
     end
 })
 
@@ -11209,7 +11209,7 @@ v14:AddButton({
     Name = "Buy Pipe $100,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Pipe")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Pipe", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Pipe", Duration = 2})
     end
 })
 
@@ -11217,7 +11217,7 @@ v14:AddButton({
     Name = "Buy Dual-Headed Blade $400,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Dual-Headed Blade")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Dual-Headed Blade", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Dual-Headed Blade", Duration = 2})
     end
 })
 
@@ -11225,7 +11225,7 @@ v14:AddButton({
     Name = "Buy Bisento $1,200,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Bisento")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Bisento", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Bisento", Duration = 2})
     end
 })
 
@@ -11233,7 +11233,7 @@ v14:AddButton({
     Name = "Buy Soul Cane $750,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Soul Cane")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Soul Cane", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Soul Cane", Duration = 2})
     end
 })
 
@@ -11241,7 +11241,7 @@ v14:AddButton({
     Name = "Buy Pole V2 5,000F",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ThunderGodTalk")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Pole V2", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Pole V2", Duration = 2})
     end
 })
 
@@ -11249,7 +11249,7 @@ v14:AddButton({
     Name = "Buy Slingshot $5,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Slingshot")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Slingshot", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Slingshot", Duration = 2})
     end
 })
 
@@ -11257,7 +11257,7 @@ v14:AddButton({
     Name = "Buy Musket $8,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Musket")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Musket", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Musket", Duration = 2})
     end
 })
 
@@ -11265,7 +11265,7 @@ v14:AddButton({
     Name = "Buy Flintlock $10,500",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Flintlock")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Flintlock", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Flintlock", Duration = 2})
     end
 })
 
@@ -11273,7 +11273,7 @@ v14:AddButton({
     Name = "Buy Refined Slingshot $30,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Refined Flintlock")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Refined Slingshot", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Refined Slingshot", Duration = 2})
     end
 })
 
@@ -11281,7 +11281,7 @@ v14:AddButton({
     Name = "Buy Refined Flintlock $65,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Refined Flintlock")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Refined Flintlock", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Refined Flintlock", Duration = 2})
     end
 })
 
@@ -11289,7 +11289,7 @@ v14:AddButton({
     Name = "Buy Cannon $100,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Cannon")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Cannon", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Cannon", Duration = 2})
     end
 })
 
@@ -11298,7 +11298,7 @@ v14:AddButton({
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Slingshot", "1")
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Slingshot", "2")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Kabucha", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Kabucha", Duration = 2})
     end
 })
 
@@ -11306,17 +11306,17 @@ v14:AddButton({
     Name = "Buy Bizarre Rifle 250 Ectoplasm",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Ectoplasm", "Buy", 1)
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Bizarre Rifle", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Bizarre Rifle", Duration = 2})
     end
 })
 
-v14:AddSection("Mua Phụ Kiện")
+v14:AddSection("Buy Accessories")
 
 v14:AddButton({
     Name = "Buy Black Cape $50,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Black Cape")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Black Cape", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Black Cape", Duration = 2})
     end
 })
 
@@ -11324,7 +11324,7 @@ v14:AddButton({
     Name = "Buy Swordsman Hat $150,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Swordsman Hat")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Swordsman Hat", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Swordsman Hat", Duration = 2})
     end
 })
 
@@ -11332,25 +11332,25 @@ v14:AddButton({
     Name = "Buy Tomoe Ring $500,000",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring")
-        StreeLib:Notify({Title = "Shop", Message = "Đã mua Tomoe Ring", Duration = 2})
+        StreeLib:Notify({Title = "Shop", Message = "Purchased Tomoe Ring", Duration = 2})
     end
 })
 
-v14:AddSection("Đổi Tộc, Reset Stats")
+v14:AddSection("Clan, Reset Stats")
 
 v14:AddButton({
-    Name = "Đổi Tộc Ghoul",
+    Name = "Clan Ghoul",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Ectoplasm", "Change", 4)
-        StreeLib:Notify({Title = "Race", Message = "Đã đổi sang Ghoul", Duration = 2})
+        StreeLib:Notify({Title = "Race", Message = "Purchased sang Ghoul", Duration = 2})
     end
 })
 
 v14:AddButton({
-    Name = "Đổi Tộc Cyborg",
+    Name = "Clan Cyborg",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CyborgTrainer", "Buy")
-        StreeLib:Notify({Title = "Race", Message = "Đã đổi sang Cyborg", Duration = 2})
+        StreeLib:Notify({Title = "Race", Message = "Purchased sang Cyborg", Duration = 2})
     end
 })
 
@@ -11359,7 +11359,7 @@ v14:AddButton({
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "1")
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "2")
-        StreeLib:Notify({Title = "Stats", Message = "Đã Reset Stats", Duration = 2})
+        StreeLib:Notify({Title = "Stats", Message = "Purchased Stats", Duration = 2})
     end
 })
 
@@ -11368,7 +11368,7 @@ v14:AddButton({
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "1")
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "2")
-        StreeLib:Notify({Title = "Race", Message = "Đã Random Race", Duration = 2})
+        StreeLib:Notify({Title = "Race", Message = "Purchased Random Race", Duration = 2})
     end
 })
 
