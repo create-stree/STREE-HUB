@@ -2584,7 +2584,7 @@ local StreeLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/crea
 local Window = StreeLib:MakeWindow({
     Title = "StreeHub | Blox Fruit",
     SubTitle = "",
-    SaveFolder = "BearHub_Save.json"
+    SaveFolder = "StreeHub_Save.json"
 })
 
 task.spawn(function()
@@ -2684,7 +2684,7 @@ v0:AddButton({
 
 v0:AddParagraph({
     Title = "StreeHub",
-    Text = "•StreeHub\n• Script oleh KirsiaSC\n• Tanggal Pembuatan: 13 Maret 2026\n• Tanggal terakhir diperbarui: 13 Maret 2026\n• Senjata Aura saat ini tidak dapat menembak perahu dan leviathan"
+    Text = "•StreeHub\n• Script oleh KirsiaSC\n• Tanggal Pembuatan: 13 Maret 2026\n• Tanggal terakhir diperbarui: 28 Mei 2026\n• Senjata Aura saat ini tidak dapat menembak perahu dan leviathan"
 })
 
 local Time = v1:AddParagraph({
