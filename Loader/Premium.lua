@@ -6,7 +6,9 @@ local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
-_G.scripts_key = _G.scripts_key or scripts_key or "FREE_USER"
+local ok, val = pcall(function() return scripts_key end)
+_G.scripts_key = _G.scripts_key or (ok and val) or "FREE_USER"
+
 local streeLogo = "rbxassetid://99948086845842"
 
 local premiumKeys = {
@@ -191,13 +193,21 @@ Bar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 Bar.BorderSizePixel = 0
 Bar.Parent = Loading
 
+local UICornerLoading = Instance.new("UICorner")
+UICornerLoading.CornerRadius = UDim.new(0, 3)
+UICornerLoading.Parent = Loading
+
+local UICornerBar = Instance.new("UICorner")
+UICornerBar.CornerRadius = UDim.new(0, 3)
+UICornerBar.Parent = Bar
+
 local tween = TweenService:Create(Bar, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
 tween:Play()
 tween.Completed:Wait()
 task.wait(0.3)
 ScreenGui:Destroy()
 
-local gameData = gameScripts[placeId]
+local gameData = gameScripts[gameId]
 local gameName = gameData and gameData.name or "Unknown Game"
 
 StarterGui:SetCore("SendNotification", {
