@@ -38,7 +38,7 @@ ThemeManager:SetDefaultTheme({
 })
 
 local Window = Library:CreateWindow({
-    Title = "StreeHub " .. version,
+    Title = "StreeHub",
     Footer = "discord.gg/streehub | " .. version .. " | Survive The Apocalypse",
     Icon = "rbxassetid://99948086845842",
     SidebarCompacted = true,
@@ -96,14 +96,14 @@ task.defer(function()
 end)
 
 local Tabs = {
-    Home    = Window:AddTab("Home",   "house"),
+    Home    = Window:AddTab("Home",   "scan-face"),
     Main    = Window:AddTab("Main",   "landmark"),
     Combat  = Window:AddTab("Combat", "sword"),
     Player  = Window:AddTab("Player", "user"),
-    Auto    = Window:AddTab("Auto",   "repeat-2"),
+    Auto    = Window:AddTab("Auto",   "play"),
     Visual  = Window:AddTab("Visual", "eye"),
     Misc    = Window:AddTab("Misc",   "layout-grid"),
-    UI      = Window:AddTab("UI Settings", "palette"),
+    UI      = Window:AddTab("UI Settings", "settings-2"),
 }
 
 local HomeLeft    = Tabs.Home:AddLeftGroupbox("Info")
