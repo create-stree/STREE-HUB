@@ -44,7 +44,6 @@ local Tabs = {
     Misc    = Window:AddTab("Misc",   "layout-grid"),
 }
 
--- Groupboxes per tab
 local HomeLeft    = Tabs.Home:AddLeftGroupbox("Info")
 local HomeRight   = Tabs.Home:AddRightGroupbox("Game")
 local MainLeft    = Tabs.Main:AddLeftGroupbox("Settings")
@@ -3505,7 +3504,6 @@ MiscRight:AddSlider("CornerRadius", {
     end,
 })
 
--- Notify on load
 Library:Notify({
     Title = "StreeHub",
     Description = "Script Loaded! Gun | Melee | Medical | Armor | Food | Resources\nRight Shift = toggle menu.",
