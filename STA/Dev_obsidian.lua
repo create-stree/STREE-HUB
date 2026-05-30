@@ -20,7 +20,6 @@ local addSuppressorRemote = Remotes and Remotes:FindFirstChild("Tools") and Remo
 local adjustBackpackRemote = Remotes and Remotes:FindFirstChild("Tools") and Remotes.Tools:FindFirstChild("AdjustBackpack")
 local resetRemote = Remotes and Remotes:FindFirstChild("Misc") and Remotes.Misc:FindFirstChild("Reset")
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -38,10 +37,12 @@ ThemeManager:SetDefaultTheme({
 })
 
 local Window = Library:CreateWindow({
-    Title = "StreeHub " .. version,
+    Title = "StreeHub",
     Footer = "Survive The Apocalypse",
     Icon = "rbxassetid://99948086845842",
     ToggleKeybind = Enum.KeyCode.RightShift,
+    ShowMobileButtons = true,
+    MobileButtonsSide = "Right",
     SidebarCompacted = true,
     EnableSidebarResize = true,
     EnableCompacting = true,
