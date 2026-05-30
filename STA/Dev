@@ -38,7 +38,7 @@ ThemeManager:SetDefaultTheme({
 })
 
 local Window = Library:CreateWindow({
-    Title = "StreeHub " .. version,
+    Title = "StreeHub",
     Footer = "discord.gg/streehub | " .. version .. " | Survive The Apocalypse",
     Icon = "rbxassetid://99948086845842",
     SidebarCompacted = true,
