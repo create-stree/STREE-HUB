@@ -20,7 +20,6 @@ local addSuppressorRemote = Remotes and Remotes:FindFirstChild("Tools") and Remo
 local adjustBackpackRemote = Remotes and Remotes:FindFirstChild("Tools") and Remotes.Tools:FindFirstChild("AdjustBackpack")
 local resetRemote = Remotes and Remotes:FindFirstChild("Misc") and Remotes.Misc:FindFirstChild("Reset")
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -38,8 +37,8 @@ ThemeManager:SetDefaultTheme({
 })
 
 local Window = Library:CreateWindow({
-    Title = "StreeHub " .. version,
-    Footer = "Survive The Apocalypse",
+    Title = "StreeHub",
+    Footer = "StreeHub - Survive The Apocalypse - 1.0.0",
     Icon = "rbxassetid://99948086845842",
     SidebarCompacted = true,
     EnableSidebarResize = true,
@@ -150,14 +149,14 @@ task.defer(function()
 end)
 
 local Tabs = {
-    Home    = Window:AddTab("Home",   "house"),
+    Home    = Window:AddTab("Home",   "scan-face"),
     Main    = Window:AddTab("Main",   "landmark"),
     Combat  = Window:AddTab("Combat", "sword"),
     Player  = Window:AddTab("Player", "user"),
-    Auto    = Window:AddTab("Auto",   "repeat-2"),
+    Auto    = Window:AddTab("Auto",   "play"),
     Visual  = Window:AddTab("Visual", "eye"),
     Misc    = Window:AddTab("Misc",   "layout-grid"),
-    UI      = Window:AddTab("UI Settings", "palette"),
+    UI      = Window:AddTab("UI Settings", "settings-2"),
 }
 
 local HomeLeft    = Tabs.Home:AddLeftGroupbox("Info")
