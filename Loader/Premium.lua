@@ -136,6 +136,10 @@ local gameScripts = {
         name = "Solo Hunter",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
     },
+    [9098570654] = {
+        nama = "Survive The Apocalypse",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/STA/Premium.lua"
+    },
     [6739698191] = {
         name = "Violence Districk",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Dev.lua"
