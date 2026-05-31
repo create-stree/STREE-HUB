@@ -22,7 +22,6 @@ local resetRemote = Remotes and Remotes:FindFirstChild("Misc") and Remotes.Misc:
 
 local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/"
-
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
 local Options = Library.Options
