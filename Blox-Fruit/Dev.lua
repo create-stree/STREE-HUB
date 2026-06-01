@@ -11991,3 +11991,24 @@ v12:AddToggle({
         end)
     end
 })
+
+v12:AddSection("Select Team")
+
+local selectedTeam = "Pirates"
+v13:AddDropdown({
+    Name = "Select Team",
+    Options = {"Pirates", "Marines"},
+    Default = "Pirates",
+    Multi = false,
+    Callback = function(value)
+        selectedTeam = value
+    end,
+})
+
+v13:AddButton({
+    Name = "Accept",
+    Callback = function()
+        local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
+        remotes.CommF_:InvokeServer("SetTeam2", selectedTeam)
+    end
+})
