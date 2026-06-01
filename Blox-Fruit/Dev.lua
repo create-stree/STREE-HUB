@@ -11995,6 +11995,7 @@ v12:AddToggle({
 v12:AddSection("Select Team")
 
 local selectedTeam = "Pirates"
+
 v12:AddDropdown({
     Name = "Select Team",
     Options = {"Pirates", "Marines"},
