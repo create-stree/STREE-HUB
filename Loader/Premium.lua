@@ -16,6 +16,7 @@ local premiumKeys = {
     "kRpXaVnqZyLhTjBfGmWcSdEoUiNpQvJ",
     "YtHqFzPaKrXeBwNuDjMiVsGoClLrSnQe",
     "pZxYvQmAaTrWnGfBqCkJdEoHsLuVtSiN",
+    "pQrStUvWxYzAbCdEfGhIjKlMnOpQrSt",
     "wJzDnQyGmTcLkVxEoPaFbSgRrUuMiZh",
     "eBtXqNpRzVhLkCmSgJaWiFuTdOyQnPc",
     "qYwRzEbTgLkPmDaVxHnUiFsCoSjMvNQ",
