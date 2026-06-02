@@ -687,6 +687,7 @@ do
         Title = "Support",
         Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
     })
+end
 
 do
     local movSection = MakeSection(PlayerTab, {
@@ -3702,3 +3703,10 @@ RunService.Heartbeat:Connect(function()
         pcall(UpdateMobileFOV)
     end
 end)
+
+StreeHub:Notify({
+    Title = "StreeHub",
+    Content = "Script loaded successfully",
+    Icon = "bell-ring",
+    Duration = 5
+})
