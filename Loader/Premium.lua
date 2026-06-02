@@ -98,7 +98,7 @@ local gameScripts = {
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Premium.lua"
     },
     [994732206] = {
-        name = "Blox Fruit",
+        name = "Blox Fruits",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Blox-Fruit/Dev.lua"
     },
     [9344307274] = {
@@ -142,7 +142,7 @@ local gameScripts = {
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/STA/Premium.lua"
     },
     [6739698191] = {
-        name = "Violence Districk",
+        name = "Violence District",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Premium.lua"
     }
 }
