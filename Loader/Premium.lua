@@ -101,6 +101,10 @@ local gameScripts = {
         name = "Blox Fruits",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Blox-Fruit/Dev.lua"
     },
+    [0000000000] = {
+        name = "Build Ring Farm",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Build-Ring-Farm/Premium.lua",
+    },
     [9344307274] = {
         name = "Break A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
