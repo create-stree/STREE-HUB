@@ -143,7 +143,7 @@ local gameScripts = {
     },
     [6739698191] = {
         name = "Violence Districk",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Dev.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Premium.lua"
     }
 }
 
