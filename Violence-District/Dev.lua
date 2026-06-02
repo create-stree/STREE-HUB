@@ -1,4 +1,3 @@
--- VIOLENCE DISTRICT DETECTION (PC + Mobile)
 local Players           = game:GetService("Players")
 local RunService        = game:GetService("RunService")
 local UserInputService  = game:GetService("UserInputService")
@@ -34,7 +33,7 @@ if StreeHub then
     Window = StreeHub:CreateWindow({
         Title = "StreeHub",
         Icon = "rbxassetid://99948086845842",
-        Author = "Violence Distrik",
+        Author = "Premium - Violence Distrik",
         Folder = "StreeHub",
         Size = WindowSize,
         LiveSearchDropdown = true,
@@ -42,13 +41,9 @@ if StreeHub then
     })
 end
 
--- =====================================================
--- PC CURSOR UNLOCK (ALT key toggle)
--- Hanya aktif di PC, tidak mengganggu mobile
--- =====================================================
 if not isMobile then
     local _cursorOn = false
-    local _cursorManual = false -- aktif setelah ALT pertama kali ditekan
+    local _cursorManual = false
 
     local function _setCursor(state)
         _cursorOn = state
@@ -68,13 +63,11 @@ if not isMobile then
     end
 
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        -- ALT selalu aktif tanpa cek gameProcessed agar bisa toggle kapanpun
         if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
             _setCursor(not _cursorOn)
         end
     end)
 
-    -- Paksa cursor state sesuai toggle (ON dan OFF), agar game tidak bisa override
     task.spawn(function()
         while true do
             if _cursorManual then
@@ -92,7 +85,6 @@ if not isMobile then
         end
     end)
 
-    -- Reset saat respawn
     LocalPlayer.CharacterAdded:Connect(function()
         task.wait(1)
         if _cursorOn then _setCursor(true) end
@@ -101,13 +93,8 @@ if not isMobile then
     print("[VD] ALT Toggle Cursor Ready (PC only)")
 end
 
-
-
--- =====================================================
--- SAFE DRAWING UTILS
--- =====================================================
 local DrawingAvailable = (function()
-    if isMobile then return false end  -- 
+    if isMobile then return false end
     local ok, result = pcall(function()
         return typeof(Drawing) == "table" and Drawing.new ~= nil
     end)
@@ -126,39 +113,26 @@ end
 
 local MobileESP = {}
 
--- =====================================================
--- UTILITY FUNCTIONS
--- =====================================================
 local function clamp(v, min, max)
     return math.max(min, math.min(max, v))
 end
 
--- =====================================================
--- CONFIG
--- =====================================================
 getgenv().VD = getgenv().VD or {
-    -- ESP
     ESP                   = false,
     MaxDistance           = 2000,
     ShowDistance          = false,
-    -- Generator / AntiFail / Healing
     GeneratorESP          = false,
     GenAntiFail           = false,
     HealAntiFail          = false,
-    -- Visual / UI
     HideSkillUI           = false,
     Fullbright            = false,
-    -- Movement
     Speed                 = false,
     SpeedValue            = 16,
     Jump                  = false,
     JumpValue             = 50,
     InfiniteJump          = false,
     Noclip                = false,
-    -- Internal
     Destroyed             = false,
-    -- Auto features
-
     AUTO_LeaveGen         = false,
     AUTO_LeaveDist        = 18,
     AUTO_Attack           = false,
@@ -173,7 +147,6 @@ getgenv().VD = getgenv().VD or {
     AUTO_ParryDelay       = 0.5,
     AUTO_SkillCheck       = false,
     SURV_AutoWiggle       = false,
-    -- Killer features
     KILLER_DestroyPallets = false,
     KILLER_FullGenBreak   = false,
     KILLER_NoPalletStun   = false,
@@ -182,24 +155,19 @@ getgenv().VD = getgenv().VD or {
     KILLER_NoSlowdown     = false,
     KILLER_DoubleTap      = false,
     KILLER_InfiniteLunge  = false,
-    -- Speed
     SPEED_Enabled         = false,
     SPEED_Value           = 32,
     SPEED_Method          = "Attribute",
-    -- Visual extras
     NO_Fog                = false,
     CAM_FOVEnabled        = false,
     CAM_FOV               = 90,
     CAM_ThirdPerson       = false,
     CAM_ShiftLock         = false,
-    -- Config
     FLING_Enabled         = false,
     FLING_Strength        = 10000,
-    -- Beat game
     BEAT_Survivor         = false,
     BEAT_Killer           = false,
     TP_Offset             = 3,
-    -- Drawing / Advanced ESP
     DRAWING_ESP           = false,
     ESP_PlayerChams       = false,
     ESP_ObjectChams       = false,
@@ -212,7 +180,6 @@ getgenv().VD = getgenv().VD or {
     ESP_Offscreen         = false,
     ESP_Velocity          = false,
     ESP_ClosestHook       = false,
-    -- Radar
     RADAR_Enabled         = false,
     RADAR_Size            = 120,
     RADAR_Circle          = false,
@@ -220,7 +187,6 @@ getgenv().VD = getgenv().VD or {
     RADAR_Survivor        = true,
     RADAR_Generator       = true,
     RADAR_Pallet          = true,
-    -- Aimbot
     AIM_Enabled           = false,
     AIM_Crosshair         = false,
     AIM_UseRMB            = true,
@@ -230,11 +196,9 @@ getgenv().VD = getgenv().VD or {
     AIM_VisCheck          = true,
     AIM_ShowFOV           = true,
     AIM_Predict           = true,
-    -- Spear aimbot
     SPEAR_Aimbot          = false,
     SPEAR_Gravity         = 50,
     SPEAR_Speed           = 100,
-    -- Fly
     FLY_Enabled           = false,
     FLY_Speed             = 50,
     FLY_Method            = "Velocity"
@@ -242,9 +206,6 @@ getgenv().VD = getgenv().VD or {
 
 local VD = getgenv().VD
 
--- =====================================================
--- CONFIGURATION SYSTEM (Save & Load)
--- =====================================================
 local function GetSafeGuiParent()
     if gethui then return gethui() end
     local ok, core = pcall(function() return game:GetService("CoreGui") end)
@@ -333,9 +294,6 @@ end
 
 pcall(function() NEX_LoadConfig("Default") end)
 
--- =====================================================
--- SAVE ORIGINAL LIGHTING
--- =====================================================
 local originalLighting = {
     Brightness     = Lighting.Brightness,
     ClockTime      = Lighting.ClockTime,
@@ -363,9 +321,6 @@ do
     if sr then originalLighting.SunRays = { Enabled = sr.Enabled } end
 end
 
--- =====================================================
--- CHARACTER REFS
--- =====================================================
 local Character, Humanoid, Root
 
 local function updateChar(char)
@@ -383,9 +338,6 @@ updateChar()
 LocalPlayer.CharacterAdded:Connect(updateChar)
 LocalPlayer.CharacterRemoving:Connect(function() Character, Humanoid, Root = nil, nil, nil end)
 
--- =====================================================
--- HELPERS: TEAM / COLORS
--- =====================================================
 local TeamColor  = Color3.fromRGB(0, 255, 0)
 local EnemyColor = Color3.fromRGB(255, 0, 0)
 
@@ -397,9 +349,6 @@ local function getPlayerColor(player)
     return isTeammate(player) and TeamColor or EnemyColor
 end
 
--- =====================================================
--- ANTI-FAIL (Generator & Heal)
--- =====================================================
 local AntiFailHooked = false
 local oldNamecall
 
@@ -428,7 +377,6 @@ local function setupAntiFail()
                 if GenResult and VD.GenAntiFail then
                     if GenFail and self == GenFail and method == "FireServer" then return nil end
                     if self == GenResult and method == "FireServer" then
-                        -- Bypass executor
                         args[1] = true
                         return oldNamecall(self, unpack(args))
                     end
@@ -453,9 +401,6 @@ local function setupAntiFail()
 end
 setupAntiFail()
 
--- =====================================================
--- UNIVERSAL ESP (PC Drawing + Mobile Highlight)
--- =====================================================
 local SimpleESP = {}
 
 local function createSimpleESPForCharacter(player, char)
@@ -468,7 +413,6 @@ local function createSimpleESPForCharacter(player, char)
     folder.Name = "UniversalESP_" .. player.Name
     folder.Parent = GetSafeChamsFolder()
 
-    -- Always use Highlight
     local highlight = Instance.new("Highlight")
     highlight.Name = "ESPHighlight"
     highlight.Adornee = char
@@ -479,7 +423,6 @@ local function createSimpleESPForCharacter(player, char)
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = folder
 
-    -- Billboard name (mobile + PC)
     local head = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
     local billboard, label
     if head then
@@ -567,26 +510,18 @@ local function updateSimpleESP()
                             char.PrimaryPart
                         data.Billboard.Adornee = newHead
                     end
-                end -- distance check
-            end     -- posRef check
-        end         -- player/character check
+                end
+            end
+        end
     end
 end
 
--- Init simple ESP for current players
 for _, p in pairs(Players:GetPlayers()) do
     if p ~= LocalPlayer then createSimpleESP(p) end
 end
 Players.PlayerAdded:Connect(function(p) if p ~= LocalPlayer then createSimpleESP(p) end end)
 Players.PlayerRemoving:Connect(removeSimpleESP)
 
--- =====================================================
--- KOSONG (Generator ESP lama dihapus karena digabung ke Advanced ESP)
--- =====================================================
-
--- =====================================================
--- FULLBRIGHT
--- =====================================================
 task.spawn(function()
     while not VD.Destroyed do
         if VD.Fullbright then
@@ -632,10 +567,6 @@ task.spawn(function()
         task.wait(0.5)
     end
 end)
-
--- =====================================================
--- MOVEMENT & NOCLIP
--- =====================================================
 local originalCanCollide = {}
 
 local function enableNoclipOnce()
@@ -656,7 +587,6 @@ local function disableNoclipRestore()
     originalCanCollide = {}
 end
 
--- Membersihkan memori noclip ketika karakter hilang/mati
 LocalPlayer.CharacterRemoving:Connect(function()
     originalCanCollide = {}
 end)
@@ -689,9 +619,6 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- =====================================================
--- HIDE SKILL CHECK UI
--- =====================================================
 local cachedPlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 RunService.RenderStepped:Connect(function()
     if VD.HideSkillUI then
@@ -703,13 +630,11 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- =====================================================
--- UI TABS
--- =====================================================
-local PlayerTab, ESPTab, MapTab, AimTab, FOVTab
+local HomeTab, PlayerTab, ESPTab, MapTab, AimTab, FOVTab
 local SurvivorTab, KillerTab, GeneratorTab, FlingTab, ResetTab, SettingsTab
 
 if Window then
+    HomeTab      = Window:Tab({ Title = "Home",         Icon = "scan-face",          Desc = "Information" })
     PlayerTab    = Window:Tab({ Title = "Player",       Icon = "person-standing",    Desc = "Movement, teleport, and player options." })
     ESPTab       = Window:Tab({ Title = "ESP",          Icon = "eye",                Desc = "Player and object ESP settings." })
     MapTab       = Window:Tab({ Title = "Map",          Icon = "map",                Desc = "Radar and map features." })
@@ -739,7 +664,31 @@ end
 
 if Window then
 
-do -- Player Tab
+do
+   local HomeSec = Home:Section({ Title = "Infomation" })
+
+    HomeSec:Button({
+        Title = "Discord",
+        Desc = "Copy Discord Link",
+        Callback = function()
+            local link = "https://discord.gg/jdmX43t5mY"
+            if setclipboard then
+                setclipboard(link)
+            end
+        end
+    })
+
+    HomeSec:Paragraph({
+        Title = "Join Us",
+        Desc = "Every Update Will Be On Discord"
+    })
+
+    HomeSec:Paragraph({
+        Title = "Support",
+        Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+    })
+
+do
     local movSection = MakeSection(PlayerTab, {
         Title = "Movement",
     })
@@ -792,7 +741,7 @@ do -- Player Tab
     tpSection:Button({ Title = "TP to Hook", Callback = function() pcall(NEX_TeleportToHook) end })
 end
 
-do -- ESP Tab
+do
     local basicEsp = MakeSection(ESPTab, {
         Title = "Basic ESP",
     })
@@ -841,7 +790,7 @@ do -- ESP Tab
     otherEsp:Toggle({ Title = "Closest Hook Highlight", Callback = function(v) VD.ESP_ClosestHook = v end })
 end
 
-do -- Map Tab (Radar)
+do
     local radarSection = MakeSection(MapTab, {
         Title = "Radar",
     })
@@ -867,7 +816,7 @@ do -- Map Tab (Radar)
     radarFilter:Toggle({ Title = "Radar show Pallet", Callback = function(v) VD.RADAR_Pallet = v end })
 end
 
-do -- Aim Tab
+do
     local aimbotSection = MakeSection(AimTab, {
         Title = "Aimbot",
     })
@@ -931,7 +880,7 @@ do -- Aim Tab
     })
 end
 
-do -- FOV Tab
+do
     local camSection = MakeSection(FOVTab, {
         Title = "Camera",
     })
@@ -956,7 +905,7 @@ do -- FOV Tab
     visualSection:Toggle({ Title = "Fullbright (lighting preset)", Callback = function(v) VD.Fullbright = v end })
 end
 
-do -- Survivor Tab
+do
     local combatSurv = MakeSection(SurvivorTab, {
         Title = "Combat",
     })
@@ -1015,7 +964,7 @@ do -- Survivor Tab
     escapeSurv:Toggle({ Title = "Beat Survivor (auto exit)", Callback = function(v) VD.BEAT_Survivor = v end })
 end
 
-do -- Killer Tab
+do
     local combatKiller = MakeSection(KillerTab, {
         Title = "Combat",
     })
@@ -1069,7 +1018,7 @@ do -- Killer Tab
     utilKiller:Toggle({ Title = "Beat Killer (auto kill)", Callback = function(v) VD.BEAT_Killer = v end })
 end
 
-do -- Generator Tab
+do
     local genVisual = MakeSection(GeneratorTab, {
         Title = "Visual",
     })
@@ -1084,7 +1033,7 @@ do -- Generator Tab
     genAuto:Toggle({ Title = "AntiFail Generator", Callback = function(v) VD.GenAntiFail = v end })
 end
 
-do -- Fling Tab
+do
     local flingSection = MakeSection(FlingTab, {
         Title = "Fling",
     })
@@ -1107,7 +1056,7 @@ do -- Fling Tab
     flingActions:Button({ Title = "Fling All", Callback = function() pcall(NEX_FlingAll) end })
 end
 
-do -- Settings Tab
+do
     local cfgSection = MakeSection(SettingsTab, {
         Title = "Configuration",
     })
@@ -1142,7 +1091,7 @@ do -- Settings Tab
         Values = GetConfigList(),
         Value = GetConfigList()[1] or "Default",
         Callback = function(v)
-            if type(v) == "table" then v = v[1] end -- jika multi/array
+            if type(v) == "table" then v = v[1] end
             getgenv().CurrentConfigName = v
         end
     })
@@ -1175,7 +1124,7 @@ do -- Settings Tab
     })
 end
 
-do -- Reset Tab
+do
     local resetSection = MakeSection(ResetTab, {
         Title = "Unload",
     })
@@ -1207,17 +1156,14 @@ do -- Reset Tab
                     end
                 end)
             end
-            print("NEX HUB Violence District Unloaded")
+            print("STREE HUB Violence District Unloaded")
         end
     })
-end -- end last do-Tab block
-end -- end if Window then
+end
+end
 
-print("NEX HUB Violence District Loaded (Full Features merged with UI fixes)")
+print("STREE HUB Violence District Loaded (Full Features merged with UI fixes)")
 
--- =====================================================
--- ROLE HELPERS
--- =====================================================
 local function GetRole()
     if not LocalPlayer.Team then return "Unknown" end
     local name = LocalPlayer.Team.Name
@@ -1234,9 +1180,6 @@ local function IsSurvivor(player)
     return player and player.Team and player.Team.Name == "Survivors"
 end
 
--- =====================================================
--- MAP CACHE (Generators / Gates / Hooks / Pallets / Windows)
--- =====================================================
 local NEX_Cache = {
     Generators  = {},
     Gates       = {},
@@ -1323,9 +1266,6 @@ local function NEX_ScanMap()
     end
 end
 
--- =====================================================
--- TELEPORT HELPERS
--- =====================================================
 local originalCanCollide = {}
 
 local function NEX_TeleportToPosition(pos)
@@ -1334,7 +1274,7 @@ local function NEX_TeleportToPosition(pos)
     if not root then return false end
 
     if LocalPlayer.Character then
-        root.Anchored = true -- Tahan agar tidak jatuh ke luar map saat CanCollide mati
+        root.Anchored = true
         for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 if originalCanCollide[part] == nil then originalCanCollide[part] = part.CanCollide end
@@ -1354,7 +1294,7 @@ local function NEX_TeleportToPosition(pos)
                     end)
                 end
             end
-            root.Anchored = false -- Lepas tahanan setelah collision aktif
+            root.Anchored = false
         end
         originalCanCollide = {}
     end)
@@ -1396,7 +1336,6 @@ function NEX_TeleportToHook()
     return NEX_TeleportToPosition(NEX_Cache.ClosestHook.part.Position)
 end
 
--- MAP CHANGE DETECTION
 local CurrentMapName = nil
 local function CheckMapChange()
     local map = Workspace:FindFirstChild("Map")
@@ -1420,9 +1359,6 @@ task.spawn(function()
     end
 end)
 
--- =====================================================
--- AUTO ATTACK (Killer)
--- =====================================================
 local function NEX_AutoAttack()
     if not VD.AUTO_Attack or GetRole() ~= "Killer" then return end
     local root = Root
@@ -1448,9 +1384,6 @@ local function NEX_AutoAttack()
     end
 end
 
--- =====================================================
--- AUTO PARRY (Survivor)
--- =====================================================
 local LastParryTime = 0
 local LastDebugParry = 0
 local function AutoParry()
@@ -1468,7 +1401,6 @@ local function AutoParry()
                 local dist = (killerRoot.Position - root.Position).Magnitude
                 if dist <= (VD.AUTO_ParryRange or 15) then
                     
-                    -- 1) CEK SENSITIVITAS (SUDUT PANDANG)
                     local sensitivity = VD.AUTO_ParrySensitivity or 30
                     local dirToKiller = (killerRoot.Position - root.Position).Unit
                     
@@ -1477,7 +1409,6 @@ local function AutoParry()
                         local dotProduct = survivorLook:Dot(dirToKiller)
                         local angle = math.deg(math.acos(math.clamp(dotProduct, -1, 1)))
 
-                        -- 2) VISIBILITY CHECK
                         local rayParams = RaycastParams.new()
                         rayParams.FilterType = Enum.RaycastFilterType.Blacklist
                         rayParams.FilterDescendantsInstances = {LocalPlayer.Character, player.Character, workspace.CurrentCamera}
@@ -1528,9 +1459,6 @@ local function AutoParry()
     end
 end
 
--- =====================================================
--- AUTO WIGGLE (Survivor)
--- =====================================================
 local LastWiggleTime = 0
 
 local function NEX_AutoWiggle()
@@ -1546,9 +1474,6 @@ local function NEX_AutoWiggle()
     end)
 end
 
--- =====================================================
--- HITBOX EXPAND (Killer)
--- =====================================================
 local OriginalHitboxSizes = {}
 
 local function NEX_UpdateHitboxes()
@@ -1594,9 +1519,6 @@ local function NEX_UpdateHitboxes()
     end
 end
 
--- =====================================================
--- DESTROY ALL PALLETS (Killer)
--- =====================================================
 local LastPalletDestroyMap = 0
 
 local function NEX_DestroyAllPallets()
@@ -1631,9 +1553,6 @@ local function NEX_DestroyAllPallets()
     LastPalletDestroyMap = tick()
 end
 
--- =====================================================
--- FULL GEN BREAK (Killer)
--- =====================================================
 local LastGenBreakTime = 0
 
 local function NEX_FullGenBreak()
@@ -1653,11 +1572,9 @@ local function NEX_FullGenBreak()
     local be = g:FindFirstChild("BreakGenEvent")
     if not be then return end
     
-    -- Kumpulkan semua generator dari Map
     local map = workspace:FindFirstChild("Map")
     if not map then return end
     
-    -- Scan semua children map untuk cari GeneratorPoint parts
     for _, obj in ipairs(map:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name:find("GeneratorPoint") then
             task.spawn(function()
@@ -1667,9 +1584,6 @@ local function NEX_FullGenBreak()
     end
 end
 
--- =====================================================
--- DOUBLE TAP (Killer)
--- =====================================================
 local LastDoubleTapTime = 0
 
 local function NEX_DoubleTap()
@@ -1688,9 +1602,6 @@ local function NEX_DoubleTap()
     end)
 end
 
--- =====================================================
--- INFINITE LUNGE (Killer)
--- =====================================================
 local function NEX_InfiniteLunge()
     if not VD.KILLER_InfiniteLunge or GetRole() ~= "Killer" then return end
     local char = LocalPlayer.Character
@@ -1701,9 +1612,6 @@ local function NEX_InfiniteLunge()
     end
 end
 
--- =====================================================
--- FLING
--- =====================================================
 function NEX_FlingNearest()
     if not VD.FLING_Enabled then return end
     local root = Root
@@ -1760,9 +1668,6 @@ function NEX_FlingAll()
     root.RotVelocity = Vector3.zero
 end
 
--- =====================================================
--- TELE AWAY (Survivor flee from killer)
--- =====================================================
 local function NEX_GetKillerDistance()
     local root = Root
     if not root then return math.huge, nil end
@@ -1821,9 +1726,6 @@ local function NEX_TeleportAway()
     end
 end
 
--- =====================================================
--- BEAT GAME SURVIVOR (teleport to exit)
--- =====================================================
 local function NEX_BeatGameSurvivor()
     if not VD.BEAT_Survivor or GetRole() ~= "Survivor" then return end
     local root = Root
@@ -1895,9 +1797,6 @@ local function NEX_BeatGameSurvivor()
     end)
 end
 
--- =====================================================
--- BEAT GAME KILLER (auto chase & attack survivors)
--- =====================================================
 local function NEX_BeatGameKiller()
     if not VD.BEAT_Killer then
         VD._KillerTarget = nil; return
@@ -1971,9 +1870,6 @@ local function NEX_BeatGameKiller()
     end)
 end
 
--- =====================================================
--- AUTO HOOK (Killer)
--- =====================================================
 local IsAutoHooking = false
 
 local function NEX_AutoHook()
@@ -2062,9 +1958,6 @@ local function NEX_AutoHook()
     end
 end
 
--- =====================================================
--- MAP SCAN LOOP & MAIN AUTO LOOP
--- =====================================================
 task.spawn(function()
     while not VD.Destroyed do
         if Root and NEX_Cache.Hooks and #NEX_Cache.Hooks > 0 then
@@ -2101,9 +1994,6 @@ task.spawn(function()
     end
 end)
 
--- =====================================================
--- CHAMS (Highlight + Billboard)
--- =====================================================
 local Chams = { Objects = {} }
 
 function Chams.Create(target, colorData, label)
@@ -2120,7 +2010,6 @@ function Chams.Create(target, colorData, label)
     highlight.FillTransparency    = colorData.fillTrans or 0.5
     highlight.OutlineTransparency = 0
     highlight.DepthMode           = Enum.HighlightDepthMode.AlwaysOnTop
-    -- Coba parent ke target dulu, fallback ke chams folder
     local ok = pcall(function() highlight.Parent = target end)
     if not ok then highlight.Parent = GetSafeChamsFolder() end
 
@@ -2209,9 +2098,6 @@ function Chams.ClearAll()
     Chams.Objects = {}
 end
 
--- =====================================================
--- DRAWING-BASED ESP (boxes / skeleton / offscreen / velocity)
--- =====================================================
 local DrawingESP = { cache = {}, objectCache = {}, velocityData = {} }
 
 local function DrawingESP_create()
@@ -2448,7 +2334,6 @@ local function DrawingESP_render(esp, player, char, cam, screenSize, screenCente
         for _, l in ipairs(esp.Skel) do if l then l.Visible = false end end
     end
 
-    -- Velocity arrows
     local vd = DrawingESP.velocityData[player]
     if not vd then
         vd = { pos = root.Position, vel = Vector3.zero, time = tick() }
@@ -2545,9 +2430,6 @@ local function DrawingESP_renderObject(esp, pos, label, color, cam)
     end
 end
 
--- =====================================================
--- RADAR
--- =====================================================
 local Radar = {
     bg            = DrawingAvailable and SafeDrawing("Square") or nil,
     circleBg      = DrawingAvailable and SafeDrawing("Circle") or nil,
@@ -2653,7 +2535,6 @@ local function Radar_step(cam)
         return center + Vector2.new(radarX, radarY)
     end
 
-    -- Killer dots
     if VD.RADAR_Killer then
         for _, player in ipairs(Players:GetPlayers()) do
             if not (player == LocalPlayer or not IsKiller(player)) then
@@ -2684,7 +2565,6 @@ local function Radar_step(cam)
         end
     end
 
-    -- Survivor dots
     if VD.RADAR_Survivor then
         for _, player in ipairs(Players:GetPlayers()) do
             if not (player == LocalPlayer or not IsSurvivor(player)) then
@@ -2730,7 +2610,6 @@ local function Radar_step(cam)
         end
     end
 
-    -- Pallet squares
     if VD.RADAR_Pallet then
         for _, pallet in ipairs(NEX_Cache.Pallets) do
             if palletIdx > #Radar.palletSquares then break end
@@ -2750,7 +2629,6 @@ local function Radar_step(cam)
         end
     end
 
-    -- Hide unused slots
     for i = idx, #Radar.dots do if Radar.dots[i] then Radar.dots[i].Visible = false end end
     for i = objIdx, #Radar.objectDots do if Radar.objectDots[i] then Radar.objectDots[i].Visible = false end end
     for i = palletIdx, #Radar.palletSquares do if Radar.palletSquares[i] then Radar.palletSquares[i].Visible = false end end
@@ -2761,9 +2639,6 @@ local function Radar_step(cam)
     Radar.center.Visible = true
 end
 
--- =====================================================
--- AIMBOT (Camera-based) + Spear Aimbot
--- =====================================================
 local Aimbot = {}
 local State  = { AimTarget = nil, AimHolding = false }
 
@@ -2838,7 +2713,6 @@ function Aimbot.Update(cam, screenSize, screenCenter)
     end
 end
 
--- Spear Aimbot (gravity compensation)
 local function SpearAimbotCalc(targetPos)
     if not VD.SPEAR_Aimbot or GetRole() ~= "Killer" then return nil end
     local root = Root
@@ -2880,7 +2754,6 @@ local function UpdateSpearAim()
     end
 end
 
--- Input handling for Aimbot RMB & Touch (Mobile Support)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if State.Unloaded then return end
     if VD.AIM_Enabled and VD.AIM_UseRMB then
@@ -2901,9 +2774,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- =====================================================
--- QTE / SKILLCHECK MONITOR (AUTO_SkillCheck) BYPASS
--- =====================================================
 local ActiveQTEGenerator = nil
 local ActiveQTEPoint     = nil
 
@@ -2921,14 +2791,13 @@ local function HookIncomingSkillCheck()
                 ActiveQTEPoint     = point
 
                 if VD.AUTO_SkillCheck and GetRole() == "Survivor" then
-                    -- Execute auto skill check after a short realistic delay
+
                     task.delay(0.2, function()
                         local resEvent = genRemotes:FindFirstChild("SkillCheckResultEvent")
                         if resEvent and ActiveQTEGenerator == gen then
                             warn("QTE: [BERHASIL] Mengeksekusi Remote SkillCheckResultEvent secara langsung!")
                             resEvent:FireServer("success", 1, gen, point)
 
-                            -- Force hide UI locally so they don't see it spinning
                             pcall(function()
                                 local pg     = LocalPlayer:FindFirstChild("PlayerGui")
                                 local prompt = pg and pg:FindFirstChild("SkillCheckPromptGui")
@@ -2948,10 +2817,6 @@ local function HookIncomingSkillCheck()
 end
 task.spawn(HookIncomingSkillCheck)
 
--- =====================================================
--- FORCE LEAVE GENERATOR (Cancel generator interaction)
--- Tekan X (PC) atau klik tombol di UI untuk keluar dari generator
--- =====================================================
 function NEX_ForceLeaveGenerator()
     local root = Root
     if not root then return end
@@ -2960,30 +2825,25 @@ function NEX_ForceLeaveGenerator()
     local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
 
-    -- Simpan state dan matikan auto skill check
     local wasAutoSC = VD.AUTO_SkillCheck
     VD.AUTO_SkillCheck = false
 
     task.spawn(function()
-        -- Step 1: Fire RepairEvent dengan false untuk cancel generator
         pcall(function()
             local remotes = ReplicatedStorage:FindFirstChild("Remotes")
             local genRemotes = remotes and remotes:FindFirstChild("Generator")
             if genRemotes then
                 local repairEvent = genRemotes:FindFirstChild("RepairEvent")
                 if repairEvent then
-                    -- Coba fire untuk ActiveQTEPoint jika ada
                     if ActiveQTEPoint then
                         repairEvent:FireServer(ActiveQTEPoint, false)
                     end
                     
-                    -- Coba fire untuk semua Generator dekat pemain sebagai fallback
                     if NEX_Cache and NEX_Cache.Generators then
                         for _, gen in ipairs(NEX_Cache.Generators) do
                             if gen.part and (gen.part.Position - root.Position).Magnitude < 15 then
                                 repairEvent:FireServer(gen.part, false)
-                                
-                                -- Kadang point bernama GeneratorPoint1, GeneratorPoint2, dst
+    
                                 local parent = gen.part.Parent
                                 if parent then
                                     for _, child in ipairs(parent:GetChildren()) do
@@ -2999,11 +2859,9 @@ function NEX_ForceLeaveGenerator()
             end
         end)
 
-        -- Bersihkan state QTE aktif
         ActiveQTEGenerator = nil
         ActiveQTEPoint = nil
 
-        -- Step 2: Mundur sedikit dengan menggerakkan Humanoid langsung
         pcall(function()
             hum:Move(Vector3.new(0, 0, -1), true)
         end)
@@ -3012,7 +2870,6 @@ function NEX_ForceLeaveGenerator()
             hum:Move(Vector3.new(0, 0, 0), true)
         end)
 
-        -- Step 3: Sembunyikan UI skill check
         pcall(function()
             local pg = LocalPlayer:FindFirstChild("PlayerGui")
             if pg then
@@ -3025,7 +2882,6 @@ function NEX_ForceLeaveGenerator()
 
         print("[VD] Force Leave Generator executed")
 
-        -- Re-enable auto skill check setelah delay
         if wasAutoSC then
             task.delay(1.5, function()
                 VD.AUTO_SkillCheck = true
@@ -3035,7 +2891,6 @@ function NEX_ForceLeaveGenerator()
     end)
 end
 
--- Keybind X untuk force leave generator (PC only)
 if not isMobile then
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end
@@ -3076,9 +2931,6 @@ function SetupSkillCheckNamecallHook()
 end
 pcall(SetupSkillCheckNamecallHook)
 
--- =====================================================
--- NO PALLET STUN (metamethod hook)
--- =====================================================
 function SetupNoPalletStun()
     pcall(function()
         local r = ReplicatedStorage:FindFirstChild("Remotes")
@@ -3108,9 +2960,6 @@ function SetupNoPalletStun()
 end
 pcall(SetupNoPalletStun)
 
--- =====================================================
--- ANTI FALL DAMAGE (metamethod hook)
--- =====================================================
 function SetupAntiFallDamage()
     pcall(function()
         local r = ReplicatedStorage:FindFirstChild("Remotes")
@@ -3128,7 +2977,7 @@ function SetupAntiFallDamage()
                     if not checkcaller() and VD.SURV_NoFall and self == fallEvent then
                         local method = getnamecallmethod()
                         if method == "FireServer" then
-                            return nil -- Block fall damage report ke server
+                            return nil
                         end
                     end
                     return old(self, ...)
@@ -3138,9 +2987,8 @@ function SetupAntiFallDamage()
         end
     end)
 end
-pcall(SetupAntiFallDamage)-- =====================================================
--- ANTI BLIND (Flashlight)
--- =====================================================
+pcall(SetupAntiFallDamage)
+
 function SetupAntiBlind()
     pcall(function()
         local r  = ReplicatedStorage:FindFirstChild("Remotes")
@@ -3158,7 +3006,7 @@ function SetupAntiBlind()
                     if not checkcaller() and VD.KILLER_AntiBlind and self == gb then
                         local method = getnamecallmethod()
                         if method == "FireServer" and GetRole() == "Killer" then
-                            return nil -- Block pengiriman sinyal buta
+                            return nil
                         end
                     end
                     return old(self, ...)
@@ -3170,9 +3018,6 @@ function SetupAntiBlind()
 end
 pcall(SetupAntiBlind)
 
--- =====================================================
--- CAMERA / FOV / THIRD PERSON / SHIFT LOCK
--- =====================================================
 local OriginalFOV          = nil
 local OriginalCameraType   = nil
 local ThirdPersonWasActive = false
@@ -3217,9 +3062,6 @@ local function UpdateShiftLock()
     root.CFrame    = CFrame.new(root.Position, root.Position + flatLook)
 end
 
--- =====================================================
--- NO FOG
--- =====================================================
 local FogCache = {}
 
 local function RemoveFog()
@@ -3265,9 +3107,6 @@ local function RestoreFog()
     end)
 end
 
--- =====================================================
--- NO FALL / NO SLOWDOWN
--- =====================================================
 local function UpdateNoFall()
     if not VD.SURV_NoFall then return end
     local char = LocalPlayer.Character
@@ -3287,9 +3126,6 @@ local function UpdateNoSlowdown()
     if hum and hum.WalkSpeed < 16 then hum.WalkSpeed = VD.SPEED_Value or 16 end
 end
 
--- =====================================================
--- KUNCI KECEPATAN / ANTI BEKU (__newindex Hook)
--- =====================================================
 function SetupAntiStunSlowdown()
     pcall(function()
         local ok, mt = pcall(function() return getrawmetatable(game) end)
@@ -3299,11 +3135,11 @@ function SetupAntiStunSlowdown()
                 local oldNI = mt.__newindex
                 mt.__newindex = newcclosure(function(t, k, v)
                     if not checkcaller() and VD.KILLER_NoSlowdown and GetRole() == "Killer" then
-                        -- Cegah perintah yang mengurangi WalkSpeed drastis (Efek Stun/Kesandung)
+
                         if k == "WalkSpeed" and typeof(v) == "number" and v < 16 and typeof(t) == "Instance" and t:IsA("Humanoid") then
                             return oldNI(t, k, VD.SPEED_Value or 16)
                         end
-                        -- Cegah perintah yang membekukan posisi karakter (Anchored Stun)
+
                         if k == "Anchored" and v == true and typeof(t) == "Instance" and t:IsA("BasePart") and t.Name == "HumanoidRootPart" then
                             return oldNI(t, k, false)
                         end
@@ -3317,9 +3153,6 @@ function SetupAntiStunSlowdown()
 end
 task.spawn(SetupAntiStunSlowdown)
 
--- =====================================================
--- FLY
--- =====================================================
 local FlyBodyVelocity = nil
 local FlyBodyGyro     = nil
 
@@ -3375,9 +3208,6 @@ local function UpdateFly()
     end
 end
 
--- =====================================================
--- FOV CIRCLE
--- =====================================================
 local FOVCircle = nil
 if DrawingAvailable then
     FOVCircle = SafeDrawing("Circle")
@@ -3391,9 +3221,6 @@ if DrawingAvailable then
     end
 end
 
--- =====================================================
--- RENDERSTEP: Drawing ESP / Radar / Aimbot / Camera
--- =====================================================
 local function OnRenderStep()
     if VD.Destroyed then
         if DrawingAvailable then
@@ -3424,12 +3251,10 @@ local function OnRenderStep()
     local screenSize   = cam.ViewportSize
     local screenCenter = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
 
-    -- Drawing ESP & Chams
     if DrawingAvailable then
         if VD.DRAWING_ESP then
             DrawingESP_cleanup()
 
-            -- Players
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     if not DrawingESP.cache[player] then
@@ -3440,7 +3265,6 @@ local function OnRenderStep()
                 end
             end
 
-            -- Object ESP helper
             local function renderObj(cacheList, objList, label, fillCol, outlineCol, fillTrans, espCol)
                 for _, obj in ipairs(objList) do
                     local target = obj.model or obj.part
@@ -3475,7 +3299,6 @@ local function OnRenderStep()
             renderObj(oc, NEX_Cache.Windows, "WINDOW", Color3.fromRGB(60, 140, 200), Color3.fromRGB(120, 200, 255), 0.5,
                 Color3.fromRGB(100, 180, 255))
 
-            -- Hooks (special: closest gets different color/label)
             for _, obj in ipairs(NEX_Cache.Hooks) do
                 local target    = obj.model or obj.part
                 local isClosest = VD.ESP_ClosestHook and obj == NEX_Cache.ClosestHook
@@ -3504,7 +3327,6 @@ local function OnRenderStep()
                 end
             end
         else
-            -- Clear all drawing objects when Drawing ESP is disabled
             for _, esp in pairs(DrawingESP.cache) do
                 if esp then
                     pcall(function()
@@ -3522,8 +3344,6 @@ local function OnRenderStep()
             end
             DrawingESP.cache       = {}
             DrawingESP.objectCache = {}
-            -- JANGAN clear Chams disini: dikelola oleh UpdateObjectChams() di Heartbeat
-            -- Chams.ClearAll() -- ini penyebab Object Chams hilang di PC
         end
 
         Radar_step(cam)
@@ -3532,7 +3352,6 @@ local function OnRenderStep()
         if DrawingAvailable then Radar_hideAll() end
     end
 
-    -- Aimbot
     pcall(function()
         if VD.AIM_Enabled then
             Aimbot.Update(cam, cam.ViewportSize, Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2))
@@ -3544,7 +3363,6 @@ local function OnRenderStep()
     UpdateThirdPerson()
     UpdateShiftLock()
 
-    -- FOV circle
     if FOVCircle and DrawingAvailable then
         if VD.AIM_Enabled and VD.AIM_ShowFOV then
             FOVCircle.Position = screenCenter
@@ -3557,9 +3375,6 @@ local function OnRenderStep()
     end
 end
 
--- =====================================================
--- OBJECT CHAMS UPDATE (Highlight-based, bekerja di PC & Mobile)
--- =====================================================
 local function UpdateObjectChams()
     if not VD.ESP_ObjectChams then
         Chams.ClearAll(); return
@@ -3597,7 +3412,6 @@ local function UpdateObjectChams()
     chamObj(NEX_Cache.Pallets,    VD.ESP_Obj_Pallet,    Color3.fromRGB(180,140,70),  Color3.fromRGB(255,210,130), 0.5)
     chamObj(NEX_Cache.Windows,    VD.ESP_Obj_Window,    Color3.fromRGB(60,140,200),  Color3.fromRGB(120,200,255), 0.5)
 
-    -- Hook has logic for closest hook
     for _, obj in ipairs(NEX_Cache.Hooks) do
         local target = obj.model or obj.part
         if VD.ESP_Obj_Hook and target and target.Parent then
@@ -3616,16 +3430,12 @@ local function UpdateObjectChams()
     end
 end
 
--- =====================================================
--- MOBILE GUI (Radar + Aimbot Button + FOV Circle)
--- =====================================================
 local MobileGui = { RadarFrame=nil, RadarDots={}, RadarObjDots={}, AimBtn=nil, FOVFrame=nil, FOVStroke=nil }
 
 local function CreateMobileUI()
     local pg = GetSafeGuiParent()
     if not pg then return end
 
-    -- === MAIN SCREENGUI ===
     local sg = Instance.new("ScreenGui")
     sg.Name           = "NEX_MobileUI"
     sg.ResetOnSpawn   = false
@@ -3634,12 +3444,11 @@ local function CreateMobileUI()
     sg.DisplayOrder   = 100
     sg.Parent         = pg
 
-    -- === RADAR ===
     local RS = VD.RADAR_Size or 130
     local radarF = Instance.new("Frame")
     radarF.Name                    = "Radar"
     radarF.Size                    = UDim2.new(0, RS, 0, RS)
-    radarF.Position                = UDim2.new(0, 20, 0, 120) -- Pindah ke Kiri agar tak tertutup Perks
+    radarF.Position                = UDim2.new(0, 20, 0, 120)
     radarF.BackgroundColor3        = Color3.fromRGB(15,15,15)
     radarF.BackgroundTransparency  = 0.3
     radarF.BorderSizePixel         = 0
@@ -3647,24 +3456,24 @@ local function CreateMobileUI()
     radarF.Parent                  = sg
     local radarCorner = Instance.new("UICorner", radarF)
     radarCorner.Name = "RCorner"
-    radarCorner.CornerRadius = UDim.new(0, 5) -- Default kotak
+    radarCorner.CornerRadius = UDim.new(0, 5)
     local rStroke = Instance.new("UIStroke")
     rStroke.Color = Color3.fromRGB(220,60,60); rStroke.Thickness = 2; rStroke.Parent = radarF
-    -- Crosshair
+
     local ch = Instance.new("Frame")
     ch.Size = UDim2.new(1,-20,0,1); ch.Position = UDim2.new(0,10,0.5,0)
     ch.BackgroundColor3 = Color3.fromRGB(45,45,45); ch.BorderSizePixel = 0; ch.Parent = radarF
     local cv = Instance.new("Frame")
     cv.Size = UDim2.new(0,1,1,-20); cv.Position = UDim2.new(0.5,0,0,10)
     cv.BackgroundColor3 = Color3.fromRGB(45,45,45); cv.BorderSizePixel = 0; cv.Parent = radarF
-    -- Center player dot
+
     local cdot = Instance.new("Frame")
     cdot.Size = UDim2.new(0,10,0,10); cdot.Position = UDim2.new(0.5,-5,0.5,-5)
     cdot.BackgroundColor3 = Color3.fromRGB(0,255,0); cdot.BorderSizePixel = 0
     cdot.ZIndex = 5; cdot.Parent = radarF
     Instance.new("UICorner", cdot).CornerRadius = UDim.new(1,0)
     MobileGui.RadarFrame = radarF
-    -- Player dots (20)
+
     for i = 1, 20 do
         local d = Instance.new("Frame")
         d.Size = UDim2.new(0,8,0,8); d.BackgroundColor3 = Color3.fromRGB(255,65,65)
@@ -3672,7 +3481,7 @@ local function CreateMobileUI()
         Instance.new("UICorner", d).CornerRadius = UDim.new(1,0)
         MobileGui.RadarDots[i] = d
     end
-    -- Object dots (30)
+
     for i = 1, 30 do
         local d = Instance.new("Frame")
         d.Size = UDim2.new(0,6,0,6); d.BackgroundColor3 = Color3.fromRGB(255,180,50)
@@ -3681,7 +3490,6 @@ local function CreateMobileUI()
         MobileGui.RadarObjDots[i] = d
     end
 
-    -- === FOV CIRCLE ===
     local fovF = Instance.new("Frame")
     fovF.Name                 = "FOVCircle"
     fovF.BackgroundTransparency = 1
@@ -3696,7 +3504,6 @@ local function CreateMobileUI()
     fovStk.Parent = fovF
     MobileGui.FOVFrame = fovF; MobileGui.FOVStroke = fovStk
 
-    -- === AIMBOT BUTTON (ScreenGui terpisah agar AlwaysOnTop) ===
     local aimSG = Instance.new("ScreenGui")
     aimSG.Name           = "NEX_AimBtn"
     aimSG.ResetOnSpawn   = false
@@ -3859,16 +3666,10 @@ task.spawn(function()
     pcall(CreateMobileUI)
 end)
 
--- =====================================================
--- RENDER LOOP: PC (RenderStepped, pakai Drawing)
--- =====================================================
 if DrawingAvailable then
     RunService.RenderStepped:Connect(OnRenderStep)
 end
 
--- =====================================================
--- HEARTBEAT UNIVERSAL: Berjalan di PC & Mobile
--- =====================================================
 RunService.Heartbeat:Connect(function()
     if VD.Destroyed then return end
     local cam = workspace.CurrentCamera
