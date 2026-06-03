@@ -1,23 +1,22 @@
 loadstring([[
-function LPH_NO_VIRTUALIZE(f) return f end;
+    function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
 repeat wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
 
-local version  = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
-
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
 local Window = StreeHub:CreateWindow({
-    Title          = "StreeHub",
-    Icon           = "rbxassetid://99948086845842",
-    Author         = (premium and "Premium" or "Build A Ring Farm") .. " - " .. version,
-    Folder         = "StreeHub",
-    Size           = WindowSize,
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "Build A Ring Farm") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
     LiveSearchDropdown = true,
-    FileSaveName   = "StreeHub/Config.json",
+    FileSaveName = "StreeHub/Config.json"
 })
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -507,12 +506,12 @@ for _, group in ipairs(seedGroups) do
 end
 
 local Tabs = {
-    Home    = Window:Tab({ Title = "Home",          Icon = "scan-face" }),
-    Main    = Window:Tab({ Title = "Main",           Icon = "landmark" }),
-    Auto    = Window:Tab({ Title = "Automatically",  Icon = "play" }),
-    Shop    = Window:Tab({ Title = "Shop",           Icon = "shopping-bag" }),
-    Upgrade = Window:Tab({ Title = "Upgrade",        Icon = "chart-column-increasing" }),
-    Utility = Window:Tab({ Title = "Utility",        Icon = "wrench" }),
+    Home = Window:Tab({ Title = "Home", Icon = "scan-face" }),
+    Main = Window:Tab({ Title = "Main", Icon = "landmark" }),
+    Auto = Window:Tab({ Title = "Automatically", Icon = "play" }),
+    Shop = Window:Tab({ Title = "Shop", Icon = "shopping-bag" }),
+    Upgrade = Window:Tab({ Title = "Upgrade", Icon = "chart-column-increasing" }),
+    Utility = Window:Tab({ Title = "Utility", Icon = "wrench" }),
 }
 
 local defaultWalk = 16
@@ -583,6 +582,7 @@ Tabs.Home:Button({
         end
     end,
 })
+
 
 local selectedCompostSeeds = {}
 
@@ -1003,6 +1003,7 @@ Tabs.Main:Button({
     end,
 })
 
+
 Tabs.Auto:Section({ Title = "Auto Collect" })
 
 local collecting     = false
@@ -1148,6 +1149,7 @@ Tabs.Auto:Toggle({
         end
     end,
 })
+
 
 Tabs.Shop:Section({ Title = "Purchased Shop" })
 
@@ -1415,6 +1417,7 @@ Tabs.Shop:Toggle({
     end,
 })
 
+
 local perPlantTargetLevel = 10
 local upgrading           = false
 local stopUpgrading       = false
@@ -1601,6 +1604,7 @@ Tabs.Upgrade:Button({
     end,
 })
 
+
 Tabs.Utility:Section({ Title = "Detected plot" })
 
 Tabs.Utility:Paragraph({
@@ -1616,3 +1620,10 @@ for _, egg in ipairs(initialEggs) do
         Desc  = egg.name,
     })
 end
+
+StreeHub:Notify({
+    Title = "StreeHub",
+    Content = "Script loaded successfully",
+    Icon = "bell-ring",
+    Duration = 4
+})
