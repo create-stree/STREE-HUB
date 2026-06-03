@@ -2684,7 +2684,7 @@ v0:AddButton({
 
 v0:AddParagraph({
     Title = "StreeHub",
-    Text = "•StreeHub\n• Script oleh KirsiaSC\n• Tanggal Pembuatan: 13 Maret 2026\n• Tanggal terakhir diperbarui: 28 Mei 2026\n• Senjata Aura saat ini tidak dapat menembak perahu dan leviathan"
+    Text = "•StreeHub\n• Script oleh KirsiaSC\n• Tanggal Pembuatan: 13 Maret 2026\n• Tanggal terakhir diperbarui: 1 Juni 2026\n• Senjata Aura saat ini tidak dapat menembak perahu dan leviathan"
 })
 
 local Time = v1:AddParagraph({
