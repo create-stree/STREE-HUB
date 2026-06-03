@@ -1,5 +1,5 @@
 loadstring([[
-function LPH_NO_VIRTUALIZE(f) return f end;
+    function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
 repeat wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
 
@@ -10,13 +10,13 @@ local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:G
 local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
 local Window = StreeHub:CreateWindow({
-Title = "StreeHub",
-Icon = "rbxassetid://99948086845842",
-Author = (premium and "Premium" or "Build A Ring Farm") .. " - " .. version,
-Folder = "StreeHub",
-Size = WindowSize,
-LiveSearchDropdown = true,
-FileSaveName = "StreeHub/Config.json"
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "Build A Ring Farm") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+    FileSaveName = "StreeHub/Config.json"
 })
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -30,382 +30,381 @@ local Plots  = workspace:WaitForChild("Map"):WaitForChild("Plots")
 local myPlot = nil
 
 for i = 1, 6 do
-local plot = Plots:FindFirstChild("Plot" .. i)
-if plot then
-local att = plot:FindFirstChild("HomeLabelAttachment")
-if att and #att:GetChildren() > 0 then
-myPlot = plot
-break
-end
-end
+    local plot = Plots:FindFirstChild("Plot" .. i)
+    if plot then
+        local att = plot:FindFirstChild("HomeLabelAttachment")
+        if att and #att:GetChildren() > 0 then
+            myPlot = plot
+            break
+        end
+    end
 end
 
 if not myPlot then
-Notify({ Title = "Error", Message = "Could not find your plot!", Type = "error", Duration = 4 })
-return
+    Notify({ Title = "Error", Message = "Could not find your plot!", Type = "error", Duration = 4 })
+    return
 end
 
 local seedRoller = myPlot:FindFirstChild("SeedRoller")
 local stands = {}
 if seedRoller then
-for i = 1, 6 do
-local stand = seedRoller:FindFirstChild("Stand" .. i)
-if stand then
-stands[i] = { index = i, position = stand:GetPivot().Position }
-end
-end
+    for i = 1, 6 do
+        local stand = seedRoller:FindFirstChild("Stand" .. i)
+        if stand then
+            stands[i] = { index = i, position = stand:GetPivot().Position }
+        end
+    end
 end
 
 local function getWorldSeeds()
-local seeds = {}
-for _, model in ipairs(workspace:GetChildren()) do
-if model:IsA("Model") and model:FindFirstChild("BuySeed", true) then
-local seedPos = model:GetPivot().Position
-local bestStand, bestDist = nil, math.huge
-for _, st in pairs(stands) do
-local d = (Vector3.new(seedPos.X, 0, seedPos.Z) - Vector3.new(st.position.X, 0, st.position.Z)).Magnitude
-if d < bestDist then bestDist = d; bestStand = st end
-end
-if bestStand and bestDist < 15 then
-seeds[model.Name] = bestStand.index
-end
-end
-end
-return seeds
+    local seeds = {}
+    for _, model in ipairs(workspace:GetChildren()) do
+        if model:IsA("Model") and model:FindFirstChild("BuySeed", true) then
+            local seedPos = model:GetPivot().Position
+            local bestStand, bestDist = nil, math.huge
+            for _, st in pairs(stands) do
+                local d = (Vector3.new(seedPos.X, 0, seedPos.Z) - Vector3.new(st.position.X, 0, st.position.Z)).Magnitude
+                if d < bestDist then bestDist = d; bestStand = st end
+            end
+            if bestStand and bestDist < 15 then
+                seeds[model.Name] = bestStand.index
+            end
+        end
+    end
+    return seeds
 end
 
 local function getFarmPlots()
-local out = {}
-for _, name in ipairs({"FarmPlot", "SecondFloor", "ThirdFloor"}) do
-local node = myPlot:FindFirstChild(name)
-if node then
-local fp = name == "FarmPlot" and node or node:FindFirstChild("FarmPlot")
-if fp then table.insert(out, fp) end
-end
-end
-return out
+    local out = {}
+    for _, name in ipairs({"FarmPlot", "SecondFloor", "ThirdFloor"}) do
+        local node = myPlot:FindFirstChild(name)
+        if node then
+            local fp = name == "FarmPlot" and node or node:FindFirstChild("FarmPlot")
+            if fp then table.insert(out, fp) end
+        end
+    end
+    return out
 end
 
 local FERTILIZER_NAMES = {
-"Super Fertilizer",
-"Strong Fertilizer",
-"Normal Fertilizer",
+    "Super Fertilizer",
+    "Strong Fertilizer",
+    "Normal Fertilizer",
 }
 
 local function getFertilizerFromBackpack()
-for _, name in ipairs(FERTILIZER_NAMES) do
-for _, tool in ipairs(player.Backpack:GetChildren()) do
-if string.find(tool.Name, name, 1, true) then
-return tool
-end
-end
-end
-return nil
+    for _, name in ipairs(FERTILIZER_NAMES) do
+        for _, tool in ipairs(player.Backpack:GetChildren()) do
+            if string.find(tool.Name, name, 1, true) then
+                return tool
+            end
+        end
+    end
+    return nil
 end
 
 local function getUnfertilizedDirt()
-for _, fp in ipairs(getFarmPlots()) do
-for _, plant in ipairs(fp:GetChildren()) do
-local dirt = plant:FindFirstChild("Dirt")
-if dirt and dirt:GetAttribute("PlantLevel") ~= nil then
-if not dirt:GetAttribute("Fertilized") then
-return dirt
-end
-end
-end
-end
-return nil
+    for _, fp in ipairs(getFarmPlots()) do
+        for _, plant in ipairs(fp:GetChildren()) do
+            local dirt = plant:FindFirstChild("Dirt")
+            if dirt and dirt:GetAttribute("PlantLevel") ~= nil then
+                if not dirt:GetAttribute("Fertilized") then
+                    return dirt
+                end
+            end
+        end
+    end
+    return nil
 end
 
 local seedScrollFrame = player.PlayerGui:WaitForChild("MainUI"):WaitForChild("Menus"):WaitForChild("IndexFrame"):WaitForChild("Main"):WaitForChild("PlantsFrame")
 
 local rarityOrder = {
-"Common", "Uncommon", "Rare", "Epic", "Legendary",
-"Divine", "Prismatic", "Secret", "Exotic", "Transcended"
+    "Common", "Uncommon", "Rare", "Epic", "Legendary",
+    "Divine", "Prismatic", "Secret", "Exotic", "Transcended"
 }
 
 local seedsByRarity = {}
 for _, r in ipairs(rarityOrder) do seedsByRarity[r] = {} end
 
 for _, child in ipairs(seedScrollFrame:GetChildren()) do
-if child:IsA("Frame") then
-local icon   = child:FindFirstChild("Icon")
-local rarity = child:FindFirstChild("RarityName")
-local sname  = child:FindFirstChild("SeedName")
-local name   = (sname and sname.Text ~= "???" and sname.Text) or child.Name
-local rar    = (rarity and rarity.Text) or "Common"
-local bucket = seedsByRarity[rar] or seedsByRarity["Common"]
-table.insert(bucket, { Name = name, Icon = icon and icon.Image or "" })
-end
+    if child:IsA("Frame") then
+        local icon   = child:FindFirstChild("Icon")
+        local rarity = child:FindFirstChild("RarityName")
+        local sname  = child:FindFirstChild("SeedName")
+        local name   = (sname and sname.Text ~= "???" and sname.Text) or child.Name
+        local rar    = (rarity and rarity.Text) or "Common"
+        local bucket = seedsByRarity[rar] or seedsByRarity["Common"]
+        table.insert(bucket, { Name = name, Icon = icon and icon.Image or "" })
+    end
 end
 
 local seedGroups = {}
 for _, r in ipairs(rarityOrder) do
-if #seedsByRarity[r] > 0 then
-table.insert(seedGroups, { Label = r, Items = seedsByRarity[r] })
-end
+    if #seedsByRarity[r] > 0 then
+        table.insert(seedGroups, { Label = r, Items = seedsByRarity[r] })
+    end
 end
 
 local iconByPlantName = {}
 for _, child in ipairs(seedScrollFrame:GetChildren()) do
-if child:IsA("Frame") then
-local icon = child:FindFirstChild("Icon")
-if icon then
-iconByPlantName[child.Name] = icon.Image
-end
-end
+    if child:IsA("Frame") then
+        local icon = child:FindFirstChild("Icon")
+        if icon then
+            iconByPlantName[child.Name] = icon.Image
+        end
+    end
 end
 
 local shopScrollFrame = player.PlayerGui:WaitForChild("MainUI"):WaitForChild("Menus"):WaitForChild("GearShopFrame"):WaitForChild("ScrollingFrame")
 
 local function getShopItems()
-local items = {}
-for _, child in ipairs(shopScrollFrame:GetChildren()) do
-if child:IsA("ImageLabel") then
-local gearName  = child:FindFirstChild("GearName")
-local gearImage = child:FindFirstChild("GearImage")
-local imgLabel  = gearImage and gearImage:FindFirstChild("ImageLabel")
-local rarLabel  = gearImage and gearImage:FindFirstChild("Rarity")
-if gearName and imgLabel then
-table.insert(items, {
-Name       = gearName.Text,
-Icon       = imgLabel.Image,
-StockLabel = rarLabel,
-})
-end
-end
-end
-return items
+    local items = {}
+    for _, child in ipairs(shopScrollFrame:GetChildren()) do
+        if child:IsA("ImageLabel") then
+            local gearName  = child:FindFirstChild("GearName")
+            local gearImage = child:FindFirstChild("GearImage")
+            local imgLabel  = gearImage and gearImage:FindFirstChild("ImageLabel")
+            local rarLabel  = gearImage and gearImage:FindFirstChild("Rarity")
+            if gearName and imgLabel then
+                table.insert(items, {
+                    Name       = gearName.Text,
+                    Icon       = imgLabel.Image,
+                    StockLabel = rarLabel,
+                })
+            end
+        end
+    end
+    return items
 end
 
 local function parseStock(stockLabel)
-if not stockLabel then return 0 end
-local n = tonumber(stockLabel.Text:match("%d+"))
-return n or 0
+    if not stockLabel then return 0 end
+    local n = tonumber(stockLabel.Text:match("%d+"))
+    return n or 0
 end
 
 local petMerchant = workspace:WaitForChild("PetMerchant", 10)
 
 local function scanEggs()
-local found = {}
-if not petMerchant then return found end
-for i = 1, 5 do
-local podium = petMerchant:FindFirstChild("Podium" .. i .. "Lever")
-if podium then
-local attachment = podium:FindFirstChild("PromptAttachment")
-local prompt = attachment and attachment:FindFirstChild("EggShopPrompt")
-if prompt and prompt.ObjectText ~= "" and not prompt.ObjectText:find("Slot") then
-table.insert(found, { podiumIdx = i, name = prompt.ObjectText })
-end
-end
-end
-return found
+    local found = {}
+    if not petMerchant then return found end
+    for i = 1, 5 do
+        local podium = petMerchant:FindFirstChild("Podium" .. i .. "Lever")
+        if podium then
+            local attachment = podium:FindFirstChild("PromptAttachment")
+            local prompt = attachment and attachment:FindFirstChild("EggShopPrompt")
+            if prompt and prompt.ObjectText ~= "" and not prompt.ObjectText:find("Slot") then
+                table.insert(found, { podiumIdx = i, name = prompt.ObjectText })
+            end
+        end
+    end
+    return found
 end
 
 local initialEggs = scanEggs()
 
 local function getPetTeleportCFrame(floorIndex)
-local sign
-if floorIndex == 1 then
-sign = myPlot:FindFirstChild("PlotUpgradeSign")
-elseif floorIndex == 2 then
-local sf = myPlot:FindFirstChild("SecondFloor")
-sign = sf and sf:FindFirstChild("PlotUpgradeSign")
-elseif floorIndex == 3 then
-local tf = myPlot:FindFirstChild("ThirdFloor")
-sign = tf and tf:FindFirstChild("PlotUpgradeSign")
-end
-return sign and sign:GetPivot()
+    local sign
+    if floorIndex == 1 then
+        sign = myPlot:FindFirstChild("PlotUpgradeSign")
+    elseif floorIndex == 2 then
+        local sf = myPlot:FindFirstChild("SecondFloor")
+        sign = sf and sf:FindFirstChild("PlotUpgradeSign")
+    elseif floorIndex == 3 then
+        local tf = myPlot:FindFirstChild("ThirdFloor")
+        sign = tf and tf:FindFirstChild("PlotUpgradeSign")
+    end
+    return sign and sign:GetPivot()
 end
 
 local function getUnlockedFloors()
-local floors = {}
-if myPlot:FindFirstChild("FarmPlot") then table.insert(floors, 1) end
-if myPlot:FindFirstChild("SecondFloor") then table.insert(floors, 2) end
-if myPlot:FindFirstChild("ThirdFloor") then table.insert(floors, 3) end
-return floors
+    local floors = {}
+    if myPlot:FindFirstChild("FarmPlot") then table.insert(floors, 1) end
+    if myPlot:FindFirstChild("SecondFloor") then table.insert(floors, 2) end
+    if myPlot:FindFirstChild("ThirdFloor") then table.insert(floors, 3) end
+    return floors
 end
 
 local function getEquippedPets()
-local pets = {}
-for _, obj in ipairs(myPlot:GetChildren()) do
-if obj:IsA("Model") and obj:GetAttribute("PetKey") ~= nil then
-if obj:GetAttribute("PetOwner") == player.Name then
-table.insert(pets, {
-name       = obj:GetAttribute("PetName"),
-petKey     = obj:GetAttribute("PetKey"),
-multiplier = obj:GetAttribute("EarningsMultiplier") or 1,
-floorIndex = obj:GetAttribute("FloorIndex") or 1,
-})
-end
-end
-end
-return pets
+    local pets = {}
+    for _, obj in ipairs(myPlot:GetChildren()) do
+        if obj:IsA("Model") and obj:GetAttribute("PetKey") ~= nil then
+            if obj:GetAttribute("PetOwner") == player.Name then
+                table.insert(pets, {
+                    name       = obj:GetAttribute("PetName"),
+                    petKey     = obj:GetAttribute("PetKey"),
+                    multiplier = obj:GetAttribute("EarningsMultiplier") or 1,
+                    floorIndex = obj:GetAttribute("FloorIndex") or 1,
+                })
+            end
+        end
+    end
+    return pets
 end
 
 local function getInventoryPets()
-local pets = {}
-for _, tool in ipairs(player.Backpack:GetChildren()) do
-if tool:IsA("Tool") and tool:GetAttribute("InventoryCategory") == "Pets" then
-table.insert(pets, {
-name       = tool:GetAttribute("trueName") or tool.Name,
-petKey     = tool:GetAttribute("petKey"),
-multiplier = tool:GetAttribute("EarningsMultiplier") or 1,
-tool       = tool,
-})
-end
-end
-return pets
+    local pets = {}
+    for _, tool in ipairs(player.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool:GetAttribute("InventoryCategory") == "Pets" then
+            table.insert(pets, {
+                name       = tool:GetAttribute("trueName") or tool.Name,
+                petKey     = tool:GetAttribute("petKey"),
+                multiplier = tool:GetAttribute("EarningsMultiplier") or 1,
+                tool       = tool,
+            })
+        end
+    end
+    return pets
 end
 
 local function optimizePets()
-local hrp = character:FindFirstChild("HumanoidRootPart")
-if not hrp then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
-local unlockedFloors = getUnlockedFloors()  
+    local unlockedFloors = getUnlockedFloors()
 
-repeat  
-    local equippedPets  = getEquippedPets()  
-    local inventoryPets = getInventoryPets()  
+    repeat
+        local equippedPets  = getEquippedPets()
+        local inventoryPets = getInventoryPets()
 
-    table.sort(equippedPets,  function(a, b) return a.multiplier > b.multiplier end)  
-    table.sort(inventoryPets, function(a, b) return a.multiplier > b.multiplier end)  
+        table.sort(equippedPets,  function(a, b) return a.multiplier > b.multiplier end)
+        table.sort(inventoryPets, function(a, b) return a.multiplier > b.multiplier end)
 
-    if #inventoryPets == 0 then break end  
+        if #inventoryPets == 0 then break end
 
-    local nbSlots = #unlockedFloors  
-    local allPets = {}  
-    for _, p in ipairs(equippedPets) do  
-        table.insert(allPets, { source = "equipped", data = p })  
-    end  
-    for _, p in ipairs(inventoryPets) do  
-        table.insert(allPets, { source = "inventory", data = p })  
-    end  
-    table.sort(allPets, function(a, b) return a.data.multiplier > b.data.multiplier end)  
+        local nbSlots = #unlockedFloors
+        local allPets = {}
+        for _, p in ipairs(equippedPets) do
+            table.insert(allPets, { source = "equipped", data = p })
+        end
+        for _, p in ipairs(inventoryPets) do
+            table.insert(allPets, { source = "inventory", data = p })
+        end
+        table.sort(allPets, function(a, b) return a.data.multiplier > b.data.multiplier end)
 
-    local bestPets = {}  
-    for i = 1, math.min(nbSlots, #allPets) do  
-        table.insert(bestPets, allPets[i])  
-    end  
+        local bestPets = {}
+        for i = 1, math.min(nbSlots, #allPets) do
+            table.insert(bestPets, allPets[i])
+        end
 
-    local bestKeys = {}  
-    for _, entry in ipairs(bestPets) do  
-        bestKeys[entry.data.petKey] = true  
-    end  
+        local bestKeys = {}
+        for _, entry in ipairs(bestPets) do
+            bestKeys[entry.data.petKey] = true
+        end
 
-    local toUnequip = {}  
-    for _, p in ipairs(equippedPets) do  
-        if not bestKeys[p.petKey] then  
-            table.insert(toUnequip, p)  
-        end  
-    end  
+        local toUnequip = {}
+        for _, p in ipairs(equippedPets) do
+            if not bestKeys[p.petKey] then
+                table.insert(toUnequip, p)
+            end
+        end
 
-    local toEquip = {}  
-    for _, entry in ipairs(bestPets) do  
-        if entry.source == "inventory" then  
-            table.insert(toEquip, entry.data)  
-        end  
-    end  
+        local toEquip = {}
+        for _, entry in ipairs(bestPets) do
+            if entry.source == "inventory" then
+                table.insert(toEquip, entry.data)
+            end
+        end
 
-    if #toUnequip == 0 and #toEquip == 0 then break end  
+        if #toUnequip == 0 and #toEquip == 0 then break end
 
-    for _, p in ipairs(toUnequip) do  
-        pcall(function()  
-            ReplicatedStorage.Remotes.Pets.UnequipPet:FireServer(p.petKey)  
-        end)  
-        task.wait(0.5)  
-    end  
+        for _, p in ipairs(toUnequip) do
+            pcall(function()
+                ReplicatedStorage.Remotes.Pets.UnequipPet:FireServer(p.petKey)
+            end)
+            task.wait(0.5)
+        end
 
-    for _, p in ipairs(toEquip) do  
-        local occupied = {}  
-        for _, eq in ipairs(getEquippedPets()) do  
-            occupied[eq.floorIndex] = true  
-        end  
+        for _, p in ipairs(toEquip) do
+            local occupied = {}
+            for _, eq in ipairs(getEquippedPets()) do
+                occupied[eq.floorIndex] = true
+            end
 
-        local targetFloor = nil  
-        for _, floorIdx in ipairs(unlockedFloors) do  
-            if not occupied[floorIdx] then  
-                targetFloor = floorIdx  
-                break  
-            end  
-        end  
+            local targetFloor = nil
+            for _, floorIdx in ipairs(unlockedFloors) do
+                if not occupied[floorIdx] then
+                    targetFloor = floorIdx
+                    break
+                end
+            end
 
-        if not targetFloor then break end  
+            if not targetFloor then break end
 
-        local cf = getPetTeleportCFrame(targetFloor)  
-        if cf then  
-            hrp.CFrame = cf + Vector3.new(0, 3, 0)  
-            task.wait(0.5)  
-        end  
+            local cf = getPetTeleportCFrame(targetFloor)
+            if cf then
+                hrp.CFrame = cf + Vector3.new(0, 3, 0)
+                task.wait(0.5)
+            end
 
-        local tool = player.Backpack:FindFirstChild(p.tool.Name)  
-        if not tool then continue end  
+            local tool = player.Backpack:FindFirstChild(p.tool.Name)
+            if not tool then continue end
 
-        humanoid:EquipTool(tool)  
-        task.wait(0.5)  
-        pcall(function()  
-            ReplicatedStorage.Remotes.Pets.EquipPet:FireServer()  
-        end)  
-        task.wait(0.3)  
-        humanoid:UnequipTools()  
-        task.wait(0.3)  
-    end  
+            humanoid:EquipTool(tool)
+            task.wait(0.5)
+            pcall(function()
+                ReplicatedStorage.Remotes.Pets.EquipPet:FireServer()
+            end)
+            task.wait(0.3)
+            humanoid:UnequipTools()
+            task.wait(0.3)
+        end
 
-until false  
+    until false
 
-Notify({ Title = "Pets", Message = "Optimisation done.", Type = "success", Duration = 3 })
-
+    Notify({ Title = "Pets", Message = "Optimisation done.", Type = "success", Duration = 3 })
 end
 
 local highlightParts = {}
 
 local function addHighlight(pName, plantModel)
-if highlightParts[pName] then return end
-local cf = plantModel:GetPivot()
-local sphere = Instance.new("Part")
-sphere.Name             = "StreeHub_Highlight"
-sphere.Shape            = Enum.PartType.Ball
-sphere.Size             = Vector3.new(1.8, 1.8, 1.8)
-sphere.CFrame           = cf + Vector3.new(0, 9, 0)
-sphere.Anchored         = true
-sphere.CanCollide       = false
-sphere.CastShadow       = false
-sphere.Material         = Enum.Material.Neon
-sphere.Color            = Color3.fromRGB(130, 80, 255)
-sphere.Parent           = workspace
-local running = true
-task.spawn(function()
-while running and sphere and sphere.Parent do
-for i = 1, 20 do
-if not running then break end
-local s = 1.5 + 0.75 * math.sin((i/20) * math.pi)
-sphere.Size = Vector3.new(s, s, s)
-task.wait(0.05)
-end
-for i = 1, 20 do
-if not running then break end
-local s = 2.25 - 0.75 * math.sin((i/20) * math.pi)
-sphere.Size = Vector3.new(s, s, s)
-task.wait(0.05)
-end
-end
-end)
-highlightParts[pName] = { part = sphere, stop = function() running = false end }
+    if highlightParts[pName] then return end
+    local cf = plantModel:GetPivot()
+    local sphere = Instance.new("Part")
+    sphere.Name             = "StreeHub_Highlight"
+    sphere.Shape            = Enum.PartType.Ball
+    sphere.Size             = Vector3.new(1.8, 1.8, 1.8)
+    sphere.CFrame           = cf + Vector3.new(0, 9, 0)
+    sphere.Anchored         = true
+    sphere.CanCollide       = false
+    sphere.CastShadow       = false
+    sphere.Material         = Enum.Material.Neon
+    sphere.Color            = Color3.fromRGB(130, 80, 255)
+    sphere.Parent           = workspace
+    local running = true
+    task.spawn(function()
+        while running and sphere and sphere.Parent do
+            for i = 1, 20 do
+                if not running then break end
+                local s = 1.5 + 0.75 * math.sin((i/20) * math.pi)
+                sphere.Size = Vector3.new(s, s, s)
+                task.wait(0.05)
+            end
+            for i = 1, 20 do
+                if not running then break end
+                local s = 2.25 - 0.75 * math.sin((i/20) * math.pi)
+                sphere.Size = Vector3.new(s, s, s)
+                task.wait(0.05)
+            end
+        end
+    end)
+    highlightParts[pName] = { part = sphere, stop = function() running = false end }
 end
 
 local function removeHighlight(pName)
-local entry = highlightParts[pName]
-if entry then
-entry.stop()
-entry.part:Destroy()
-highlightParts[pName] = nil
-end
+    local entry = highlightParts[pName]
+    if entry then
+        entry.stop()
+        entry.part:Destroy()
+        highlightParts[pName] = nil
+    end
 end
 
 local function clearAllHighlights()
-for pName in pairs(highlightParts) do
-removeHighlight(pName)
-end
+    for pName in pairs(highlightParts) do
+        removeHighlight(pName)
+    end
 end
 
 local selectedPlantsForUpgrade = {}
@@ -416,83 +415,83 @@ local modelByCardName = {}
 local pNameByCardName = {}
 
 local function buildCardName(pName, lvl, counter)
-return "[Lv." .. lvl .. "] " .. pName .. " #" .. counter
+    return "[Lv." .. lvl .. "] " .. pName .. " #" .. counter
 end
 
 local function fullRescan(keepSelection)
-for i = #plantCardItems, 1, -1 do plantCardItems[i] = nil end
-for k in pairs(dirtByCardName)  do dirtByCardName[k]  = nil end
-for k in pairs(modelByCardName) do modelByCardName[k] = nil end
-for k in pairs(pNameByCardName) do pNameByCardName[k] = nil end
+    for i = #plantCardItems, 1, -1 do plantCardItems[i] = nil end
+    for k in pairs(dirtByCardName)  do dirtByCardName[k]  = nil end
+    for k in pairs(modelByCardName) do modelByCardName[k] = nil end
+    for k in pairs(pNameByCardName) do pNameByCardName[k] = nil end
 
-local prevSelected = {}  
-if keepSelection then  
-    for pName in pairs(selectedPlantsForUpgrade) do  
-        prevSelected[pName] = true  
-    end  
-end  
+    local prevSelected = {}
+    if keepSelection then
+        for pName in pairs(selectedPlantsForUpgrade) do
+            prevSelected[pName] = true
+        end
+    end
 
-clearAllHighlights()  
-selectedPlantsForUpgrade = {}  
+    clearAllHighlights()
+    selectedPlantsForUpgrade = {}
 
-local counters = {}  
-local raw      = {}  
-for _, fp in ipairs(getFarmPlots()) do  
-    for _, plant in ipairs(fp:GetChildren()) do  
-        local dirt  = plant:FindFirstChild("Dirt")  
-        local pName = dirt and dirt:GetAttribute("PlantName")  
-        if dirt and pName then  
-            local lvl = dirt:GetAttribute("PlantLevel") or 0  
-            table.insert(raw, { pName = pName, lvl = lvl, dirt = dirt, model = plant })  
-        end  
-    end  
-end  
-table.sort(raw, function(a, b) return a.pName < b.pName end)  
+    local counters = {}
+    local raw      = {}
+    for _, fp in ipairs(getFarmPlots()) do
+        for _, plant in ipairs(fp:GetChildren()) do
+            local dirt  = plant:FindFirstChild("Dirt")
+            local pName = dirt and dirt:GetAttribute("PlantName")
+            if dirt and pName then
+                local lvl = dirt:GetAttribute("PlantLevel") or 0
+                table.insert(raw, { pName = pName, lvl = lvl, dirt = dirt, model = plant })
+            end
+        end
+    end
+    table.sort(raw, function(a, b) return a.pName < b.pName end)
 
-for _, entry in ipairs(raw) do  
-    counters[entry.pName] = (counters[entry.pName] or 0) + 1  
-    local cardName = buildCardName(entry.pName, entry.lvl, counters[entry.pName])  
-    dirtByCardName[cardName]  = entry.dirt  
-    modelByCardName[cardName] = entry.model  
-    pNameByCardName[cardName] = entry.pName  
-    table.insert(plantCardItems, { Name = cardName, Icon = iconByPlantName[entry.pName] or "" })  
-end  
+    for _, entry in ipairs(raw) do
+        counters[entry.pName] = (counters[entry.pName] or 0) + 1
+        local cardName = buildCardName(entry.pName, entry.lvl, counters[entry.pName])
+        dirtByCardName[cardName]  = entry.dirt
+        modelByCardName[cardName] = entry.model
+        pNameByCardName[cardName] = entry.pName
+        table.insert(plantCardItems, { Name = cardName, Icon = iconByPlantName[entry.pName] or "" })
+    end
 
-if keepSelection then  
-    local seen = {}  
-    for _, item in ipairs(plantCardItems) do  
-        local pName = pNameByCardName[item.Name]  
-        if pName and prevSelected[pName] then  
-            selectedPlantsForUpgrade[pName] = true  
-            if not seen[pName] then  
-                seen[pName] = true  
-                local model = modelByCardName[item.Name]  
-                if model then addHighlight(pName, model) end  
-            end  
-        end  
-    end  
-end
-
+    if keepSelection then
+        local seen = {}
+        for _, item in ipairs(plantCardItems) do
+            local pName = pNameByCardName[item.Name]
+            if pName and prevSelected[pName] then
+                selectedPlantsForUpgrade[pName] = true
+                if not seen[pName] then
+                    seen[pName] = true
+                    local model = modelByCardName[item.Name]
+                    if model then addHighlight(pName, model) end
+                end
+            end
+        end
+    end
 end
 
 local allSeedNames = {}
 local allSeedNamesByRarity = {}
 for _, group in ipairs(seedGroups) do
-allSeedNamesByRarity[group.Label] = {}
-for _, item in ipairs(group.Items) do
-table.insert(allSeedNames, item.Name)
-table.insert(allSeedNamesByRarity[group.Label], item.Name)
-end
+    allSeedNamesByRarity[group.Label] = {}
+    for _, item in ipairs(group.Items) do
+        table.insert(allSeedNames, item.Name)
+        table.insert(allSeedNamesByRarity[group.Label], item.Name)
+    end
 end
 
 local Tabs = {
-Home = Window:Tab({ Title = "Home", Icon = "scan-face" }),
-Main = Window:Tab({ Title = "Main", Icon = "landmark"}),
-Auto = Window:Tab({ Title = "Automatically", Icon = "play" }),
-Shop = Window:Tab({ Title = "Shop", Icon = "shopping-bag" }),
-Upgrade = Window:Tab({ Title = "Upgrade",  Icon = "chart-column-increasing" }),
-Utility = Window:Tab({ Title = "Utility", Icon = "wrench" }),
+    Home = Window:Tab({ Title = "Home", Icon = "scan-face" }),
+    Main = Window:Tab({ Title = "Main", Icon = "landmark"}),
+    Auto = Window:Tab({ Title = "Automatically", Icon = "play" }),
+    Shop = Window:Tab({ Title = "Shop", Icon = "shopping-bag" }),
+    Upgrade = Window:Tab({ Title = "Upgrade",  Icon = "chart-column-increasing" }),
+    Utility = Window:Tab({ Title = "Utility", Icon = "wrench" }),
 }
+
 
 local defaultWalk = 16
 local defaultJump = 50
@@ -502,69 +501,70 @@ local currentJump = defaultJump
 Tabs.Home:Section({ Title = "Information" })
 
 Tabs.Home:Button({
-Title = "Discord",
-Desc = "Copy Discord Link",
-Callback = function()
-local link = "https://discord.gg/jdmX43t5mY"
-if setclipboard then
-setclipboard(link)
-end
-end
+    Title = "Discord",
+    Desc = "Copy Discord Link",
+    Callback = function()
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
+    end
 })
 
 Tabs.Home:Paragraph({
-Title = "Join Us",
-Desc = "Every Update Will Be On Discord"
+    Title = "Join Us",
+    Desc = "Every Update Will Be On Discord"
 })
 
 Tabs.Home:Paragraph({
-Title = "Support",
-Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+    Title = "Support",
+    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
 })
 
 Tabs.Home:Section({ Title = "Local Player" })
 
 Tabs.Home:Slider({
-Title = "WalkSpeed",
-Step = 1,
-Value = { Min = 0, Max = 100, Default = defaultWalk },
-Callback = function(value)
-currentWalk = value
-local player = game:GetService("Players").LocalPlayer
-local char = player.Character
-if char and char:FindFirstChild("Humanoid") then
-char.Humanoid.WalkSpeed = value
-end
-end
+    Title = "WalkSpeed",
+    Step = 1,
+    Value = { Min = 0, Max = 100, Default = defaultWalk },
+    Callback = function(value)
+        currentWalk = value
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = value
+        end
+    end
 })
 
 Tabs.Home:Slider({
-Title = "JumpPower",
-Step = 1,
-Value = { Min = 0, Max = 150, Default = defaultJump },
-Callback = function(value)
-currentJump = value
-local player = game:GetService("Players").LocalPlayer
-local char = player.Character
-if char and char:FindFirstChild("Humanoid") then
-char.Humanoid.JumpPower = value
-end
-end
+    Title = "JumpPower",
+    Step = 1,
+    Value = { Min = 0, Max = 150, Default = defaultJump },
+    Callback = function(value)
+        currentJump = value
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.JumpPower = value
+        end
+    end
 })
 
 Tabs.Home:Button({
-Title = "Reset Default",
-Callback = function()
-currentWalk = defaultWalk
-currentJump = defaultJump
-local player = game:GetService("Players").LocalPlayer
-local char = player.Character
-if char and char:FindFirstChild("Humanoid") then
-char.Humanoid.WalkSpeed = defaultWalk
-char.Humanoid.JumpPower = defaultJump
-end
-end
+    Title = "Reset Default",
+    Callback = function()
+        currentWalk = defaultWalk
+        currentJump = defaultJump
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = defaultWalk
+            char.Humanoid.JumpPower = defaultJump
+        end
+    end
 })
+
 
 local selectedCompostSeeds = {}
 
@@ -572,84 +572,84 @@ local compostSeedsByRarity = {}
 for _, r in ipairs(rarityOrder) do compostSeedsByRarity[r] = {} end
 
 for _, child in ipairs(seedScrollFrame:GetChildren()) do
-if child:IsA("Frame") then
-local icon   = child:FindFirstChild("Icon")
-local rarity = child:FindFirstChild("RarityName")
-local sname  = child:FindFirstChild("SeedName")
-local name   = (sname and sname.Text ~= "???" and sname.Text) or child.Name
-local rar    = (rarity and rarity.Text) or "Common"
-local bucket = compostSeedsByRarity[rar] or compostSeedsByRarity["Common"]
-table.insert(bucket, { Name = name, Icon = icon and icon.Image or "" })
-end
+    if child:IsA("Frame") then
+        local icon   = child:FindFirstChild("Icon")
+        local rarity = child:FindFirstChild("RarityName")
+        local sname  = child:FindFirstChild("SeedName")
+        local name   = (sname and sname.Text ~= "???" and sname.Text) or child.Name
+        local rar    = (rarity and rarity.Text) or "Common"
+        local bucket = compostSeedsByRarity[rar] or compostSeedsByRarity["Common"]
+        table.insert(bucket, { Name = name, Icon = icon and icon.Image or "" })
+    end
 end
 
 Tabs.Main:Section({ Title = "Seeds Compost" })
 
 local compostRarityDropdowns = {}
 for _, r in ipairs(rarityOrder) do
-if #compostSeedsByRarity[r] > 0 then
-local names = {}
-for _, item in ipairs(compostSeedsByRarity[r]) do
-table.insert(names, item.Name)
-end
-Tabs.Main:Dropdown({
-Title     = r .. " Seeds",
-Values    = names,
-Value     = {},
-Multi     = true,
-AllowNone = true,
-Callback  = function(selected)
-for _, item in ipairs(compostSeedsByRarity[r]) do
-selectedCompostSeeds[item.Name] = nil
-end
-if type(selected) == "table" then
-for _, name in ipairs(selected) do
-selectedCompostSeeds[name] = true
-end
-end
-end,
-})
-compostRarityDropdowns[r] = dd
-end
+    if #compostSeedsByRarity[r] > 0 then
+        local names = {}
+        for _, item in ipairs(compostSeedsByRarity[r]) do
+            table.insert(names, item.Name)
+        end
+        Tabs.Main:Dropdown({
+            Title     = r .. " Seeds",
+            Values    = names,
+            Value     = {},
+            Multi     = true,
+            AllowNone = true,
+            Callback  = function(selected)
+                for _, item in ipairs(compostSeedsByRarity[r]) do
+                    selectedCompostSeeds[item.Name] = nil
+                end
+                if type(selected) == "table" then
+                    for _, name in ipairs(selected) do
+                        selectedCompostSeeds[name] = true
+                    end
+                end
+            end,
+        })
+        compostRarityDropdowns[r] = dd
+    end
 end
 
 Tabs.Main:Button({
-Title    = "Deselect all",
-Callback = function()
-selectedCompostSeeds = {}
-for _, dd in pairs(compostRarityDropdowns) do
-dd:Select({})
-end
-Notify({ Title = "Selection", Message = "Selection cleared.", Type = "warning", Duration = 2 })
-end,
+    Title    = "Deselect all",
+    Callback = function()
+        selectedCompostSeeds = {}
+        for _, dd in pairs(compostRarityDropdowns) do
+            dd:Select({})
+        end
+        Notify({ Title = "Selection", Message = "Selection cleared.", Type = "warning", Duration = 2 })
+    end,
 })
 
 local function getSelectedSeedTools()
-local out = {}
-for _, tool in ipairs(player.Backpack:GetChildren()) do
-if tool:IsA("Tool") and tool:GetAttribute("InventoryCategory") == "Seeds" then
-local plantName = tool:GetAttribute("Plant") or tool.Name
-if selectedCompostSeeds[plantName] then
-local level    = tostring(tool:GetAttribute("Level") or 1)
-local mutation = tostring(tool:GetAttribute("Mutation") or "Normal")
-table.insert(out, {
-plantName = plantName,
-level     = level,
-mutation  = mutation,
-})
-end
-end
-end
-return out
+    local out = {}
+    for _, tool in ipairs(player.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool:GetAttribute("InventoryCategory") == "Seeds" then
+            local plantName = tool:GetAttribute("Plant") or tool.Name
+            if selectedCompostSeeds[plantName] then
+                local level    = tostring(tool:GetAttribute("Level") or 1)
+                local mutation = tostring(tool:GetAttribute("Mutation") or "Normal")
+                table.insert(out, {
+                    plantName = plantName,
+                    level     = level,
+                    mutation  = mutation,
+                })
+            end
+        end
+    end
+    return out
 end
 
 local Composter = ReplicatedStorage.Remotes.Composter
 
 local function formatValue(n)
-if n >= 1e12 then return string.format("%.2fT", n / 1e12)
-elseif n >= 1e9 then return string.format("%.2fB", n / 1e9)
-elseif n >= 1e6 then return string.format("%.2fM", n / 1e6)
-else return tostring(n) end
+    if n >= 1e12 then return string.format("%.2fT", n / 1e12)
+    elseif n >= 1e9 then return string.format("%.2fB", n / 1e9)
+    elseif n >= 1e6 then return string.format("%.2fM", n / 1e6)
+    else return tostring(n) end
 end
 
 local composterFloor = 3
@@ -659,46 +659,46 @@ local stopComposting = false
 Tabs.Main:Section({ Title = "Floor selection" })
 
 Tabs.Main:Dropdown({
-Title    = "Composter floor",
-Values   = { "Floor 3", "Floor 2" },
-Value    = "Floor 3",
-Callback = function(v)
-composterFloor = (v == "Floor 2") and 2 or 3
-Notify({ Title = "Composter", Message = "Now targeting " .. v, Type = "info", Duration = 2 })
-end,
+    Title    = "Composter floor",
+    Values   = { "Floor 3", "Floor 2" },
+    Value    = "Floor 3",
+    Callback = function(v)
+        composterFloor = (v == "Floor 2") and 2 or 3
+        Notify({ Title = "Composter", Message = "Now targeting " .. v, Type = "info", Duration = 2 })
+    end,
 })
 
 Tabs.Main:Paragraph{
-Title = "Note",
-Desc  = "Uses seeds selected in the 'Seeds to Compost' tab."
+    Title = "Note",
+    Desc  = "Uses seeds selected in the 'Seeds to Compost' tab."
 }
 
 local function runCompostLoop()
-while not stopComposting do
-local seedTools = getSelectedSeedTools()
-if #seedTools == 0 then
-task.wait(5)
-continue
-end
-for , entry in ipairs(seedTools) do
-if stopComposting then break end
-local seedKey = entry.plantName .. "" .. entry.level .. "_" .. entry.mutation
-local ok, err = pcall(function()
-Composter.InsertSeed:InvokeServer(composterFloor, seedKey, 1)
-end)
-if not ok then
-Notify({ Title = "Error", Message = "InsertSeed failed: " .. tostring(err), Type = "error", Duration = 3 })
-task.wait(0.5)
-continue
-end
-task.wait(0.2)
-local state = nil
-pcall(function()
-state = Composter.RequestState:InvokeServer(composterFloor)
-end)
-if not state then task.wait(0.3); continue end
-local shouldP
-if state.TooRich then
+    while not stopComposting do
+        local seedTools = getSelectedSeedTools()
+        if #seedTools == 0 then
+            task.wait(5)
+            continue
+        end
+        for _, entry in ipairs(seedTools) do
+            if stopComposting then break end
+            local seedKey = entry.plantName .. "_" .. entry.level .. "_" .. entry.mutation
+            local ok, err = pcall(function()
+                Composter.InsertSeed:InvokeServer(composterFloor, seedKey, 1)
+            end)
+            if not ok then
+                Notify({ Title = "Error", Message = "InsertSeed failed: " .. tostring(err), Type = "error", Duration = 3 })
+                task.wait(0.5)
+                continue
+            end
+            task.wait(0.2)
+            local state = nil
+            pcall(function()
+                state = Composter.RequestState:InvokeServer(composterFloor)
+            end)
+            if not state then task.wait(0.3); continue end
+            local shouldPull = false
+            if state.TooRich then
                 shouldPull = true
                 Notify({ Title = "Composter F" .. composterFloor, Message = "TooRich! Pulling lever... (" .. formatValue(state.Value) .. ")", Type = "success", Duration = 3 })
             elseif composterFloor == 3 and state.Value >= 25e12 then
