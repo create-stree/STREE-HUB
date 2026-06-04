@@ -512,6 +512,8 @@ local Tabs = {
     Shop = Window:Tab({ Title = "Shop", Icon = "shopping-bag" }),
     Upgrade = Window:Tab({ Title = "Upgrade", Icon = "chart-column-increasing" }),
     Utility = Window:Tab({ Title = "Utility", Icon = "wrench" }),
+    Misc = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
+    Settings = Window:Tab({ Title = "Settings", Icon = "settings"})
 }
 
 local defaultWalk = 16
@@ -583,6 +585,33 @@ Tabs.Home:Button({
     end,
 })
 
+
+Tabs.Main:Section({ Title = "Roll Seeds" })
+
+Tabs.Main:Toggle({
+    Title = "Auto Roll Seeds",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoRollSeeds = Value
+
+        task.spawn(function()
+            while _G.AutoRollSeeds do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.RollSeeds:FireServer()
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+Tabs.Main:Button({
+    Title = "Roll Seeds",
+    Callback = function()
+        local Event = game:GetService("ReplicatedStorage").Remotes.RollSeeds
+        Event:FireServer()
+    end
+})
 
 local selectedCompostSeeds = {}
 
@@ -785,6 +814,62 @@ Tabs.Main:Button({
             end)
         end)
     end,
+})
+
+Tabs.Main:Section({ Title = "Rewards" })
+
+Tabs.Main:Button({
+    Title = "Claim Playtime Reward",
+    Callback = function()
+        local Event = game:GetService("ReplicatedStorage").Remotes.GetPlaytimeRewardState
+        Event:InvokeServer()
+    end
+})
+
+Tabs.Main:Section({ Title = "Spin Wheel" })
+
+Tabs.Main:Toggle({
+    Title = "Auto Spin Wheel",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoSpinWheel = Value
+
+        task.spawn(function()
+            while _G.AutoSpinWheel do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.SpinWheel.RequestSpin:InvokeServer(false)
+                end)
+                task.wait(5)
+            end
+        end)
+    end
+})
+
+Tabs.Main:Section({ Title = "Sell Crates" })
+
+Tabs.Main:Toggle({
+    Title = "Auto Sell Crates",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoSellCrates = Value
+
+        task.spawn(function()
+            while _G.AutoSellCrates do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.SellCrates:FireServer()
+                end)
+                task.wait(2)
+            end
+        end)
+    end
+})
+
+Tabs.Main:Button({
+    Title = "Sell Crates",
+    Callback = function()
+        local Event = game:GetService("ReplicatedStorage").Remotes.SellCrates
+        Event:FireServer()
+    end
 })
 
 local selectedPets = {}
@@ -1620,6 +1705,176 @@ for _, egg in ipairs(initialEggs) do
         Desc  = egg.name,
     })
 end
+
+
+Tabs.Misc:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        infJump = state
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump then
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+    end
+end)
+
+
+Tabs.Misc:Button({
+    Title = "FPS Boost",
+    Callback = function()
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false
+            end
+        end
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    end
+})
+
+Tabs.Misc:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(state)
+        noclip = state
+    end
+})
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip then
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+Tabs.Misc:Toggle({
+    Title = "Auto Reconnect",
+    Default = false,
+    Callback = function(state)
+        autoReconnect = state
+
+        if autoReconnect then
+            local ts = game:GetService("TeleportService")
+            local player = game.Players.LocalPlayer
+
+            game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+                if autoReconnect and child.Name == "ErrorPrompt" then
+                    task.wait(2)
+                    ts:Teleport(game.PlaceId, player)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Misc:Toggle({
+    Title = "Anti AFK",
+    Default = false,
+    Callback = function(state)
+        antiAFK = state
+
+        if antiAFK then
+            local vu = game:GetService("VirtualUser")
+
+            afkConnection = game.Players.LocalPlayer.Idled:Connect(function()
+                vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            end)
+        else
+            if afkConnection then
+                afkConnection:Disconnect()
+                afkConnection = nil
+            end
+        end
+    end
+})
+
+
+Tabs.Settings:Button({
+    Title = "Rejoin",
+    Callback = function()
+        local ts = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        ts:Teleport(game.PlaceId, player)
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Server Hop",
+    Callback = function()
+        local ts = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        local placeId = game.PlaceId
+        local servers = game:GetService("HttpService"):JSONDecode(
+            game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
+        )
+        for _, v in pairs(servers.data) do
+            if v.playing < v.maxPlayers then
+                ts:TeleportToPlaceInstance(placeId, v.id, player)
+                break
+            end
+        end
+    end
+})
+
+Tabs.Settings:Paragraph({
+    Title = "Current Server",
+    Desc = "You are in server: " .. game.JobId
+})
+
+Tabs.Settings:Input({
+    Title = "Target Server ID",
+    Default = "",
+    Placeholder = "Enter JobId...",
+    MultiLine = false,
+    Callback = function(input)
+        if input ~= "" then
+            local found = false
+            for _, id in ipairs(savedServers) do
+                if id == input then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                table.insert(savedServers, 1, input)
+                refreshDropdown()
+            end
+            inputObj = input
+        end
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Teleport",
+    Callback = function()
+        local target = inputObj
+        if target and target ~= "" then
+            pcall(function()
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, target)
+            end)
+        end
+    end
+})
+
 
 StreeHub:Notify({
     Title = "StreeHub",
