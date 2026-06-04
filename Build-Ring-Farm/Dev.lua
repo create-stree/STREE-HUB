@@ -1503,11 +1503,11 @@ Tabs.Shop:Toggle({
 })
 
 
+Tabs.Upgrade:Section({ Title = "Upgrade Plants" })
+
 local perPlantTargetLevel = 10
 local upgrading           = false
 local stopUpgrading       = false
-
-Tabs.Upgrade:Section({ Title = "Plant Upgrade" })
 
 Tabs.Upgrade:Input({
     Title       = "Target level",
@@ -1585,8 +1585,6 @@ Tabs.Upgrade:Button({
         fullRescan(false)
     end,
 })
-
-Tabs.Upgrade:Section({ Title = "Auto Upgrade Plants" })
 
 local targetLevel = 10
 
@@ -1687,6 +1685,58 @@ Tabs.Upgrade:Button({
         selectedPlantsForUpgrade = {}
         plantMultiDD:Select({})
     end,
+})
+
+Tabs.Upgrade:Section({ Title = "Upgrade Seed Rolls" })
+
+Tabs.Upgrade:Toggle({
+    Title = "Auto Upgrade Seed Rolls",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoUpgradeSeedRolls = Value
+
+        task.spawn(function()
+            while _G.AutoUpgradeSeedRolls do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.UpgradeSeedRolls:InvokeServer()
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+Tabs.Upgrade:Button({
+    Title = "Upgrade Seed Rolls",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.UpgradeSeedRolls:InvokeServer()
+    end
+})
+
+Tabs.Upgrade:Section({ Title = "Upgrade Seed Lucky" })
+
+Tabs.Upgrade:Toggle({
+    Title = "Auto Upgrade Seed Luck",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoUpgradeSeedLuck = Value
+
+        task.spawn(function()
+            while _G.AutoUpgradeSeedLuck do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.UpgradeSeedLuck:InvokeServer()
+                end)
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+Tabs.Main:Button({
+    Title = "Upgrade Seed Luck",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.UpgradeSeedLuck:InvokeServer()
+    end
 })
 
 
