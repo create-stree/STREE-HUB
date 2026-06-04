@@ -818,6 +818,23 @@ Tabs.Main:Button({
 
 Tabs.Main:Section({ Title = "Rewards" })
 
+Tabs.Main:Toggle({
+    Title = "Auto Playtime Reward",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoPlaytimeReward = Value
+
+        task.spawn(function()
+            while _G.AutoPlaytimeReward do
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remotes.GetPlaytimeRewardState:InvokeServer()
+                end)
+                task.wait(30)
+            end
+        end)
+    end
+})
+
 Tabs.Main:Button({
     Title = "Claim Playtime Reward",
     Callback = function()
@@ -1732,7 +1749,7 @@ Tabs.Upgrade:Toggle({
     end
 })
 
-Tabs.Main:Button({
+Tabs.Upgrade:Button({
     Title = "Upgrade Seed Luck",
     Callback = function()
         game:GetService("ReplicatedStorage").Remotes.UpgradeSeedLuck:InvokeServer()
