@@ -11,76 +11,18 @@ _G.scripts_key = _G.scripts_key or (ok and val) or "FREE_USER"
 
 local streeLogo = "rbxassetid://99948086845842"
 
-local premiumKeys = {
-    "hRCWybDuIIxXeREImBbvjsEueohPzTfX",
-    "kRpXaVnqZyLhTjBfGmWcSdEoUiNpQvJ",
-    "YtHqFzPaKrXeBwNuDjMiVsGoClLrSnQe",
-    "pZxYvQmAaTrWnGfBqCkJdEoHsLuVtSiN",
-    "pQrStUvWxYzAbCdEfGhIjKlMnOpQrSt",
-    "wJzDnQyGmTcLkVxEoPaFbSgRrUuMiZh",
-    "eBtXqNpRzVhLkCmSgJaWiFuTdOyQnPc",
-    "qYwRzEbTgLkPmDaVxHnUiFsCoSjMvNQ",
-    "ZkWmNtGpQrHxSaJlDyCfVuEbLoPiTnR",
-    "vQbJnGzHcTtXoLwFfAqSmPrYiEdKuNM",
-    "hZpRkQyUxWaJmTfVnSgCoLdEiBtNsMQ",
-    "hKQZrXvTnMFaJpLwSgDBeEYcUoNiRA",
-    "QmYBvDZoTnCwLrHFaXkUJEpSgNiVMQ",
-    "XoZKQnYJpLrEHTwSgDMBaFiCvUqRNP",
-    "nFvTQwXgYHKEoLaSBDZCUMJpRNiVTF",
-    "ZxJvXHnYkSgBLCMTFUpQoDaERwViNP",
-    "rTnMZQXvJHLFSCYwBKaUpgDoENiVPM",
-    "vBFSHkJXnLZCwQpDgMTUYoaERViNPQ",
-    "QpHnZLBkTgXvFMCwSYDoUaJERiVNQP",
-    "XQYpJkLCMZBvDgSwnHToFUERNiVPMQ",
-    "JXoZkYpLHQwMBnDgCvTFSUERiVNPQM",
-    "MTZLwXHnYkQgJpDCSBFoUvERiNPMQX",
-    "ZgYJQXkHnBvTFUoMCSwDLpERiNPMQV",
-    "wJXHnZkYFQpDvSLCMToUBgERiNPMQV",
-    "XwYkJZHQnMBCgTFDvUSpLoERiNPMQV",
-    "QZJXkHMYnLwBTDpCgUSFoERiNPMQVX",
-    "HXkZBvJMYQwDnTLpUCSFgERiNPMQVX",
-    "JkQHnXMYDvZLBFoCgSwUTpERiNPMQV",
-    "YJXQkZHDvMBSgTFLnUwCoERiNPMQVX",
-    "XkHnQZJMYpLwTDgCBUSFoERiNPMQVX",
-    "QXJZkHnYwMBgDvSCUTLpFERiNPMQVX",
-    "RfbTkLmNqPsAdFhGjKzXcVwQyUtIoPaSd",
-    "AzXcVbNmLpOiUyTrEwQqAsDfGhJkLmNbV",
-    "QwErTyUiOpAsDfGhJkLzXcVbNmLpOiUyT",
-    "MnBvCxZlKjHgFdSaQwErTyUiOpLkJhGfD",
-    "VwQyUtIoPaSdFgHjKlMnBvCxZqWeRtYuI",
-    "GhJkLmNbVcXzQwErTyUiOpAsDfGhJkLmN",
-    "XcVbNmLpOiUyTrEwQqAsDfGhJkLmNbVcX",
-    "SdFgHjKlMnBvCxZqWeRtYuIoPaSdFgHjK",
-    "LkJhGfDsAqWeRtYuIoPaSdFgHjKlMnBvC",
-    "PaSdFgHjKlMnBvCxZqWeRtYuIoPaSdFgH",
-    "xQmZbTnLcVrWpKyJdHsUfGaEiLoPnYtR",
-    "BnVcXzQpLmYtRwQkJhGfDsAzXbNmLpOt",
-    "YkLmNbVcXzAsDfGhJkLpOiUyTrEwQmNy",
-    "tRqWpLnMxKvBsGfHeJzDuQiYcPaLmNkQ",
-    "JmQnLpRtYxKvBsGhEfZaWiCuTdOyQnLu",
-    "kVxYoPaSdFgHjKlMnBvCxZqWeRtYuIoT",
-    "pLnMxKvBsGhEfZaWiCuTdOyQnLkVxYon",
-    "XcVbNmLpQrTyUiOpAsDfGhJkLmNbVcXs",
-    "sDfGhJkLmNbVcXpLnMxKvBsGhEfZaWig",
-    "HeJzDuQiYcPaLmNkVxYoPaSdFgHjKlMp",
-    "STRE-6SSR-5GWR-M0TW",
-    "STRE-RSBD-LOOH-RBKS",
-    "STRE-MSL8-Q149-QC1T",
-    "developer_access",
-    "team_access",
-}
+local HttpService = game:GetService("HttpService")
 
-local function isPremiumKey(key)
-    for _, k in ipairs(premiumKeys) do
-        if key == k then
-            return true
-        end
-    end
-    return false
-end
+local response = game:HttpGet(
+    "https://streehub-api.vercel.app/api/premium?key=" .. 
+    tostring(_G.scripts_key) .. 
+    "&hwid=" .. tostring(game:GetService("RbxAnalyticsService"):GetClientId())
+)
 
-if not isPremiumKey(_G.scripts_key) then
-    game.Players.LocalPlayer:Kick("Invalid Premium Key! Contact seller.")
+local data = HttpService:JSONDecode(response)
+
+if not data.success then
+    game.Players.LocalPlayer:Kick("Invalid Key: " .. (data.message or "Unknown"))
     return
 end
 
