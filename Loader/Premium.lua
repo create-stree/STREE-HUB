@@ -5,24 +5,34 @@ local gameId = game.GameId
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 
 local ok, val = pcall(function() return scripts_key end)
 _G.scripts_key = _G.scripts_key or (ok and val) or "FREE_USER"
 
+local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
 local streeLogo = "rbxassetid://99948086845842"
 
-local HttpService = game:GetService("HttpService")
+local success, response = pcall(function()
+    return game:HttpGet(
+        "https://streehub-api.vercel.app/api/premium?key=" ..
+        tostring(_G.scripts_key) ..
+        "&hwid=" .. hwid
+    )
+end)
 
-local response = game:HttpGet(
-    "https://streehub-api.vercel.app/api/premium?key=" .. 
-    tostring(_G.scripts_key) .. 
-    "&hwid=" .. tostring(game:GetService("RbxAnalyticsService"):GetClientId())
-)
+if not success then
+    game.Players.LocalPlayer:Kick("[StreeHub] Failed to connect to auth server!")
+    return
+end
 
-local data = HttpService:JSONDecode(response)
+local data
+local ok2 = pcall(function()
+    data = HttpService:JSONDecode(response)
+end)
 
-if not data.success then
-    game.Players.LocalPlayer:Kick("Invalid Key: " .. (data.message or "Unknown"))
+if not ok2 or not data or not data.success then
+    game.Players.LocalPlayer:Kick("[StreeHub] " .. (data and data.message or "Invalid Key!"))
     return
 end
 
@@ -45,7 +55,7 @@ local gameScripts = {
     },
     [10039338037] = {
         name = "Build Ring Farm",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Build-Ring-Farm/Premium.lua",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Build-Ring-Farm/Premium.lua"
     },
     [9344307274] = {
         name = "Break A Lucky Block",
@@ -84,7 +94,7 @@ local gameScripts = {
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
     },
     [9098570654] = {
-        nama = "Survive The Apocalypse",
+        name = "Survive The Apocalypse",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/STA/Premium.lua"
     },
     [6739698191] = {
@@ -164,14 +174,14 @@ local gameName = gameData and gameData.name or "Unknown Game"
 
 StarterGui:SetCore("SendNotification", {
     Title = "STREE HUB",
-    Text = "Detected game: " .. gameName,
+    Text = "Detected: " .. gameName,
     Icon = streeLogo,
     Duration = 3
 })
 
 StarterGui:SetCore("SendNotification", {
     Title = "STREE HUB",
-    Text = "Premium User",
+    Text = "✅ Premium User Verified",
     Icon = streeLogo,
     Duration = 3
 })
@@ -181,7 +191,7 @@ task.wait(2)
 if gameData then
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
-        Text = "Loading Premium version for " .. gameName .. "...",
+        Text = "Loading " .. gameName .. "...",
         Icon = streeLogo,
         Duration = 3
     })
@@ -193,5 +203,5 @@ else
         Icon = streeLogo,
         Duration = 4
     })
-    game.Players.LocalPlayer:Kick("Game not supported!")
+    game.Players.LocalPlayer:Kick("[StreeHub] Game not supported!")
 end
