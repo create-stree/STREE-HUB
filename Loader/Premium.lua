@@ -14,7 +14,6 @@ local key = _G.scripts_key
 local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
 local streeLogo = "rbxassetid://99948086845842"
 
--- Auth Check
 local success, response = pcall(function()
     return game:HttpGet(
         "https://streehub-api.vercel.app/api/premium?key=" .. key .. "&hwid=" .. hwid,
@@ -27,7 +26,6 @@ if not success or not response or response:find("Invalid") or response:find("err
     return
 end
 
--- Loading UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
@@ -94,7 +92,6 @@ tween.Completed:Wait()
 task.wait(0.3)
 ScreenGui:Destroy()
 
--- Game Scripts
 local gameScripts = {
     [7326934954] = {
         name = "99 Night In The Forest",
