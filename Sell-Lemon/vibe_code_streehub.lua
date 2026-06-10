@@ -1,5 +1,5 @@
-local ok, val = pcall(function() return scripts_key end)
-_G.scripts_key = _G.scripts_key or (ok and val) or nil
+local ok, val = pcall(function() return _G.scripts_key end)
+if not ok then _G.scripts_key = nil end
 
 if not _G.scripts_key or _G.scripts_key == "FREE_USER" then
     game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key!")
@@ -26,7 +26,6 @@ loadstring([[
 ]])();
 repeat wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -35,7 +34,7 @@ local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = (premium and "Premium" or "Sell Lemon") .. " - " .. version,
+    Author = "Premium - Sell Lemon",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
