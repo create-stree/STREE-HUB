@@ -1,14 +1,22 @@
-local StreeHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua"))()
+loadstring([[
+    function LPH_NO_VIRTUALIZE(f) return f end;
+]])();
+repeat wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
+
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
+local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
-local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(620, 370)
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
 
 local Window = StreeHub:CreateWindow({
-	Title = "Vibe Code Central",
-	Icon = "rbxassetid://91948065763443",
-	Author = "Sell Lemons",
-	Folder = "LemonAutofarm",
-	Size = WindowSize,
-	FileSaveName = "LemonAutofarm/config.json",
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "Sell Lemon") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+    FileSaveName = "StreeHub/Config.json"
 })
 
 local Tabs = {
