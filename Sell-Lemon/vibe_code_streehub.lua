@@ -20,11 +20,88 @@ local Window = StreeHub:CreateWindow({
 })
 
 local Tabs = {
-	Main  = Window:Tab({ Title = "Main",  Icon = "settings", Desc = "Main automation controls." }),
-	Panel = Window:Tab({ Title = "Panel", Icon = "monitor",  Desc = "Live status panel settings." }),
+	Home  = Window:Tab({ Title = "Home",  Icon = "scan-face" }),
+	Main  = Window:Tab({ Title = "Main",  Icon = "landmark" }),
+	Auto  = Window:Tab({ Title = "Automatically",  Icon = "play" }),
+	Panel = Window:Tab({ Title = "Panel", Icon = "monitor" }),
+	Misc = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
+    Settings = Window:Tab({ Title = "Settings", Icon = "settings"})
 }
 
-Window:SelectTab(1)
+
+local defaultWalk = 16
+local defaultJump = 50
+local currentWalk = defaultWalk
+local currentJump = defaultJump
+
+Tabs.Home:Section({ Title = "Information" })
+
+Tabs.Home:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
+    Callback = function()
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
+    end
+})
+
+Tabs.Home:Paragraph({
+    Title = "Join Us",
+    Desc = "Every Update Will Be On Discord"
+})
+
+Tabs.Home:Paragraph({
+    Title = "Support",
+    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+})
+
+Tabs.Home:Section({ Title = "Local Player" })
+
+Tabs.Home:Slider({
+    Title = "WalkSpeed",
+    Step = 1,
+    Value = { Min = 0, Max = 100, Default = defaultWalk },
+    Callback = function(value)
+        currentWalk = value
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = value
+        end
+    end
+})
+
+Tabs.Home:Slider({
+    Title = "JumpPower",
+    Step = 1,
+    Value = { Min = 0, Max = 150, Default = defaultJump },
+    Callback = function(value)
+        currentJump = value
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.JumpPower = value
+        end
+    end
+})
+
+Tabs.Home:Button({
+    Title = "Reset Default",
+    Callback = function()
+        currentWalk = defaultWalk
+        currentJump = defaultJump
+
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = defaultWalk
+            char.Humanoid.JumpPower = defaultJump
+        end
+    end
+})
+
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -38,8 +115,6 @@ local function findTycoon()
 		end
 	end
 end
-
-if not game:IsLoaded() then game.Loaded:Wait() end
 
 local userTycoon
 local _tStart = tick()
@@ -594,50 +669,7 @@ task.spawn(function()
 	end
 end)
 
-local AutoRejoin      = false
-local TeleportService = game:GetService("TeleportService")
-local VirtualUser     = game:GetService("VirtualUser")
-local PLACE_ID        = game.PlaceId
-
-LocalPlayer.Idled:Connect(function()
-	pcall(function()
-		VirtualUser:CaptureController()
-		VirtualUser:ClickButton2(Vector2.new())
-	end)
-end)
-
-local function tryRejoin()
-	if not AutoRejoin then return end
-	pcall(function()
-		local players = Players:GetPlayers()
-		if #players <= 1 then
-			TeleportService:Teleport(PLACE_ID, LocalPlayer)
-		else
-			TeleportService:TeleportToPlaceInstance(PLACE_ID, game.JobId, LocalPlayer)
-		end
-	end)
-end
-
-pcall(function()
-	game:GetService("GuiService").ErrorMessageChanged:Connect(function()
-		if AutoRejoin then task.wait(0.5); tryRejoin() end
-	end)
-end)
-
-task.spawn(function()
-	local cg = game:GetService("CoreGui")
-	cg.DescendantAdded:Connect(function(d)
-		if not AutoRejoin then return end
-		local n = string.lower(d.Name)
-		if n:find("disconnect") or n:find("reconnect") or n:find("errorprompt") then
-			task.wait(0.5); tryRejoin()
-		end
-	end)
-end)
-
-TeleportService.TeleportInitFailed:Connect(function(_, _, _)
-	if AutoRejoin then task.wait(2); tryRejoin() end
-end)
+Tabs.Main:Section({ Title = "Buy" })
 
 Tabs.Main:Toggle({
 	Title = "Auto Buy",
@@ -647,6 +679,8 @@ Tabs.Main:Toggle({
 	end,
 })
 
+Tabs.Main:Section({ Title = "Upgarde" })
+
 Tabs.Main:Toggle({
 	Title = "Auto Upgrade",
 	Default = false,
@@ -655,6 +689,8 @@ Tabs.Main:Toggle({
 	end,
 })
 
+Tabs.Main:Section({ Title = "Fruit" })
+
 Tabs.Main:Toggle({
 	Title = "Auto Fruit",
 	Default = false,
@@ -662,6 +698,8 @@ Tabs.Main:Toggle({
 		AutoFruit = Value
 	end,
 })
+
+Tabs.Main:Section({ Title = "Rebirth" })
 
 Tabs.Main:Toggle({
 	Title = "Auto Rebirth",
@@ -692,48 +730,10 @@ Tabs.Main:Input({
 	end,
 })
 
-Tabs.Main:Toggle({
-	Title = "Auto Evolve (x10 income)",
-	Default = false,
-	Callback = function(Value)
-		AutoEvolve = Value
-	end,
-})
-
-Tabs.Main:Toggle({
-	Title = "Auto Ascend (all-purchases reset)",
-	Default = false,
-	Callback = function(Value)
-		AutoAscend = Value
-	end,
-})
-
-Tabs.Main:Toggle({
-	Title = "Auto Accept Phone Offers",
-	Default = false,
-	Callback = function(Value)
-		AutoPhoneOffers = Value
-	end,
-})
-
-Tabs.Main:Toggle({
-	Title = "Auto Power Level",
-	Default = false,
-	Callback = function(Value)
-		AutoPowerLevel = Value
-	end,
-})
-
-Tabs.Main:Toggle({
-	Title = "Auto Rejoin (on disconnect)",
-	Default = false,
-	Callback = function(Value)
-		AutoRejoin = Value
-	end,
-})
+Tabs.Main:Section({ Title = "Manual" })
 
 Tabs.Main:Button({
-	Title = "Pull All Levers (sewer)",
+	Title = "Pull All Levers",
 	Callback = function()
 		pullAllLevers()
 	end,
@@ -755,32 +755,65 @@ Tabs.Main:Button({
 	end,
 })
 
-Tabs.Main:Button({
-	Title = "Destroy GUI",
-	Callback = function()
-		Window:Destroy()
+
+Tabs.Auto:Section({ Title = "Auto Evolve" })
+
+Tabs.Auto:Toggle({
+	Title = "Auto Evolve",
+	Default = false,
+	Callback = function(Value)
+		AutoEvolve = Value
 	end,
 })
 
+Tabs.Auto:Section({ Title = "Auto Ascend" })
+
+Tabs.Auto:Toggle({
+	Title = "Auto Ascend",
+	Default = false,
+	Callback = function(Value)
+		AutoAscend = Value
+	end,
+})
+
+Tabs.Auto:Section({ Title = "Auto Offers Phone" })
+
+Tabs.Auto:Toggle({
+	Title = "Auto Accept Phone Offers",
+	Default = false,
+	Callback = function(Value)
+		AutoPhoneOffers = Value
+	end,
+})
+
+Tabs.Main:Toggle({
+	Title = "Auto Power Level",
+	Default = false,
+	Callback = function(Value)
+		AutoPowerLevel = Value
+	end,
+})
+
+
 local PanelVisible = true
 local statusGui = nil
-
+ 
 local function destroyStatusPanel()
 	if statusGui then
 		pcall(function() statusGui:Destroy() end)
 		statusGui = nil
 	end
 end
-
+ 
 local function createStatusPanel()
 	destroyStatusPanel()
-
+ 
 	local parent = LocalPlayer:FindFirstChildOfClass("PlayerGui")
 	if not parent then
 		local okh, hui = pcall(function() return gethui() end)
 		parent = (okh and hui) or game:GetService("CoreGui")
 	end
-
+ 
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "AutoStatusGui"
 	gui.ResetOnSpawn = false
@@ -788,41 +821,47 @@ local function createStatusPanel()
 	gui.DisplayOrder = 9999
 	gui.Parent = parent
 	statusGui = gui
-
+ 
 	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(0, 200, 0, 198)
+	frame.Size = UDim2.new(0, 210, 0, 210)
 	frame.Position = UDim2.new(0, 10, 0, 90)
-	frame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-	frame.BackgroundTransparency = 0.1
+	frame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+	frame.BackgroundTransparency = 0
 	frame.BorderSizePixel = 0
 	frame.Active = true
 	frame.Parent = gui
-	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+ 
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(57, 255, 20)
+	stroke.Thickness = 1.5
+	stroke.Transparency = 0
+	stroke.Parent = frame
+ 
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, 0, 0, 24)
-	title.BackgroundColor3 = Color3.fromRGB(38, 40, 54)
+	title.Size = UDim2.new(1, 0, 0, 26)
+	title.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 	title.BorderSizePixel = 0
 	title.Text = "AUTO STATUS"
-	title.TextColor3 = Color3.fromRGB(120, 235, 140)
+	title.TextColor3 = Color3.fromRGB(57, 255, 20)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 13
 	title.Parent = frame
-	Instance.new("UICorner", title).CornerRadius = UDim.new(0, 8)
-
+	Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
+ 
 	local body = Instance.new("TextLabel")
-	body.Size = UDim2.new(1, -12, 1, -30)
-	body.Position = UDim2.new(0, 8, 0, 28)
+	body.Size = UDim2.new(1, -14, 1, -32)
+	body.Position = UDim2.new(0, 8, 0, 30)
 	body.BackgroundTransparency = 1
 	body.TextXAlignment = Enum.TextXAlignment.Left
 	body.TextYAlignment = Enum.TextYAlignment.Top
 	body.RichText = true
 	body.Text = "starting..."
-	body.TextColor3 = Color3.fromRGB(235, 235, 245)
+	body.TextColor3 = Color3.fromRGB(57, 255, 20)
 	body.Font = Enum.Font.Code
 	body.TextSize = 12
 	body.Parent = frame
-
+ 
 	local UIS = game:GetService("UserInputService")
 	local dragging, ds, sp
 	title.InputBegan:Connect(function(i)
@@ -841,16 +880,16 @@ local function createStatusPanel()
 			frame.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
 		end
 	end)
-
+ 
 	local RunService = game:GetService("RunService")
 	local frames, fps, fpsT = 0, 0, tick()
 	RunService.RenderStepped:Connect(function()
 		frames = frames + 1
 		if tick() - fpsT >= 1 then fps, frames, fpsT = frames, 0, tick() end
 	end)
-
-	local function on(b) return b and "<font color='#7CFF7C'>ON</font>" or "<font color='#777'>off</font>" end
-
+ 
+	local function on(b) return b and "<font color='#39FF14'>ON</font>" or "<font color='#444'>off</font>" end
+ 
 	task.spawn(function()
 		while gui.Parent and PanelVisible do
 			local cashStr = "?"
@@ -874,7 +913,7 @@ local function createStatusPanel()
 		end
 	end)
 end
-
+ 
 createStatusPanel()
 
 Tabs.Panel:Section({ Title = "Live Status Panel" })
@@ -910,4 +949,181 @@ Tabs.Panel:Button({
 		stats.ascends  = 0
 		stats.phone    = 0
 	end,
+})
+
+
+Tabs.Misc:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        infJump = state
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump then
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+    end
+end)
+
+
+Tabs.Misc:Button({
+    Title = "FPS Boost",
+    Callback = function()
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false
+            end
+        end
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    end
+})
+
+Tabs.Misc:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(state)
+        noclip = state
+    end
+})
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip then
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+Tabs.Misc:Toggle({
+    Title = "Auto Reconnect",
+    Default = false,
+    Callback = function(state)
+        autoReconnect = state
+
+        if autoReconnect then
+            local ts = game:GetService("TeleportService")
+            local player = game.Players.LocalPlayer
+
+            game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+                if autoReconnect and child.Name == "ErrorPrompt" then
+                    task.wait(2)
+                    ts:Teleport(game.PlaceId, player)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Misc:Toggle({
+    Title = "Anti AFK",
+    Default = false,
+    Callback = function(state)
+        antiAFK = state
+
+        if antiAFK then
+            local vu = game:GetService("VirtualUser")
+
+            afkConnection = game.Players.LocalPlayer.Idled:Connect(function()
+                vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            end)
+        else
+            if afkConnection then
+                afkConnection:Disconnect()
+                afkConnection = nil
+            end
+        end
+    end
+})
+
+
+Tabs.Settings:Button({
+    Title = "Rejoin",
+    Callback = function()
+        local ts = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        ts:Teleport(game.PlaceId, player)
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Server Hop",
+    Callback = function()
+        local ts = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        local placeId = game.PlaceId
+        local servers = game:GetService("HttpService"):JSONDecode(
+            game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
+        )
+        for _, v in pairs(servers.data) do
+            if v.playing < v.maxPlayers then
+                ts:TeleportToPlaceInstance(placeId, v.id, player)
+                break
+            end
+        end
+    end
+})
+
+Tabs.Settings:Paragraph({
+    Title = "Current Server",
+    Desc = "You are in server: " .. game.JobId
+})
+
+Tabs.Settings:Input({
+    Title = "Target Server ID",
+    Default = "",
+    Placeholder = "Enter JobId...",
+    MultiLine = false,
+    Callback = function(input)
+        if input ~= "" then
+            local found = false
+            for _, id in ipairs(savedServers) do
+                if id == input then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                table.insert(savedServers, 1, input)
+                refreshDropdown()
+            end
+            inputObj = input
+        end
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Teleport",
+    Callback = function()
+        local target = inputObj
+        if target and target ~= "" then
+            pcall(function()
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, target)
+            end)
+        end
+    end
+})
+
+
+StreeHub:Notify({
+    Title = "StreeHub",
+    Content = "Script loaded successfully",
+    Icon = "bell-ring",
+    Duration = 4
 })
