@@ -1,3 +1,26 @@
+local ok, val = pcall(function() return scripts_key end)
+_G.scripts_key = _G.scripts_key or (ok and val) or nil
+
+if not _G.scripts_key or _G.scripts_key == "FREE_USER" then
+    game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key!")
+    return
+end
+
+local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
+local key = _G.scripts_key
+
+local success, response = pcall(function()
+    return game:HttpGet(
+        "https://streehub-api.vercel.app/api/premium?key=" .. key .. "&hwid=" .. hwid,
+        true
+    )
+end)
+
+if not success or not response or response:find("Invalid") or response:find("error") or response:find("Missing") or response:find("expired") or response:find("banned") then
+    game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key!")
+    return
+end
+
 loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
