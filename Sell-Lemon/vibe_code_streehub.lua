@@ -1076,6 +1076,9 @@ Tabs.Misc:Toggle({
 })
 
 
+local savedServers = {}
+local inputObj = ""
+
 Tabs.Settings:Button({
     Title = "Rejoin",
     Callback = function()
@@ -1124,7 +1127,6 @@ Tabs.Settings:Input({
             end
             if not found then
                 table.insert(savedServers, 1, input)
-                refreshDropdown()
             end
             inputObj = input
         end
