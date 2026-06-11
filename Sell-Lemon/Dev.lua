@@ -24,7 +24,7 @@ local Tabs = {
 	Auto  = Window:Tab({ Title = "Automatically",  Icon = "play" }),
 	Panel = Window:Tab({ Title = "Panel", Icon = "monitor" }),
 	Misc = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
-  Settings = Window:Tab({ Title = "Settings", Icon = "settings"})
+    Settings = Window:Tab({ Title = "Settings", Icon = "settings"})
 }
 
 local defaultWalk = 16
