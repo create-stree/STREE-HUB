@@ -1,23 +1,38 @@
-local ok, val = pcall(function() return _G.scripts_key end)
-if not ok then _G.scripts_key = nil end
+local ok, val = pcall(function() return scripts_key end)
+_G.scripts_key = _G.scripts_key or (ok and val) or nil
 
-if not _G.scripts_key or _G.scripts_key == "FREE_USER" then
-    game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key!")
-    return
+local function verifyStreeHubKey(key)
+    local API_URL = "https://streehub-api.vercel.app/api/premium"
+    local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
+    
+    if not key or key == "" or key == "FREE_USER" then
+        return false, "Invalid Key"
+    end
+
+    local fullUrl = string.format("%s?key=%s&hwid=%s", API_URL, key, hwid)
+    local success, response = pcall(function()
+        return game:HttpGet(fullUrl, true)
+    end)
+
+    if not success or not response then
+        return false, "HTTP Request Failed"
+    end
+
+    if response == "-- Valid Key" then
+        return true, "Success"
+    elseif response == "-- Invalid Key" then
+        return false, "Invalid Key"
+    elseif response == "-- Invalid HWID" then
+        return false, "Invalid HWID (Hardware ID Mismatch)"
+    else
+        return false, response:gsub("%-", ""):trim()
+    end
 end
 
-local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
-local key = _G.scripts_key
+local isVerified, errMsg = verifyStreeHubKey(_G.scripts_key)
 
-local success, response = pcall(function()
-    return game:HttpGet(
-        "https://streehub-api.vercel.app/api/premium?key=" .. key .. "&hwid=" .. hwid,
-        true
-    )
-end)
-
-if not success or not response or response:find("Invalid") or response:find("error") or response:find("Missing") or response:find("expired") or response:find("banned") then
-    game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key!")
+if not isVerified then
+    game.Players.LocalPlayer:Kick("[StreeHub] Verification Failed: " .. tostring(errMsg))
     return
 end
 
@@ -263,7 +278,7 @@ task.spawn(function()
 end)
 
 local RebirthGainMultiple = 1.0
-local RebirthMultMode         = false
+local RebirthMultMode     = false
 local RebirthInvestorMultiple = 10
 local MinPotential        = 1
 local RebirthCooldown     = 2
@@ -778,7 +793,7 @@ Tabs.Main:Button({
 })
 
 
-Tabs.Auto:Section({ Title = "Auto Evolve" })
+Tabs.Auto:Section({ Title = "Automatically Evolve" })
 
 Tabs.Auto:Toggle({
 	Title = "Auto Evolve",
@@ -788,7 +803,7 @@ Tabs.Auto:Toggle({
 	end,
 })
 
-Tabs.Auto:Section({ Title = "Auto Ascend" })
+Tabs.Auto:Section({ Title = "Automatically Ascend" })
 
 Tabs.Auto:Toggle({
 	Title = "Auto Ascend",
@@ -798,7 +813,7 @@ Tabs.Auto:Toggle({
 	end,
 })
 
-Tabs.Auto:Section({ Title = "Auto Offers Phone" })
+Tabs.Auto:Section({ Title = "Automatically Offers Phone" })
 
 Tabs.Auto:Toggle({
 	Title = "Auto Accept Phone Offers",
@@ -807,6 +822,8 @@ Tabs.Auto:Toggle({
 		AutoPhoneOffers = Value
 	end,
 })
+
+Tabs.Auto:Section({ Title = "Automatically Level" })
 
 Tabs.Main:Toggle({
 	Title = "Auto Power Level",
