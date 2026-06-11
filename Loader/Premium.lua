@@ -1,28 +1,27 @@
 repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 if not game:IsLoaded() then game.Loaded:Wait() end
 
-local gameId = game.GameId
+local gameId = tostring(game.GameId)
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-local HttpService = game:GetService("HttpService")
+local streeLogo = "rbxassetid://99948086845842"
 
 local ok, val = pcall(function() return scripts_key end)
 _G.scripts_key = _G.scripts_key or (ok and val) or "FREE_USER"
 
 local key = _G.scripts_key
 local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
-local streeLogo = "rbxassetid://99948086845842"
 
 local success, response = pcall(function()
     return game:HttpGet(
-        "https://streehub-api.vercel.app/api/premium?key=" .. key .. "&hwid=" .. hwid,
+        "https://streehub-api.vercel.app/api/premium?key=" .. key .. "&hwid=" .. hwid .. "&gameid=" .. gameId,
         true
     )
 end)
 
 if not success or not response or response:find("Invalid") or response:find("error") or response:find("Missing") or response:find("expired") or response:find("banned") then
-    game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key: " .. tostring(response or "Unknown error"))
+    game.Players.LocalPlayer:Kick("[StreeHub] " .. tostring(response or "Auth failed"))
     return
 end
 
@@ -92,83 +91,6 @@ tween.Completed:Wait()
 task.wait(0.3)
 ScreenGui:Destroy()
 
-local gameScripts = {
-    [7326934954] = {
-        name = "99 Night In The Forest",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/99NITF/Premium.lua"
-    },
-    [8144728961] = {
-        name = "Abyss",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Premium.lua"
-    },
-    [111958650] = {
-        name = "Arsenal",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Premium.lua"
-    },
-    [994732206] = {
-        name = "Blox Fruits",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Blox-Fruit/Dev.lua"
-    },
-    [10039338037] = {
-        name = "Build Ring Farm",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Build-Ring-Farm/Premium.lua"
-    },
-    [9344307274] = {
-        name = "Break A Lucky Block",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
-    },
-    [7474367816] = {
-        name = "Climb and Jump Tower",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
-    },
-    [9363735110] = {
-        name = "Escape Tsunami For Brainrot",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Premium.lua"
-    },
-    [6701277882] = {
-        name = "Fish It",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Fish_It/Premium.lua"
-    },
-    [6331902150] = {
-        name = "Forsaken",
-        premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
-    },
-    [9509842868] = {
-        name = "Garden Horizons",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Garden-Horizons/Premium.lua"
-    },
-    [10004244222] = {
-        name = "Kick A Lucky Block",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Premium.lua"
-    },
-    [9792947201] = {
-        name = "Slime RNG",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Slime-Rng/Premium.lua"
-    },
-    [7394964165] = {
-        name = "Solo Hunter",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Solo-Hunter/Premium.lua"
-    },
-    [9098570654] = {
-        name = "Survive The Apocalypse",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/STA/Premium.lua"
-    },
-    [6739698191] = {
-        name = "Violence District",
-        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Violence-District/Premium.lua"
-    }
-}
-
-local gameData = gameScripts[gameId]
-local gameName = gameData and gameData.name or "Unknown Game"
-
-StarterGui:SetCore("SendNotification", {
-    Title = "STREE HUB",
-    Text = "Detected: " .. gameName,
-    Icon = streeLogo,
-    Duration = 3
-})
-
 StarterGui:SetCore("SendNotification", {
     Title = "STREE HUB",
     Text = "Premium User Verified",
@@ -176,17 +98,9 @@ StarterGui:SetCore("SendNotification", {
     Duration = 3
 })
 
-task.wait(2)
+task.wait(1)
 
-if gameData then
-    StarterGui:SetCore("SendNotification", {
-        Title = "STREE HUB",
-        Text = "Loading " .. gameName .. "...",
-        Icon = streeLogo,
-        Duration = 3
-    })
-    loadstring(game:HttpGet(gameData.premium, true))()
-else
+if response == "-- Game not supported" then
     StarterGui:SetCore("SendNotification", {
         Title = "STREE HUB",
         Text = "Game not supported!",
@@ -194,4 +108,6 @@ else
         Duration = 4
     })
     game.Players.LocalPlayer:Kick("[StreeHub] Game not supported!")
+else
+    loadstring(response)()
 end
