@@ -1,41 +1,3 @@
-local ok, val = pcall(function() return scripts_key end)
-_G.scripts_key = _G.scripts_key or (ok and val) or nil
-
-local function verifyStreeHubKey(key)
-    local API_URL = "https://streehub-api.vercel.app/api/premium"
-    local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
-    
-    if not key or key == "" or key == "FREE_USER" then
-        return false, "Invalid Key"
-    end
-
-    local fullUrl = string.format("%s?key=%s&hwid=%s", API_URL, key, hwid)
-    local success, response = pcall(function()
-        return game:HttpGet(fullUrl, true)
-    end)
-
-    if not success or not response then
-        return false, "HTTP Request Failed"
-    end
-
-    if response == "-- Valid Key" then
-        return true, "Success"
-    elseif response == "-- Invalid Key" then
-        return false, "Invalid Key"
-    elseif response == "-- Invalid HWID" then
-        return false, "Invalid HWID (Hardware ID Mismatch)"
-    else
-        return false, response:gsub("%-", ""):trim()
-    end
-end
-
-local isVerified, errMsg = verifyStreeHubKey(_G.scripts_key)
-
-if not isVerified then
-    game.Players.LocalPlayer:Kick("[StreeHub] Verification Failed: " .. tostring(errMsg))
-    return
-end
-
 loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
@@ -49,7 +11,7 @@ local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = "Premium - Sell Lemon",
+    Author = "Sell Lemon",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
