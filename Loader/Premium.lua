@@ -142,7 +142,7 @@ local gameScripts = {
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Premium.lua"
     },
     [7395930870] = {
-        name = "Sell Lemon"
+        name = "Sell Lemon",
         free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Sell-Lemon/Premium.lua"
     },
     [9792947201] = {
