@@ -141,6 +141,10 @@ local gameScripts = {
         name = "Kick A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Premium.lua"
     },
+    [7395930870] = {
+        name = "Sell Lemon"
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Sell-Lemon/Premium.lua"
+    },
     [9792947201] = {
         name = "Slime RNG",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Slime-Rng/Premium.lua"
