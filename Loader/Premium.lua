@@ -143,7 +143,7 @@ local gameScripts = {
     },
     [7395930870] = {
         name = "Sell Lemon",
-        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Sell-Lemon/Premium.lua"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Sell-Lemon/Premium.lua"
     },
     [9792947201] = {
         name = "Slime RNG",
