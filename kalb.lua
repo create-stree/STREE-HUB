@@ -19,9 +19,8 @@ end
 loadstring([[
     function LPH_NO_VIRTUALIZE(f) return f end;
 ]])();
-repeat task.wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
+repeat wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -30,7 +29,7 @@ local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = (premium and "Premium" or "KALB") .. " - " .. version,
+    Author = "Premium - Sell Lemon",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
@@ -38,20 +37,718 @@ local Window = StreeHub:CreateWindow({
 })
 
 local Tabs = {
-    Home = Window:Tab({ Title = "Home", Icon = "scan-face" }),
-    Main = Window:Tab({ Title = "Main", Icon = "landmark" }),
-    Exclusive = Window:Tab({ Title = "Exclusive", Icon = "star" }),
-    Webhook = Window:Tab({ Title = "Webhook", Icon = "webhook" }),
-    Upgrade = Window:Tab({ Title = "Upgrade", Icon = "chart-column-increasing" }),
-    Shop = Window:Tab({ Title = "Shop", Icon = "shopping-bag" }),
-    Miscellaneous = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
+	Home  = Window:Tab({ Title = "Home",  Icon = "scan-face" }),
+	Main  = Window:Tab({ Title = "Main",  Icon = "landmark" }),
+	Auto  = Window:Tab({ Title = "Automatically",  Icon = "play" }),
+	Panel = Window:Tab({ Title = "Panel", Icon = "monitor" }),
+	Misc = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
     Settings = Window:Tab({ Title = "Settings", Icon = "settings"})
 }
+
+local Players       = game:GetService("Players")
+local RS            = game:GetService("ReplicatedStorage")
+local RunService    = game:GetService("RunService")
+local UIS           = game:GetService("UserInputService")
+local LocalPlayer   = Players.LocalPlayer
 
 local defaultWalk = 16
 local defaultJump = 50
 local currentWalk = defaultWalk
 local currentJump = defaultJump
+
+local AutoBuy         = false
+local AutoUpgrade     = false
+local AutoFruit       = false
+local AutoRebirth     = false
+local AutoEvolve      = false
+local AutoPowerLevel  = false
+local AutoAscend      = false
+local AutoPhoneOffers = false
+
+local infJump       = false
+local noclip        = false
+local autoReconnect = false
+local antiAFK       = false
+local afkConnection = nil
+
+local stats = {
+    buys = 0, upgrades = 0, fruit = 0,
+    rebirths = 0, evolves = 0, ascends = 0, phone = 0,
+}
+
+local function findTycoon()
+    for _, v in pairs(workspace:GetChildren()) do
+        if v:IsA("Folder") and v.Name:match("Tycoon%d") then
+            if v:FindFirstChild("Owner") and v.Owner.Value == LocalPlayer then
+                return v
+            end
+        end
+    end
+end
+
+local userTycoon
+local _tStart = tick()
+repeat
+    userTycoon = findTycoon()
+    if not userTycoon then task.wait(0.5) end
+until userTycoon or tick() - _tStart > 30
+
+if not userTycoon then return end
+
+local Tycoon, CompClass = nil, {}
+pcall(function()
+    Tycoon                = require(RS.Modules.Tycoon.Tycoon)
+    CompClass.Balances    = require(RS.Modules.Tycoon.Component.Client.ClientTycoonBalances)
+    CompClass.Rebirth     = require(RS.Modules.Tycoon.Component.Client.ClientTycoonRebirth)
+    CompClass.Ascension   = require(RS.Modules.Tycoon.Component.Client.ClientTycoonAscension)
+    CompClass.PhoneOffers = require(RS.Modules.Tycoon.Component.Client.ClientTycoonPhoneOffers)
+end)
+
+local function comp(class)
+    if not (Tycoon and class) then return nil end
+    local ok, c = pcall(function()
+        local lt = Tycoon.getLocal()
+        return lt and lt:GetComponent(class)
+    end)
+    return ok and c or nil
+end
+
+local NUM_SCALE = {
+    thousand=1e3,  million=1e6,   billion=1e9,   trillion=1e12,
+    quadrillion=1e15, quintillion=1e18, sextillion=1e21, septillion=1e24,
+    octillion=1e27, nonillion=1e30, decillion=1e33,
+    k=1e3, m=1e6, b=1e9, t=1e12,
+}
+
+do
+    local BASE = {
+        [0]="thousand",[1]="million",[2]="billion",[3]="trillion",
+        [4]="quadrillion",[5]="quintillion",[6]="sextillion",
+        [7]="septillion",[8]="octillion",[9]="nonillion",
+        [10]="decillion",[11]="undecillion",[12]="duodecillion",
+        [13]="tredecillion",[14]="quattuordecillion",[15]="quindecillion",
+        [16]="sexdecillion",[17]="septendecillion",[18]="octodecillion",
+        [19]="novemdecillion",
+    }
+    local ROOT = {
+        [2]="vigintillion",[3]="trigintillion",[4]="quadragintillion",
+        [5]="quinquagintillion",[6]="sexagintillion",[7]="septuagintillion",
+        [8]="octogintillion",[9]="nonagintillion",[10]="centillion",
+    }
+    local PREFIX = {
+        [0]="",[1]="un",[2]="duo",[3]="tres",[4]="quattuor",
+        [5]="quin",[6]="sex",[7]="septen",[8]="octo",[9]="novem",
+    }
+    for n = 0, 100 do
+        local name
+        if n < 20 then
+            name = BASE[n]
+        else
+            name = (PREFIX[n % 10] or "") .. (ROOT[math.floor(n / 10)] or "")
+        end
+        if name and name ~= "" then
+            NUM_SCALE[name] = 10 ^ ((n + 1) * 3)
+        end
+    end
+end
+
+local function parseNumber(s)
+    if not s then return nil end
+    local cleaned = tostring(s):gsub(",", ""):gsub("%s+", ""):lower()
+    local numStr = cleaned:match("^([%d%.]+)")
+    if not numStr then return nil end
+    local val = tonumber(numStr)
+    if not val then return nil end
+    local suffix = cleaned:match("^[%d%.]+([a-z]+)$")
+    if suffix and NUM_SCALE[suffix] then
+        val = val * NUM_SCALE[suffix]
+    end
+    return val
+end
+
+
+local function buyAllAffordable()
+    for _, obj in ipairs(userTycoon.Purchases:GetDescendants()) do
+        if obj:IsA("Model") then
+            local shown     = obj:GetAttribute("Shown")
+            local purchased = obj:GetAttribute("Purchased")
+            if shown == true and purchased ~= true then
+                local purchase = obj:FindFirstChild("Purchase")
+                if purchase and purchase:IsA("RemoteFunction") then
+                    pcall(function() purchase:InvokeServer() end)
+                    stats.buys = stats.buys + 1
+                end
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+        if AutoBuy then pcall(buyAllAffordable) end
+    end
+end)
+
+
+local upgradeRemotes  = {}
+local upgradeLevel    = {}
+local lastUpgradeScan = 0
+
+local function refreshUpgradeRemotes()
+    upgradeRemotes = {}
+    upgradeLevel   = {}
+    local purchases = userTycoon:FindFirstChild("Purchases")
+    if not purchases then return end
+    for _, obj in ipairs(purchases:GetDescendants()) do
+        if obj:IsA("RemoteFunction") and obj.Name == "Upgrade" then
+            upgradeRemotes[#upgradeRemotes + 1] = obj
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.25)
+        if AutoUpgrade then
+            if tick() - lastUpgradeScan > 3 then
+                refreshUpgradeRemotes()
+                lastUpgradeScan = tick()
+            end
+            for _, remote in ipairs(upgradeRemotes) do
+                if remote.Parent then
+                    local lvl = (upgradeLevel[remote] or 0) + 1
+                    while lvl <= 100 do
+                        local ok, res = pcall(function() return remote:InvokeServer(lvl) end)
+                        if (not ok) or res == false then break end
+                        upgradeLevel[remote] = lvl
+                        stats.upgrades       = stats.upgrades + 1
+                        lvl = lvl + 1
+                    end
+                end
+            end
+        end
+    end
+end)
+
+
+local function getPowerLevelRemote()
+    local remotes = userTycoon:FindFirstChild("Remotes")
+    return remotes and remotes:FindFirstChild("UpgradePowerLevel")
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.25)
+        if AutoPowerLevel then
+            local remote = getPowerLevelRemote()
+            if remote then pcall(function() remote:InvokeServer() end) end
+        end
+    end
+end)
+
+
+local RebirthGainMultiple     = 1.0
+local RebirthMultMode         = false
+local RebirthInvestorMultiple = 10
+local MinPotential            = 1
+local RebirthCooldown         = 2
+local RebirthTimeout          = 8
+local rebirthBusy             = false
+
+local function getRebirthRemote()
+    local r = userTycoon:FindFirstChild("Remotes")
+    return r and r:FindFirstChild("Rebirth")
+end
+
+local function getRebirthedSignal()
+    local r = userTycoon:FindFirstChild("Remotes")
+    return r and r:FindFirstChild("Rebirthed")
+end
+
+local function investorBody()
+    local pg = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    local r  = pg and pg:FindFirstChild("Rebirth")
+    local im = r  and r:FindFirstChild("InvestorsMenu")
+    return im and im:FindFirstChild("Body")
+end
+
+local function readQuantity(frameName)
+    local body  = investorBody()
+    local frame = body and body:FindFirstChild(frameName)
+    local q     = frame and frame:FindFirstChild("Quantity")
+    return q and parseNumber(q.Text)
+end
+
+local function getCurrentInvestors()   return readQuantity("Amount")    or 0 end
+local function getPotentialInvestors() return readQuantity("Potential")       end
+
+local function getInvestorLogs()
+    local bal = comp(CompClass.Balances)
+    local reb = comp(CompClass.Rebirth)
+    if not (bal and reb) then return nil end
+    local okp, p = pcall(function() return reb:GetPotentialInvestors() end)
+    local okc, c = pcall(function() return bal:GetInvestors() end)
+    if okp and okc and type(p) == "number" and type(c) == "number" then
+        return p, c
+    end
+    return nil
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        if AutoRebirth and not rebirthBusy then
+            local remote  = getRebirthRemote()
+            local mult    = RebirthMultMode and RebirthInvestorMultiple or RebirthGainMultiple
+            local worthIt = false
+            local potLog, curLog = getInvestorLogs()
+            if remote and potLog then
+                worthIt = potLog >= math.log10(MinPotential)
+                    and potLog >= curLog + math.log10(mult)
+            elseif remote then
+                local potential = getPotentialInvestors()
+                local current   = getCurrentInvestors()
+                worthIt = potential ~= nil
+                    and potential >= MinPotential
+                    and potential >= current * mult
+            end
+            if worthIt then
+                rebirthBusy = true
+                pcall(function()
+                    local done   = false
+                    local signal = getRebirthedSignal()
+                    local conn
+                    if signal and signal:IsA("RemoteEvent") then
+                        conn = signal.OnClientEvent:Connect(function() done = true end)
+                    end
+                    remote:InvokeServer()
+                    stats.rebirths = stats.rebirths + 1
+                    local t = 0
+                    while not done and t < RebirthTimeout do
+                        task.wait(0.1); t = t + 0.1
+                    end
+                    if conn then conn:Disconnect() end
+                end)
+                task.wait(RebirthCooldown)
+                rebirthBusy = false
+            end
+        end
+    end
+end)
+
+
+local EvolveAt       = 100
+local EvolveCooldown = 2
+local EvolveTimeout  = 8
+local evolveBusy     = false
+
+local function getEvolveRemote()
+    local r = userTycoon:FindFirstChild("Remotes")
+    return r and r:FindFirstChild("Evolve")
+end
+
+local function getEvolvedSignal()
+    local r = userTycoon:FindFirstChild("Remotes")
+    return r and r:FindFirstChild("Evolved")
+end
+
+local function getEvolveProgress()
+    local pg   = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    local r    = pg and pg:FindFirstChild("Rebirth")
+    local em   = r  and r:FindFirstChild("EvolutionMenu")
+    local body = em and em:FindFirstChild("Body")
+    local p    = body and body:FindFirstChild("Progress")
+    if not p then return nil end
+    return tonumber(tostring(p.Text):match("[%d%.]+"))
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        if AutoEvolve and not evolveBusy then
+            local remote   = getEvolveRemote()
+            local progress = getEvolveProgress()
+            if remote and progress and progress >= EvolveAt then
+                evolveBusy = true
+                pcall(function()
+                    local done   = false
+                    local signal = getEvolvedSignal()
+                    local conn
+                    if signal and signal:IsA("RemoteEvent") then
+                        conn = signal.OnClientEvent:Connect(function() done = true end)
+                    end
+                    remote:InvokeServer()
+                    stats.evolves = stats.evolves + 1
+                    local t = 0
+                    while not done and t < EvolveTimeout do
+                        task.wait(0.1); t = t + 0.1
+                    end
+                    if conn then conn:Disconnect() end
+                end)
+                task.wait(EvolveCooldown)
+                evolveBusy = false
+            end
+        end
+    end
+end)
+
+
+local AscendCooldown = 2
+local AscendTimeout  = 8
+local ascendBusy     = false
+
+local function getAscendRemote()
+    local r = userTycoon:FindFirstChild("Remotes")
+    return r and r:FindFirstChild("Ascend")
+end
+
+local function getAscendedSignal()
+    local r = userTycoon:FindFirstChild("Remotes")
+    return r and r:FindFirstChild("Ascended")
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        if AutoAscend and not ascendBusy then
+            local remote   = getAscendRemote()
+            local asc      = comp(CompClass.Ascension)
+            local progress
+            if asc then pcall(function() progress = asc:GetAscensionProgress() end) end
+            if remote and progress and progress >= 1 then
+                ascendBusy = true
+                pcall(function()
+                    local done   = false
+                    local signal = getAscendedSignal()
+                    local conn
+                    if signal and signal:IsA("RemoteEvent") then
+                        conn = signal.OnClientEvent:Connect(function() done = true end)
+                    end
+                    remote:InvokeServer()
+                    stats.ascends = stats.ascends + 1
+                    local t = 0
+                    while not done and t < AscendTimeout do
+                        task.wait(0.1); t = t + 0.1
+                    end
+                    if conn then conn:Disconnect() end
+                end)
+                task.wait(AscendCooldown)
+                ascendBusy = false
+            end
+        end
+    end
+end)
+
+
+local function touchPart(hrp, part)
+    pcall(function()
+        firetouchinterest(hrp, part, 0)
+        firetouchinterest(hrp, part, 1)
+    end)
+end
+
+local function pullAllLevers()
+    local char = LocalPlayer.Character
+    local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return 0 end
+    local map   = workspace:FindFirstChild("Map")
+    local sewer = map and map:FindFirstChild("Sewer")
+    local root  = sewer or workspace
+    local pulled = 0
+    for _, o in ipairs(root:GetDescendants()) do
+        if o:IsA("BasePart")
+            and (o.Name == "Lever" or string.find(string.lower(o.Name), "lever", 1, true))
+        then
+            touchPart(hrp, o)
+            pulled = pulled + 1
+        end
+    end
+    if sewer then
+        for _, o in ipairs(sewer:GetDescendants()) do
+            if o:IsA("BasePart") and (o.Name == "VineKey" or o.Name == "UFOKey") then
+                touchPart(hrp, o)
+            end
+        end
+    end
+    return pulled
+end
+
+local function doSewerRun()
+    local char = LocalPlayer.Character
+    local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false, "no character" end
+    local map   = workspace:FindFirstChild("Map")
+    local sewer = map and map:FindFirstChild("Sewer")
+    if not sewer then return false, "sewer not loaded" end
+    for _, o in ipairs(sewer:GetDescendants()) do
+        if o:IsA("BasePart") and string.find(string.lower(o.Name), "lever", 1, true) then
+            touchPart(hrp, o)
+        end
+    end
+    for _, folderName in ipairs({ "CashVine", "SewerAlien" }) do
+        local folder = sewer:FindFirstChild(folderName)
+        if folder then
+            for _, o in ipairs(folder:GetDescendants()) do
+                if o:IsA("BasePart") and (o.Name == "VineKey" or o.Name == "UFOKey") then
+                    touchPart(hrp, o)
+                end
+            end
+        end
+    end
+    task.wait(0.3)
+    local cashVine = sewer:FindFirstChild("CashVine")
+    if cashVine then
+        local vineDoor = cashVine:FindFirstChild("VineDoor")
+        if vineDoor then
+            for _, o in ipairs(vineDoor:GetDescendants()) do
+                if o:IsA("BasePart") then touchPart(hrp, o) end
+            end
+        end
+    end
+    task.wait(0.3)
+    if cashVine then
+        local vineModel = cashVine:FindFirstChild("CashVine")
+        if vineModel then
+            local pivot = vineModel:GetPivot()
+            pcall(function() hrp.CFrame = pivot + Vector3.new(0, 3, 0) end)
+            task.wait(0.2)
+            for _, o in ipairs(vineModel:GetDescendants()) do
+                if o:IsA("BasePart") then touchPart(hrp, o) end
+            end
+        end
+    end
+    return true
+end
+
+local SEWER_ALIEN_POS = Vector3.new(-42, -41, 180)
+
+local function teleportToAlien()
+    local char = LocalPlayer.Character
+    local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false, "no character" end
+    pcall(function() hrp.CFrame = CFrame.new(SEWER_ALIEN_POS) end)
+    return true
+end
+
+
+local Trees = {}
+
+local function addTree(obj)
+    if obj:IsA("Model") and obj.Name == "LemonTree" then
+        if not table.find(Trees, obj) then
+            table.insert(Trees, obj)
+        end
+    end
+end
+
+local function removeTree(obj)
+    local idx = table.find(Trees, obj)
+    if idx then table.remove(Trees, idx) end
+end
+
+for _, v in ipairs(workspace:GetDescendants()) do addTree(v) end
+workspace.DescendantAdded:Connect(addTree)
+workspace.DescendantRemoving:Connect(removeTree)
+
+local function noCollisionTree(tree)
+    for _, obj in ipairs(tree:GetDescendants()) do
+        if obj:IsA("BasePart") then obj.CanCollide = false end
+    end
+end
+
+local function teleportToTree(tree)
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+    hrp.CFrame = tree:GetPivot() + Vector3.new(0, 5, 0)
+    return true
+end
+
+local function collectFruit(tree)
+    noCollisionTree(tree)
+    if not teleportToTree(tree) then return end
+    for _, obj in ipairs(tree:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name == "Fruit" then
+            obj.CanCollide = false
+            local clickPart = obj:FindFirstChild("ClickPart")
+            if clickPart then
+                local detector = clickPart:FindFirstChildOfClass("ClickDetector")
+                if detector then
+                    task.wait(0.45)
+                    pcall(function() fireclickdetector(detector) end)
+                    stats.fruit = stats.fruit + 1
+                end
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if AutoFruit then
+            for _, tree in ipairs(Trees) do
+                if not AutoFruit then break end
+                if tree and tree.Parent then
+                    pcall(function() collectFruit(tree) end)
+                end
+            end
+        end
+    end
+end)
+
+
+task.spawn(function()
+    local remotes = userTycoon:FindFirstChild("Remotes")
+    local phone   = remotes and remotes:WaitForChild("PhoneOffer", 30)
+    if not phone then return end
+    local function acceptOffer()
+        if AutoPhoneOffers then
+            pcall(function() phone:FireServer("Accept") end)
+            stats.phone = stats.phone + 1
+        end
+    end
+    phone.OnClientEvent:Connect(function(v)
+        if type(v) == "number" then acceptOffer() end
+    end)
+    while true do
+        task.wait(0.5)
+        if AutoPhoneOffers then
+            local po = comp(CompClass.PhoneOffers)
+            if po then
+                local ok, cur = pcall(function() return po:GetCurrentOffer() end)
+                if ok and type(cur) == "number" then acceptOffer() end
+            end
+        end
+    end
+end)
+
+
+local PanelVisible = true
+local statusGui    = nil
+
+local function destroyStatusPanel()
+    if statusGui then
+        pcall(function() statusGui:Destroy() end)
+        statusGui = nil
+    end
+end
+
+local function createStatusPanel()
+    destroyStatusPanel()
+    local parent = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    if not parent then
+        local ok, hui = pcall(function() return gethui() end)
+        parent = (ok and hui) or game:GetService("CoreGui")
+    end
+    local gui = Instance.new("ScreenGui")
+    gui.Name            = "AutoStatusGui"
+    gui.ResetOnSpawn    = false
+    gui.IgnoreGuiInset  = true
+    gui.DisplayOrder    = 9999
+    gui.Parent          = parent
+    statusGui           = gui
+    local frame = Instance.new("Frame")
+    frame.Size                 = UDim2.new(0, 210, 0, 210)
+    frame.Position             = UDim2.new(0, 10, 0, 90)
+    frame.BackgroundColor3     = Color3.fromRGB(5, 5, 5)
+    frame.BackgroundTransparency = 0
+    frame.BorderSizePixel      = 0
+    frame.Active               = true
+    frame.Parent               = gui
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color        = Color3.fromRGB(57, 255, 20)
+    stroke.Thickness    = 1.5
+    stroke.Transparency = 0
+    stroke.Parent       = frame
+    local title = Instance.new("TextLabel")
+    title.Size             = UDim2.new(1, 0, 0, 26)
+    title.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    title.BorderSizePixel  = 0
+    title.Text             = "AUTO STATUS"
+    title.TextColor3       = Color3.fromRGB(57, 255, 20)
+    title.Font             = Enum.Font.GothamBold
+    title.TextSize         = 13
+    title.Parent           = frame
+    Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
+    local body = Instance.new("TextLabel")
+    body.Size               = UDim2.new(1, -14, 1, -32)
+    body.Position           = UDim2.new(0, 8, 0, 30)
+    body.BackgroundTransparency = 1
+    body.TextXAlignment     = Enum.TextXAlignment.Left
+    body.TextYAlignment     = Enum.TextYAlignment.Top
+    body.RichText           = true
+    body.Text               = "starting..."
+    body.TextColor3         = Color3.fromRGB(57, 255, 20)
+    body.Font               = Enum.Font.Code
+    body.TextSize           = 12
+    body.Parent             = frame
+    local dragging, ds, sp
+    title.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1
+            or i.UserInputType == Enum.UserInputType.Touch
+        then
+            dragging, ds, sp = true, i.Position, frame.Position
+            i.Changed:Connect(function()
+                if i.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    UIS.InputChanged:Connect(function(i)
+        if dragging and (
+            i.UserInputType == Enum.UserInputType.MouseMovement
+            or i.UserInputType == Enum.UserInputType.Touch
+        ) then
+            local d = i.Position - ds
+            frame.Position = UDim2.new(
+                sp.X.Scale, sp.X.Offset + d.X,
+                sp.Y.Scale, sp.Y.Offset + d.Y
+            )
+        end
+    end)
+    local frames, fps, fpsT = 0, 0, tick()
+    RunService.RenderStepped:Connect(function()
+        frames = frames + 1
+        if tick() - fpsT >= 1 then
+            fps = frames; frames = 0; fpsT = tick()
+        end
+    end)
+    local function on(b)
+        return b
+            and "<font color='#39FF14'>ON</font>"
+            or  "<font color='#444'>off</font>"
+    end
+    task.spawn(function()
+        while gui.Parent and PanelVisible do
+            local cashStr = "?"
+            local ls = LocalPlayer:FindFirstChild("leaderstats")
+            local c  = ls and ls:FindFirstChild("Cash")
+            if c then cashStr = tostring(c.Value) end
+            body.Text = string.format(
+                "FPS:  %d\nCash: %s\n"
+                .. "Buys:  %d  %s\nUpgr:  %d  %s\nFruit: %d  %s\n"
+                .. "Reb:   %d  %s\nEvo:   %d  %s\nAsc:   %d  %s\nPhone: %d  %s",
+                fps, cashStr,
+                stats.buys,     on(AutoBuy),
+                stats.upgrades, on(AutoUpgrade),
+                stats.fruit,    on(AutoFruit),
+                stats.rebirths, on(AutoRebirth),
+                stats.evolves,  on(AutoEvolve),
+                stats.ascends,  on(AutoAscend),
+                stats.phone,    on(AutoPhoneOffers)
+            )
+            task.wait(0.25)
+        end
+    end)
+end
+
+createStatusPanel()
+
 
 Tabs.Home:Section({ Title = "Information" })
 
@@ -77,11 +774,6 @@ Tabs.Home:Paragraph({
 })
 
 Tabs.Home:Section({ Title = "Local Player" })
-
-Tabs.Home:Paragraph({
-    Title = "⚠️ Warning ⚠️",
-    Desc = "may not work but it could be to dectect"
-})
 
 Tabs.Home:Slider({
     Title = "WalkSpeed",
@@ -126,1554 +818,172 @@ Tabs.Home:Button({
     end
 })
 
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local player = Players.LocalPlayer
-local KickServiceClient = require(ReplicatedStorage.Modules.ServicesLoader.KickServiceClient)
-local WaveData = require(ReplicatedStorage.Shared.Data.WaveData)
-local VFXService = require(ReplicatedStorage.Modules.ServicesLoader.VFXService)
-local AnimationController = require(ReplicatedStorage.Modules.ControllerLoader.AnimationController)
-local defaultKickSpeed = KickServiceClient.Multipliers.Speed
-local originalWaveSpeeds = {}
-local originalPlayVFX = VFXService.PlayVFX
-local originalPlayAnim = AnimationController.PlayAnim
-for i, wave in pairs(WaveData.Waves) do
-    originalWaveSpeeds[i] = wave.Speed
-end
-local tweenSpeed = 50
-local kickMode = "Manual"
-local autofarm = false
-local farmThread = nil
-local currentTween = nil
-local safeZone = CFrame.new(690.45, 2.79, 230.67)
-local KICK_POS = CFrame.new(692, 3, 231)
-local LAND_POS = CFrame.new(666.26, -7.19, 233.35)
-local selectedKickPower = 1
 
-local areaOrder = {
-    "Eternal+",
-    "Eternal",
-    "Celestial",
-    "Rainbow",
-    "Hacked",
-    "Secret",
-    "Godly",
-    "Mythic",
-    "Legendary",
-    "Epic",
-    "Rare",
-    "Common",
-}
+Tabs.Main:Section({ Title = "Buy" })
 
-local areaFloorPaths = {
-    ["Eternal+"]  = function() return Workspace.Floors["Eternal+"] end,
-    ["Eternal"]   = function() return Workspace.Floors.Eternal end,
-    ["Celestial"] = function() return Workspace.Floors.Celestial end,
-    ["Rainbow"]   = function() return Workspace.Floors.Rainbow end,
-    ["Hacked"]    = function() return Workspace.Floors.Hacked end,
-    ["Secret"]    = function() return Workspace.Floors.Secret end,
-    ["Godly"]     = function() return Workspace.Floors.Godly end,
-    ["Mythic"]    = function() return Workspace.Floors.Mythic end,
-    ["Legendary"] = function() return Workspace.Floors.Legendary end,
-    ["Epic"]      = function() return Workspace.Floors.Epic end,
-    ["Rare"]      = function() return Workspace.Floors.Rare end,
-    ["Common"]    = function() return Workspace.Floors.Common end,
-}
-
-local function getFloorCFrame(areaName)
-    local ok, result = pcall(areaFloorPaths[areaName])
-    if ok and result then
-        local ok2, cf = pcall(function()
-            return result:WaitForChild("SpawnPoint", 3).CFrame + Vector3.new(0, 3, 0)
-        end)
-        if ok2 and cf then return cf end
-        local ok3, cf2 = pcall(function()
-            return result.CFrame + Vector3.new(0, 3, 0)
-        end)
-        if ok3 and cf2 then return cf2 end
-    end
-    return nil
-end
-
-local function detectPlayerArea()
-    local char = player.Character
-    if not char then return nil end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-    local playerPos = hrp.Position
-    local closest = nil
-    local closestDist = math.huge
-    for _, areaName in ipairs(areaOrder) do
-        local ok, floor = pcall(areaFloorPaths[areaName])
-        if ok and floor then
-            local ok2, pos = pcall(function()
-                return floor.CFrame.Position
-            end)
-            if ok2 then
-                local dist = (playerPos - pos).Magnitude
-                if dist < closestDist then
-                    closestDist = dist
-                    closest = areaName
-                end
-            end
-        end
-    end
-    return closest
-end
-
-local function getAreaIndex(areaName)
-    for i, name in ipairs(areaOrder) do
-        if name == areaName then
-            return i
-        end
-    end
-    return nil
-end
-
-local function setInstantMode(state)
-    if state then
-        KickServiceClient.Multipliers.Speed = 1e6
-        for _, wave in pairs(WaveData.Waves) do
-            wave.Speed = 0
-        end
-        VFXService.PlayVFX = function(name, ...)
-            if name == "AnimateBrainrots" then return end
-            return originalPlayVFX(name, ...)
-        end
-        AnimationController.PlayAnim = function(name)
-            local track = originalPlayAnim(name)
-            if track then
-                track:AdjustSpeed(1000)
-            end
-            return track
-        end
-    else
-        KickServiceClient.Multipliers.Speed = defaultKickSpeed
-        for i, wave in pairs(WaveData.Waves) do
-            wave.Speed = originalWaveSpeeds[i]
-        end
-        VFXService.PlayVFX = originalPlayVFX
-        AnimationController.PlayAnim = originalPlayAnim
-    end
-end
-
-local function getCharacter()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    return char, hrp
-end
-
-local function stopTween()
-    if currentTween then
-        currentTween:Cancel()
-        currentTween = nil
-    end
-end
-
-local function tweenTo(cf)
-    local _, hrp = getCharacter()
-    if not hrp then return end
-    stopTween()
-    local distance = (hrp.Position - cf.Position).Magnitude
-    local duration = math.max(distance / tweenSpeed, 0.05)
-    currentTween = TweenService:Create(
-        hrp,
-        TweenInfo.new(duration, Enum.EasingStyle.Linear),
-        {CFrame = cf}
-    )
-    currentTween:Play()
-    currentTween.Completed:Wait()
-    currentTween = nil
-end
-
-local function teleportAreaFarm()
-    local kickEvent = ReplicatedStorage.Shared.Packages.Network.rev_KickEvent
-    local lobbyKickPos = Workspace.Lobby.Part.CFrame + Vector3.new(0, 3, 0)
-
-    while autofarm and kickMode == "Teleport Area" do
-        local _, hrp = getCharacter()
-        if not hrp then task.wait(1) continue end
-
-        hrp.CFrame = lobbyKickPos
-        task.wait(3)
-        if not autofarm or kickMode ~= "Teleport Area" then break end
-
-        kickEvent:FireServer(1, 1)
-        task.wait(3)
-        if not autofarm or kickMode ~= "Teleport Area" then break end
-
-        local landedArea = detectPlayerArea()
-        local landedIndex = landedArea and getAreaIndex(landedArea) or nil
-
-        if landedIndex then
-            local floorCF = getFloorCFrame(areaOrder[landedIndex])
-            if floorCF then
-                hrp.CFrame = floorCF
-                task.wait(3)
-            end
-            if not autofarm or kickMode ~= "Teleport Area" then break end
-
-            for i = landedIndex + 1, #areaOrder do
-                if not autofarm or kickMode ~= "Teleport Area" then break end
-                local nextFloorCF = getFloorCFrame(areaOrder[i])
-                if nextFloorCF then
-                    hrp.CFrame = nextFloorCF
-                    task.wait(3)
-                end
-            end
-        end
-
-        if not autofarm or kickMode ~= "Teleport Area" then break end
-        hrp.CFrame = lobbyKickPos
-        task.wait(3)
-    end
-end
-
-Tabs.Main:Section({Title = "Auto Kick"})
-
-Tabs.Main:Button({
-    Title = "Teleport Safe Zone",
-    Callback = function()
-        local _, hrp = getCharacter()
-        if hrp then
-            hrp.CFrame = safeZone
-        end
-    end
+Tabs.Main:Toggle({
+	Title = "Auto Buy",
+	Default = false,
+	Callback = function(Value)
+		AutoBuy = Value
+	end,
 })
 
-Tabs.Main:Dropdown({
-    Title = "Select Mode",
-    Values = {"Manual", "Instant", "Super Instant", "Teleport Area"},
-    Value = "Manual",
-    Callback = function(option)
-        kickMode = option
-        if option == "Teleport Area" then
-            setInstantMode(false)
-        else
-            setInstantMode(option ~= "Manual")
-        end
-    end
+Tabs.Main:Section({ Title = "Upgarde" })
+
+Tabs.Main:Toggle({
+	Title = "Auto Upgrade",
+	Default = false,
+	Callback = function(Value)
+		AutoUpgrade = Value
+	end,
 })
 
-Tabs.Main:Dropdown({
-    Title = "Kick Power",
-    Values = {"Perfect", "Excellent", "Great", "Good", "Mid", "Bad"},
-    Value = "Perfect",
-    Callback = function(option)
-        local power = 1
-        if option == "Perfect" then
-            power = 1
-        elseif option == "Excellent" then
-            power = 0.900
-        elseif option == "Great" then
-            power = 0.700
-        elseif option == "Good" then
-            power = 0.400
-        elseif option == "Mid" then
-            power = 0.200
-        elseif option == "Bad" then
-            power = 0.100
-        end
-        selectedKickPower = power
-    end
+Tabs.Main:Section({ Title = "Fruit" })
+
+Tabs.Main:Toggle({
+	Title = "Auto Fruit",
+	Default = false,
+	Callback = function(Value)
+		AutoFruit = Value
+	end,
+})
+
+Tabs.Main:Section({ Title = "Rebirth" })
+
+Tabs.Main:Toggle({
+	Title = "Auto Rebirth",
+	Default = false,
+	Callback = function(Value)
+		AutoRebirth = Value
+	end,
 })
 
 Tabs.Main:Toggle({
-    Title = "Auto Farm",
-    Default = false,
-    Callback = function(state)
-        autofarm = state
-
-        if not state then
-            stopTween()
-            setInstantMode(false)
-            if farmThread then
-                task.cancel(farmThread)
-                farmThread = nil
-            end
-            return
-        end
-
-        if farmThread then
-            task.cancel(farmThread)
-            farmThread = nil
-        end
-
-        farmThread = task.spawn(function()
-            local kickEvent = ReplicatedStorage.Shared.Packages.Network.rev_KickEvent
-
-            while autofarm do
-                if kickMode == "Teleport Area" then
-                    teleportAreaFarm()
-                elseif kickMode == "Super Instant" then
-                    setInstantMode(true)
-                    local _, hrp = getCharacter()
-                    if hrp then
-                        hrp.CFrame = KICK_POS
-                        task.wait(0.2)
-                        kickEvent:FireServer(selectedKickPower, 1)
-                        task.wait(2)
-                        hrp.CFrame = LAND_POS
-                        task.wait(4.5)
-                        tweenTo(KICK_POS)
-                    end
-                elseif kickMode == "Instant" then
-                    setInstantMode(true)
-                    kickEvent:FireServer(selectedKickPower, 1)
-                    task.wait(5)
-                    tweenTo(safeZone)
-                else
-                    setInstantMode(false)
-                    kickEvent:FireServer(selectedKickPower, 1)
-                    task.wait(1)
-                    tweenTo(safeZone)
-                end
-                task.wait(1)
-            end
-
-            stopTween()
-            setInstantMode(false)
-            farmThread = nil
-        end)
-    end
+	Title = "Rebirth only at big multiple",
+	Default = false,
+	Callback = function(Value)
+		RebirthMultMode = Value
+	end,
 })
 
-Tabs.Main:Slider({
-    Title = "Tween Speed",
-    Step = 1,
-    Value = {Min = 10, Max = 200, Default = 50},
-    Callback = function(value)
-        tweenSpeed = value
-    end
+Tabs.Main:Input({
+	Title = "Rebirth at this many x current investors",
+	Default = "10",
+	Placeholder = "e.g. 10",
+	MultiLine = false,
+	Callback = function(Text)
+		local n = tonumber((tostring(Text):gsub("[^%d%.]", "")))
+		if n and n > 0 then
+			RebirthInvestorMultiple = n
+		end
+	end,
 })
 
-Tabs.Main:Section({ Title = "Kick Battle" })
+Tabs.Main:Section({ Title = "Manual" })
 
-local RDropdown = Tabs.Main:Dropdown({
-    Title = "Amount Players",
-    Values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
-    Value = "1",
-    Callback = function(Value)
-        selectedR = Value
-    end
+Tabs.Main:Button({
+	Title = "Pull All Levers",
+	Callback = function()
+		pullAllLevers()
+	end,
 })
 
 Tabs.Main:Button({
-    Title = "Create",
-    Callback = function()
-        game:GetService("ReplicatedStorage").Shared.Packages.Network.ref_battle_create
-            :InvokeServer({
-                GP = true,
-                R = tonumber(selectedR)
-            })
-    end
+	Title = "Vine Harvest",
+	Callback = function()
+		task.spawn(function()
+			doSewerRun()
+		end)
+	end,
 })
-
-local function getPlayerNames()
-    local names = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= Players.LocalPlayer then
-            table.insert(names, p.Name)
-        end
-    end
-    return names
-end
-
-local selectedPlayer = nil
-
-local playerNames = getPlayerNames()
-local InviteDropdown = Tabs.Main:Dropdown({
-    Title = "Select Player",
-    Values = playerNames,
-    Value = playerNames[1] or "",
-    Callback = function(Value)
-        selectedPlayer = Value
-    end
-})
-
-Players.PlayerAdded:Connect(function()
-    InviteDropdown:SetValues(getPlayerNames())
-end)
-
-Players.PlayerRemoving:Connect(function()
-    InviteDropdown:SetValues(getPlayerNames())
-end)
 
 Tabs.Main:Button({
-    Title = "Invite",
-    Callback = function()
-        if selectedPlayer then
-            local target = Players:FindFirstChild(selectedPlayer)
-            if target then
-                game:GetService("ReplicatedStorage").Shared.Packages.Network.ref_battle_invite
-                    :InvokeServer(target)
-            end
-        end
-    end
+	Title = "Teleport to Sewer Alien",
+	Callback = function()
+		teleportToAlien()
+	end,
 })
+
+
+Tabs.Auto:Section({ Title = "Automatically Evolve" })
+
+Tabs.Auto:Toggle({
+	Title = "Auto Evolve",
+	Default = false,
+	Callback = function(Value)
+		AutoEvolve = Value
+	end,
+})
+
+Tabs.Auto:Section({ Title = "Automatically Ascend" })
+
+Tabs.Auto:Toggle({
+	Title = "Auto Ascend",
+	Default = false,
+	Callback = function(Value)
+		AutoAscend = Value
+	end,
+})
+
+Tabs.Auto:Section({ Title = "Automatically Offers Phone" })
+
+Tabs.Auto:Toggle({
+	Title = "Auto Accept Phone Offers",
+	Default = false,
+	Callback = function(Value)
+		AutoPhoneOffers = Value
+	end,
+})
+
+Tabs.Auto:Section({ Title = "Automatically Level" })
 
 Tabs.Main:Toggle({
-    Title = "Auto Start",
-    Default = false,
-    Callback = function(Value)
-        autoStart = Value
-    end
+	Title = "Auto Power Level",
+	Default = false,
+	Callback = function(Value)
+		AutoPowerLevel = Value
+	end,
 })
 
-task.spawn(function()
-    while true do
-        task.wait(1)
-        if autoStart then
-            game:GetService("ReplicatedStorage").Shared.Packages.Network.rev_battle_start
-                :FireServer()
-        end
-    end
-end)
 
-Tabs.Main:Toggle({
-    Title = "Auto Leave",
-    Default = false,
-    Callback = function(Value)
-        autoLeave = Value
-    end
+Tabs.Panel:Section({ Title = "Live Status Panel" })
+
+Tabs.Panel:Paragraph({
+	Title = "Info Panel",
+	Desc = "A small on-screen panel that displays live auto counters (buys, upgrades, fruit, etc.). It can be dragged and turned on/off at any time."
 })
 
-task.spawn(function()
-    while true do
-        task.wait(1)
-        if autoLeave then
-            game:GetService("ReplicatedStorage").Shared.Packages.Network.ref_battle_leave
-                :InvokeServer()
-        end
-    end
-end)
-
-local function clickX2()
-    local player = game:GetService("Players").LocalPlayer
-    local gui = player.PlayerGui:FindFirstChild("KickUpgrades")
-
-    if not gui then return end
-
-    for _, v in pairs(gui:GetDescendants()) do
-        if v.Name == "Bonus" and (v:IsA("ImageButton") or v:IsA("TextButton")) then
-            pcall(function()
-                firesignal(v.Activated)
-                firesignal(v.MouseButton1Click)
-            end)
-        end
-    end
-end
-
-Tabs.Main:Section({ Title = "Auto Click X2" })
-
-Tabs.Main:Toggle({
-    Title = "Auto Click X2",
-    Default = false,
-    Callback = function(state)
-        autoX2 = state
-
-        if autoX2 then
-            task.spawn(function()
-                while autoX2 do
-                    clickX2()
-                    task.wait(x2Delay)
-                end
-            end)
-        end
-    end
+Tabs.Panel:Toggle({
+	Title = "Status Panel",
+	Default = true,
+	Callback = function(Value)
+		PanelVisible = Value
+		if Value then
+			if not statusGui or not statusGui.Parent then
+				createStatusPanel()
+			end
+		else
+			destroyStatusPanel()
+		end
+	end,
 })
 
-Tabs.Main:Button({
-    Title = "Click X2",
-    Callback = function()
-        clickX2()
-    end
+Tabs.Panel:Button({
+	Title = "Reset Counter Stats",
+	Callback = function()
+		stats.buys     = 0
+		stats.upgrades = 0
+		stats.fruit    = 0
+		stats.rebirths = 0
+		stats.evolves  = 0
+		stats.ascends  = 0
+		stats.phone    = 0
+	end,
 })
 
-Tabs.Main:Slider({
-    Title = "Auto Click Delay",
-    Step = 0.05,
-    Value = { Min = 0.1, Max = 1, Default = 0.2 },
-    Callback = function(v)
-        x2Delay = v
-    end
-})
 
-Tabs.Main:Section({ Title = "Equip Weight" })
-
-Tabs.Main:Dropdown({
-    Title = "Equip Weight",
-    Values = {
-        "Wooden Stick",
-        "Bone Barbell",
-        "Stone Block",
-        "Copper Plate",
-        "Iron Plate",
-        "Ice Barbell",
-        "Donut Barbell",
-        "Golden Barbell",
-        "Heaven Plate",
-        "Mega Golden Barbell",
-        "Neon Pulse",
-        "Giat Gold Star Barbell"
-    },
-    Value = "Wooden Stick",
-    Callback = function(option)
-        selectedEquip = option
-    end
-})
-
-Tabs.Main:Button({
-    Title = "Equip Weight",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_WeightEquip
-            :FireServer(selectedEquip)
-    end
-})
-
-Tabs.Main:Section({ Title = "Collect" })
-
-Tabs.Main:Toggle({
-    Title = "Auto Collect",
-    Default = false,
-    Callback = function(state)
-        brainrotLoop = state
-
-        if brainrotLoop then
-            task.spawn(function()
-                local event = game:GetService("ReplicatedStorage")
-                    .Shared.Packages.Network.rev_B_Collect
-
-                while brainrotLoop do
-                    for i = 1, 30 do
-                        if not brainrotLoop then break end
-                        event:FireServer(i)
-                        task.wait(collectDelay)
-                    end
-
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Main:Slider({
-    Title = "Collect Delay",
-    Step = 0.01,
-    Value = {Min = 0.01, Max = 5, Default = 3},
-    Callback = function(value)
-        collectDelay = value
-    end
-})
-
-local function getMyPlot()
-    local plots = workspace:WaitForChild("Plots")
-
-    for _, plot in pairs(plots:GetChildren()) do
-        local deco = plot:FindFirstChild("Decorations")
-        if deco then
-            local owner = deco:FindFirstChild("PlotOwner")
-            if owner then
-                local gui = owner:FindFirstChild("OwnerGUI")
-                if gui then
-                    local label = gui:FindFirstChild("TextLabel")
-                    if label and label.Text == LocalPlayer.Name then
-                        return plot
-                    end
-                end
-            end
-        end
-    end
-end
-
-local collectEvent = ReplicatedStorage.Shared.Packages.Network.rev_B_Collect
-
-Tabs.Main:Toggle({
-    Title = "Auto Teleport Collect",
-    Default = false,
-    Callback = function(state)
-        AutoCollect = state
-
-        if AutoCollect then
-            task.spawn(function()
-                while AutoCollect do
-
-                    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-                    local hrp = char:WaitForChild("HumanoidRootPart")
-                    local startPos = hrp.CFrame
-
-                    local plot = getMyPlot()
-
-                    if plot then
-
-                        local slots = plot:FindFirstChild("Slots")
-
-                        if slots then
-
-                            for _, slot in ipairs(slots:GetChildren()) do
-                                if not AutoCollect then
-                                    break
-                                end
-
-                                local slotNumber = tonumber(
-                                    string.match(slot.Name, "%d+")
-                                )
-
-                                if slotNumber then
-
-                                    if slot:IsA("BasePart") then
-                                        hrp.CFrame = slot.CFrame + Vector3.new(0,3,0)
-
-                                    elseif slot:IsA("Model") then
-                                        hrp.CFrame = slot:GetPivot() + Vector3.new(0,3,0)
-                                    end
-
-                                    task.wait(0.35)
-
-                                    collectEvent:FireServer(slotNumber)
-
-                                    task.wait(Delay)
-                                end
-                            end
-                        end
-                    end
-
-                    hrp.CFrame = startPos
-
-                    task.wait(AfterDelay)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Main:Slider({
-    Title = "Collect Delay",
-    Step = 0.1,
-    Value = { Min = 0.1, Max = 2, Default = 0.5 },
-    Callback = function(value)
-        Delay = value
-    end
-})
-
-Tabs.Main:Slider({
-    Title = "After Collect Delay",
-    Step = 1,
-    Value = { Min = 1, Max = 10, Default = 5 },
-    Callback = function(value)
-        AfterDelay = value
-    end
-})
-
-Tabs.Main:Section({ Title = "Rebirt" })
-
-Tabs.Main:Toggle({
-    Title = "Auto Rebirth",
-    Default = false,
-    Callback = function(state)
-        rebirthLoop = state
-
-        if rebirthLoop then
-            task.spawn(function()
-                while rebirthLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_RebirthRequest
-                        :FireServer()
-                    task.wait(1)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Main:Button({
-    Title = "Rebirth",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_RebirthRequest
-            :FireServer()
-    end
-})
-
-Tabs.Main:Section({ Title = "Base" })
-
-Tabs.Main:Dropdown({
-    Title = "Select Slot",
-    Values = (function()
-        local t = {}
-        for i = 1, 30 do
-            table.insert(t, tostring(i))
-        end
-        return t
-    end)(),
-    Value = "1",
-    Callback = function(option)
-        selectedIndex = tonumber(option)
-    end
-})
-
-Tabs.Main:Button({
-    Title = "Pick Up",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_S_Interact
-            :FireServer(selectedIndex)
-    end
-})
-
-Tabs.Main:Button({
-    Title = "Place",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_S_Interact
-            :FireServer(selectedIndex)
-    end
-})
-
-Tabs.Main:Section({ Title = "Offline Reward" })
-
-Tabs.Main:Button({
-    Title = "Claim Offline Reward",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_Offline_Claim
-            :FireServer()
-    end
-})
-
-Tabs.Main:Toggle({
-    Title = "Auto Claim Offline Reward",
-    Default = false,
-    Callback = function(state)
-        offlineLoop = state
-
-        if offlineLoop then
-            task.spawn(function()
-                while offlineLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_Offline_Claim
-                        :FireServer()
-                    task.wait(5)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Main:Section({ Title = "Sell" })
-
-Tabs.Main:Button({
-    Title = "Sell Brainrot",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.ref_B_Sell
-            :InvokeServer()
-    end
-})
-
-Tabs.Main:Button({
-    Title = "Sell All Brainrot",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.ref_B_SellAll
-            :InvokeServer()
-    end
-})
-
-Tabs.Main:Toggle({
-    Title = "Auto Sell Brainrot",
-    Default = false,
-    Callback = function(state)
-        sellLoop = state
-
-        if sellLoop then
-            task.spawn(function()
-                while sellLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.ref_B_Sell
-                        :InvokeServer()
-
-                    task.wait(1)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Main:Toggle({
-    Title = "Auto Sell All Brainrot",
-    Default = false,
-    Callback = function(state)
-        sellAllLoop = state
-
-        if sellAllLoop then
-            task.spawn(function()
-                while sellAllLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.ref_B_SellAll
-                        :InvokeServer()
-
-                    task.wait(2)
-                end
-            end)
-        end
-    end
-})
-
-local autoX2 = false
-local brainrotLoop = false
-local AutoCollect = false
-local rebirthLoop = false
-local offlineLoop = false
-local sellLoop = false
-local sellAllLoop = false
-local bsLoop = false
-local upgradeLoop = false
-local selectedLevel = 1
-local WaveFreeze = false
-local savedServers = {}
-local inputObj = nil
-
-local autoCancel = false
-local trade = game:GetService("ReplicatedStorage").Shared.Packages.Network.ref_trade_r
-local confirm = game:GetService("ReplicatedStorage").Shared.Packages.Network.rev_trade_i
-local Players = game:GetService("Players")
-local selectedId = nil
-local Event = game:GetService("ReplicatedStorage").Shared.Packages.Network.rev_trade_i
-
-Tabs.Exclusive:Section({ Title = "Trade" })
-
-local function getPlayerList()
-    local list = {}
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= Players.LocalPlayer then
-            table.insert(list, player.Name)
-        end
-    end
-    return list
-end
-
-local playerList = getPlayerList()
-local TradeDropdown = Tabs.Exclusive:Dropdown({
-    Title = "Select Players",
-    Values = playerList,
-    Value = playerList[1] or "",
-    Callback = function(value)
-        local p = Players:FindFirstChild(value)
-        if p then
-            selectedId = p.UserId
-        end
-    end
-})
-
-Tabs.Exclusive:Button({
-    Title = "Refresh Players",
-    Callback = function()
-        selectedId = nil
-        local newList = getPlayerList()
-        TradeDropdown:SetValues(newList)
-    end
-})
-
-Tabs.Exclusive:Button({
-    Title = "Confirm",
-    Callback = function()
-        if selectedId then
-            trade:InvokeServer(selectedId)
-            task.wait(0.5)
-            confirm:FireServer("Confirm")
-        end
-    end
-})
-
-Tabs.Exclusive:Toggle({
-    Title = "Auto Cancel",
-    Default = false,
-    Callback = function(state)
-        autoCancel = state
-        if state then
-            task.spawn(function()
-                while autoCancel do
-                    pcall(function()
-                        Event:FireServer("Cancel")
-                    end)
-                    task.wait(0.05)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Exclusive:Section({ Title = "Premium" })
-
-local function FreezeWave()
-    for _, wave in pairs(WaveData.Waves) do
-        wave.Speed = 0
-    end
-end
-
-local function UnfreezeWave()
-    for i, wave in pairs(WaveData.Waves) do
-        wave.Speed = originalWaveSpeeds[i]
-    end
-end
-
-Tabs.Exclusive:Toggle({
-    Title = "Freeze Wave",
-    Default = false,
-    Callback = function(state)
-        WaveFreeze = state
-        if state then
-            FreezeWave()
-        else
-            UnfreezeWave()
-        end
-    end
-})
-
-Tabs.Exclusive:Section({ Title = "Snipe" })
-
-local RarityData = {
-    Common = {
-        "Fruli Frula","Lirili Larila","Noobini Pizzanini","Pipi Kiwi",
-        "Svinina Bombardino","Talpa Di Fero","Tim Cheese","Trippi Troppi"
-    },
-    Rare = {
-        "Ballerina Cappuccina","Bobrito Bandito","Boneca Ambalabu","Brr Brr Patapim",
-        "Cacto Hipopotamo","Cappuccino Assassino","Gangster Footera","Ta Ta Ta Ta Sahur"
-    },
-    Epic = {
-        "Garamararam","Gattatino Nyanino","John Pork","Madung","Mangolini Parrocini",
-        "Orcalero","Pannaburro","Pesto Mortioni","Waterdino"
-    },
-    Legendary = {
-        "Bambini Crostini","Bananita Dolphinita","Capi Taco","Chimpanzini Bananini",
-        "Elefantucci Bananucci","Plan Blue","Plan Red","Salamino Pinguino","Trulimero Trulicina"
-    },
-    Mythic = {
-        "67","Bangello","Burbaloni Luliloli","Capybara Eggplant","Chef Crabracadabra",
-        "Elefanto Frigo","Glorbo Fruttodrillo","Penguino Cocosino","Rinooccio Verdini"
-    },
-    Godly = {
-        "Bombardiro Crocodilo","Frigo Camelo","Octopusini Bluberini","Orangutini Ananasini",
-        "Pandaccini Bananini","Rhino Toasterino","Sigma Boy","Strawberelli Flamingelli","Udin Din Din Dun"
-    },
-    Secret = {
-        "Bombini Gusini","Burguro","Cavallo Virtuso","Cocofanto Elefanto","Fryuro",
-        "Gorillo Watermelondrillo","Guest666","Tuff Toucan","Zibra Zubra Zibralini"
-    },
-    OG = {
-        "Blackhole Goat","Cappuccino Clownino","Chillin Chilli","Compactoroni Diskaloni",
-        "Corn Sahur","Crazylone Pizaione","Karkerkar Kurkur","Meowl","Nuclearo Dinossaurol","Strawberry Elephant"
-    },
-    Hacked = {
-        "Agarrini La Palini","Alessio","Cactus Pingu","La Vacca Saturno Saturnita",
-        "Los Primos Blue","SWAG SODA","Stoppo Luminino","Tictac Sahur",
-        "Torrtuginni Dragonfrutini","Tripi Tropi Tropa Tripa"
-    },
-    Divine = {
-        "1x1x1x1","Dipperi Chiperini","Espresso Signora","Girafa Celeste",
-        "Matteo","Peant Jarro","Rexosaurus","Tralalerita Tralala","Tralalero Tralala"
-    },
-    Celestial = {
-        "Anpali Babel","Beluga Beluga","Chicleteira Bicicleteira","Dragonfrutina Dolphinita",
-        "Guerriro Digitale","Ketupat Kepat","Krupuk Pagi Pagi","Mastodontico Telepiedone",
-        "Pot Hotspot","Tralaledon"
-    },
-    Exclusive = {
-        "Dragon Cannelloni","Esok Sekolah","Spaghetti Tualetti","W"
-    }
-}
-
-local MutationData = {
-    "Alien","Bacon","Diamond","Electrified","Enchanted",
-    "Golden","Molten","Plasma","Radioactive","Rainbow",
-    "Shadow","Virus","Void","Wet"
-}
-
-local RarityOrder = {
-    "Common","Rare","Epic","Legendary","Mythic","Godly",
-    "Secret","OG","Hacked","Divine","Celestial","Exclusive"
-}
-
-local UPDATE_DELAY = 0.01
-local SCAN_DELAY = {0.01, 0.02}
-local NEXT_SNIPE_DELAY = {0.01, 0.02}
-local RESPAWN_DELAY = 0.001
-
-local SelectedRarities = {}
-local SelectedBrainrots = {}
-local SelectedMutations = {}
-
-local AutoSnipe = false
-local SnipeThread
-local BrainrotList = {}
-
-local function randomDelay(range)
-    return math.random(range[1] * 100, range[2] * 100) / 100
-end
-
-for _, rarity in ipairs(RarityOrder) do
-    for _, name in ipairs(RarityData[rarity]) do
-        table.insert(BrainrotList, name)
-    end
-end
-
-local function hasValue(tbl, value)
-    if not tbl or #tbl == 0 then return true end
-    return table.find(tbl, value) ~= nil
-end
-
-local function detectMutation(model)
-    local attr = model:GetAttribute("Mutation")
-    if attr and table.find(MutationData, attr) then
-        return attr
-    end
-    for _, v in ipairs(model:GetDescendants()) do
-        if table.find(MutationData, v.Name) then return v.Name end
-        if v:IsA("StringValue") and table.find(MutationData, v.Value) then return v.Value end
-        if v:IsA("TextLabel") and table.find(MutationData, v.Text) then return v.Text end
-    end
-    return "Normal"
-end
-
-local function detectRarity(model)
-    if model:GetAttribute("Rarity") then
-        return model:GetAttribute("Rarity")
-    end
-    local rarity = model:FindFirstChild("Rarity")
-    if rarity and rarity:IsA("StringValue") then return rarity.Value end
-    for _, v in ipairs(model:GetDescendants()) do
-        if v:IsA("TextLabel") and table.find(RarityOrder, v.Text) then
-            return v.Text
-        end
-    end
-    return "Unknown"
-end
-
-local function findBrainrot()
-    for _, model in ipairs(workspace:GetDescendants()) do
-        if model:IsA("Model")
-            and model:FindFirstChild("Humanoid")
-            and model:FindFirstChild("Root")
-            and model.Name ~= player.Name then
-            return model
-        end
-    end
-end
-
-local function respawnCharacter()
-    if player.Character then
-        player.Character:Destroy()
-    end
-    player:LoadCharacter()
-end
-
-local SnipeInfo = Tabs.Exclusive:Paragraph({
-    Title = "Select Snipe",
-    Desc = "Waiting..."
-})
-
-task.spawn(function()
-    while true do
-        local model = findBrainrot()
-        if model then
-            SnipeInfo:SetDesc(
-                "Rarity : " .. detectRarity(model) ..
-                "\nBrainrot : " .. model.Name ..
-                "\nMutation : " .. detectMutation(model)
-            )
-        else
-            SnipeInfo:SetDesc("Waiting...")
-        end
-        task.wait(UPDATE_DELAY)
-    end
-end)
-
-Tabs.Exclusive:Dropdown({
-    Title = "Select Snipe Rarity",
-    Values = RarityOrder,
-    Multi = true,
-    AllowNone = true,
-    Callback = function(v) SelectedRarities = v end
-})
-
-Tabs.Exclusive:Dropdown({
-    Title = "Select Snipe Brainrot",
-    Values = BrainrotList,
-    Multi = true,
-    AllowNone = true,
-    Callback = function(v) SelectedBrainrots = v end
-})
-
-Tabs.Exclusive:Dropdown({
-    Title = "Select Snipe Mutation",
-    Values = MutationData,
-    Multi = true,
-    AllowNone = true,
-    Callback = function(v) SelectedMutations = v end
-})
-
-Tabs.Exclusive:Toggle({
-    Title = "Auto Snipe",
-    Default = false,
-    Callback = function(state)
-        AutoSnipe = state
-        if not state then
-            SnipeThread = nil
-            return
-        end
-        if SnipeThread then return end
-
-        SnipeThread = task.spawn(function()
-            while AutoSnipe do
-                local model
-                repeat
-                    model = findBrainrot()
-                    task.wait(randomDelay(SCAN_DELAY))
-                until model or not AutoSnipe
-
-                if not AutoSnipe then break end
-
-                local rarity = detectRarity(model)
-                local brainrotName = model.Name
-                local mutation = detectMutation(model)
-
-                if not hasValue(SelectedRarities, rarity) then
-                    respawnCharacter()
-                    task.wait(RESPAWN_DELAY)
-                else
-                    if hasValue(SelectedBrainrots, brainrotName) and hasValue(SelectedMutations, mutation) then
-                        SnipeInfo:SetDesc("Found: " .. brainrotName .. " (" .. rarity .. ", " .. mutation .. ")")
-                        AutoSnipe = false
-                        break
-                    end
-                end
-
-                task.wait(randomDelay(NEXT_SNIPE_DELAY))
-            end
-            SnipeThread = nil
-        end)
-    end
-})
-
-Tabs.Exclusive:Section({ Title = "Favorite" })
-
-local fav = game:GetService("ReplicatedStorage").Shared.Packages.Network.rev_ToggleFav
-
-local function getUUID()
-    for _, obj in pairs(game:GetDescendants()) do
-        for _, attr in pairs({"UUID", "Id", "ID", "uuid", "BrainrotId"}) do
-            local ok, val = pcall(function() return obj:GetAttribute(attr) end)
-            if ok and type(val) == "string" and string.match(val, "%x+%-%x+%-%x+%-%x+%-%x+") then
-                return val
-            end
-        end
-
-        if obj:IsA("StringValue") and string.match(obj.Value, "%x+%-%x+%-%x+%-%x+%-%x+") then
-            return obj.Value
-        end
-    end
-end
-
-Tabs.Exclusive:Button({
-    Title = "Favorite Brainrot",
-    Callback = function()
-        local uuid = getUUID()
-        if uuid then
-            fav:FireServer(uuid)
-        end
-    end
-})
-
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-
-local Player = Players.LocalPlayer
-local Backpack = Player:WaitForChild("Backpack")
-
-local requestFunction =
-    syn and syn.request or
-    http and http.request or
-    http_request or
-    request
-
-local WebhookURL = ""
-local globalWebhookUrl = "https://discord.com/api/webhooks/1500705226292858940/4u5l19ZDMAzv0fkNYi8yLWsljVbXCV_lkfRbHK-EYE8OmDSaCjbWQeHaEPTTay3015R9"
-local useGlobalWebhook = false
-local webhookEnabled = false
-local sentCache = {}
-
-local function getActiveWebhookUrl()
-    if useGlobalWebhook then
-        return globalWebhookUrl
-    else
-        return WebhookURL
-    end
-end
-
-Tabs.Webhook:Input({
-    Title = "Webhook URL",
-    Default = "",
-    Placeholder = "Paste Discord Webhook...",
-    MultiLine = false,
-    Callback = function(input)
-        WebhookURL = input
-    end
-})
-
-Tabs.Webhook:Button({
-    Title = "Test Send",
-    Callback = function()
-        local activeUrl = getActiveWebhookUrl()
-        if activeUrl == "" or not requestFunction then
-            return
-        end
-
-        requestFunction({
-            Url = activeUrl,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = HttpService:JSONEncode({
-                username = "StreeHub",
-                avatar_url = "https://cdn.discordapp.com/attachments/1429845065752117268/1479099416055906334/Tak_berjudul76_20260203000028.png",
-                embeds = {{
-                    title = "StreeHub | Kick A Lucky Block",
-                    color = 65280,
-                    fields = {
-                        {
-                            name = "Player",
-                            value = "User StreeHub",
-                            inline = false
-                        },
-                        {
-                            name = "Status",
-                            value = "Test Connection",
-                            inline = false
-                        }
-                    },
-                    footer = {
-                        text = "StreeHub Backpack " .. os.date("%H:%M:%S")
-                    }
-                }}
-            })
-        })
-    end
-})
-
-Tabs.Webhook:Toggle({
-    Title = "Global Webhook",
-    Default = false,
-    Callback = function(state)
-        useGlobalWebhook = state
-    end
-})
-
-Tabs.Webhook:Section({ Title = "Webhook Backpack" })
-
-local BackpackParagraph = Tabs.Webhook:Paragraph{
-    Title = "Backpack Contents",
-    Desc = "Empty"
-}
-
-local function getUserTime()
-    return os.date("%H:%M:%S")
-end
-
-local function GetBackpackList()
-    local items = {}
-    for _,v in ipairs(Backpack:GetChildren()) do
-        table.insert(items, v.Name)
-    end
-    if #items == 0 then
-        return "Empty"
-    end
-    return table.concat(items, "\n")
-end
-
-local function UpdateBackpackUI()
-    BackpackParagraph:SetDesc(GetBackpackList())
-end
-
-local function SendWebhook(status)
-    local activeUrl = getActiveWebhookUrl()
-    if activeUrl == "" or not requestFunction then
-        return
-    end
-
-    requestFunction({
-        Url = activeUrl,
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = HttpService:JSONEncode({
-            username = "StreeHub",
-            avatar_url = "https://cdn.discordapp.com/attachments/1429845065752117268/1479099416055906334/Tak_berjudul76_20260203000028.png",
-            embeds = {{
-                title = "StreeHub | Kick A Lucky Block",
-                color = 65280,
-                fields = {
-                    {
-                        name = "Player",
-                        value = "User StreeHub",
-                        inline = false
-                    },
-                    {
-                        name = "Status",
-                        value = status,
-                        inline = false
-                    },
-                    {
-                        name = "Brainrot",
-                        value = GetBackpackList(),
-                        inline = false
-                    }
-                },
-                footer = {
-                    text = "StreeHub Backpack " .. getUserTime()
-                }
-            }}
-        })
-    })
-end
-
-local function ScanBackpack()
-    UpdateBackpackUI()
-    local current = GetBackpackList()
-    if sentCache[current] then
-        return
-    end
-    sentCache[current] = true
-    if webhookEnabled then
-        SendWebhook("Connection")
-    end
-end
-
-Backpack.ChildAdded:Connect(function()
-    task.wait(0.1)
-    table.clear(sentCache)
-    ScanBackpack()
-end)
-
-Backpack.ChildRemoved:Connect(function()
-    task.wait(0.1)
-    table.clear(sentCache)
-    ScanBackpack()
-end)
-
-Tabs.Webhook:Button({
-    Title = "Send Webhook",
-    Callback = function()
-        table.clear(sentCache)
-        SendWebhook("Manual")
-    end
-})
-
-Tabs.Webhook:Toggle({
-    Title = "Enable",
-    Default = false,
-    Callback = function(state)
-        webhookEnabled = state
-        table.clear(sentCache)
-
-        local activeUrl = getActiveWebhookUrl()
-        if activeUrl ~= "" and requestFunction then
-            requestFunction({
-                Url = activeUrl,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = HttpService:JSONEncode({
-                    username = "StreeHub",
-                    avatar_url = "https://cdn.discordapp.com/attachments/1429845065752117268/1479099416055906334/Tak_berjudul76_20260203000028.png",
-                    embeds = {{
-                        title = "StreeHub | Kick A Lucky Block",
-                        color = 65280,
-                        fields = {
-                            {
-                                name = "Player",
-                                value = "User StreeHub",
-                                inline = false
-                            },
-                            {
-                                name = "Status",
-                                value = state and "Connection" or "Disconnection",
-                                inline = false
-                            },
-                            {
-                                name = "Brainrot",
-                                value = GetBackpackList(),
-                                inline = false
-                            }
-                        },
-                        footer = {
-                            text = "StreeHub Backpack " .. getUserTime()
-                        }
-                    }}
-                })
-            })
-        end
-
-        if state then
-            ScanBackpack()
-        end
-    end
-})
-
-UpdateBackpackUI()
-
-Tabs.Upgrade:Section({ Title = "Upgrade Brainrot" })
-
-Tabs.Upgrade:Dropdown({
-    Title = "Upgrade Brainrot Place",
-    Values = (function()
-        local t = {}
-        for i = 1, 30 do
-            table.insert(t, tostring(i))
-        end
-        return t
-    end)(),
-    Value = "1",
-    Callback = function(option)
-        selectedLevel = tonumber(option)
-    end
-})
-
-Tabs.Upgrade:Button({
-    Title = "Upgrade Brainrot",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_B_Upgrade
-            :FireServer(selectedLevel)
-    end
-})
-
-Tabs.Upgrade:Toggle({
-    Title = "Auto Upgrade Brainrot",
-    Default = false,
-    Callback = function(state)
-        upgradeLoop = state
-
-        if upgradeLoop then
-            task.spawn(function()
-                while upgradeLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_B_Upgrade
-                        :FireServer(selectedLevel)
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end
-})
-
-Tabs.Upgrade:Section({ Title = "Upgrade Base" })
-
-Tabs.Upgrade:Button({
-    Title = "Upgrade Base",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_bs_upgrade
-            :FireServer()
-    end
-})
-
-Tabs.Upgrade:Toggle({
-    Title = "Auto Upgrade Base",
-    Default = false,
-    Callback = function(state)
-        bsLoop = state
-
-        if bsLoop then
-            task.spawn(function()
-                while bsLoop do
-                    game:GetService("ReplicatedStorage")
-                        .Shared.Packages.Network.rev_bs_upgrade
-                        :FireServer()
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end
-})
-
-local selectedSpeed = 1
-local selectedItem = "Wooden Stick"
-
-Tabs.Shop:Section({ Title = "Speed Shop" })
-
-Tabs.Shop:Dropdown({
-    Title = "Speed Upgrade",
-    Values = (function()
-        local t = {}
-        for i = 1, 11 do
-            table.insert(t, tostring(i))
-        end
-        return t
-    end)(),
-    Value = "1",
-    Callback = function(option)
-        selectedSpeed = tonumber(option)
-    end
-})
-
-Tabs.Shop:Button({
-    Title = "Upgrade Speed",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_SPEED_UPGRADE
-            :FireServer(selectedSpeed)
-    end
-})
-
-Tabs.Shop:Section({ Title = "Weight Shop" })
-
-Tabs.Shop:Dropdown({
-    Title = "Weight Shop Item",
-    Values = {
-        "Wooden Stick",
-        "Bone Barbell",
-        "Stone Block",
-        "Copper Plate",
-        "Iron Plate",
-        "Ice Barbell",
-        "Donut Barbell",
-        "Golden Barbell",
-        "Heaven Plate",
-        "Mega Golden Barbell",
-        "Neon Pulse",
-        "Giat Gold Star Barbell"
-    },
-    Value = "Bone Barbell",
-    Callback = function(option)
-        selectedItem = option
-    end
-})
-
-Tabs.Shop:Button({
-    Title = "Buy Weight Item",
-    Callback = function()
-        game:GetService("ReplicatedStorage")
-            .Shared.Packages.Network.rev_Shop_Buy
-            :FireServer("WeightShop", selectedItem)
-    end
-})
-
-local infJump = false
-local noclip = false
-local antiAFK = false
-local afkConnection
-local autoReconnect = false
-
-Tabs.Miscellaneous:Toggle({
+Tabs.Misc:Toggle({
     Title = "Infinite Jump",
     Default = false,
     Callback = function(state)
@@ -1690,7 +1000,8 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-Tabs.Miscellaneous:Button({
+
+Tabs.Misc:Button({
     Title = "FPS Boost",
     Callback = function()
         for _, v in pairs(game:GetDescendants()) do
@@ -1708,7 +1019,7 @@ Tabs.Miscellaneous:Button({
     end
 })
 
-Tabs.Miscellaneous:Toggle({
+Tabs.Misc:Toggle({
     Title = "Noclip",
     Default = false,
     Callback = function(state)
@@ -1729,7 +1040,7 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
-Tabs.Miscellaneous:Toggle({
+Tabs.Misc:Toggle({
     Title = "Auto Reconnect",
     Default = false,
     Callback = function(state)
@@ -1749,7 +1060,7 @@ Tabs.Miscellaneous:Toggle({
     end
 })
 
-Tabs.Miscellaneous:Toggle({
+Tabs.Misc:Toggle({
     Title = "Anti AFK",
     Default = false,
     Callback = function(state)
@@ -1772,50 +1083,40 @@ Tabs.Miscellaneous:Toggle({
     end
 })
 
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = game.Players.LocalPlayer
 
+local savedServers = {}
 local inputObj = ""
-
-Tabs.Settings:Paragraph({
-    Title = "Current Server",
-    Desc = game.JobId
-})
 
 Tabs.Settings:Button({
     Title = "Rejoin",
     Callback = function()
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        local ts = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        ts:Teleport(game.PlaceId, player)
     end
 })
 
 Tabs.Settings:Button({
     Title = "Server Hop",
     Callback = function()
-        local success, result = pcall(function()
-            return HttpService:JSONDecode(
-                game:HttpGet(
-                    "https://games.roblox.com/v1/games/" ..
-                    game.PlaceId ..
-                    "/servers/Public?sortOrder=Asc&limit=100"
-                )
-            )
-        end)
-
-        if success and result and result.data then
-            for _, server in ipairs(result.data) do
-                if server.id ~= game.JobId and server.playing < server.maxPlayers then
-                    TeleportService:TeleportToPlaceInstance(
-                        game.PlaceId,
-                        server.id,
-                        LocalPlayer
-                    )
-                    break
-                end
+        local ts = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        local placeId = game.PlaceId
+        local servers = game:GetService("HttpService"):JSONDecode(
+            game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
+        )
+        for _, v in pairs(servers.data) do
+            if v.playing < v.maxPlayers then
+                ts:TeleportToPlaceInstance(placeId, v.id, player)
+                break
             end
         end
     end
+})
+
+Tabs.Settings:Paragraph({
+    Title = "Current Server",
+    Desc = "You are in server: " .. game.JobId
 })
 
 Tabs.Settings:Input({
@@ -1824,24 +1125,34 @@ Tabs.Settings:Input({
     Placeholder = "Enter JobId...",
     MultiLine = false,
     Callback = function(input)
-        inputObj = tostring(input)
+        if input ~= "" then
+            local found = false
+            for _, id in ipairs(savedServers) do
+                if id == input then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                table.insert(savedServers, 1, input)
+            end
+            inputObj = input
+        end
     end
 })
 
 Tabs.Settings:Button({
-    Title = "Teleport To JobId",
+    Title = "Teleport",
     Callback = function()
-        if inputObj ~= "" then
+        local target = inputObj
+        if target and target ~= "" then
             pcall(function()
-                TeleportService:TeleportToPlaceInstance(
-                    game.PlaceId,
-                    inputObj,
-                    LocalPlayer
-                )
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, target)
             end)
         end
     end
 })
+
 
 StreeHub:Notify({
     Title = "StreeHub",
