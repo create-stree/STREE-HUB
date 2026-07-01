@@ -1,4 +1,3 @@
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -8,7 +7,7 @@ local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = (premium and "Premium" or "Arsenal") .. " - " .. version,
+    Author = "Arsenal",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
