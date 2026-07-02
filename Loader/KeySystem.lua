@@ -7,15 +7,11 @@ local Services = {
 local Player = Services.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
-local Aegis = loadstring(game:HttpGet("https://sdk.luaegis.net/sdk/library.lua"))()
-Aegis.script_id = "YOUR_SCRIPT_ID_HERE"
-
 local Config = {
 	MaxKeyLength = 50,
 	AnimationSpeed = 0.4,
 	ParticleCount = 60,
-	ParticleSpeed = 60,
-	GetKeyLink = "https://discord.gg/jdmX43t5mY"
+	ParticleSpeed = 60
 }
 
 local Colors = {
@@ -74,8 +70,8 @@ end
 local function CreateContainer(parent)
 	local container = Instance.new("Frame")
 	container.Name = "MainContainer"
-	container.Size = UDim2.new(0, 480, 0, 240)
-	container.Position = UDim2.new(0.5, -240, 0.5, -120)
+	container.Size = UDim2.new(0, 420, 0, 280)
+	container.Position = UDim2.new(0.5, -210, 0.5, -140)
 	container.BackgroundColor3 = Colors.Background
 	container.BorderSizePixel = 0
 	container.ZIndex = 110
@@ -138,15 +134,15 @@ local function CreateHeader(parent)
 	header.Parent = parent
 
 	local iconContainer = Instance.new("Frame")
-	iconContainer.Size = UDim2.new(0, 36, 0, 36)
-	iconContainer.Position = UDim2.new(0.5, -18, 0, 7)
+	iconContainer.Size = UDim2.new(0, 32, 0, 32)
+	iconContainer.Position = UDim2.new(0.5, -16, 0, 9)
 	iconContainer.BackgroundColor3 = Colors.Primary
 	iconContainer.BorderSizePixel = 0
 	iconContainer.ZIndex = 12
 	iconContainer.Selectable = false
 	iconContainer.Parent = header
 	local iconCorner = Instance.new("UICorner")
-	iconCorner.CornerRadius = UDim.new(0, 10)
+	iconCorner.CornerRadius = UDim.new(0, 8)
 	iconCorner.Parent = iconContainer
 
 	local iconGlow = Instance.new("Frame")
@@ -157,7 +153,7 @@ local function CreateHeader(parent)
 	iconGlow.Selectable = false
 	iconGlow.Parent = iconContainer
 	local glowCorner = Instance.new("UICorner")
-	glowCorner.CornerRadius = UDim.new(0, 14)
+	glowCorner.CornerRadius = UDim.new(0, 12)
 	glowCorner.Parent = iconGlow
 	local glowStroke = Instance.new("UIStroke")
 	glowStroke.Color = Colors.NeonGreen
@@ -211,7 +207,7 @@ end
 local function CreateContent(parent)
 	local content = Instance.new("Frame")
 	content.Name = "Content"
-	content.Size = UDim2.new(1, -40, 0, 190)
+	content.Size = UDim2.new(1, -40, 0, 225)
 	content.Position = UDim2.new(0, 20, 0, 55)
 	content.BackgroundTransparency = 1
 	content.ZIndex = 11
@@ -236,7 +232,7 @@ end
 local function CreateInputSection(parent)
 	local section = Instance.new("Frame")
 	section.Size = UDim2.new(1, 0, 0, 65)
-	section.Position = UDim2.new(0, 0, 0, 24)
+	section.Position = UDim2.new(0, 0, 0, 50)  -- digeser ke bawah agar lebih tengah
 	section.BackgroundTransparency = 1
 	section.ZIndex = 12
 	section.Selectable = false
@@ -329,7 +325,7 @@ end
 local function CreateButtons(parent)
 	local buttonsContainer = Instance.new("Frame")
 	buttonsContainer.Size = UDim2.new(1, 0, 0, 40)
-	buttonsContainer.Position = UDim2.new(0, 0, 0, 95)
+	buttonsContainer.Position = UDim2.new(0, 0, 0, 120)  -- di bawah input
 	buttonsContainer.BackgroundTransparency = 1
 	buttonsContainer.ZIndex = 12
 	buttonsContainer.Selectable = false
@@ -402,7 +398,7 @@ end
 local function CreateStatus(parent)
 	local statusContainer = Instance.new("Frame")
 	statusContainer.Size = UDim2.new(1, 0, 0, 40)
-	statusContainer.Position = UDim2.new(0, 0, 0, 140)
+	statusContainer.Position = UDim2.new(0, 0, 0, 165)  -- di bawah tombol
 	statusContainer.BackgroundTransparency = 1
 	statusContainer.ZIndex = 12
 	statusContainer.Selectable = false
@@ -676,44 +672,6 @@ local function CopyToClipboard(text, successMessage)
 	if not success then ShowStatus("Link: " .. text, false, true) end
 end
 
-local function HandleKeyCheck(key)
-	if key == "" then
-		ShowStatus("Please enter an access key", true)
-		UI.Input.TextBox:CaptureFocus()
-		return
-	end
-	SetLoading(true)
-	ShowStatus("Validating key...", false, false)
-	task.spawn(function()
-		local status = Aegis.check_key(key)
-		SetLoading(false)
-		if status.code == "KEY_VALID" then
-			ShowStatus("Key valid, loading...", false, true)
-			task.wait(0.5)
-			Aegis.load_script()
-			local success, err = pcall(function()
-				script_key = key
-				loadstring(game:HttpGet("https://stree-api.vercel.app/api/loader"))()
-			end)
-			if success then
-				UI.ScreenGui:Destroy()
-			else
-				ShowStatus("Loader failed to execute, try again.", true)
-			end
-		elseif status.code == "KEY_HWID_LOCKED" then
-			ShowStatus("This key is locked to another device. Reset it from the Discord panel.", true)
-		elseif status.code == "KEY_EXPIRED" then
-			ShowStatus("This key has expired. Renew or purchase a new one.", true)
-		elseif status.code == "KEY_BANNED" then
-			ShowStatus(status.message, true)
-		elseif status.code == "KEY_INCORRECT" then
-			ShowStatus("Invalid key. Double-check what you entered.", true)
-		else
-			ShowStatus("Could not reach the auth server. Try again.", true)
-		end
-	end)
-end
-
 local function ConnectEvents()
 	Services.UserInputService.InputChanged:Connect(function(input, gameProcessed)
 		if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -755,17 +713,32 @@ local function ConnectEvents()
 	Services.UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed or State.IsDestroyed then return end
 		if input.KeyCode == Enum.KeyCode.Return and UI.Input.TextBox:IsFocused() then
-			if State.IsLoading then return end
-			HandleKeyCheck(UI.Input.TextBox.Text)
+			local key = UI.Input.TextBox.Text
+			if key == "" then ShowStatus("Please enter an access key", true) UI.Input.TextBox:CaptureFocus() return end
+			SetLoading(true)
+			ShowStatus("Validating key...", false, false)
+			task.spawn(function()
+				task.wait(2)
+				SetLoading(false)
+				ShowStatus("This is a template - add your validation logic here", false, true)
+			end)
 		end
 	end)
 	UI.Buttons.Submit.MouseButton1Click:Connect(function()
 		if State.IsLoading then return end
-		HandleKeyCheck(UI.Input.TextBox.Text)
+		local key = UI.Input.TextBox.Text
+		if key == "" then ShowStatus("Please enter an access key", true) UI.Input.TextBox:CaptureFocus() return end
+		SetLoading(true)
+		ShowStatus("Validating key...", false, false)
+		task.spawn(function()
+			task.wait(2)
+			SetLoading(false)
+			ShowStatus("This is a template - add your validation logic here", false, true)
+		end)
 	end)
 	UI.Buttons.GetKey.MouseButton1Click:Connect(function()
 		ShowStatus("Opening key website...", false, false)
-		CopyToClipboard(Config.GetKeyLink, "Discord link copied to clipboard!")
+		CopyToClipboard("https://discord.gg/jdmX43t5mY", "Key website link copied to clipboard!")
 	end)
 end
 
@@ -827,7 +800,7 @@ local function PlayEntranceAnimation()
 	UI.Backdrop.BackgroundTransparency = 1
 	Services.TweenService:Create(UI.Backdrop, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {BackgroundTransparency = 0.1}):Play()
 	task.wait(0.1)
-	Services.TweenService:Create(UI.Container, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 480, 0, 240), BackgroundTransparency = 0}):Play()
+	Services.TweenService:Create(UI.Container, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 420, 0, 280), BackgroundTransparency = 0}):Play()
 	task.wait(0.5)
 	UI.Input.TextBox:CaptureFocus()
 end
