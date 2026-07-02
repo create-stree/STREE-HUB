@@ -131,7 +131,7 @@ local gameScripts = {
     },
     [6331902150] = {
         name = "Forsaken",
-        premium = "https://pandadevelopment.net/virtual/file/0ab33cd15eae6790"
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Forsaken/Premium.lua"
     },
     [9509842868] = {
         name = "Garden Horizons",
