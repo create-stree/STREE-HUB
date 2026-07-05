@@ -6,7 +6,6 @@ repeat wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall
 local isLobby = game.PlaceId == 79546208627805
 local isForest = game.PlaceId == 126509999114328
 
-local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
 local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
 local StreeHub = loadstring(StreeHub)()
 local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
@@ -556,7 +555,7 @@ selectedMob = currentMobNames[1]
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = (premium and "Premium" or "99 NITF") .. " - " .. version,
+    Author = "99 Night In The Forest",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
@@ -1392,15 +1391,6 @@ local function refreshDropdown()
         serverDropdown:SetValues(savedServers)
     end
 end
-
-serverDropdown = Tabs.Settings:Dropdown({
-    Title = "Saved Server IDs",
-    Values = savedServers,
-    Value = "",
-    Callback = function(input)
-        inputObj = input
-    end
-})
 
 Tabs.Settings:Input({
     Title = "Target Server ID",
