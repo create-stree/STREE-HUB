@@ -1,0 +1,369 @@
+--[[
+    STREE HUB - Full Loader + Key System
+    Powered by LuaEgis Key Check Library
+    Version: 2.0
+]]
+
+repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+--@services
+local cloneref     = cloneref or function(x) return x end
+local game         = cloneref(game)
+local players      = cloneref(game:GetService("Players"))
+local StarterGui   = cloneref(game:GetService("StarterGui"))
+local TweenService = cloneref(game:GetService("TweenService"))
+local CoreGui      = cloneref(game:GetService("CoreGui"))
+
+--@constants
+local SCRIPT_ID  = "6a49d3c621d08ce6d8ba08ea4bc5a7566c00083cc83f461b7ab8143546b77ae3"
+local STREE_LOGO = "rbxassetid://99948086845842"
+local PLAYER     = players.LocalPlayer
+
+--@types
+type loader_config = {
+    name    : string,
+    free    : string,
+    version : string?,
+}
+
+--@game_list
+local gameScripts: { [number]: loader_config } = {
+    [7326934954] = {
+        name    = "99 Night In The Forest",
+        free    = "https://luaegis.net/scripts/v4/loaders/21837cd1-e3b5-4d28-b9e3-e3b64dfc5bef.lua",
+    },
+    [8144728961] = {
+        name    = "Abyss",
+        free    = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Main.lua",
+    },
+    [111958650] = {
+        name    = "Arsenal",
+        free    = "https://luaegis.net/scripts/v4/loaders/04bf36d6-a974-4016-a2e7-208cb39019a3.lua",
+    },
+    [10039338037] = {
+        name    = "Build A Ring Farm",
+        free    = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Build-Ring-Farm/Main.lua",
+    },
+    [9344307274] = {
+        name    = "Break A Lucky Block",
+        free    = "https://luaegis.net/scripts/v4/loaders/20d99722-94dc-49b2-b877-551eb670fb29.lua",
+    },
+    [7474367816] = {
+        name    = "Climb and Jump Tower",
+        free    = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua",
+    },
+    [9363735110] = {
+        name    = "Escape Tsunami For Brainrot",
+        free    = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Main.lua",
+    },
+    [6331902150] = {
+        name    = "Forsaken",
+        free    = "https://luaegis.net/scripts/v4/loaders/cef2c6c0-d6af-4673-ae2f-c73939648692.lua",
+    },
+    [9509842868] = {
+        name    = "Garden Horizons",
+        free    = "https://luaegis.net/scripts/v4/loaders/affffc0f-ddbe-4b89-807d-a3e2520917fa.lua",
+    },
+    [7436755782] = {
+        name    = "Grow A Garden",
+        free    = "https://luaegis.net/scripts/v4/loaders/a513c0fc-d841-4a84-87c5-b729c5ba2f41.lua",
+    },
+    [10004244222] = {
+        name    = "Kick A Lucky Block",
+        free    = "https://luaegis.net/scripts/v4/loaders/2d11a568-cf59-4d22-b30a-5aac2f9059eb.lua",
+    },
+    [7395930870] = {
+        name    = "Sell Lemon",
+        free    = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Sell-Lemon/Main.lua",
+    },
+    [9792947201] = {
+        name    = "Slime RNG",
+        free    = "https://luaegis.net/scripts/v4/loaders/0638bb53-2a88-441d-8c61-698ca3003463.lua",
+    },
+}
+
+--@utility
+local function notify(title: string, text: string, duration: number?)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title    = title,
+            Text     = text,
+            Icon     = STREE_LOGO,
+            Duration = duration or 4,
+        })
+    end)
+end
+
+--@splash_screen
+local function showSplash()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ResetOnSpawn   = false
+    ScreenGui.Parent         = CoreGui
+
+    local Frame = Instance.new("Frame")
+    Frame.Size                = UDim2.new(0, 320, 0, 160)
+    Frame.Position            = UDim2.new(0.5, -160, 0.5, -80)
+    Frame.BackgroundColor3    = Color3.fromRGB(0, 0, 0)
+    Frame.BackgroundTransparency = 0.3
+    Frame.BorderSizePixel     = 0
+    Frame.Parent              = ScreenGui
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 20)
+    UICorner.Parent       = Frame
+
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Thickness = 2
+    UIStroke.Color     = Color3.fromRGB(0, 255, 0)
+    UIStroke.Parent    = Frame
+
+    local Image = Instance.new("ImageLabel")
+    Image.Image                = STREE_LOGO
+    Image.BackgroundTransparency = 1
+    Image.Size                 = UDim2.new(0, 80, 0, 80)
+    Image.Position             = UDim2.new(0.5, -40, 0, 15)
+    Image.Parent               = Frame
+
+    local Title = Instance.new("TextLabel")
+    Title.Text                 = "STREE HUB"
+    Title.Font                 = Enum.Font.GothamBold
+    Title.TextSize             = 22
+    Title.TextColor3           = Color3.fromRGB(0, 255, 0)
+    Title.BackgroundTransparency = 1
+    Title.Position             = UDim2.new(0, 0, 0, 105)
+    Title.Size                 = UDim2.new(1, 0, 0, 30)
+    Title.Parent               = Frame
+
+    local Loading = Instance.new("Frame")
+    Loading.Size            = UDim2.new(0, 260, 0, 6)
+    Loading.Position        = UDim2.new(0.5, -130, 1, -20)
+    Loading.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Loading.BorderSizePixel = 0
+    Loading.Parent          = Frame
+
+    local Bar = Instance.new("Frame")
+    Bar.Size             = UDim2.new(0, 0, 1, 0)
+    Bar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    Bar.BorderSizePixel  = 0
+    Bar.Parent           = Loading
+
+    TweenService:Create(
+        Bar,
+        TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        { Size = UDim2.new(1, 0, 1, 0) }
+    ):Play()
+
+    task.wait(2.3)
+    ScreenGui:Destroy()
+end
+
+--@key_input_ui — returns the key string entered by user
+local function promptKeyInput(): string
+    local result    = nil
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ResetOnSpawn   = false
+    ScreenGui.Parent         = CoreGui
+
+    -- backdrop
+    local Frame = Instance.new("Frame")
+    Frame.Size                   = UDim2.new(0, 360, 0, 200)
+    Frame.Position               = UDim2.new(0.5, -180, 0.5, -100)
+    Frame.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
+    Frame.BackgroundTransparency = 0.2
+    Frame.BorderSizePixel        = 0
+    Frame.Parent                 = ScreenGui
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 16)
+    UICorner.Parent       = Frame
+
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Thickness = 2
+    UIStroke.Color     = Color3.fromRGB(0, 255, 0)
+    UIStroke.Parent    = Frame
+
+    -- title
+    local TitleLbl = Instance.new("TextLabel")
+    TitleLbl.Text                 = "STREE HUB — Key System"
+    TitleLbl.Font                 = Enum.Font.GothamBold
+    TitleLbl.TextSize             = 16
+    TitleLbl.TextColor3           = Color3.fromRGB(0, 255, 0)
+    TitleLbl.BackgroundTransparency = 1
+    TitleLbl.Size                 = UDim2.new(1, 0, 0, 36)
+    TitleLbl.Position             = UDim2.new(0, 0, 0, 8)
+    TitleLbl.Parent               = Frame
+
+    -- input box
+    local InputBox = Instance.new("TextBox")
+    InputBox.PlaceholderText      = "Masukkan key kamu..."
+    InputBox.Text                 = ""
+    InputBox.Font                 = Enum.Font.Gotham
+    InputBox.TextSize             = 14
+    InputBox.TextColor3           = Color3.fromRGB(255, 255, 255)
+    InputBox.PlaceholderColor3    = Color3.fromRGB(120, 120, 120)
+    InputBox.BackgroundColor3     = Color3.fromRGB(20, 20, 20)
+    InputBox.BorderSizePixel      = 0
+    InputBox.Size                 = UDim2.new(0, 300, 0, 40)
+    InputBox.Position             = UDim2.new(0.5, -150, 0, 62)
+    InputBox.ClearTextOnFocus     = false
+    InputBox.Parent               = Frame
+
+    local InputCorner = Instance.new("UICorner")
+    InputCorner.CornerRadius = UDim.new(0, 8)
+    InputCorner.Parent       = InputBox
+
+    local InputStroke = Instance.new("UIStroke")
+    InputStroke.Thickness = 1
+    InputStroke.Color     = Color3.fromRGB(0, 200, 0)
+    InputStroke.Parent    = InputBox
+
+    -- submit button
+    local SubmitBtn = Instance.new("TextButton")
+    SubmitBtn.Text                 = "Submit"
+    SubmitBtn.Font                 = Enum.Font.GothamBold
+    SubmitBtn.TextSize             = 14
+    SubmitBtn.TextColor3           = Color3.fromRGB(0, 0, 0)
+    SubmitBtn.BackgroundColor3     = Color3.fromRGB(0, 255, 0)
+    SubmitBtn.BorderSizePixel      = 0
+    SubmitBtn.Size                 = UDim2.new(0, 120, 0, 36)
+    SubmitBtn.Position             = UDim2.new(0.5, -60, 0, 118)
+    SubmitBtn.Parent               = Frame
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 8)
+    BtnCorner.Parent       = SubmitBtn
+
+    -- status label
+    local StatusLbl = Instance.new("TextLabel")
+    StatusLbl.Text                 = ""
+    StatusLbl.Font                 = Enum.Font.Gotham
+    StatusLbl.TextSize             = 12
+    StatusLbl.TextColor3           = Color3.fromRGB(255, 80, 80)
+    StatusLbl.BackgroundTransparency = 1
+    StatusLbl.Size                 = UDim2.new(1, 0, 0, 24)
+    StatusLbl.Position             = UDim2.new(0, 0, 0, 164)
+    StatusLbl.Parent               = Frame
+
+    -- wait for submit
+    SubmitBtn.MouseButton1Click:Connect(function()
+        local key = InputBox.Text
+        if key == "" then
+            StatusLbl.Text = "Key tidak boleh kosong."
+            return
+        end
+        result = key
+    end)
+
+    -- block until result
+    repeat task.wait(0.1) until result ~= nil
+    ScreenGui:Destroy()
+
+    return result
+end
+
+--@key_validation via LuaEgis SDK
+local function validateKey(userKey: string): boolean
+    local api = loadstring(game:HttpGet("https://sdk.luaegis.net/sdk/library.lua"))()
+    api.script_id = SCRIPT_ID
+
+    local status = api.check_key(userKey)
+
+    if status.code == "KEY_VALID" then
+        local expiry = status.data.auth_expire == 0
+            and "Permanent"
+            or math.floor((status.data.auth_expire - os.time()) / 3600) .. "h remaining"
+
+        notify("STREE HUB", "Key valid! Plan: " .. (status.data.note or "Free") .. " | " .. expiry, 4)
+        return true
+
+    elseif status.code == "KEY_HWID_LOCKED" then
+        notify("STREE HUB", "Key terikat ke device lain. Reset HWID via Discord.", 5)
+
+    elseif status.code == "KEY_EXPIRED" then
+        notify("STREE HUB", "Key sudah expired. Beli atau renew key baru.", 5)
+
+    elseif status.code == "KEY_BANNED" then
+        notify("STREE HUB", "Key di-ban: " .. status.message, 5)
+
+    elseif status.code == "KEY_INCORRECT" then
+        notify("STREE HUB", "Key salah atau tidak valid.", 4)
+
+    else
+        notify("STREE HUB", "Gagal menghubungi server. Coba lagi.", 4)
+    end
+
+    return false
+end
+
+--@main_loader
+local function loadGame(gameData: loader_config)
+    local success, err = pcall(function()
+        local content = game:HttpGet(gameData.free)
+        local fn = loadstring(content)
+        if not fn then error("Gagal compile script") end
+        fn()
+    end)
+
+    if not success then
+        warn("[STREE HUB] Loader error:", err)
+        notify("STREE HUB", "Gagal load script: " .. tostring(err), 5)
+    end
+end
+
+--@entry_point
+local function main()
+    local gameId   = game.GameId
+    local gameData = gameScripts[gameId] or gameScripts[game.PlaceId]
+    local gameName = gameData and gameData.name or "Unknown Game"
+
+    -- 1. Splash screen
+    showSplash()
+
+    -- 2. Detect game
+    notify("STREE HUB", "Game terdeteksi: " .. gameName, 3)
+    task.wait(2)
+
+    -- 3. Game tidak didukung
+    if not gameData then
+        notify("STREE HUB", "Game ini belum didukung.", 5)
+        task.wait(1)
+        PLAYER:Kick("[STREE HUB] Game tidak didukung.")
+        return
+    end
+
+    -- 4. Key input loop (max 3 percobaan)
+    local attempts = 0
+    local maxAttempts = 3
+
+    while attempts < maxAttempts do
+        attempts += 1
+        notify("STREE HUB", "Masukkan key kamu. Percobaan " .. attempts .. "/" .. maxAttempts, 3)
+        task.wait(1.5)
+
+        local userKey = promptKeyInput()
+        local valid   = validateKey(userKey)
+
+        if valid then
+            -- 5. Load game script
+            task.wait(1)
+            notify("STREE HUB", "Memuat " .. gameName .. "...", 3)
+            task.wait(1.5)
+            loadGame(gameData)
+            return
+        end
+
+        if attempts < maxAttempts then
+            task.wait(2)
+        end
+    end
+
+    -- max attempts exceeded
+    notify("STREE HUB", "Key gagal " .. maxAttempts .. "x. Keluar.", 4)
+    task.wait(2)
+    PLAYER:Kick("[STREE HUB] Terlalu banyak percobaan key gagal.")
+end
+
+main()
