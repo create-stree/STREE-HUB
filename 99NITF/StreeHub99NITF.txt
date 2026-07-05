@@ -567,7 +567,7 @@ local Tabs = {
     Lobby  = Window:Tab({ Title = "Lobby", Icon = "house" }),
     Main = Window:Tab({ Title = "Main", Icon = "landmark"}),
     Auto = Window:Tab({ Title = "Automatically", Icon = "play" }),
-    Visual = Window:Tab({ Title = "ESP", Icon = "eye" }),
+    Visual = Window:Tab({ Title = "Visual", Icon = "eye" }),
     tp = Window:Tab({ Title = "Teleport", Icon = "door-open" }),
     Misc = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
     Settings = Window:Tab({ Title = "Settings", Icon = "settings"})
