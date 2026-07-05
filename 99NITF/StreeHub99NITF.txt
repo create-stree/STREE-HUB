@@ -1385,13 +1385,6 @@ Tabs.Settings:Paragraph({
     Desc = "You are in server: " .. game.JobId
 })
 
-local serverDropdown = nil
-local function refreshDropdown()
-    if serverDropdown then
-        serverDropdown:SetValues(savedServers)
-    end
-end
-
 Tabs.Settings:Input({
     Title = "Target Server ID",
     Default = "",
