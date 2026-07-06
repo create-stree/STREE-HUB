@@ -1,0 +1,892 @@
+repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+local cloneref       = cloneref or function(x) return x end
+local Players        = cloneref(game:GetService("Players"))
+local TweenService   = cloneref(game:GetService("TweenService"))
+local UIS            = cloneref(game:GetService("UserInputService"))
+local StarterGui     = cloneref(game:GetService("StarterGui"))
+local HttpService    = cloneref(game:GetService("HttpService"))
+
+local Player         = Players.LocalPlayer
+local PlayerGui      = Player:WaitForChild("PlayerGui")
+
+local STREE_LOGO     = "rbxassetid://99948086845842"
+local GET_KEY_URL    = "https://your-key-website.com"
+
+-- Luaegis API Configuration (Read-Only Key)
+local LUAEGIS_API_KEY     = "25ea17d1d9e152e7b132fc7cc265fe3b414082ac37d8ae3c3e4c3f4ccf5eacc7"
+local LUAEGIS_PROJECT_ID  = "23920c54-b81e-4c4f-a304-450108699ef4"
+
+local Config = {
+    MaxKeyLength  = 50,
+    ParticleCount = 60,
+    ParticleSpeed = 60,
+}
+
+local gameScripts = {
+    [7326934954]  = {
+        name = "99 Night In The Forest",
+        free = "https://luaegis.net/scripts/v4/loaders/21837cd1-e3b5-4d28-b9e3-e3b64dfc5bef.lua"
+    },
+    [8144728961]  = {
+        name = "Abyss",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Main.lua"
+    },
+    [111958650]   = {
+        name = "Arsenal",
+        free = "https://luaegis.net/scripts/v4/loaders/04bf36d6-a974-4016-a2e7-208cb39019a3.lua"
+    },
+    [10039338037] = {
+        name = "Build A Ring Farm",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Build-Ring-Farm/Main.lua"
+    },
+    [9344307274]  = {
+        name = "Break A Lucky Block",
+        free = "https://luaegis.net/scripts/v4/loaders/20d99722-94dc-49b2-b877-551eb670fb29.lua"
+    },
+    [7474367816]  = {
+        name = "Climb and Jump Tower",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Main.lua"
+    },
+    [9363735110]  = {
+        name = "Escape Tsunami For Brainrot",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Main.lua"
+    },
+    [6331902150]  = {
+        name = "Forsaken",
+        free = "https://luaegis.net/scripts/v4/loaders/cef2c6c0-d6af-4673-ae2f-c73939648692.lua"
+    },
+    [9509842868]  = {
+        name = "Garden Horizons",
+        free = "https://luaegis.net/scripts/v4/loaders/affffc0f-ddbe-4b89-807d-a3e2520917fa.lua"
+    },
+    [7436755782]  = {
+        name = "Grow A Garden",
+        free = "https://luaegis.net/scripts/v4/loaders/a513c0fc-d841-4a84-87c5-b729c5ba2f41.lua"
+    },
+    [10004244222] = {
+        name = "Kick A Lucky Block",
+        free = "https://luaegis.net/scripts/v4/loaders/2d11a568-cf59-4d22-b30a-5aac2f9059eb.lua"
+    },
+    [7395930870]  = {
+        name = "Sell Lemon",
+        free = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Sell-Lemon/Main.lua" 
+    },
+    [9792947201]  = {
+        name = "Slime RNG",
+        free = "https://luaegis.net/scripts/v4/loaders/0638bb53-2a88-441d-8c61-698ca3003463.lua" 
+    },
+}
+
+local Colors = {
+    Background    = Color3.fromRGB(18,  18,  22),
+    Surface       = Color3.fromRGB(25,  25,  30),
+    Primary       = Color3.fromRGB(45,  45,  50),
+    Border        = Color3.fromRGB(40,  40,  45),
+    TextPrimary   = Color3.fromRGB(220, 220, 225),
+    TextSecondary = Color3.fromRGB(140, 140, 150),
+    Success       = Color3.fromRGB(25,  135, 84),
+    Error         = Color3.fromRGB(180, 50,  50),
+    Warning       = Color3.fromRGB(200, 120, 30),
+    GetKey        = Color3.fromRGB(40,  140, 100),
+    HoverPrimary  = Color3.fromRGB(55,  55,  60),
+    HoverGetKey   = Color3.fromRGB(30,  120, 80),
+    NeonGreen     = Color3.fromRGB(0,   255, 100),
+    NeonGlow      = Color3.fromRGB(0,   200, 80),
+}
+
+local State = {
+    IsLoading     = false,
+    IsDestroyed   = false,
+    Particles     = {},
+    Animations    = {},
+    MousePosition = { X = 0, Y = 0 },
+    FocusStates   = { InputFocused = false, ButtonHovered = {}, AnimationsActive = true },
+}
+local UI = {}
+
+local function notify(title, text, duration)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title    = title,
+            Text     = text,
+            Icon     = STREE_LOGO,
+            Duration = duration or 4,
+        })
+    end)
+end
+
+local function ShowStatus(msg, isError, isSuccess)
+    if not UI.Status then return end
+    UI.Status.Text = msg
+    UI.Status.TextColor3 = isSuccess and Colors.Success or isError and Colors.Error or Colors.Warning
+    TweenService:Create(UI.Status, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { TextTransparency = 0 }):Play()
+end
+
+local function ClearStatus()
+    if UI.Status then
+        TweenService:Create(UI.Status, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { TextTransparency = 1 }):Play()
+    end
+end
+
+local function SetLoading(loading)
+    State.IsLoading = loading
+    if not UI.Buttons then return end
+    UI.Buttons.Loading.Container.Visible = loading
+    UI.Buttons.Submit.Text = loading and "" or "Submit"
+    if loading then
+        local tw = TweenService:Create(UI.Buttons.Loading.Spinner,
+            TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1),
+            { Rotation = 360 })
+        tw:Play()
+        State.Animations.SpinTween = tw
+    else
+        if State.Animations.SpinTween then
+            State.Animations.SpinTween:Cancel()
+            UI.Buttons.Loading.Spinner.Rotation = 0
+        end
+    end
+end
+
+local function UpdateCharCounter()
+    if not UI.Input then return end
+    local len = #UI.Input.TextBox.Text
+    UI.Input.Counter.Text = len .. "/" .. Config.MaxKeyLength
+    UI.Input.Counter.TextColor3 =
+        len >= Config.MaxKeyLength       and Colors.Error   or
+        len >= Config.MaxKeyLength * 0.8 and Colors.Warning or
+        Colors.TextSecondary
+end
+
+local function CreateParticle()
+    if State.IsDestroyed or not UI.ParticleContainer or not UI.ParticleContainer.Parent then return end
+    local size = math.random(6, 20)
+    local p = Instance.new("Frame")
+    p.Size                   = UDim2.new(0, size, 0, size)
+    p.Position               = UDim2.new(math.random() * 1.4 - 0.2, 0, 1.2, 0)
+    p.BackgroundColor3       = Colors.NeonGreen
+    p.BackgroundTransparency = math.random(60, 85) / 100
+    p.BorderSizePixel        = 0
+    p.ZIndex                 = 106
+    p.Parent                 = UI.ParticleContainer
+    Instance.new("UICorner", p).CornerRadius = UDim.new(1, 0)
+
+    local bubbleColors = {
+        Color3.fromRGB(0, 255, 100), Color3.fromRGB(50, 220, 80),
+        Color3.fromRGB(0, 230, 120), Color3.fromRGB(100, 255, 150),
+    }
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,   bubbleColors[math.random(#bubbleColors)]),
+        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.7, bubbleColors[math.random(#bubbleColors)]),
+        ColorSequenceKeypoint.new(1,   bubbleColors[math.random(#bubbleColors)]),
+    }
+    grad.Rotation = math.random(0, 360)
+    grad.Parent   = p
+
+    local hl = Instance.new("Frame")
+    hl.Size                   = UDim2.new(0.3, 0, 0.3, 0)
+    hl.Position               = UDim2.new(0.2, 0, 0.15, 0)
+    hl.BackgroundColor3       = Color3.fromRGB(255, 255, 255)
+    hl.BackgroundTransparency = 0.3
+    hl.BorderSizePixel        = 0
+    hl.ZIndex                 = p.ZIndex + 1
+    hl.Parent                 = p
+    Instance.new("UICorner", hl).CornerRadius = UDim.new(1, 0)
+
+    local glow = Instance.new("Frame")
+    glow.Size                   = UDim2.new(1.8, 0, 1.8, 0)
+    glow.Position               = UDim2.new(-0.4, 0, -0.4, 0)
+    glow.BackgroundColor3       = Color3.fromRGB(0, 255, 100)
+    glow.BackgroundTransparency = 0.9
+    glow.BorderSizePixel        = 0
+    glow.ZIndex                 = p.ZIndex - 1
+    glow.Parent                 = p
+    Instance.new("UICorner", glow).CornerRadius = UDim.new(1, 0)
+
+    table.insert(State.Particles, {
+        frame               = p,
+        vx                  = (math.random() - 0.5) * 0.004,
+        vy                  = -math.random(20, 50) / 10000,
+        created             = tick(),
+        rotation            = 0,
+        rotationSpeed       = (math.random() - 0.5) * 2,
+        pulsePhase          = math.random() * math.pi * 2,
+        wobblePhase         = math.random() * math.pi * 2,
+        originalTransparency = p.BackgroundTransparency,
+        glow                = glow,
+        highlight           = hl,
+        lifetime            = math.random(30, 60),
+        originalSize        = size,
+        repelForce          = { x = 0, y = 0 },
+        mass                = size / 10,
+    })
+end
+
+local function UpdateParticles()
+    if State.IsDestroyed or not UI.ParticleContainer then return end
+    local screenSize   = UI.ScreenGui.AbsoluteSize
+    local mouseScreenX = State.MousePosition.X / screenSize.X
+    local mouseScreenY = State.MousePosition.Y / screenSize.Y
+
+    for i = #State.Particles, 1, -1 do
+        local p = State.Particles[i]
+        if not p or not p.frame or not p.frame.Parent then
+            table.remove(State.Particles, i)
+            continue
+        end
+        local pos = p.frame.Position
+        local age = tick() - p.created
+        if pos.Y.Scale < -0.3 or age > p.lifetime then
+            p.frame:Destroy()
+            table.remove(State.Particles, i)
+            continue
+        end
+        local dx    = pos.X.Scale - mouseScreenX
+        local dy    = pos.Y.Scale - mouseScreenY
+        local dist  = math.sqrt(dx * dx + dy * dy)
+        local rfx, rfy = 0, 0
+        if dist < 0.15 and dist > 0 then
+            local pow = ((0.15 - dist) / 0.15) * 0.08 / p.mass
+            rfx = (dx / dist) * pow
+            rfy = (dy / dist) * pow
+        end
+        p.repelForce.x = p.repelForce.x * 0.85 + rfx * 0.15
+        p.repelForce.y = p.repelForce.y * 0.85 + rfy * 0.15
+
+        local nx = pos.X.Scale + p.vx + p.repelForce.x
+        local ny = pos.Y.Scale + p.vy + p.repelForce.y
+        if nx <= -0.2 then nx = 1.2 elseif nx >= 1.2 then nx = -0.2 end
+        local t = tick()
+        nx = nx + math.sin(t * 1.5 + p.wobblePhase) * 0.002
+        ny = ny + math.cos(t * 1.05 + p.wobblePhase) * 0.001
+        p.rotation = p.rotation + p.rotationSpeed
+        p.frame.Rotation = p.rotation
+
+        local breathe = math.sin(t * 2.5 + p.pulsePhase) * 0.1 + 1
+        local s = p.originalSize * breathe
+        p.frame.Size = UDim2.new(0, s, 0, s)
+        local tAlpha = math.sin(t * 3 + p.pulsePhase) * 0.1
+        p.frame.BackgroundTransparency = math.clamp(p.originalTransparency + tAlpha, 0.5, 0.95)
+        p.glow.BackgroundTransparency  = dist < 0.2 and (0.7 + dist / 0.2 * 0.2) or 0.9
+        p.highlight.BackgroundTransparency = math.sin(t * 4 + p.pulsePhase) * 0.2 + 0.3
+        p.vx = p.vx * 0.995
+        p.vy = p.vy * 0.998
+        p.frame.Position = UDim2.new(nx, 0, ny, 0)
+    end
+end
+
+local function CreateButtonGlow(button, hoverColor, originalColor)
+    local gb = Instance.new("Frame")
+    gb.Size                   = UDim2.new(1, 8, 1, 8)
+    gb.Position               = UDim2.new(0, -4, 0, -4)
+    gb.BackgroundTransparency = 1
+    gb.ZIndex                 = button.ZIndex - 1
+    gb.Visible                = false
+    gb.Parent                 = button
+    Instance.new("UICorner", gb).CornerRadius = UDim.new(0, 12)
+    local s = Instance.new("UIStroke")
+    s.Color       = Colors.NeonGreen
+    s.Thickness   = 2
+    s.Transparency = 0.3
+    s.Parent      = gb
+    local g = Instance.new("UIGradient")
+    g.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,   Colors.NeonGreen),
+        ColorSequenceKeypoint.new(0.5, Colors.NeonGlow),
+        ColorSequenceKeypoint.new(1,   Colors.NeonGreen),
+    }
+    g.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0,   0.8),
+        NumberSequenceKeypoint.new(0.2, 0.1),
+        NumberSequenceKeypoint.new(0.8, 0.1),
+        NumberSequenceKeypoint.new(1,   0.8),
+    }
+    g.Parent = s
+
+    local activeTween = nil
+    button.MouseEnter:Connect(function()
+        gb.Visible = true
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { BackgroundColor3 = hoverColor }):Play()
+        TweenService:Create(s,      TweenInfo.new(0.2, Enum.EasingStyle.Quad), { Transparency = 0.1 }):Play()
+        if activeTween then activeTween:Cancel() end
+        activeTween = TweenService:Create(g, TweenInfo.new(1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), { Rotation = 360 })
+        activeTween:Play()
+    end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { BackgroundColor3 = originalColor }):Play()
+        TweenService:Create(s,      TweenInfo.new(0.3, Enum.EasingStyle.Quad), { Transparency = 0.8 }):Play()
+        if activeTween then activeTween:Cancel() g.Rotation = 0 end
+        task.delay(0.3, function()
+            if gb and gb.Parent then gb.Visible = false end
+        end)
+    end)
+end
+
+local function validateKey(userKey)
+    local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (Fluxus and Fluxus.request) or request
+    local function apiGet(endpoint)
+        local url = "https://api.luaegis.net" .. endpoint
+        print("[DEBUG] API URL: " .. url)
+        local success, response = pcall(function()
+            local headers = {
+                ["Authorization"] = "Bearer " .. LUAEGIS_API_KEY,
+                ["x-api-key"] = LUAEGIS_API_KEY,
+                ["Content-Type"] = "application/json",
+            }
+            if httpRequest then
+                return httpRequest({
+                    Method = "GET",
+                    Url = url,
+                    Headers = headers,
+                })
+            else
+                return HttpService:RequestAsync({
+                    Method = "GET",
+                    Url = url,
+                    Headers = headers,
+                })
+            end
+        end)
+        print("[DEBUG] Success: " .. tostring(success))
+        if success and response then
+            print("[DEBUG] Status Code: " .. tostring(response.StatusCode))
+            print("[DEBUG] Body: " .. tostring(response.Body))
+            local isSuccess = response.Success or (response.StatusCode and response.StatusCode >= 200 and response.StatusCode < 300)
+            if isSuccess and response.Body then
+                local ok, decoded = pcall(function()
+                    return HttpService:JSONDecode(response.Body)
+                end)
+                if ok then
+                    return decoded
+                else
+                    print("[DEBUG] JSON Decode failed: " .. tostring(decoded))
+                end
+            end
+        end
+        print("[DEBUG] HTTP request failed")
+        return nil
+    end
+
+    local function getLocalHwid()
+        local success, result = pcall(function()
+            return cloneref(game:GetService("RbxAnalyticsService")):GetClientId()
+        end)
+        return success and result or ""
+    end
+
+    local data = apiGet(string.format("/api/v3/projects/%s/users/%s", LUAEGIS_PROJECT_ID, userKey))
+    print("[DEBUG] Full response data: " .. tostring(data))
+
+    if not data then
+        ShowStatus("Failed to connect to server.", true, false)
+        return false
+    end
+
+    if not data.success then
+        local errMsg = data.message or "Unknown error"
+        print("[DEBUG] API Error: " .. errMsg)
+        ShowStatus("Server error: " .. errMsg, true, false)
+        return false
+    end
+
+    print("[DEBUG] User data status: " .. tostring(data.data.user_data.status))
+    local userData = data.data.user_data
+
+    if userData.status == "banned" then
+        local reason = userData.ban_reason or "Unknown"
+        local untilStr = userData.ban_until and os.date("%Y-%m-%d", userData.ban_until) or "Permanent"
+        ShowStatus("Key is banned: " .. reason .. " until " .. untilStr, true, false)
+        return false
+    end
+
+    local localHwid = getLocalHwid()
+    local storedHwid = userData.hwid or userData.fingerprint or ""
+    if storedHwid == "null" then storedHwid = "" end
+
+    if storedHwid ~= "" and storedHwid ~= localHwid then
+        ShowStatus("Key is bound to another device. Please reset your HWID.", true, false)
+        return false
+    end
+
+    local expiry = userData.key_expire
+    local expiryStr
+    if not expiry or expiry == 0 then
+        expiryStr = "Permanent"
+    else
+        local remaining = expiry - os.time()
+        if remaining <= 0 then
+            ShowStatus("Key has expired.", true, false)
+            return false
+        end
+        local hours = math.floor(remaining / 3600)
+        local days = math.floor(remaining / 86400)
+        expiryStr = days > 0 and (days .. "d " .. (hours % 24) .. "h remaining") or (hours .. "h remaining")
+    end
+
+    local note = userData.key_note or "Free"
+    ShowStatus("Key valid! " .. expiryStr, false, true)
+    notify("STREE HUB", "Key valid — " .. note .. " | " .. expiryStr, 4)
+    return true
+end
+
+local function loadGame(gameData)
+    local ok, err = pcall(function()
+        local fn = loadstring(game:HttpGet(gameData.free))
+        assert(fn, "Compile failed")
+        fn()
+    end)
+    if not ok then
+        warn("[STREE HUB] Loader error:", err)
+        notify("STREE HUB", "Failed to load: " .. tostring(err), 5)
+    end
+end
+
+local function Initialize()
+    local gameId   = game.GameId
+    local gameData = gameScripts[gameId]
+
+    if not gameData then
+        notify("STREE HUB", "This game is not supported.", 5)
+        task.wait(2)
+        Player:Kick("[STREE HUB] Game not supported.")
+        return
+    end
+
+    notify("STREE HUB", "Game: " .. gameData.name, 3)
+
+    local sg = Instance.new("ScreenGui")
+    sg.Name           = "KeySystemGUI"
+    sg.ResetOnSpawn   = false
+    sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    sg.IgnoreGuiInset = true
+    sg.DisplayOrder   = 100
+    sg.Parent         = PlayerGui
+    UI.ScreenGui      = sg
+
+    local backdrop = Instance.new("Frame")
+    backdrop.Name                   = "Backdrop"
+    backdrop.Size                   = UDim2.new(1, 0, 1, 0)
+    backdrop.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
+    backdrop.BackgroundTransparency = 0.1
+    backdrop.BorderSizePixel        = 0
+    backdrop.ZIndex                 = 100
+    backdrop.Parent                 = sg
+    UI.Backdrop = backdrop
+
+    local particleContainer = Instance.new("Frame")
+    particleContainer.Size                   = UDim2.new(1, 0, 1, 0)
+    particleContainer.BackgroundTransparency = 1
+    particleContainer.ZIndex                 = 105
+    particleContainer.Parent                 = backdrop
+    UI.ParticleContainer = particleContainer
+
+    local container = Instance.new("Frame")
+    container.Name             = "MainContainer"
+    container.Size             = UDim2.new(0, 420, 0, 380)
+    container.Position         = UDim2.new(0.5, -210, 0.5, -190)
+    container.BackgroundColor3 = Colors.Background
+    container.BorderSizePixel  = 0
+    container.ZIndex           = 110
+    container.Parent           = sg
+    Instance.new("UICorner", container).CornerRadius = UDim.new(0, 20)
+    local containerStroke = Instance.new("UIStroke")
+    containerStroke.Color       = Colors.Border
+    containerStroke.Thickness   = 1
+    containerStroke.Transparency = 0.3
+    containerStroke.Parent      = container
+    UI.Container = container
+
+    local animBorder = Instance.new("Frame")
+    animBorder.Name                   = "AnimatedBorder"
+    animBorder.Size                   = UDim2.new(1, 6, 1, 6)
+    animBorder.Position               = UDim2.new(0, -3, 0, -3)
+    animBorder.BackgroundTransparency = 1
+    animBorder.ZIndex                 = 109
+    animBorder.Parent                 = container
+    Instance.new("UICorner", animBorder).CornerRadius = UDim.new(0, 23)
+    local animStroke = Instance.new("UIStroke")
+    animStroke.Color       = Colors.NeonGreen
+    animStroke.Thickness   = 2
+    animStroke.Transparency = 0.3
+    animStroke.Parent      = animBorder
+    local animGrad = Instance.new("UIGradient")
+    animGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,   Colors.NeonGreen),
+        ColorSequenceKeypoint.new(0.5, Colors.NeonGlow),
+        ColorSequenceKeypoint.new(1,   Colors.NeonGreen),
+    }
+    animGrad.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0,   0.9),
+        NumberSequenceKeypoint.new(0.2, 0.1),
+        NumberSequenceKeypoint.new(0.8, 0.1),
+        NumberSequenceKeypoint.new(1,   0.9),
+    }
+    animGrad.Parent = animStroke
+    UI.AnimatedBorder = { Frame = animBorder, Gradient = animGrad, Stroke = animStroke }
+
+    local iconContainer = Instance.new("Frame")
+    iconContainer.Size             = UDim2.new(0, 64, 0, 64)
+    iconContainer.Position         = UDim2.new(0.5, -32, 0, 18)
+    iconContainer.BackgroundColor3 = Colors.Primary
+    iconContainer.BorderSizePixel  = 0
+    iconContainer.ZIndex           = 112
+    iconContainer.Parent           = container
+    Instance.new("UICorner", iconContainer).CornerRadius = UDim.new(0, 14)
+
+    local iconGlowFrame = Instance.new("Frame")
+    iconGlowFrame.Size                   = UDim2.new(1, 10, 1, 10)
+    iconGlowFrame.Position               = UDim2.new(0, -5, 0, -5)
+    iconGlowFrame.BackgroundTransparency = 1
+    iconGlowFrame.ZIndex                 = 111
+    iconGlowFrame.Parent                 = iconContainer
+    Instance.new("UICorner", iconGlowFrame).CornerRadius = UDim.new(0, 18)
+    local iconGlowStroke = Instance.new("UIStroke")
+    iconGlowStroke.Color       = Colors.NeonGreen
+    iconGlowStroke.Thickness   = 2
+    iconGlowStroke.Transparency = 0.2
+    iconGlowStroke.Parent      = iconGlowFrame
+    local iconGlowGrad = Instance.new("UIGradient")
+    iconGlowGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,   Colors.NeonGreen),
+        ColorSequenceKeypoint.new(0.5, Colors.NeonGlow),
+        ColorSequenceKeypoint.new(1,   Colors.NeonGreen),
+    }
+    iconGlowGrad.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0,   0.8),
+        NumberSequenceKeypoint.new(0.2, 0.05),
+        NumberSequenceKeypoint.new(0.8, 0.05),
+        NumberSequenceKeypoint.new(1,   0.8),
+    }
+    iconGlowGrad.Parent = iconGlowStroke
+    UI.Header = { IconGlow = iconGlowGrad, IconStroke = iconGlowStroke }
+
+    local iconImage = Instance.new("ImageLabel")
+    iconImage.Size                   = UDim2.new(0.72, 0, 0.72, 0)
+    iconImage.Position               = UDim2.new(0.14, 0, 0.14, 0)
+    iconImage.BackgroundTransparency = 1
+    iconImage.Image                  = STREE_LOGO
+    iconImage.ImageColor3            = Colors.NeonGreen
+    iconImage.ImageTransparency      = 0.05
+    iconImage.ScaleType              = Enum.ScaleType.Fit
+    iconImage.ZIndex                 = 113
+    iconImage.Parent                 = iconContainer
+
+    local closeButton = Instance.new("ImageButton")
+    closeButton.Size                   = UDim2.new(0, 24, 0, 24)
+    closeButton.Position               = UDim2.new(1, -32, 0, 18)
+    closeButton.BackgroundTransparency = 1
+    closeButton.Image                  = "rbxassetid://10152135063"
+    closeButton.ImageColor3            = Colors.TextPrimary
+    closeButton.ImageTransparency      = 0.1
+    closeButton.ScaleType              = Enum.ScaleType.Fit
+    closeButton.ZIndex                 = 120
+    closeButton.Parent                 = container
+    closeButton.MouseButton1Click:Connect(function()
+        State.IsDestroyed = true
+        sg:Destroy()
+    end)
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size                   = UDim2.new(1, -40, 0, 26)
+    titleLabel.Position               = UDim2.new(0, 20, 0, 92)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text                   = "Key System"
+    titleLabel.TextColor3             = Colors.TextPrimary
+    titleLabel.TextSize               = 20
+    titleLabel.Font                   = Enum.Font.GothamBold
+    titleLabel.TextXAlignment         = Enum.TextXAlignment.Center
+    titleLabel.ZIndex                 = 112
+    titleLabel.Parent                 = container
+
+    local inputContainer = Instance.new("Frame")
+    inputContainer.Size             = UDim2.new(0, 360, 0, 44)
+    inputContainer.Position         = UDim2.new(0.5, -180, 0, 128)
+    inputContainer.BackgroundColor3 = Colors.Surface
+    inputContainer.BorderSizePixel  = 0
+    inputContainer.ZIndex           = 113
+    inputContainer.Parent           = container
+    Instance.new("UICorner", inputContainer).CornerRadius = UDim.new(0, 8)
+    local inputStroke = Instance.new("UIStroke")
+    inputStroke.Color       = Colors.Border
+    inputStroke.Thickness   = 1
+    inputStroke.Transparency = 0.3
+    inputStroke.Parent      = inputContainer
+
+    local inputGlowFrame = Instance.new("Frame")
+    inputGlowFrame.Size                   = UDim2.new(1, 8, 1, 8)
+    inputGlowFrame.Position               = UDim2.new(0, -4, 0, -4)
+    inputGlowFrame.BackgroundTransparency = 1
+    inputGlowFrame.ZIndex                 = inputContainer.ZIndex - 1
+    inputGlowFrame.Visible                = false
+    inputGlowFrame.Parent                 = inputContainer
+    Instance.new("UICorner", inputGlowFrame).CornerRadius = UDim.new(0, 12)
+    local inputGlowStroke = Instance.new("UIStroke")
+    inputGlowStroke.Color       = Colors.NeonGreen
+    inputGlowStroke.Thickness   = 2
+    inputGlowStroke.Transparency = 0.3
+    inputGlowStroke.Parent      = inputGlowFrame
+    local inputGlowGrad = Instance.new("UIGradient")
+    inputGlowGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,   Colors.NeonGreen),
+        ColorSequenceKeypoint.new(0.5, Colors.NeonGlow),
+        ColorSequenceKeypoint.new(1,   Colors.NeonGreen),
+    }
+    inputGlowGrad.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0,   0.8),
+        NumberSequenceKeypoint.new(0.2, 0.1),
+        NumberSequenceKeypoint.new(0.8, 0.1),
+        NumberSequenceKeypoint.new(1,   0.8),
+    }
+    inputGlowGrad.Parent = inputGlowStroke
+
+    local textInput = Instance.new("TextBox")
+    textInput.Size               = UDim2.new(1, -20, 1, 0)
+    textInput.Position           = UDim2.new(0, 10, 0, 0)
+    textInput.BackgroundTransparency = 1
+    textInput.Text               = ""
+    textInput.PlaceholderText    = "Enter key here"
+    textInput.TextColor3         = Colors.TextPrimary
+    textInput.PlaceholderColor3  = Colors.TextSecondary
+    textInput.TextSize           = 13
+    textInput.Font               = Enum.Font.Gotham
+    textInput.TextXAlignment     = Enum.TextXAlignment.Left
+    textInput.ClearTextOnFocus   = false
+    textInput.ZIndex             = 114
+    textInput.Parent             = inputContainer
+
+    local charCounter = Instance.new("TextLabel")
+    charCounter.Size                   = UDim2.new(0, 80, 0, 16)
+    charCounter.Position               = UDim2.new(0.5, 100, 0, 176)
+    charCounter.BackgroundTransparency = 1
+    charCounter.Text                   = "0/" .. Config.MaxKeyLength
+    charCounter.TextColor3             = Colors.TextSecondary
+    charCounter.TextSize               = 11
+    charCounter.Font                   = Enum.Font.Gotham
+    charCounter.TextXAlignment         = Enum.TextXAlignment.Right
+    charCounter.ZIndex                 = 113
+    charCounter.Parent                 = container
+
+    UI.Input = {
+        Container = inputContainer,
+        TextBox   = textInput,
+        Counter   = charCounter,
+        Stroke    = inputStroke,
+        Glow      = { Frame = inputGlowFrame, Stroke = inputGlowStroke, Gradient = inputGlowGrad },
+    }
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size                   = UDim2.new(0, 360, 0, 36)
+    statusLabel.Position               = UDim2.new(0.5, -180, 0, 196)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text                   = ""
+    statusLabel.TextColor3             = Colors.Error
+    statusLabel.TextSize               = 13
+    statusLabel.Font                   = Enum.Font.Gotham
+    statusLabel.TextXAlignment         = Enum.TextXAlignment.Center
+    statusLabel.TextWrapped            = true
+    statusLabel.TextTransparency       = 1
+    statusLabel.ZIndex                 = 113
+    statusLabel.Parent                 = container
+    UI.Status = statusLabel
+
+    local getKeyBtn = Instance.new("TextButton")
+    getKeyBtn.Size             = UDim2.new(0, 172, 0, 46)
+    getKeyBtn.Position         = UDim2.new(0.5, -180, 0, 240)
+    getKeyBtn.BackgroundColor3 = Colors.GetKey
+    getKeyBtn.BorderSizePixel  = 0
+    getKeyBtn.Text             = "Get Key"
+    getKeyBtn.TextColor3       = Colors.TextPrimary
+    getKeyBtn.TextSize         = 15
+    getKeyBtn.Font             = Enum.Font.GothamMedium
+    getKeyBtn.AutoButtonColor  = false
+    getKeyBtn.ZIndex           = 113
+    getKeyBtn.Parent           = container
+    Instance.new("UICorner", getKeyBtn).CornerRadius = UDim.new(0, 10)
+
+    local submitBtn = Instance.new("TextButton")
+    submitBtn.Size             = UDim2.new(0, 172, 0, 46)
+    submitBtn.Position         = UDim2.new(0.5, 8, 0, 240)
+    submitBtn.BackgroundColor3 = Colors.Primary
+    submitBtn.BorderSizePixel  = 0
+    submitBtn.Text             = "Submit"
+    submitBtn.TextColor3       = Colors.TextPrimary
+    submitBtn.TextSize         = 15
+    submitBtn.Font             = Enum.Font.GothamMedium
+    submitBtn.AutoButtonColor  = false
+    submitBtn.ZIndex           = 113
+    submitBtn.Parent           = container
+    Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0, 10)
+
+    local loadingContainer = Instance.new("Frame")
+    loadingContainer.Size                   = UDim2.new(0, 22, 0, 22)
+    loadingContainer.Position               = UDim2.new(0.5, -11, 0.5, -11)
+    loadingContainer.BackgroundTransparency = 1
+    loadingContainer.Visible                = false
+    loadingContainer.ZIndex                 = 114
+    loadingContainer.Parent                 = submitBtn
+
+    local spinner = Instance.new("Frame")
+    spinner.Size             = UDim2.new(1, 0, 1, 0)
+    spinner.BackgroundColor3 = Colors.TextPrimary
+    spinner.BorderSizePixel  = 0
+    spinner.ZIndex           = 115
+    spinner.Parent           = loadingContainer
+    Instance.new("UICorner", spinner).CornerRadius = UDim.new(1, 0)
+    local spinGrad = Instance.new("UIGradient")
+    spinGrad.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0,   0),
+        NumberSequenceKeypoint.new(0.8, 0.8),
+        NumberSequenceKeypoint.new(1,   1),
+    }
+    spinGrad.Parent = spinner
+
+    UI.Buttons = {
+        Submit  = submitBtn,
+        GetKey  = getKeyBtn,
+        Loading = { Container = loadingContainer, Spinner = spinner },
+    }
+
+    CreateButtonGlow(submitBtn,  Colors.HoverPrimary, Colors.Primary)
+    CreateButtonGlow(getKeyBtn,  Colors.HoverGetKey,  Colors.GetKey)
+    UpdateCharCounter()
+
+    UIS.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            State.MousePosition.X = input.Position.X
+            State.MousePosition.Y = input.Position.Y
+        end
+    end)
+
+    textInput:GetPropertyChangedSignal("Text"):Connect(function()
+        local t = textInput.Text
+        if #t > Config.MaxKeyLength then
+            textInput.Text = t:sub(1, Config.MaxKeyLength)
+            ShowStatus("Maximum " .. Config.MaxKeyLength .. " characters.", true, false)
+        end
+        UpdateCharCounter()
+        ClearStatus()
+    end)
+
+    local inputGlowTw = nil
+    textInput.Focused:Connect(function()
+        inputGlowFrame.Visible = true
+        TweenService:Create(inputStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { Color = Colors.NeonGreen, Transparency = 0.1 }):Play()
+        TweenService:Create(inputGlowStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { Transparency = 0.1 }):Play()
+        if inputGlowTw then inputGlowTw:Cancel() end
+        inputGlowTw = TweenService:Create(inputGlowGrad, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), { Rotation = 360 })
+        inputGlowTw:Play()
+        ClearStatus()
+    end)
+    textInput.FocusLost:Connect(function()
+        TweenService:Create(inputStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { Color = Colors.Border, Transparency = 0.3 }):Play()
+        TweenService:Create(inputGlowStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { Transparency = 0.8 }):Play()
+        if inputGlowTw then inputGlowTw:Cancel() inputGlowGrad.Rotation = 0 end
+        task.delay(0.3, function()
+            if inputGlowFrame and inputGlowFrame.Parent then inputGlowFrame.Visible = false end
+        end)
+    end)
+
+    UIS.InputBegan:Connect(function(input, processed)
+        if processed or State.IsDestroyed or State.IsLoading then return end
+        if input.KeyCode == Enum.KeyCode.Return and textInput:IsFocused() then
+            submitBtn:Activate()
+        end
+    end)
+
+    submitBtn.MouseButton1Click:Connect(function()
+        if State.IsLoading then return end
+        local key = textInput.Text
+        if key == "" then
+            ShowStatus("Please enter an access key.", true, false)
+            textInput:CaptureFocus()
+            return
+        end
+        SetLoading(true)
+        ShowStatus("Validating key...", false, false)
+        task.spawn(function()
+            local valid = validateKey(key)
+            SetLoading(false)
+            if valid then
+                task.wait(1)
+                ShowStatus("Loading " .. gameData.name .. "...", false, true)
+                task.wait(1)
+                State.IsDestroyed = true
+                sg:Destroy()
+                loadGame(gameData)
+            end
+        end)
+    end)
+
+    getKeyBtn.MouseButton1Click:Connect(function()
+        pcall(function()
+            if setclipboard then
+                setclipboard(GET_KEY_URL)
+                ShowStatus("Link copied to clipboard!", false, true)
+            else
+                ShowStatus("Link: " .. GET_KEY_URL, false, false)
+            end
+        end)
+    end)
+
+    task.spawn(function()
+        for i = 1, 25 do
+            if State.IsDestroyed then break end
+            CreateParticle()
+            task.wait(math.random(20, 100) / 1000)
+        end
+        while not State.IsDestroyed and sg and sg.Parent do
+            if #State.Particles < Config.ParticleCount then CreateParticle() end
+            task.wait(math.random(400, 1200) / 1000)
+        end
+    end)
+
+    task.spawn(function()
+        while not State.IsDestroyed and sg and sg.Parent do
+            pcall(UpdateParticles)
+            task.wait(1 / Config.ParticleSpeed)
+        end
+    end)
+
+    task.spawn(function()
+        while not State.IsDestroyed and animBorder and animBorder.Parent do
+            if State.Animations.BorderTween then State.Animations.BorderTween:Cancel() end
+            local tw = TweenService:Create(animGrad,
+                TweenInfo.new(4, Enum.EasingStyle.Linear),
+                { Rotation = animGrad.Rotation + 360 })
+            State.Animations.BorderTween = tw
+            tw:Play()
+            pcall(function() tw.Completed:Wait() end)
+            task.wait(0.05)
+        end
+    end)
+
+    task.spawn(function()
+        while not State.IsDestroyed and iconGlowGrad and iconGlowGrad.Parent do
+            if State.Animations.IconTween then State.Animations.IconTween:Cancel() end
+            local tw = TweenService:Create(iconGlowGrad,
+                TweenInfo.new(3, Enum.EasingStyle.Linear),
+                { Rotation = iconGlowGrad.Rotation + 360 })
+            State.Animations.IconTween = tw
+            tw:Play()
+            pcall(function() tw.Completed:Wait() end)
+            task.wait(0.05)
+        end
+    end)
+
+    container.Size                   = UDim2.new(0, 0, 0, 0)
+    container.BackgroundTransparency = 1
+    backdrop.BackgroundTransparency  = 1
+    TweenService:Create(backdrop, TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+        { BackgroundTransparency = 0.1 }):Play()
+    task.wait(0.1)
+    TweenService:Create(container,
+        TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        { Size = UDim2.new(0, 420, 0, 380), BackgroundTransparency = 0 }):Play()
+    task.wait(0.5)
+    textInput:CaptureFocus()
+end
+
+Initialize()
