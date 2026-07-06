@@ -12,7 +12,7 @@ local Player         = Players.LocalPlayer
 local PlayerGui      = Player:WaitForChild("PlayerGui")
 
 local STREE_LOGO     = "rbxassetid://99948086845842"
-local GET_KEY_URL    = "https://your-key-website.com"
+local GET_KEY_URL    = "https://discord.gg/jdmX43t5mY"
 
 -- Luaegis API Configuration (Read-Only Key)
 local LUAEGIS_API_KEY     = "25ea17d1d9e152e7b132fc7cc265fe3b414082ac37d8ae3c3e4c3f4ccf5eacc7"
