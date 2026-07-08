@@ -619,7 +619,7 @@ RunService.Heartbeat:Connect(function()
 
     if VD.Noclip and LocalPlayer.Character then
         enableNoclipOnce()
-    elseif not VD.Noclip and STREEt(originalCanCollide) then
+    elseif not VD.Noclip and next(originalCanCollide) then
         disableNoclipRestore()
     end
 end)
