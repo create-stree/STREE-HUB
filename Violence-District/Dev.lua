@@ -1588,10 +1588,25 @@ local function STREE_InfiniteLunge()
     end
 end
 
+local function ApplyFling(targetRoot, myRoot, strength)
+    local saved = myRoot.CFrame
+    myRoot.CFrame = CFrame.new(targetRoot.Position)
+    myRoot.AssemblyLinearVelocity  = Vector3.new(strength, strength * 0.8, strength)
+    myRoot.AssemblyAngularVelocity = Vector3.new(9999, 9999, 9999)
+    task.wait(0.05)
+    myRoot.AssemblyLinearVelocity  = Vector3.new(strength, strength * 0.8, strength)
+    myRoot.AssemblyAngularVelocity = Vector3.new(9999, 9999, 9999)
+    task.wait(0.05)
+    myRoot.CFrame = saved
+    myRoot.AssemblyLinearVelocity  = Vector3.zero
+    myRoot.AssemblyAngularVelocity = Vector3.zero
+end
+
 function STREE_FlingNearest()
     if not VD.FLING_Enabled then return end
     local root = Root
     if not root then return end
+
     local closest, closestDist = nil, math.huge
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
@@ -1604,19 +1619,18 @@ function STREE_FlingNearest()
             end
         end
     end
+
     if closest and closest.Character then
         local tr = closest.Character:FindFirstChild("HumanoidRootPart")
         if tr then
-            local originalPos = root.CFrame
-            for _ = 1, 10 do
-                root.CFrame      = tr.CFrame
-                root.Velocity    = Vector3.new(VD.FLING_Strength, VD.FLING_Strength / 2, VD.FLING_Strength)
-                root.RotVelocity = Vector3.new(9999, 9999, 9999)
-                task.wait()
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.PlatformStand = true end
+            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then pcall(function() part.CanCollide = false end) end
             end
-            root.CFrame      = originalPos
-            root.Velocity    = Vector3.zero
-            root.RotVelocity = Vector3.zero
+            ApplyFling(tr, root, VD.FLING_Strength)
+            task.wait(0.1)
+            if hum then hum.PlatformStand = false end
         end
     end
 end
@@ -1625,23 +1639,24 @@ function STREE_FlingAll()
     if not VD.FLING_Enabled then return end
     local root = Root
     if not root then return end
-    local originalPos = root.CFrame
+
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if hum then hum.PlatformStand = true end
+    for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+        if part:IsA("BasePart") then pcall(function() part.CanCollide = false end) end
+    end
+
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             local tr = player.Character:FindFirstChild("HumanoidRootPart")
             if tr then
-                for _ = 1, 5 do
-                    root.CFrame      = tr.CFrame
-                    root.Velocity    = Vector3.new(VD.FLING_Strength, VD.FLING_Strength / 2, VD.FLING_Strength)
-                    root.RotVelocity = Vector3.new(9999, 9999, 9999)
-                    task.wait()
-                end
+                ApplyFling(tr, root, VD.FLING_Strength)
             end
         end
     end
-    root.CFrame      = originalPos
-    root.Velocity    = Vector3.zero
-    root.RotVelocity = Vector3.zero
+
+    task.wait(0.15)
+    if hum then hum.PlatformStand = false end
 end
 
 
@@ -2535,38 +2550,63 @@ end
 local Aimbot = {}
 local State  = { AimTarget = nil, AimHolding = false }
 
+-- FIX: Cari target terdekat dari FOV circle, bukan cuma IsKiller
+-- Bila peran tidak terdeteksi (Lobby/Unknown), tetap scan semua player lain
 function Aimbot.GetClosestTarget(cam)
     if not cam then return nil end
-    if GetRole() ~= "Survivor" then return nil end
 
     local root = Root
     if not root then return nil end
 
+    local role         = GetRole()
+    local screenCenter = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local fovRadius    = VD.AIM_FOV or 120
+
     local closestPlayer = nil
-    local closestDist   = math.huge
+    local closestDist2D = math.huge
 
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and IsKiller(player) and player.Character then
-            local tr = player.Character:FindFirstChild("HumanoidRootPart")
-            if tr then
-                local dist = (tr.Position - root.Position).Magnitude
+        if player == LocalPlayer then continue end
+        if not player.Character then continue end
 
-                local passVis = true
-                if VD.AIM_VisCheck then
-                    local camPos = cam.CFrame.Position
-                    local params = RaycastParams.new()
-                    params.FilterType = Enum.RaycastFilterType.Blacklist
-                    params.FilterDescendantsInstances = { cam, LocalPlayer.Character, player.Character }
-                    local ray = workspace:Raycast(camPos, tr.Position - camPos, params)
-                    passVis = (ray == nil)
-                end
+        -- FIX: Filter target berdasarkan role
+        -- Survivor → bidik Killer; Killer → bidik Survivor; Unknown → bidik semua
+        local validTarget = false
+        if role == "Survivor" and IsKiller(player) then
+            validTarget = true
+        elseif role == "Killer" and IsSurvivor(player) then
+            validTarget = true
+        elseif role == "Unknown" or role == "Lobby" then
+            validTarget = true
+        end
+        if not validTarget then continue end
 
-                if passVis and dist < closestDist then
-                    closestDist = dist; closestPlayer = player
-                end
-            end
+        local tr = player.Character:FindFirstChild("HumanoidRootPart")
+        if not tr then continue end
+
+        -- FIX: Cek apakah target ada di dalam FOV circle (2D screen distance)
+        local screenPos, onScreen = cam:WorldToViewportPoint(tr.Position)
+        if not onScreen or screenPos.Z <= 0 then continue end
+
+        local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+        if dist2D > fovRadius then continue end
+
+        local passVis = true
+        if VD.AIM_VisCheck then
+            local camPos = cam.CFrame.Position
+            local params = RaycastParams.new()
+            params.FilterType = Enum.RaycastFilterType.Blacklist
+            params.FilterDescendantsInstances = { cam, LocalPlayer.Character, player.Character }
+            local ray = workspace:Raycast(camPos, tr.Position - camPos, params)
+            passVis = (ray == nil)
+        end
+
+        if passVis and dist2D < closestDist2D then
+            closestDist2D = dist2D
+            closestPlayer = player
         end
     end
+
     return closestPlayer
 end
 
@@ -2574,30 +2614,49 @@ function Aimbot.GetPredictedPosition(target, targetPart)
     if not target or not targetPart then return nil end
     local pos = targetPart.Position
     if VD.AIM_Predict then
-        local root = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
-        if root then pos = pos + root.AssemblyLinearVelocity * 0.1 end
+        local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+        if tRoot then pos = pos + tRoot.AssemblyLinearVelocity * 0.12 end
     end
     return pos
 end
 
+-- FIX: Set CFrame camera via VirtualUser/mouse delta agar bisa bekerja di executor
 function Aimbot.AimAt(cam, targetPos)
     if not cam or not targetPos then return end
-    local cur    = cam.CFrame
-    local smooth = VD.AIM_Smooth or 0.3
-    cam.CFrame   = cur:Lerp(CFrame.new(cur.Position, targetPos), smooth)
+    local smooth = math.clamp(VD.AIM_Smooth or 0.3, 0.05, 1)
+    local goal   = CFrame.new(cam.CFrame.Position, targetPos)
+    local newCF  = cam.CFrame:Lerp(goal, smooth)
+    -- Set langsung (beberapa executor support ini, fallback mouse delta method)
+    local ok, _ = pcall(function()
+        cam.CFrame = newCF
+    end)
+    if not ok then
+        -- Fallback: geser lewat mousemoverel
+        local curScreen  = cam:WorldToViewportPoint(cam.CFrame.LookVector * 100 + cam.CFrame.Position)
+        local goalScreen = cam:WorldToViewportPoint(targetPos)
+        local dx = (goalScreen.X - curScreen.X) * smooth
+        local dy = (goalScreen.Y - curScreen.Y) * smooth
+        pcall(function() mousemoverel(dx, dy) end)
+    end
 end
 
 function Aimbot.Update(cam, screenSize, screenCenter)
-    if not VD.AIM_Enabled or GetRole() ~= "Survivor" then
+    if not VD.AIM_Enabled then
         State.AimTarget = nil; return
     end
+
+    -- FIX: Kalau UseRMB aktif, harus holding; kalau tidak aktif, langsung aim
     if VD.AIM_UseRMB and not State.AimHolding then
         State.AimTarget = nil; return
     end
+
     local target = Aimbot.GetClosestTarget(cam)
     State.AimTarget = target
+
     if target and target.Character then
-        local tr = target.Character:FindFirstChild("HumanoidRootPart")
+        local partName = VD.AIM_TargetPart or "HumanoidRootPart"
+        local tr = target.Character:FindFirstChild(partName)
+            or target.Character:FindFirstChild("HumanoidRootPart")
         if tr then
             local pred = Aimbot.GetPredictedPosition(target, tr)
             if pred then Aimbot.AimAt(cam, pred) end
@@ -2619,28 +2678,50 @@ local function SpearAimbotCalc(targetPos)
 end
 
 local function UpdateSpearAim()
-    if not VD.SPEAR_Aimbot or GetRole() ~= "Killer" then return end
+    if not VD.SPEAR_Aimbot then return end
+    local role = GetRole()
+    if role ~= "Killer" and role ~= "Unknown" then return end
     local root = Root
     if not root then return end
-    local closest, closestDist = nil, math.huge
+
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+
+    local screenCenter = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local fovRadius    = VD.AIM_FOV or 120
+    local closest, closestDist2D = nil, math.huge
+
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and IsSurvivor(player) and player.Character then
-            local tr = player.Character:FindFirstChild("HumanoidRootPart")
-            if tr then
-                local dist = (tr.Position - root.Position).Magnitude
-                if dist < closestDist then
-                    closestDist = dist; closest = player
-                end
-            end
+        if player == LocalPlayer then continue end
+        if not player.Character then continue end
+        -- Spear aimbot bidik Survivor (atau semua kalau Unknown)
+        local validTarget = IsSurvivor(player) or (role == "Unknown")
+        if not validTarget then continue end
+
+        local tr = player.Character:FindFirstChild("HumanoidRootPart")
+        if not tr then continue end
+
+        local screenPos, onScreen = cam:WorldToViewportPoint(tr.Position)
+        if not onScreen or screenPos.Z <= 0 then continue end
+
+        local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+        if dist2D < closestDist2D then
+            closestDist2D = dist2D; closest = player
         end
     end
+
     if closest and closest.Character then
         local tr = closest.Character:FindFirstChild("HumanoidRootPart")
         if tr then
             local aimPos = SpearAimbotCalc(tr.Position)
             if aimPos then
-                local cam = workspace.CurrentCamera
-                if cam then cam.CFrame = CFrame.new(cam.CFrame.Position, aimPos) end
+                local goal = CFrame.new(cam.CFrame.Position, aimPos)
+                local ok, _ = pcall(function() cam.CFrame = goal end)
+                if not ok then
+                    local curS  = cam:WorldToViewportPoint(cam.CFrame.LookVector * 100 + cam.CFrame.Position)
+                    local goalS = cam:WorldToViewportPoint(aimPos)
+                    pcall(function() mousemoverel(goalS.X - curS.X, goalS.Y - curS.Y) end)
+                end
             end
         end
     end
@@ -3222,11 +3303,12 @@ local function OnRenderStep()
         if DrawingAvailable then Radar_hideAll() end
     end
 
-    pcall(function()
-        if VD.AIM_Enabled then
+    -- FIX: Aimbot.Update dipanggil langsung tanpa cek role di sini (cek sudah ada di dalam GetClosestTarget)
+    if VD.AIM_Enabled then
+        pcall(function()
             Aimbot.Update(cam, cam.ViewportSize, Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2))
-        end
-    end)
+        end)
+    end
 
     pcall(UpdateSpearAim)
     UpdateCameraFOV()
@@ -3551,7 +3633,7 @@ RunService.Heartbeat:Connect(function()
         pcall(UpdateSpearAim)
     end
 
-    if not DrawingAvailable and VD.AIM_Enabled and State.AimHolding then
+    if not DrawingAvailable and VD.AIM_Enabled then
         local sc = cam.ViewportSize
         pcall(function() Aimbot.Update(cam, sc, Vector2.new(sc.X/2, sc.Y/2)) end)
     end
