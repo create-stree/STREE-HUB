@@ -50,11 +50,11 @@ if not isMobile then
         _cursorManual = true
         pcall(function()
             UserInputService.MouseIconEnabled = state
-            UserInputService.MouseBehavior = state 
-                and Enum.MouseBehavior.Default 
+            UserInputService.MouseBehavior = state
+                and Enum.MouseBehavior.Default
                 or Enum.MouseBehavior.LockCenter
         end)
-        
+
         local char = LocalPlayer.Character
         local humanoid = char and char:FindFirstChildOfClass("Humanoid")
         if humanoid then
@@ -94,19 +94,18 @@ if not isMobile then
 end
 
 
-
 local DrawingAvailable = (function()
     if isMobile then return false end
-    local ok, result = pcall(function()
+    local ok2, result2 = pcall(function()
         return typeof(Drawing) == "table" and Drawing.new ~= nil
     end)
-    return ok and result or false
+    return ok2 and result2 or false
 end)()
 
 local function SafeDrawing(typ)
     if not DrawingAvailable then return nil end
-    local ok, res = pcall(function() return Drawing.new(typ) end)
-    return ok and res or nil
+    local ok2, res = pcall(function() return Drawing.new(typ) end)
+    return ok2 and res or nil
 end
 
 local function SafeRemove(obj)
@@ -115,8 +114,8 @@ end
 
 local MobileESP = {}
 
-local function clamp(v, min, max)
-    return math.max(min, math.min(max, v))
+local function clamp(v, mn, mx)
+    return math.max(mn, math.min(mx, v))
 end
 
 getgenv().VD = getgenv().VD or {
@@ -150,6 +149,7 @@ getgenv().VD = getgenv().VD or {
     AUTO_ParryDelay       = 0.5,
     AUTO_SkillCheck       = false,
     SURV_AutoWiggle       = false,
+    SURV_NoFall           = false,
     KILLER_DestroyPallets = false,
     KILLER_FullGenBreak   = false,
     KILLER_NoPalletStun   = false,
@@ -209,10 +209,13 @@ getgenv().VD = getgenv().VD or {
 
 local VD = getgenv().VD
 
+-- FIX: GeneratorESP dideklarasi di sini agar tersedia saat unload
+local GeneratorESP = {}
+
 local function GetSafeGuiParent()
     if gethui then return gethui() end
-    local ok, core = pcall(function() return game:GetService("CoreGui") end)
-    if ok and core then return core end
+    local ok2, core = pcall(function() return game:GetService("CoreGui") end)
+    if ok2 and core then return core end
     return LocalPlayer:FindFirstChild("PlayerGui")
 end
 
@@ -221,7 +224,7 @@ local function GetSafeChamsFolder()
     local pg = GetSafeGuiParent()
     if not pg then return workspace end
     if VD_ChamsFolder and VD_ChamsFolder.Parent then return VD_ChamsFolder end
-    
+
     local f = pg:FindFirstChild("STREE_WorkspaceChams")
     if not f then
         f = Instance.new("Folder")
@@ -294,7 +297,6 @@ local function STREE_DeleteConfig(name)
     end)
 end
 
-
 pcall(function() STREE_LoadConfig("Default") end)
 
 local originalLighting = {
@@ -313,15 +315,14 @@ do
     if atm then
         originalLighting.Atmosphere = {
             Density = atm.Density,
-            Offset = atm.Offset,
-            Glare = atm.Glare,
-            Haze = atm
-                .Haze
+            Offset  = atm.Offset,
+            Glare   = atm.Glare,
+            Haze    = atm.Haze
         }
     end
     if blur then originalLighting.Blur = { Size = blur.Size } end
-    if cc then originalLighting.ColorCorrection = { Enabled = cc.Enabled } end
-    if sr then originalLighting.SunRays = { Enabled = sr.Enabled } end
+    if cc   then originalLighting.ColorCorrection = { Enabled = cc.Enabled } end
+    if sr   then originalLighting.SunRays = { Enabled = sr.Enabled } end
 end
 
 
@@ -361,7 +362,7 @@ local oldNamecall
 local function setupAntiFail()
     if AntiFailHooked then return end
     task.spawn(function()
-        local ok, err = pcall(function()
+        local ok2, err = pcall(function()
             local Remotes = ReplicatedStorage:WaitForChild("Remotes", 10)
             local Events  = ReplicatedStorage:WaitForChild("Events", 10)
             if not Remotes then
@@ -376,7 +377,7 @@ local function setupAntiFail()
             local HealResult = HealFolder and HealFolder:FindFirstChild("SkillCheckResultEvent")
             local HealFail   = HealFolder and HealFolder:FindFirstChild("SkillCheckFailEvent")
 
-            oldNamecall      = hookmetamethod(game, "__namecall", function(self, ...)
+            oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
                 local method = getnamecallmethod()
                 local args   = { ... }
 
@@ -399,10 +400,10 @@ local function setupAntiFail()
                 return oldNamecall(self, ...)
             end)
 
-            AntiFailHooked   = true
+            AntiFailHooked = true
             print("AntiFail: hooked")
         end)
-        if not ok then warn("AntiFail setup failed:", err) end
+        if not ok2 then warn("AntiFail setup failed:", err) end
     end)
 end
 setupAntiFail()
@@ -426,7 +427,7 @@ local function createSimpleESPForCharacter(player, char)
     highlight.FillTransparency = 0.5
     highlight.OutlineTransparency = 0
     highlight.FillColor = getPlayerColor(player)
-    highlight.OutlineColor = Color3.new(1,1,1)
+    highlight.OutlineColor = Color3.new(1, 1, 1)
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = folder
 
@@ -447,7 +448,7 @@ local function createSimpleESPForCharacter(player, char)
         label.Text = player.Name
         label.TextColor3 = getPlayerColor(player)
         label.TextStrokeTransparency = 0
-        label.TextStrokeColor3 = Color3.new(0,0,0)
+        label.TextStrokeColor3 = Color3.new(0, 0, 0)
         label.Font = Enum.Font.SourceSansBold
         label.TextSize = 14
         label.Parent = billboard
@@ -488,13 +489,13 @@ local function updateSimpleESP()
             local posRef = head or hrp or char.PrimaryPart
             if not posRef then
                 if data.Highlight then pcall(function() data.Highlight.Enabled = false end) end
-                if data.Label then pcall(function() data.Label.Visible = false end) end
+                if data.Label     then pcall(function() data.Label.Visible = false end) end
             else
                 local camPos   = Camera and Camera.CFrame.Position or posRef.Position
                 local distance = (posRef.Position - camPos).Magnitude
                 if distance > VD.MaxDistance then
                     if data.Highlight then pcall(function() data.Highlight.Enabled = false end) end
-                    if data.Label then pcall(function() data.Label.Visible = false end) end
+                    if data.Label     then pcall(function() data.Label.Visible = false end) end
                 else
                     local _, onScreen = Camera:WorldToViewportPoint(posRef.Position)
                     if data.Label then data.Label.Visible = onScreen end
@@ -513,8 +514,7 @@ local function updateSimpleESP()
                     end
 
                     if data.Billboard and (not data.Billboard.Adornee or data.Billboard.Adornee.Parent ~= char) then
-                        local newHead = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart") or
-                            char.PrimaryPart
+                        local newHead = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
                         data.Billboard.Adornee = newHead
                     end
                 end
@@ -543,9 +543,9 @@ task.spawn(function()
                 if v:IsA("Atmosphere") then
                     v.Density = 0; v.Offset = 0; v.Glare = 0; v.Haze = 0
                 end
-                if v:IsA("BlurEffect") then v.Size = 0 end
+                if v:IsA("BlurEffect")          then v.Size = 0 end
                 if v:IsA("ColorCorrectionEffect") then v.Enabled = false end
-                if v:IsA("SunRaysEffect") then v.Enabled = false end
+                if v:IsA("SunRaysEffect")         then v.Enabled = false end
             end
         else
             Lighting.Brightness     = originalLighting.Brightness
@@ -561,14 +561,14 @@ task.spawn(function()
                     v.Glare   = originalLighting.Atmosphere.Glare or 0
                     v.Haze    = originalLighting.Atmosphere.Haze or 0
                 end
-                if v:IsA("BlurEffect") and originalLighting.Blur then v.Size = originalLighting.Blur.Size or 0 end
+                if v:IsA("BlurEffect") and originalLighting.Blur then
+                    v.Size = originalLighting.Blur.Size or 0
+                end
                 if v:IsA("ColorCorrectionEffect") and originalLighting.ColorCorrection then
-                    v.Enabled = originalLighting
-                        .ColorCorrection.Enabled or false
+                    v.Enabled = originalLighting.ColorCorrection.Enabled or false
                 end
                 if v:IsA("SunRaysEffect") and originalLighting.SunRays then
-                    v.Enabled = originalLighting.SunRays.Enabled or
-                        false
+                    v.Enabled = originalLighting.SunRays.Enabled or false
                 end
             end
         end
@@ -577,6 +577,7 @@ task.spawn(function()
 end)
 
 
+-- FIX: Satu tabel originalCanCollide di scope atas, tidak diduplikasi
 local originalCanCollide = {}
 
 local function enableNoclipOnce()
@@ -592,11 +593,12 @@ end
 
 local function disableNoclipRestore()
     for part, val in pairs(originalCanCollide) do
-        if part and part.Parent and part:IsA("BasePart") then pcall(function() part.CanCollide = val end) end
+        if part and part.Parent and part:IsA("BasePart") then
+            pcall(function() part.CanCollide = val end)
+        end
     end
     originalCanCollide = {}
 end
-
 
 LocalPlayer.CharacterRemoving:Connect(function()
     originalCanCollide = {}
@@ -605,7 +607,7 @@ end)
 RunService.Heartbeat:Connect(function()
     if Humanoid then
         if VD.Speed then Humanoid.WalkSpeed = VD.SpeedValue end
-        if VD.Jump then Humanoid.JumpPower = VD.JumpValue end
+        if VD.Jump  then Humanoid.JumpPower = VD.JumpValue  end
     end
 
     if VD.ESP then
@@ -642,42 +644,29 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-local PlayerTab, ESPTab, MapTab, AimTab, FOVTab
-local SurvivorTab, KillerTab, GeneratorTab, FlingTab, ResetTab, SettingsTab
+-- FIX: Nama variabel konsisten — semuanya pakai PlayersTab
+local PlayersTab, ESPTab, MapTab, AimTab, FOVTab
+local SurvivorTab, KillerTab, GeneratorTab, FlingTab, SettingsTab
 
 if Window then
-    PlayersTab = Window:Tab({ Title = "Players", Icon = "user" })
-    ESPTab = Window:Tab({ Title = "Visual", Icon = "eye" })
-    MapTab  = Window:Tab({ Title = "Map", Icon = "map" })
-    AimTab  = Window:Tab({ Title = "Aim", Icon = "crosshair" })
-    FOVTab = Window:Tab({ Title = "FOV", Icon = "video" })
-    SurvivorTab  = Window:Tab({ Title = "Survivor", Icon = "shield" })
-    KillerTab = Window:Tab({ Title = "Killer", Icon = "swords" })
-    GeneratorTab = Window:Tab({ Title = "Generator", Icon = "zap" })
-    FlingTab = Window:Tab({ Title = "Fling", Icon = "wind", })
-    SettingsTab  = Window:Tab({ Title = "Settings", Icon = "settings" })
-end
-
-local function MakeSection(tabRef, sectionData)
-    local section = tabRef:Section(sectionData)
-    if not section then return nil end
-
-    function section:Toggle(cfg) return tabRef:Toggle(cfg) end
-    function section:Slider(cfg) return tabRef:Slider(cfg) end
-    function section:Button(cfg) return tabRef:Button(cfg) end
-    function section:Dropdown(cfg) return tabRef:Dropdown(cfg) end
-    function section:Input(cfg) return tabRef:Input(cfg) end
-    function section:Paragraph(cfg) return tabRef:Paragraph(cfg) end
-
-    return section
+    PlayersTab   = Window:Tab({ Title = "Players",   Icon = "user"      })
+    ESPTab       = Window:Tab({ Title = "Visual",    Icon = "eye"       })
+    MapTab       = Window:Tab({ Title = "Map",       Icon = "map"       })
+    AimTab       = Window:Tab({ Title = "Aim",       Icon = "crosshair" })
+    FOVTab       = Window:Tab({ Title = "FOV",       Icon = "video"     })
+    SurvivorTab  = Window:Tab({ Title = "Survivor",  Icon = "shield"    })
+    KillerTab    = Window:Tab({ Title = "Killer",    Icon = "swords"    })
+    GeneratorTab = Window:Tab({ Title = "Generator", Icon = "zap"       })
+    FlingTab     = Window:Tab({ Title = "Fling",     Icon = "wind"      })
+    SettingsTab  = Window:Tab({ Title = "Settings",  Icon = "settings"  })
 end
 
 if Window then
 
 do
-    PlayerTab:Section({ Title = "Movement" })
+    PlayersTab:Section({ Title = "Movement" })
 
-    PlayerTab:Toggle({
+    PlayersTab:Toggle({
         Title = "Speed Hack",
         Callback = function(v)
             VD.Speed = v
@@ -688,16 +677,15 @@ do
         end
     })
 
-    PlayerTab:Slider({
+    PlayersTab:Slider({
         Title = "Speed Value",
         Value = { Min = 16, Max = 200, Default = 16 },
         Callback = function(v)
-            VD.SpeedValue =
-                v
+            VD.SpeedValue = v
         end
     })
 
-    PlayerTab:Toggle({
+    PlayersTab:Toggle({
         Title = "Jump Hack",
         Callback = function(v)
             VD.Jump = v
@@ -708,7 +696,7 @@ do
         end
     })
 
-    PlayerTab:Slider({
+    PlayersTab:Slider({
         Title = "Jump Power",
         Value = { Min = 50, Max = 300, Default = 50 },
         Callback = function(v)
@@ -716,29 +704,29 @@ do
         end
     })
 
-    PlayerTab:Toggle({ 
-        Title = "Infinite Jump", 
-        Callback = function(v) 
-            VD.InfiniteJump = v 
-        end 
+    PlayersTab:Toggle({
+        Title = "Infinite Jump",
+        Callback = function(v)
+            VD.InfiniteJump = v
+        end
     })
 
-    PlayerTab:Toggle({ 
-        Title = "Noclip", 
-        Callback = function(v) 
-            VD.Noclip = v 
-        end 
+    PlayersTab:Toggle({
+        Title = "Noclip",
+        Callback = function(v)
+            VD.Noclip = v
+        end
     })
 
-    PlayerTab:Section({ Title = "Teleport" })
+    PlayersTab:Section({ Title = "Teleport" })
 
-    PlayerTab:Button({ Title = "TP to Gen", Callback = function() pcall(function() STREE_TeleportToGenerator(1) end) end })
-    PlayerTab:Button({ Title = "TP to Gate", Callback = function() pcall(STREE_TeleportToGate) end })
-    PlayerTab:Button({ Title = "TP to Hook", Callback = function() pcall(STREE_TeleportToHook) end })
+    PlayersTab:Button({ Title = "TP to Gen",  Callback = function() pcall(function() STREE_TeleportToGenerator(1) end) end })
+    PlayersTab:Button({ Title = "TP to Gate", Callback = function() pcall(STREE_TeleportToGate) end })
+    PlayersTab:Button({ Title = "TP to Hook", Callback = function() pcall(STREE_TeleportToHook) end })
 end
 
 do
-    ESPTab:Section({ Title = "Basic Esp" })
+    ESPTab:Section({ Title = "Basic ESP" })
 
     ESPTab:Toggle({
         Title = "Enable ESP",
@@ -753,54 +741,53 @@ do
             end
         end
     })
-    ESPTab:Toggle({ Title = "Show Distance", Callback = function(v) VD.ShowDistance = v end })
+    ESPTab:Toggle({ Title = "Show Distance",    Callback = function(v) VD.ShowDistance = v end })
     ESPTab:Slider({
         Title = "Max ESP Distance",
         Value = { Min = 500, Max = 5000, Default = 2000 },
         Callback = function(v)
-            VD.MaxDistance =
-                v
+            VD.MaxDistance = v
         end
     })
 
-    ESPTab:Section({ Title = "Advanced Esp" })
+    ESPTab:Section({ Title = "Advanced ESP" })
 
     ESPTab:Toggle({ Title = "Master Turn On Object Chams", Callback = function(v) VD.ESP_ObjectChams = v end })
-    ESPTab:Toggle({ Title = "Generator (with %)", Callback = function(v) VD.ESP_Obj_Generator = v end })
-    ESPTab:Toggle({ Title = "Gate", Callback = function(v) VD.ESP_Obj_Gate = v end })
-    ESPTab:Toggle({ Title = "Hook", Callback = function(v) VD.ESP_Obj_Hook = v end })
-    ESPTab:Toggle({ Title = "Pallet", Callback = function(v) VD.ESP_Obj_Pallet = v end })
-    ESPTab:Toggle({ Title = "Window", Callback = function(v) VD.ESP_Obj_Window = v end })
+    ESPTab:Toggle({ Title = "Generator (with %)",          Callback = function(v) VD.ESP_Obj_Generator = v end })
+    ESPTab:Toggle({ Title = "Gate",                        Callback = function(v) VD.ESP_Obj_Gate = v end })
+    ESPTab:Toggle({ Title = "Hook",                        Callback = function(v) VD.ESP_Obj_Hook = v end })
+    ESPTab:Toggle({ Title = "Pallet",                      Callback = function(v) VD.ESP_Obj_Pallet = v end })
+    ESPTab:Toggle({ Title = "Window",                      Callback = function(v) VD.ESP_Obj_Window = v end })
 
     ESPTab:Section({ Title = "Other Markers" })
 
-    ESPTab:Toggle({ Title = "Player Highlight (Chams)", Callback = function(v) VD.ESP_PlayerChams = v end })
-    ESPTab:Toggle({ Title = "ESP Skeleton", Callback = function(v) VD.ESP_Skeleton = v end })
-    ESPTab:Toggle({ Title = "ESP Velocity Arrows", Callback = function(v) VD.ESP_Velocity = v end })
-    ESPTab:Toggle({ Title = "ESP Offscreen Arrows", Callback = function(v) VD.ESP_Offscreen = v end })
-    ESPTab:Toggle({ Title = "Closest Hook Highlight", Callback = function(v) VD.ESP_ClosestHook = v end })
+    ESPTab:Toggle({ Title = "Player Highlight (Chams)",  Callback = function(v) VD.ESP_PlayerChams = v end })
+    ESPTab:Toggle({ Title = "ESP Skeleton",              Callback = function(v) VD.ESP_Skeleton = v end })
+    ESPTab:Toggle({ Title = "ESP Velocity Arrows",       Callback = function(v) VD.ESP_Velocity = v end })
+    ESPTab:Toggle({ Title = "ESP Offscreen Arrows",      Callback = function(v) VD.ESP_Offscreen = v end })
+    ESPTab:Toggle({ Title = "Closest Hook Highlight",    Callback = function(v) VD.ESP_ClosestHook = v end })
 end
 
 do
     MapTab:Section({ Title = "Radar" })
 
-    MapTab:Toggle({ Title = "Radar Enable", Callback = function(v) VD.RADAR_Enabled = v end })
+    MapTab:Toggle({ Title = "Radar Enable",       Callback = function(v) VD.RADAR_Enabled = v end })
     MapTab:Slider({
         Title = "Radar Size",
         Value = { Min = 80, Max = 300, Default = 120 },
         Callback = function(v)
-            VD.RADAR_Size =
-                v
+            VD.RADAR_Size = v
         end
     })
     MapTab:Toggle({ Title = "Radar Circle Mode", Callback = function(v) VD.RADAR_Circle = v end })
 
-    MapTab:Section({ Title = "Radar" })
+    -- FIX: Section kedua diganti judul "Radar Filter" agar tidak duplikat
+    MapTab:Section({ Title = "Radar Filter" })
 
-    MapTab:Toggle({ Title = "Radar show Killer", Callback = function(v) VD.RADAR_Killer = v end })
-    MapTab:Toggle({ Title = "Radar show Survivor", Callback = function(v) VD.RADAR_Survivor = v end })
-    MapTab:Toggle({ Title = "Radar show Generator", Callback = function(v) VD.RADAR_Generator = v end })
-    MapTab:Toggle({ Title = "Radar show Pallet", Callback = function(v) VD.RADAR_Pallet = v end })
+    MapTab:Toggle({ Title = "Show Killer",    Callback = function(v) VD.RADAR_Killer = v end })
+    MapTab:Toggle({ Title = "Show Survivor",  Callback = function(v) VD.RADAR_Survivor = v end })
+    MapTab:Toggle({ Title = "Show Generator", Callback = function(v) VD.RADAR_Generator = v end })
+    MapTab:Toggle({ Title = "Show Pallet",    Callback = function(v) VD.RADAR_Pallet = v end })
 end
 
 do
@@ -814,13 +801,12 @@ do
             STREE_CrossV.Visible = v
         end
     end })
-    AimTab:Toggle({ Title = "Use RMB to aim", Callback = function(v) VD.AIM_UseRMB = v end })
+    AimTab:Toggle({ Title = "Use RMB to Aim",        Callback = function(v) VD.AIM_UseRMB = v end })
     AimTab:Toggle({ Title = "Show Aim FOV (circle)", Callback = function(v) VD.AIM_ShowFOV = v end })
     AimTab:Slider({
         Title = "FOV Size (aim radius on screen)",
         Value = { Min = 20, Max = 400, Default = 120 },
-        Callback = function(
-            v)
+        Callback = function(v)
             VD.AIM_FOV = v
         end
     })
@@ -831,15 +817,13 @@ do
             VD.AIM_Smooth = v
         end
     })
-
     AimTab:Toggle({ Title = "Visibility Check", Callback = function(v) VD.AIM_VisCheck = v end })
-    AimTab:Toggle({ Title = "Prediction", Callback = function(v) VD.AIM_Predict = v end })
-
+    AimTab:Toggle({ Title = "Prediction",       Callback = function(v) VD.AIM_Predict = v end })
 
     AimTab:Section({ Title = "Spear Aimbot" })
 
     AimTab:Toggle({ Title = "Spear Aimbot", Callback = function(v) VD.SPEAR_Aimbot = v end })
-    AimTab:Toggle({ Title = "Show Crosshair", Callback = function(v)
+    AimTab:Toggle({ Title = "Show Crosshair (Spear)", Callback = function(v)
         VD.AIM_Crosshair = v
         if STREE_CrossH and STREE_CrossV then
             STREE_CrossH.Visible = v
@@ -850,16 +834,14 @@ do
         Title = "Spear Gravity",
         Value = { Min = 10, Max = 200, Default = 50 },
         Callback = function(v)
-            VD.SPEAR_Gravity =
-                v
+            VD.SPEAR_Gravity = v
         end
     })
     AimTab:Slider({
         Title = "Spear Speed",
         Value = { Min = 50, Max = 300, Default = 100 },
         Callback = function(v)
-            VD.SPEAR_Speed =
-                v
+            VD.SPEAR_Speed = v
         end
     })
 end
@@ -867,22 +849,21 @@ end
 do
     FOVTab:Section({ Title = "Camera" })
 
-    FOVTab:Toggle({ Title = "Enable Camera FOV override", Callback = function(v) VD.CAM_FOVEnabled = v end })
+    FOVTab:Toggle({ Title = "Enable Camera FOV Override",    Callback = function(v) VD.CAM_FOVEnabled = v end })
     FOVTab:Slider({
         Title = "Camera FOV",
         Value = { Min = 30, Max = 140, Default = 90 },
         Callback = function(v)
-            VD.CAM_FOV =
-                v
+            VD.CAM_FOV = v
         end
     })
-    FOVTab:Toggle({ Title = "Third Person (Killer only)", Callback = function(v) VD.CAM_ThirdPerson = v end })
-    FOVTab:Toggle({ Title = "Shift Lock (auto face camera)", Callback = function(v) VD.CAM_ShiftLock = v end })
+    FOVTab:Toggle({ Title = "Third Person (Killer only)",       Callback = function(v) VD.CAM_ThirdPerson = v end })
+    FOVTab:Toggle({ Title = "Shift Lock (auto face camera)",    Callback = function(v) VD.CAM_ShiftLock = v end })
 
     FOVTab:Section({ Title = "Visual" })
 
     FOVTab:Toggle({ Title = "No Fog (remove fog/post effects)", Callback = function(v) VD.NO_Fog = v end })
-    FOVTab:Toggle({ Title = "Fullbright (lighting preset)", Callback = function(v) VD.Fullbright = v end })
+    FOVTab:Toggle({ Title = "Fullbright (lighting preset)",     Callback = function(v) VD.Fullbright = v end })
 end
 
 do
@@ -913,11 +894,14 @@ do
             VD.AUTO_ParryDelay = v
         end
     })
-    SurvivorTab:Toggle({ Title = "Auto Wiggle", Callback = function(v) VD.SURV_AutoWiggle = v end })
+
+    SurvivorTab:Toggle({ Title = "Auto Wiggle",   Callback = function(v) VD.SURV_AutoWiggle = v end })
+    -- FIX: SetupSkillCheckMonitor tidak ada, diganti dengan pcall ke HookIncomingSkillCheck yang ada
     SurvivorTab:Toggle({
         Title = "Auto SkillCheck (QTE)",
         Callback = function(v)
-            VD.AUTO_SkillCheck = v; if v then pcall(SetupSkillCheckMonitor) end
+            VD.AUTO_SkillCheck = v
+            if v then pcall(HookIncomingSkillCheck) end
         end
     })
     SurvivorTab:Button({
@@ -933,8 +917,7 @@ do
         Title = "Flee Distance",
         Value = { Min = 20, Max = 120, Default = 40 },
         Callback = function(v)
-            VD.AUTO_TeleAwayDist =
-                v
+            VD.AUTO_TeleAwayDist = v
         end
     })
     SurvivorTab:Toggle({ Title = "Beat Survivor (auto exit)", Callback = function(v) VD.BEAT_Survivor = v end })
@@ -948,8 +931,7 @@ do
         Title = "Attack Range",
         Value = { Min = 5, Max = 20, Default = 12 },
         Callback = function(v)
-            VD.AUTO_AttackRange =
-                v
+            VD.AUTO_AttackRange = v
         end
     })
     KillerTab:Toggle({ Title = "Hitbox Expand", Callback = function(v) VD.HITBOX_Enabled = v end })
@@ -957,17 +939,16 @@ do
         Title = "Hitbox Size",
         Value = { Min = 5, Max = 40, Default = 15 },
         Callback = function(v)
-            VD.HITBOX_Size =
-                v
+            VD.HITBOX_Size = v
         end
     })
-    KillerTab:Toggle({ Title = "Double Tap", Callback = function(v) VD.KILLER_DoubleTap = v end })
-    KillerTab:Toggle({ Title = "Infinite Lunge", Callback = function(v) VD.KILLER_InfiniteLunge = v end })
+    KillerTab:Toggle({ Title = "Double Tap",      Callback = function(v) VD.KILLER_DoubleTap = v end })
+    KillerTab:Toggle({ Title = "Infinite Lunge",  Callback = function(v) VD.KILLER_InfiniteLunge = v end })
 
     KillerTab:Section({ Title = "Map Control" })
 
     KillerTab:Toggle({ Title = "Destroy Pallets", Callback = function(v) VD.KILLER_DestroyPallets = v end })
-    KillerTab:Toggle({ Title = "Full Gen Break", Callback = function(v) VD.KILLER_FullGenBreak = v end })
+    KillerTab:Toggle({ Title = "Full Gen Break",  Callback = function(v) VD.KILLER_FullGenBreak = v end })
 
     KillerTab:Section({ Title = "Utilities" })
 
@@ -975,23 +956,25 @@ do
     KillerTab:Toggle({
         Title = "Anti Blind (Flashlight)",
         Callback = function(v)
-            VD.KILLER_AntiBlind = v; pcall(SetupAntiBlind)
+            VD.KILLER_AntiBlind = v
+            pcall(SetupAntiBlind)
         end
     })
     KillerTab:Toggle({
         Title = "No Pallet Stun (metamethod)",
         Callback = function(v)
-            VD.KILLER_NoPalletStun = v; pcall(SetupNoPalletStun)
+            VD.KILLER_NoPalletStun = v
+            pcall(SetupNoPalletStun)
         end
     })
-    KillerTab:Toggle({ Title = "No Slowdown", Callback = function(v) VD.KILLER_NoSlowdown = v end })
+    KillerTab:Toggle({ Title = "No Slowdown",        Callback = function(v) VD.KILLER_NoSlowdown = v end })
     KillerTab:Toggle({ Title = "Beat Killer (auto kill)", Callback = function(v) VD.BEAT_Killer = v end })
 end
 
 do
     GeneratorTab:Section({ Title = "Visual" })
 
-    GeneratorTab:Toggle({ Title = "Master Turn On Object Chams", Callback = function(v) VD.ESP_ObjectChams = v end })
+    GeneratorTab:Toggle({ Title = "Master Turn On Object Chams",  Callback = function(v) VD.ESP_ObjectChams = v end })
     GeneratorTab:Toggle({ Title = "- Chams: Generator (with %)", Callback = function(v) VD.ESP_Obj_Generator = v end })
 
     GeneratorTab:Section({ Title = "Automation" })
@@ -1006,8 +989,7 @@ do
     FlingTab:Slider({
         Title = "Fling Strength",
         Value = { Min = 1000, Max = 50000, Default = 10000 },
-        Callback = function(
-            v)
+        Callback = function(v)
             VD.FLING_Strength = v
         end
     })
@@ -1015,14 +997,15 @@ do
     FlingTab:Section({ Title = "Actions" })
 
     FlingTab:Button({ Title = "Fling Nearest", Callback = function() pcall(function() STREE_FlingNearest() end) end })
-    FlingTab:Button({ Title = "Fling All", Callback = function() pcall(STREE_FlingAll) end })
+    FlingTab:Button({ Title = "Fling All",     Callback = function() pcall(STREE_FlingAll) end })
 end
 
+-- FIX: Blok Config dipindah ke SettingsTab (bukan FlingTab)
 do
-    FlingTab:Section({ Title = "Configuration" })
-
     local confInput = ""
     local configDropdown
+
+    SettingsTab:Section({ Title = "Configuration" })
 
     SettingsTab:Input({
         Title = "Config Name",
@@ -1034,7 +1017,7 @@ do
 
     SettingsTab:Button({
         Title = "Save Config",
-        Callback = function() 
+        Callback = function()
             if confInput ~= "" then
                 getgenv().CurrentConfigName = confInput
             end
@@ -1058,14 +1041,14 @@ do
 
     SettingsTab:Button({
         Title = "Load Config",
-        Callback = function() 
+        Callback = function()
             pcall(function() STREE_LoadConfig(getgenv().CurrentConfigName) end)
         end
     })
-    
+
     SettingsTab:Button({
         Title = "Delete Config",
-        Callback = function() 
+        Callback = function()
             pcall(function() STREE_DeleteConfig(getgenv().CurrentConfigName) end)
             getgenv().CurrentConfigName = "Default"
             if configDropdown and configDropdown.Refresh then
@@ -1073,7 +1056,7 @@ do
             end
         end
     })
-    
+
     SettingsTab:Button({
         Title = "Refresh Config List",
         Callback = function()
@@ -1095,6 +1078,7 @@ do
             VD.HealAntiFail = false
             disableNoclipRestore()
             for p, _ in pairs(SimpleESP) do removeSimpleESP(p) end
+            -- FIX: GeneratorESP sekarang valid (dideklarasi di atas)
             for _, folder in pairs(GeneratorESP) do
                 if folder and folder.Parent then pcall(function() folder:Destroy() end) end
             end
@@ -1104,10 +1088,12 @@ do
                 pcall(function()
                     for target, _ in pairs(Chams.Objects or {}) do
                         pcall(function()
-                            local c = target and target:FindFirstChild("_ViolenceChams"); if c then c:Destroy() end
+                            local c = target and target:FindFirstChild("_ViolenceChams")
+                            if c then c:Destroy() end
                         end)
                         pcall(function()
-                            local l = target and target:FindFirstChild("_ViolenceLabel"); if l then l:Destroy() end
+                            local l = target and target:FindFirstChild("_ViolenceLabel")
+                            if l then l:Destroy() end
                         end)
                     end
                 end)
@@ -1124,7 +1110,7 @@ print("STREE HUB Violence District Loaded (Full Features merged with UI fixes)")
 local function GetRole()
     if not LocalPlayer.Team then return "Unknown" end
     local name = LocalPlayer.Team.Name
-    if name == "Killer" then return "Killer" end
+    if name == "Killer"    then return "Killer"   end
     if name == "Survivors" then return "Survivor" end
     return "Lobby"
 end
@@ -1209,12 +1195,12 @@ local function STREE_ScanMap()
     STREE_Cache.ExitPos    = exitPos
     print("[STREE ScanMap] Generators:", #newGens, "Gates:", #newGates, "Hooks:", #newHooks)
 
-    local root           = Root
-    if root and #STREE_Cache.Hooks > 0 then
+    local root2 = Root
+    if root2 and #STREE_Cache.Hooks > 0 then
         local closest, closestDist = nil, math.huge
         for _, hook in ipairs(STREE_Cache.Hooks) do
             if hook.part then
-                local d = (hook.part.Position - root.Position).Magnitude
+                local d = (hook.part.Position - root2.Position).Magnitude
                 if d < closestDist then
                     closestDist = d; closest = hook
                 end
@@ -1224,8 +1210,6 @@ local function STREE_ScanMap()
     end
 end
 
-
-local originalCanCollide = {}
 
 local function STREE_TeleportToPosition(pos)
     if not pos then return false end
@@ -1261,11 +1245,13 @@ local function STREE_TeleportToPosition(pos)
 end
 
 function STREE_TeleportToGenerator(index)
-    if not STREE_Cache or not STREE_Cache.Generators or #STREE_Cache.Generators == 0 then print("[STREE HUB] Generator tidak ditemukan") return false end
+    if not STREE_Cache or not STREE_Cache.Generators or #STREE_Cache.Generators == 0 then
+        print("[STREE HUB] Generator tidak ditemukan"); return false
+    end
 
     local sorted = {}
     for _, gen in ipairs(STREE_Cache.Generators) do
-        table.insert(sorted, {gen = gen, dist = (Root and (gen.part.Position - Root.Position).Magnitude) or math.huge})
+        table.insert(sorted, { gen = gen, dist = (Root and (gen.part.Position - Root.Position).Magnitude) or math.huge })
     end
     table.sort(sorted, function(a, b) return a.dist < b.dist end)
 
@@ -1275,14 +1261,15 @@ function STREE_TeleportToGenerator(index)
 end
 
 function STREE_TeleportToGate()
-    if not STREE_Cache or not STREE_Cache.Gates or #STREE_Cache.Gates == 0 then print("[STREE HUB] Gate tidak ditemukan") return false end
+    if not STREE_Cache or not STREE_Cache.Gates or #STREE_Cache.Gates == 0 then
+        print("[STREE HUB] Gate tidak ditemukan"); return false
+    end
 
     local closest, closestDist = nil, math.huge
     for _, gate in ipairs(STREE_Cache.Gates) do
         local dist = (Root and (gate.part.Position - Root.Position).Magnitude) or math.huge
         if dist < closestDist then
-            closestDist = dist
-            closest = gate
+            closestDist = dist; closest = gate
         end
     end
 
@@ -1291,23 +1278,24 @@ function STREE_TeleportToGate()
 end
 
 function STREE_TeleportToHook()
-    if not STREE_Cache or not STREE_Cache.ClosestHook then print("[STREE HUB] Hook tidak ditemukan") return false end
+    if not STREE_Cache or not STREE_Cache.ClosestHook then
+        print("[STREE HUB] Hook tidak ditemukan"); return false
+    end
     return STREE_TeleportToPosition(STREE_Cache.ClosestHook.part.Position)
 end
 
 local CurrentMapName = nil
 local function CheckMapChange()
-    local map = Workspace:FindFirstChild("Map")
+    local map     = Workspace:FindFirstChild("Map")
     local mapName = map and map.Name or "Unknown"
     if CurrentMapName ~= mapName then
         print("[STREE HUB] Map berubah: " .. tostring(CurrentMapName) .. " -> " .. mapName)
         VD._BeatSurvivorDone = false
-        VD._BeatKillerDone = false
-        VD._LastTeleAway = 0
-        VD._KillerTarget = nil
+        VD._BeatKillerDone   = false
+        VD._LastTeleAway     = 0
+        VD._KillerTarget     = nil
     end
     CurrentMapName = mapName
-    
     STREE_ScanMap()
 end
 
@@ -1326,16 +1314,16 @@ local function STREE_AutoAttack()
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and IsSurvivor(player) and player.Character then
             local tRoot = player.Character:FindFirstChild("HumanoidRootPart")
-            local tHum = player.Character:FindFirstChildOfClass("Humanoid")
-            
+            local tHum  = player.Character:FindFirstChildOfClass("Humanoid")
+
             if tRoot and tHum and tHum.MaxHealth > 0 then
                 local pct = tHum.Health / tHum.MaxHealth
                 if pct > 0.25 and (tRoot.Position - root.Position).Magnitude <= VD.AUTO_AttackRange then
                     pcall(function()
-                        local r = ReplicatedStorage:FindFirstChild("Remotes")
-                        local a = r and r:FindFirstChild("Attacks")
-                        local b = a and a:FindFirstChild("BasicAttack")
-                        if b then b:FireServer(false) end
+                        local r  = ReplicatedStorage:FindFirstChild("Remotes")
+                        local a  = r and r:FindFirstChild("Attacks")
+                        local ba = a and a:FindFirstChild("BasicAttack")
+                        if ba then ba:FireServer(false) end
                     end)
                     break
                 end
@@ -1344,16 +1332,16 @@ local function STREE_AutoAttack()
     end
 end
 
-local LastParryTime = 0
+local LastParryTime  = 0
 local LastDebugParry = 0
 local function AutoParry()
     if not VD.AUTO_Parry then return end
     if GetRole() ~= "Survivor" then return end
     if tick() - LastParryTime < (VD.AUTO_ParryDelay or 0.5) then return end
-    
+
     local root = Root
     if not root then return end
-    
+
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and IsKiller(player) and player.Character then
             local killerRoot = player.Character:FindFirstChild("HumanoidRootPart")
@@ -1363,15 +1351,15 @@ local function AutoParry()
 
                     local sensitivity = VD.AUTO_ParrySensitivity or 30
                     local dirToKiller = (killerRoot.Position - root.Position).Unit
-                    
+
                     if dirToKiller.Magnitude == dirToKiller.Magnitude then
                         local survivorLook = root.CFrame.LookVector
-                        local dotProduct = survivorLook:Dot(dirToKiller)
-                        local angle = math.deg(math.acos(math.clamp(dotProduct, -1, 1)))
+                        local dotProduct   = survivorLook:Dot(dirToKiller)
+                        local angle        = math.deg(math.acos(math.clamp(dotProduct, -1, 1)))
 
                         local rayParams = RaycastParams.new()
                         rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-                        rayParams.FilterDescendantsInstances = {LocalPlayer.Character, player.Character, workspace.CurrentCamera}
+                        rayParams.FilterDescendantsInstances = { LocalPlayer.Character, player.Character, workspace.CurrentCamera }
                         local rayHit = workspace:Raycast(root.Position, killerRoot.Position - root.Position, rayParams)
 
                         if angle <= sensitivity and not rayHit then
@@ -1380,24 +1368,31 @@ local function AutoParry()
                                 if remotes then
                                     local items = remotes:FindFirstChild("Items")
                                     if items then
-                                        
                                         local dagger = items:FindFirstChild("Parrying Dagger") or items:FindFirstChild("Parry") or items:FindFirstChild("Dagger")
                                         if dagger then
                                             local parry = dagger:FindFirstChild("parry") or dagger:FindFirstChildWhichIsA("RemoteEvent")
                                             if parry then
                                                 local targetLook = Vector3.new(killerRoot.Position.X, root.Position.Y, killerRoot.Position.Z)
                                                 root.CFrame = CFrame.lookAt(root.Position, targetLook)
-
                                                 parry:FireServer()
                                                 LastParryTime = tick()
                                             else
-                                                if tick() - LastDebugParry > 2 then warn("AutoParry: Ditemukan item Dagger, tapi tidak ada RemoteEvent parry!"); LastDebugParry = tick() end
+                                                if tick() - LastDebugParry > 2 then
+                                                    warn("AutoParry: Ditemukan item Dagger, tapi tidak ada RemoteEvent parry!")
+                                                    LastDebugParry = tick()
+                                                end
                                             end
                                         else
-                                            if tick() - LastDebugParry > 2 then warn("AutoParry: Parrying Dagger tidak ditemukan di dalam Remotes.Items!"); LastDebugParry = tick() end
+                                            if tick() - LastDebugParry > 2 then
+                                                warn("AutoParry: Parrying Dagger tidak ditemukan di dalam Remotes.Items!")
+                                                LastDebugParry = tick()
+                                            end
                                         end
                                     else
-                                        if tick() - LastDebugParry > 2 then warn("AutoParry: Remotes.Items tidak ditemukan!"); LastDebugParry = tick() end
+                                        if tick() - LastDebugParry > 2 then
+                                            warn("AutoParry: Remotes.Items tidak ditemukan!")
+                                            LastDebugParry = tick()
+                                        end
                                     end
                                 end
                             end)
@@ -1407,7 +1402,7 @@ local function AutoParry()
                                 if rayHit then
                                     warn("AutoParry: Gagal, terhalang objek: " .. tostring(rayHit.Instance.Name))
                                 else
-                                    warn("AutoParry: Gagal, sudut Anda " .. math.floor(angle) .. "Â° (Maksimal di config: " .. tostring(sensitivity) .. "Â°). Harap hadap Killer!")
+                                    warn("AutoParry: Gagal, sudut Anda " .. math.floor(angle) .. "° (Maksimal: " .. tostring(sensitivity) .. "°). Harap hadap Killer!")
                                 end
                                 LastDebugParry = tick()
                             end
@@ -1450,8 +1445,7 @@ local function STREE_UpdateHitboxes()
     end
 
     if GetRole() ~= "Killer" or not VD.HITBOX_Enabled then
-        restoreAll()
-        return
+        restoreAll(); return
     end
 
     for _, player in ipairs(Players:GetPlayers()) do
@@ -1464,9 +1458,9 @@ local function STREE_UpdateHitboxes()
                     if not OriginalHitboxSizes[player] then
                         OriginalHitboxSizes[player] = root.Size
                     end
-                    local sz          = VD.HITBOX_Size
-                    root.Size         = Vector3.new(sz, sz, sz)
-                    root.CanCollide   = false
+                    local sz        = VD.HITBOX_Size
+                    root.Size       = Vector3.new(sz, sz, sz)
+                    root.CanCollide = false
                     root.Transparency = 0.7
                 elseif root and OriginalHitboxSizes[player] then
                     root.Size                   = OriginalHitboxSizes[player]
@@ -1483,25 +1477,22 @@ local LastPalletDestroyMap = 0
 
 local function STREE_DestroyAllPallets()
     if not VD.KILLER_DestroyPallets or GetRole() ~= "Killer" then return end
-    
     if tick() - LastPalletDestroyMap < 1.5 then return end
-    
+
     pcall(function()
         local r = ReplicatedStorage:FindFirstChild("Remotes")
         local p = r and r:FindFirstChild("Pallet")
         local j = p and p:FindFirstChild("Jason")
         if not j then return end
-        
+
         local dg = j:FindFirstChild("Destroy-Global")
         local d  = j:FindFirstChild("Destroy")
-        
+
         if dg then pcall(function() dg:FireServer() end) end
-        
+
         if d then
-            local sentCount = 0
             for _, pallet in ipairs(STREE_Cache.Pallets) do
                 if pallet.model then
-                    sentCount = sentCount + 1
                     task.spawn(function()
                         pcall(function() d:FireServer(pallet.model) end)
                     end)
@@ -1509,7 +1500,7 @@ local function STREE_DestroyAllPallets()
             end
         end
     end)
-    
+
     LastPalletDestroyMap = tick()
 end
 
@@ -1521,14 +1512,13 @@ local function STREE_FullGenBreak()
     if tick() - LastGenBreakTime < 0.8 then return end
     local root = Root
     if not root then return end
-    
+
     LastGenBreakTime = tick()
 
     local r = ReplicatedStorage:FindFirstChild("Remotes")
     if not r then return end
     local g = r:FindFirstChild("Generator")
     if not g then return end
-
     local be = g:FindFirstChild("BreakGenEvent")
     if not be then return end
 
@@ -1658,22 +1648,20 @@ local function STREE_TeleportAway()
     local bestDist = 0
     for _, gate in ipairs(STREE_Cache.Gates) do
         if gate.part and killerPos then
-            local gatePos = gate.part.Position
+            local gatePos       = gate.part.Position
             local distFromKiller = (gatePos - killerPos).Magnitude
             if distFromKiller > bestDist then
-                bestDist = distFromKiller
-                bestSpot = gatePos
+                bestDist = distFromKiller; bestSpot = gatePos
             end
         end
     end
     if not bestSpot then
         for _, gen in ipairs(STREE_Cache.Generators) do
             if gen.part and killerPos then
-                local genPos = gen.part.Position
+                local genPos        = gen.part.Position
                 local distFromKiller = (genPos - killerPos).Magnitude
                 if distFromKiller > bestDist then
-                    bestDist = distFromKiller
-                    bestSpot = genPos
+                    bestDist = distFromKiller; bestSpot = genPos
                 end
             end
         end
@@ -1694,7 +1682,7 @@ local function STREE_BeatGameSurvivor()
     local map = Workspace:FindFirstChild("Map")
     if not map then return end
 
-    local exitPos = nil
+    local exitPos    = nil
     local finishPart = nil
     pcall(function()
         if map:FindFirstChild("RooftopHitbox") or map:FindFirstChild("Rooftop") then
@@ -1704,18 +1692,15 @@ local function STREE_BeatGameSurvivor()
             exitPos = Vector3.new(1546.12, 152.21, -796.72); return
         end
         if STREE_Cache and STREE_Cache.ExitPos then
-            exitPos = STREE_Cache.ExitPos
-            return
+            exitPos = STREE_Cache.ExitPos; return
         end
     end)
 
     if not exitPos then return end
-    VD._LastFinishPos    = VD._LastFinishPos or nil
     VD._BeatSurvivorDone = VD._BeatSurvivorDone or false
     if VD._BeatSurvivorDone then return end
 
     VD._BeatSurvivorDone = true
-    VD._LastFinishPos    = exitPos
 
     task.spawn(function()
         task.delay(4, function()
@@ -1724,7 +1709,7 @@ local function STREE_BeatGameSurvivor()
 
         for i = 1, 10 do
             if not Root or not Root.Parent then break end
-            
+
             pcall(function()
                 local event = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes"):FindFirstChild("Game"):FindFirstChild("PlayerActionEvent")
                 if event then
@@ -1740,17 +1725,15 @@ local function STREE_BeatGameSurvivor()
                 pcall(function() firetouchinterest(Root, finishPart, 0) end)
                 pcall(function() firetouchinterest(Root, finishPart, 1) end)
             end
-            
+
             if i == 1 then
                 Root.Velocity = Vector3.zero
-                Root.CFrame = CFrame.new(exitPos + Vector3.new(0, 3, 0))
+                Root.CFrame   = CFrame.new(exitPos + Vector3.new(0, 3, 0))
             end
 
             pcall(function()
                 local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum:MoveTo(exitPos)
-                end
+                if hum then hum:MoveTo(exitPos) end
             end)
 
             task.wait(0.2)
@@ -1809,12 +1792,8 @@ local function STREE_BeatGameKiller()
     if not target or not target.Character then return end
     local tr = target.Character:FindFirstChild("HumanoidRootPart")
     local th = target.Character:FindFirstChildOfClass("Humanoid")
-    if not tr or not th then
-        VD._KillerTarget = nil; return
-    end
-    if th.Health <= 0 then
-        VD._KillerTarget = nil; return
-    end
+    if not tr or not th                         then VD._KillerTarget = nil; return end
+    if th.Health <= 0                           then VD._KillerTarget = nil; return end
 
     for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
         if part:IsA("BasePart") then pcall(function() part.CanCollide = false end) end
@@ -1837,7 +1816,7 @@ local IsAutoHooking = false
 local function STREE_AutoHook()
     if not VD.KILLER_AutoHook or GetRole() ~= "Killer" then return end
     if IsAutoHooking then return end
-    
+
     local root = Root
     if not root then return end
 
@@ -1857,7 +1836,6 @@ local function STREE_AutoHook()
                             end
                         end
                     end
-                    
                     if not isHooked then
                         local dist = (tr.Position - root.Position).Magnitude
                         if dist < closestDist then
@@ -1885,20 +1863,20 @@ local function STREE_AutoHook()
             task.spawn(function()
                 root.CFrame = CFrame.new(closestDowned.Position + Vector3.new(0, 3, 0), closestDowned.Position)
                 task.wait(0.3)
-                
+
                 pcall(function()
                     local vim = game:GetService("VirtualInputManager")
-                    vim:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                    vim:SendKeyEvent(true,  Enum.KeyCode.Space, false, game)
                     task.wait(0.05)
                     vim:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
                 end)
-                
+
                 task.wait(0.8)
 
                 if root and root.Parent then
                     root.CFrame = CFrame.new(closestHook.part.Position + Vector3.new(0, 3, 0))
                     task.wait(0.3)
-                    
+
                     pcall(function()
                         local event = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes"):FindFirstChild("Carry"):FindFirstChild("HookEvent")
                         if event and event:IsA("RemoteEvent") then
@@ -1907,12 +1885,11 @@ local function STREE_AutoHook()
                                 hookPoint = closestHook.model:FindFirstChild("HookPoint") or closestHook.model:FindFirstChild("HookHitbox")
                             end
                             if not hookPoint then hookPoint = closestHook.part end
-                            
                             event:FireServer(hookPoint)
                         end
                     end)
                 end
-                
+
                 task.wait(1)
                 IsAutoHooking = false
             end)
@@ -1974,14 +1951,13 @@ function Chams.Create(target, colorData, label)
     highlight.OutlineTransparency = 0
     highlight.DepthMode           = Enum.HighlightDepthMode.AlwaysOnTop
 
-    local ok = pcall(function() highlight.Parent = target end)
-    if not ok then highlight.Parent = GetSafeChamsFolder() end
+    local ok3 = pcall(function() highlight.Parent = target end)
+    if not ok3 then highlight.Parent = GetSafeChamsFolder() end
 
-    local data                    = { highlight = highlight, target = target }
+    local data = { highlight = highlight, target = target }
 
     if label then
-        local rootPart = (target:IsA("Model") and (target:FindFirstChild("HumanoidRootPart") or target:FindFirstChildWhichIsA("BasePart"))) or
-            target
+        local rootPart = (target:IsA("Model") and (target:FindFirstChild("HumanoidRootPart") or target:FindFirstChildWhichIsA("BasePart"))) or target
         if rootPart then
             local billboard                  = Instance.new("BillboardGui")
             billboard.Name                   = "_ViolenceLabel"
@@ -2002,9 +1978,9 @@ function Chams.Create(target, colorData, label)
             textLabel.Text                   = label
             textLabel.Parent                 = billboard
 
-            data.billboard                   = billboard
-            data.textLabel                   = textLabel
-            data.rootPart                    = rootPart
+            data.billboard  = billboard
+            data.textLabel  = textLabel
+            data.rootPart   = rootPart
         end
     end
 
@@ -2030,12 +2006,11 @@ end
 function Chams.SetColor(target, colorData)
     local data = Chams.Objects[target]
     if not data or not data.highlight then return end
-    
+
     if not data.highlight.Parent then
-        Chams.Remove(target)
-        return
+        Chams.Remove(target); return
     end
-    
+
     data.highlight.FillColor        = colorData.fill
     data.highlight.OutlineColor     = colorData.outline
     data.highlight.FillTransparency = colorData.fillTrans or 0.5
@@ -2068,16 +2043,12 @@ local function DrawingESP_create()
     local skel = {}
     for i = 1, 14 do
         skel[i] = SafeDrawing("Line")
-        if skel[i] then
-            skel[i].Thickness = 1; skel[i].Visible = false
-        end
+        if skel[i] then skel[i].Thickness = 1; skel[i].Visible = false end
     end
     local box = {}
     for i = 1, 4 do
         box[i] = SafeDrawing("Line")
-        if box[i] then
-            box[i].Thickness = 1; box[i].Visible = false
-        end
+        if box[i] then box[i].Thickness = 1; box[i].Visible = false end
     end
     return {
         Box       = box,
@@ -2094,42 +2065,26 @@ end
 
 local function DrawingESP_setup(esp)
     if not esp then return end
-    for _, l in ipairs(esp.Box) do
-        if l then
-            l.Thickness = 1; l.Visible = false
-        end
-    end
-    for _, l in ipairs(esp.Skel) do
-        if l then
-            l.Thickness = 1; l.Visible = false
-        end
-    end
+    for _, l in ipairs(esp.Box)  do if l then l.Thickness = 1; l.Visible = false end end
+    for _, l in ipairs(esp.Skel) do if l then l.Thickness = 1; l.Visible = false end end
     if esp.Name then
-        esp.Name.Size = 14; esp.Name.Font = Drawing.Fonts.Monospace; esp.Name.Center = true; esp.Name.Outline = true; esp.Name.Visible = false
+        esp.Name.Size = 14; esp.Name.Font = Drawing.Fonts.Monospace
+        esp.Name.Center = true; esp.Name.Outline = true; esp.Name.Visible = false
     end
     if esp.Dist then
-        esp.Dist.Size = 12; esp.Dist.Font = Drawing.Fonts.Monospace; esp.Dist.Center = true; esp.Dist.Outline = true; esp.Dist.Color =
-            Color3.fromRGB(180, 180, 180); esp.Dist.Visible = false
+        esp.Dist.Size = 12; esp.Dist.Font = Drawing.Fonts.Monospace
+        esp.Dist.Center = true; esp.Dist.Outline = true
+        esp.Dist.Color = Color3.fromRGB(180, 180, 180); esp.Dist.Visible = false
     end
-    if esp.HealthBg then
-        esp.HealthBg.Filled = true; esp.HealthBg.Color = Color3.fromRGB(25, 25, 25); esp.HealthBg.Visible = false
-    end
-    if esp.HealthBar then
-        esp.HealthBar.Filled = true; esp.HealthBar.Visible = false
-    end
-    if esp.Offscreen then
-        esp.Offscreen.Filled = true; esp.Offscreen.Visible = false
-    end
-    if esp.VelLine then
-        esp.VelLine.Thickness = 2; esp.VelLine.Color = Color3.fromRGB(0, 255, 255); esp.VelLine.Visible = false
-    end
-    if esp.VelArrow then
-        esp.VelArrow.Filled = true; esp.VelArrow.Color = Color3.fromRGB(0, 255, 255); esp.VelArrow.Visible = false
-    end
+    if esp.HealthBg  then esp.HealthBg.Filled  = true; esp.HealthBg.Color = Color3.fromRGB(25,25,25); esp.HealthBg.Visible = false end
+    if esp.HealthBar then esp.HealthBar.Filled  = true; esp.HealthBar.Visible = false end
+    if esp.Offscreen then esp.Offscreen.Filled  = true; esp.Offscreen.Visible = false end
+    if esp.VelLine   then esp.VelLine.Thickness = 2; esp.VelLine.Color = Color3.fromRGB(0,255,255); esp.VelLine.Visible = false end
+    if esp.VelArrow  then esp.VelArrow.Filled   = true; esp.VelArrow.Color = Color3.fromRGB(0,255,255); esp.VelArrow.Visible = false end
 end
 
 local Bones_R15 = {
-    { "Head",       "UpperTorso" }, { "UpperTorso", "LowerTorso" },
+    { "Head", "UpperTorso" }, { "UpperTorso", "LowerTorso" },
     { "UpperTorso", "LeftUpperArm" }, { "LeftUpperArm", "LeftLowerArm" }, { "LeftLowerArm", "LeftHand" },
     { "UpperTorso", "RightUpperArm" }, { "RightUpperArm", "RightLowerArm" }, { "RightLowerArm", "RightHand" },
     { "LowerTorso", "LeftUpperLeg" }, { "LeftUpperLeg", "LeftLowerLeg" }, { "LeftLowerLeg", "LeftFoot" },
@@ -2146,15 +2101,15 @@ local function DrawingESP_cleanup()
         if not valid[player] then
             if esp then
                 pcall(function()
-                    for _, l in ipairs(esp.Box) do if l then SafeRemove(l) end end
+                    for _, l in ipairs(esp.Box)  do if l then SafeRemove(l) end end
                     for _, l in ipairs(esp.Skel) do if l then SafeRemove(l) end end
-                    if esp.Name then SafeRemove(esp.Name) end
-                    if esp.Dist then SafeRemove(esp.Dist) end
-                    if esp.HealthBg then SafeRemove(esp.HealthBg) end
+                    if esp.Name      then SafeRemove(esp.Name)      end
+                    if esp.Dist      then SafeRemove(esp.Dist)      end
+                    if esp.HealthBg  then SafeRemove(esp.HealthBg)  end
                     if esp.HealthBar then SafeRemove(esp.HealthBar) end
                     if esp.Offscreen then SafeRemove(esp.Offscreen) end
-                    if esp.VelLine then SafeRemove(esp.VelLine) end
-                    if esp.VelArrow then SafeRemove(esp.VelArrow) end
+                    if esp.VelLine   then SafeRemove(esp.VelLine)   end
+                    if esp.VelArrow  then SafeRemove(esp.VelArrow)  end
                 end)
             end
             DrawingESP.cache[player]        = nil
@@ -2164,14 +2119,14 @@ local function DrawingESP_cleanup()
 end
 
 local function DrawingESP_hideAll(esp)
-    for _, l in ipairs(esp.Box) do if l then l.Visible = false end end
+    for _, l in ipairs(esp.Box)  do if l then l.Visible = false end end
     for _, l in ipairs(esp.Skel) do if l then l.Visible = false end end
-    if esp.Name then esp.Name.Visible = false end
-    if esp.Dist then esp.Dist.Visible = false end
-    if esp.HealthBg then esp.HealthBg.Visible = false end
+    if esp.Name      then esp.Name.Visible      = false end
+    if esp.Dist      then esp.Dist.Visible      = false end
+    if esp.HealthBg  then esp.HealthBg.Visible  = false end
     if esp.HealthBar then esp.HealthBar.Visible = false end
-    if esp.VelLine then esp.VelLine.Visible = false end
-    if esp.VelArrow then esp.VelArrow.Visible = false end
+    if esp.VelLine   then esp.VelLine.Visible   = false end
+    if esp.VelArrow  then esp.VelArrow.Visible  = false end
 end
 
 local function DrawingESP_render(esp, player, char, cam, screenSize, screenCenter)
@@ -2179,15 +2134,11 @@ local function DrawingESP_render(esp, player, char, cam, screenSize, screenCente
     local root = char:FindFirstChild("HumanoidRootPart")
     local head = char:FindFirstChild("Head")
     local hum  = char:FindFirstChildOfClass("Humanoid")
-    if not root or not head then
-        DrawingESP_hideAll(esp); return
-    end
+    if not root or not head then DrawingESP_hideAll(esp); return end
 
     local myRoot = Root
     local dist   = myRoot and (root.Position - myRoot.Position).Magnitude or 0
-    if dist > VD.MaxDistance then
-        DrawingESP_hideAll(esp); return
-    end
+    if dist > VD.MaxDistance then DrawingESP_hideAll(esp); return end
 
     local isKillerPlayer = IsKiller(player)
     local visible = true
@@ -2196,14 +2147,14 @@ local function DrawingESP_render(esp, player, char, cam, screenSize, screenCente
         local params                      = RaycastParams.new()
         params.FilterType                 = Enum.RaycastFilterType.Blacklist
         params.FilterDescendantsInstances = { cam, LocalPlayer.Character, char }
-        local ray                         = workspace:Raycast(camPos, head.Position - camPos, params)
-        visible                           = (ray == nil)
+        local ray = workspace:Raycast(camPos, head.Position - camPos, params)
+        visible   = (ray == nil)
     end
 
-    local col      = isKillerPlayer
-        and (visible and Color3.fromRGB(255, 120, 120) or Color3.fromRGB(255, 65, 65))
-        or (visible and Color3.fromRGB(120, 255, 170) or Color3.fromRGB(65, 220, 130))
-    local skelCol  = visible and Color3.fromRGB(150, 255, 150) or Color3.fromRGB(255, 255, 255)
+    local col     = isKillerPlayer
+        and (visible and Color3.fromRGB(255,120,120) or Color3.fromRGB(255,65,65))
+        or  (visible and Color3.fromRGB(120,255,170) or Color3.fromRGB(65,220,130))
+    local skelCol = visible and Color3.fromRGB(150,255,150) or Color3.fromRGB(255,255,255)
 
     local headPos  = head.Position + Vector3.new(0, 0.5, 0)
     local feetPos  = root.Position - Vector3.new(0, 3, 0)
@@ -2219,10 +2170,8 @@ local function DrawingESP_render(esp, player, char, cam, screenSize, screenCente
             local dy    = rs.Y - screenCenter.Y
             local angle = math.atan2(dy, dx)
             local edge  = 50
-            local aX    = math.clamp(screenCenter.X + math.cos(angle) * (screenSize.X / 2 - edge), edge,
-                screenSize.X - edge)
-            local aY    = math.clamp(screenCenter.Y + math.sin(angle) * (screenSize.Y / 2 - edge), edge,
-                screenSize.Y - edge)
+            local aX    = math.clamp(screenCenter.X + math.cos(angle) * (screenSize.X / 2 - edge), edge, screenSize.X - edge)
+            local aY    = math.clamp(screenCenter.Y + math.sin(angle) * (screenSize.Y / 2 - edge), edge, screenSize.Y - edge)
             local fwd   = Vector2.new(math.cos(angle), math.sin(angle))
             local right = Vector2.new(-fwd.Y, fwd.X)
             local pos   = Vector2.new(aX, aY)
@@ -2248,29 +2197,13 @@ local function DrawingESP_render(esp, player, char, cam, screenSize, screenCente
     local boxWidth  = boxHeight * 0.6
     local cx        = rs.X
 
-    if esp.Box[1] then
-        esp.Box[1].From = Vector2.new(cx - boxWidth / 2, boxTop); esp.Box[1].To = Vector2.new(cx + boxWidth / 2, boxTop); esp.Box[1].Color =
-            col; esp.Box[1].Visible = true
-    end
-    if esp.Box[2] then
-        esp.Box[2].From = Vector2.new(cx + boxWidth / 2, boxTop); esp.Box[2].To = Vector2.new(cx + boxWidth / 2,
-            boxBottom); esp.Box[2].Color = col; esp.Box[2].Visible = true
-    end
-    if esp.Box[3] then
-        esp.Box[3].From = Vector2.new(cx + boxWidth / 2, boxBottom); esp.Box[3].To = Vector2.new(cx - boxWidth / 2,
-            boxBottom); esp.Box[3].Color = col; esp.Box[3].Visible = true
-    end
-    if esp.Box[4] then
-        esp.Box[4].From = Vector2.new(cx - boxWidth / 2, boxBottom); esp.Box[4].To = Vector2.new(cx - boxWidth / 2,
-            boxTop); esp.Box[4].Color = col; esp.Box[4].Visible = true
-    end
+    if esp.Box[1] then esp.Box[1].From = Vector2.new(cx - boxWidth/2, boxTop);    esp.Box[1].To = Vector2.new(cx + boxWidth/2, boxTop);    esp.Box[1].Color = col; esp.Box[1].Visible = true end
+    if esp.Box[2] then esp.Box[2].From = Vector2.new(cx + boxWidth/2, boxTop);    esp.Box[2].To = Vector2.new(cx + boxWidth/2, boxBottom); esp.Box[2].Color = col; esp.Box[2].Visible = true end
+    if esp.Box[3] then esp.Box[3].From = Vector2.new(cx + boxWidth/2, boxBottom); esp.Box[3].To = Vector2.new(cx - boxWidth/2, boxBottom); esp.Box[3].Color = col; esp.Box[3].Visible = true end
+    if esp.Box[4] then esp.Box[4].From = Vector2.new(cx - boxWidth/2, boxBottom); esp.Box[4].To = Vector2.new(cx - boxWidth/2, boxTop);    esp.Box[4].Color = col; esp.Box[4].Visible = true end
 
-    if esp.Name then
-        esp.Name.Text = player.Name; esp.Name.Position = Vector2.new(cx, boxTop - 18); esp.Name.Color = col; esp.Name.Visible = true
-    end
-    if esp.Dist then
-        esp.Dist.Text = math.floor(dist) .. "m"; esp.Dist.Position = Vector2.new(cx, boxBottom + 4); esp.Dist.Visible = true
-    end
+    if esp.Name then esp.Name.Text = player.Name; esp.Name.Position = Vector2.new(cx, boxTop - 18); esp.Name.Color = col; esp.Name.Visible = true end
+    if esp.Dist then esp.Dist.Text = math.floor(dist) .. "m"; esp.Dist.Position = Vector2.new(cx, boxBottom + 4); esp.Dist.Visible = true end
 
     if VD.ESP_Skeleton and hum then
         local bones = (char:FindFirstChild("Torso") and Bones_R6) or Bones_R15
@@ -2320,33 +2253,32 @@ local function DrawingESP_render(esp, player, char, cam, screenSize, screenCente
             local futureScreen = cam:WorldToViewportPoint(futurePos)
             if futureScreen.Z > 0 then
                 if esp.VelLine then
-                    esp.VelLine.From = Vector2.new(rs.X, rs.Y); esp.VelLine.To = Vector2.new(futureScreen.X,
-                        futureScreen.Y); esp.VelLine.Visible = true
+                    esp.VelLine.From = Vector2.new(rs.X, rs.Y)
+                    esp.VelLine.To   = Vector2.new(futureScreen.X, futureScreen.Y)
+                    esp.VelLine.Visible = true
                 end
                 local dx  = futureScreen.X - rs.X
                 local dy  = futureScreen.Y - rs.Y
-                local len = math.sqrt(dx * dx + dy * dy)
+                local len = math.sqrt(dx*dx + dy*dy)
                 if len > 5 and esp.VelArrow then
-                    local fx, fy         = dx / len, dy / len
+                    local fx, fy         = dx/len, dy/len
                     esp.VelArrow.PointA  = Vector2.new(futureScreen.X, futureScreen.Y)
-                    esp.VelArrow.PointB  = Vector2.new(futureScreen.X - fx * 10 + fy * 5, futureScreen.Y - fy * 10 - fx *
-                        5)
-                    esp.VelArrow.PointC  = Vector2.new(futureScreen.X - fx * 10 - fy * 5, futureScreen.Y - fy * 10 + fx *
-                        5)
+                    esp.VelArrow.PointB  = Vector2.new(futureScreen.X - fx*10 + fy*5, futureScreen.Y - fy*10 - fx*5)
+                    esp.VelArrow.PointC  = Vector2.new(futureScreen.X - fx*10 - fy*5, futureScreen.Y - fy*10 + fx*5)
                     esp.VelArrow.Visible = true
                 elseif esp.VelArrow then
                     esp.VelArrow.Visible = false
                 end
             else
-                if esp.VelLine then esp.VelLine.Visible = false end
+                if esp.VelLine  then esp.VelLine.Visible  = false end
                 if esp.VelArrow then esp.VelArrow.Visible = false end
             end
         else
-            if esp.VelLine then esp.VelLine.Visible = false end
+            if esp.VelLine  then esp.VelLine.Visible  = false end
             if esp.VelArrow then esp.VelArrow.Visible = false end
         end
     else
-        if esp.VelLine then esp.VelLine.Visible = false end
+        if esp.VelLine  then esp.VelLine.Visible  = false end
         if esp.VelArrow then esp.VelArrow.Visible = false end
     end
 end
@@ -2358,50 +2290,30 @@ local function DrawingESP_renderObject(esp, pos, label, color, cam)
     local function hideAll()
         for _, l in ipairs(esp.Box) do if l then l.Visible = false end end
         if esp.Label then esp.Label.Visible = false end
-        if esp.Dist then esp.Dist.Visible = false end
+        if esp.Dist  then esp.Dist.Visible  = false end
     end
-    if dist > VD.MaxDistance then
-        hideAll(); return
-    end
+    if dist > VD.MaxDistance then hideAll(); return end
     local screen = cam:WorldToViewportPoint(pos)
-    if screen.Z <= 0 then
-        hideAll(); return
-    end
+    if screen.Z <= 0 then hideAll(); return end
 
     local size = math.clamp(800 / screen.Z, 16, 60)
     local sx, sy = screen.X, screen.Y
-    if esp.Box[1] then
-        esp.Box[1].From = Vector2.new(sx - size / 2, sy - size / 2); esp.Box[1].To = Vector2.new(sx + size / 2,
-            sy - size / 2); esp.Box[1].Color = color; esp.Box[1].Visible = true
-    end
-    if esp.Box[2] then
-        esp.Box[2].From = Vector2.new(sx + size / 2, sy - size / 2); esp.Box[2].To = Vector2.new(sx + size / 2,
-            sy + size / 2); esp.Box[2].Color = color; esp.Box[2].Visible = true
-    end
-    if esp.Box[3] then
-        esp.Box[3].From = Vector2.new(sx + size / 2, sy + size / 2); esp.Box[3].To = Vector2.new(sx - size / 2,
-            sy + size / 2); esp.Box[3].Color = color; esp.Box[3].Visible = true
-    end
-    if esp.Box[4] then
-        esp.Box[4].From = Vector2.new(sx - size / 2, sy + size / 2); esp.Box[4].To = Vector2.new(sx - size / 2,
-            sy - size / 2); esp.Box[4].Color = color; esp.Box[4].Visible = true
-    end
-    if esp.Label then
-        esp.Label.Text = label; esp.Label.Position = Vector2.new(sx, sy - size / 2 - 14); esp.Label.Color = color; esp.Label.Visible = true
-    end
-    if esp.Dist then
-        esp.Dist.Text     = math.floor(dist) .. "m"; esp.Dist.Position = Vector2.new(sx, sy + size / 2 + 2); esp.Dist.Visible = true
-    end
+    if esp.Box[1] then esp.Box[1].From = Vector2.new(sx-size/2, sy-size/2); esp.Box[1].To = Vector2.new(sx+size/2, sy-size/2); esp.Box[1].Color = color; esp.Box[1].Visible = true end
+    if esp.Box[2] then esp.Box[2].From = Vector2.new(sx+size/2, sy-size/2); esp.Box[2].To = Vector2.new(sx+size/2, sy+size/2); esp.Box[2].Color = color; esp.Box[2].Visible = true end
+    if esp.Box[3] then esp.Box[3].From = Vector2.new(sx+size/2, sy+size/2); esp.Box[3].To = Vector2.new(sx-size/2, sy+size/2); esp.Box[3].Color = color; esp.Box[3].Visible = true end
+    if esp.Box[4] then esp.Box[4].From = Vector2.new(sx-size/2, sy+size/2); esp.Box[4].To = Vector2.new(sx-size/2, sy-size/2); esp.Box[4].Color = color; esp.Box[4].Visible = true end
+    if esp.Label  then esp.Label.Text = label; esp.Label.Position = Vector2.new(sx, sy-size/2-14); esp.Label.Color = color; esp.Label.Visible = true end
+    if esp.Dist   then esp.Dist.Text  = math.floor(dist) .. "m"; esp.Dist.Position = Vector2.new(sx, sy+size/2+2); esp.Dist.Visible = true end
 end
 
 
 local Radar = {
-    bg            = DrawingAvailable and SafeDrawing("Square") or nil,
-    circleBg      = DrawingAvailable and SafeDrawing("Circle") or nil,
-    border        = DrawingAvailable and SafeDrawing("Square") or nil,
-    circleBorder  = DrawingAvailable and SafeDrawing("Circle") or nil,
-    cross1        = DrawingAvailable and SafeDrawing("Line") or nil,
-    cross2        = DrawingAvailable and SafeDrawing("Line") or nil,
+    bg            = DrawingAvailable and SafeDrawing("Square")   or nil,
+    circleBg      = DrawingAvailable and SafeDrawing("Circle")   or nil,
+    border        = DrawingAvailable and SafeDrawing("Square")   or nil,
+    circleBorder  = DrawingAvailable and SafeDrawing("Circle")   or nil,
+    cross1        = DrawingAvailable and SafeDrawing("Line")     or nil,
+    cross2        = DrawingAvailable and SafeDrawing("Line")     or nil,
     center        = DrawingAvailable and SafeDrawing("Triangle") or nil,
     dots          = {},
     objectDots    = {},
@@ -2409,28 +2321,25 @@ local Radar = {
 }
 
 if DrawingAvailable then
-    Radar.bg.Filled              = true; Radar.bg.Color = Color3.fromRGB(20, 20, 20); Radar.bg.Transparency = 0.8
-    Radar.circleBg.Filled        = true; Radar.circleBg.Color = Color3.fromRGB(20, 20, 20); Radar.circleBg.Transparency = 0.8; Radar.circleBg.NumSides = 64
-    Radar.border.Filled          = false; Radar.border.Color = Color3.fromRGB(255, 65, 65); Radar.border.Thickness = 2
-    Radar.circleBorder.Filled    = false; Radar.circleBorder.Color = Color3.fromRGB(255, 65, 65); Radar.circleBorder.Thickness = 2; Radar.circleBorder.NumSides = 64
-    Radar.cross1.Color           = Color3.fromRGB(40, 40, 40); Radar.cross1.Thickness = 1
-    Radar.cross2.Color           = Color3.fromRGB(40, 40, 40); Radar.cross2.Thickness = 1
-    Radar.center.Filled          = true; Radar.center.Color = Color3.fromRGB(0, 255, 0)
+    Radar.bg.Filled           = true;  Radar.bg.Color = Color3.fromRGB(20,20,20); Radar.bg.Transparency = 0.8
+    Radar.circleBg.Filled     = true;  Radar.circleBg.Color = Color3.fromRGB(20,20,20); Radar.circleBg.Transparency = 0.8; Radar.circleBg.NumSides = 64
+    Radar.border.Filled       = false; Radar.border.Color = Color3.fromRGB(255,65,65); Radar.border.Thickness = 2
+    Radar.circleBorder.Filled = false; Radar.circleBorder.Color = Color3.fromRGB(255,65,65); Radar.circleBorder.Thickness = 2; Radar.circleBorder.NumSides = 64
+    Radar.cross1.Color        = Color3.fromRGB(40,40,40); Radar.cross1.Thickness = 1
+    Radar.cross2.Color        = Color3.fromRGB(40,40,40); Radar.cross2.Thickness = 1
+    Radar.center.Filled       = true;  Radar.center.Color = Color3.fromRGB(0,255,0)
 
     for _ = 1, 100 do
-        local d = SafeDrawing("Triangle"); if d then
-            d.Filled = true; d.Visible = false
-        end; table.insert(Radar.dots, d)
+        local d = SafeDrawing("Triangle"); if d then d.Filled = true; d.Visible = false end
+        table.insert(Radar.dots, d)
     end
     for _ = 1, 100 do
-        local d = SafeDrawing("Circle"); if d then
-            d.Filled = true; d.Visible = false; d.NumSides = 16
-        end; table.insert(Radar.objectDots, d)
+        local d = SafeDrawing("Circle"); if d then d.Filled = true; d.Visible = false; d.NumSides = 16 end
+        table.insert(Radar.objectDots, d)
     end
     for _ = 1, 100 do
-        local d = SafeDrawing("Square"); if d then
-            d.Filled = true; d.Visible = false
-        end; table.insert(Radar.palletSquares, d)
+        local d = SafeDrawing("Square"); if d then d.Filled = true; d.Visible = false end
+        table.insert(Radar.palletSquares, d)
     end
 end
 
@@ -2443,16 +2352,14 @@ local function Radar_hideAll()
     Radar.center.Visible       = false
     Radar.cross1.Visible       = false
     Radar.cross2.Visible       = false
-    for _, d in pairs(Radar.dots) do if d then d.Visible = false end end
-    for _, d in pairs(Radar.objectDots) do if d then d.Visible = false end end
+    for _, d in pairs(Radar.dots)          do if d then d.Visible = false end end
+    for _, d in pairs(Radar.objectDots)    do if d then d.Visible = false end end
     for _, d in pairs(Radar.palletSquares) do if d then d.Visible = false end end
 end
 
 local function Radar_step(cam)
     if not DrawingAvailable then return end
-    if not VD.RADAR_Enabled then
-        Radar_hideAll(); return
-    end
+    if not VD.RADAR_Enabled then Radar_hideAll(); return end
 
     local size   = VD.RADAR_Size
     local pos    = Vector2.new(cam.ViewportSize.X - size - 20, 20)
@@ -2460,49 +2367,49 @@ local function Radar_step(cam)
 
     if VD.RADAR_Circle then
         Radar.bg.Visible = false; Radar.border.Visible = false
-        Radar.circleBg.Position = center; Radar.circleBg.Radius = size / 2; Radar.circleBg.Visible = true
-        Radar.circleBorder.Position = center; Radar.circleBorder.Radius = size / 2; Radar.circleBorder.Visible = true
+        Radar.circleBg.Position = center; Radar.circleBg.Radius = size/2; Radar.circleBg.Visible = true
+        Radar.circleBorder.Position = center; Radar.circleBorder.Radius = size/2; Radar.circleBorder.Visible = true
     else
         Radar.circleBg.Visible = false; Radar.circleBorder.Visible = false
-        Radar.bg.Position = pos; Radar.bg.Size = Vector2.new(size, size); Radar.bg.Visible = true
-        Radar.border.Position = pos; Radar.border.Size = Vector2.new(size, size); Radar.border.Visible = true
+        Radar.bg.Position = pos; Radar.bg.Size = Vector2.new(size,size); Radar.bg.Visible = true
+        Radar.border.Position = pos; Radar.border.Size = Vector2.new(size,size); Radar.border.Visible = true
     end
 
-    Radar.cross1.From = Vector2.new(center.X, pos.Y + 10); Radar.cross1.To = Vector2.new(center.X, pos.Y + size - 10); Radar.cross1.Visible = true
-    Radar.cross2.From = Vector2.new(pos.X + 10, center.Y); Radar.cross2.To = Vector2.new(pos.X + size - 10, center.Y); Radar.cross2.Visible = true
+    Radar.cross1.From = Vector2.new(center.X, pos.Y+10);    Radar.cross1.To = Vector2.new(center.X, pos.Y+size-10); Radar.cross1.Visible = true
+    Radar.cross2.From = Vector2.new(pos.X+10, center.Y);    Radar.cross2.To = Vector2.new(pos.X+size-10, center.Y); Radar.cross2.Visible = true
 
     local myChar = LocalPlayer.Character
     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
     local myLook = cam.CFrame.LookVector
     if not myRoot then
         Radar.center.Visible = false
-        for _, d in pairs(Radar.dots) do if d then d.Visible = false end end
-        for _, d in pairs(Radar.objectDots) do if d then d.Visible = false end end
+        for _, d in pairs(Radar.dots)          do if d then d.Visible = false end end
+        for _, d in pairs(Radar.objectDots)    do if d then d.Visible = false end end
         for _, d in pairs(Radar.palletSquares) do if d then d.Visible = false end end
         return
     end
 
-    local myAngle                = math.atan2(-myLook.X, -myLook.Z)
-    local cosA, sinA             = math.cos(myAngle), math.sin(myAngle)
-    local scale                  = (size / 2 - 10) / 150
-    local maxD                   = size / 2 - 8
+    local myAngle        = math.atan2(-myLook.X, -myLook.Z)
+    local cosA, sinA     = math.cos(myAngle), math.sin(myAngle)
+    local scale          = (size/2 - 10) / 150
+    local maxD           = size/2 - 8
     local idx, objIdx, palletIdx = 1, 1, 1
 
     local function worldToRadar(px, pz)
         local rx, rz = px - myRoot.Position.X, pz - myRoot.Position.Z
-        local dist2D = math.sqrt(rx * rx + rz * rz)
+        local dist2D = math.sqrt(rx*rx + rz*rz)
         if dist2D >= 150 then return nil end
-        local rotX           = rx * cosA - rz * sinA
-        local rotZ           = rx * sinA + rz * cosA
-        local radarX, radarY = rotX * scale, rotZ * scale
-        local rDist          = math.sqrt(radarX * radarX + radarY * radarY)
-        if rDist > maxD then radarX, radarY = radarX / rDist * maxD, radarY / rDist * maxD end
+        local rotX   = rx*cosA - rz*sinA
+        local rotZ   = rx*sinA + rz*cosA
+        local radarX, radarY = rotX*scale, rotZ*scale
+        local rDist  = math.sqrt(radarX*radarX + radarY*radarY)
+        if rDist > maxD then radarX, radarY = radarX/rDist*maxD, radarY/rDist*maxD end
         return center + Vector2.new(radarX, radarY)
     end
 
     if VD.RADAR_Killer then
         for _, player in ipairs(Players:GetPlayers()) do
-            if not (player == LocalPlayer or not IsKiller(player)) then
+            if player ~= LocalPlayer and IsKiller(player) then
                 if idx > #Radar.dots then break end
                 local char = player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -2511,16 +2418,14 @@ local function Radar_step(cam)
                     if dotPos then
                         local dot    = Radar.dots[idx]
                         local head   = char:FindFirstChild("Head")
-                        local eAngle = head and
-                            math.atan2(-head.CFrame.LookVector.X, -head.CFrame.LookVector.Z) - myAngle or
-                            0
+                        local eAngle = head and math.atan2(-head.CFrame.LookVector.X, -head.CFrame.LookVector.Z) - myAngle or 0
                         local eFwd   = Vector2.new(-math.sin(eAngle), -math.cos(eAngle))
                         local eRight = Vector2.new(-eFwd.Y, eFwd.X)
                         if dot then
                             dot.PointA  = dotPos + eFwd * 5
-                            dot.PointB  = dotPos - eFwd * 2.5 + eRight * 2.5
-                            dot.PointC  = dotPos - eFwd * 2.5 - eRight * 2.5
-                            dot.Color   = Color3.fromRGB(255, 65, 65)
+                            dot.PointB  = dotPos - eFwd*2.5 + eRight*2.5
+                            dot.PointC  = dotPos - eFwd*2.5 - eRight*2.5
+                            dot.Color   = Color3.fromRGB(255,65,65)
                             dot.Visible = true
                         end
                         idx = idx + 1
@@ -2532,7 +2437,7 @@ local function Radar_step(cam)
 
     if VD.RADAR_Survivor then
         for _, player in ipairs(Players:GetPlayers()) do
-            if not (player == LocalPlayer or not IsSurvivor(player)) then
+            if player ~= LocalPlayer and IsSurvivor(player) then
                 if idx > #Radar.dots then break end
                 local char = player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -2541,16 +2446,14 @@ local function Radar_step(cam)
                     if dotPos then
                         local dot    = Radar.dots[idx]
                         local head   = char:FindFirstChild("Head")
-                        local eAngle = head and
-                            math.atan2(-head.CFrame.LookVector.X, -head.CFrame.LookVector.Z) - myAngle or
-                            0
+                        local eAngle = head and math.atan2(-head.CFrame.LookVector.X, -head.CFrame.LookVector.Z) - myAngle or 0
                         local eFwd   = Vector2.new(-math.sin(eAngle), -math.cos(eAngle))
                         local eRight = Vector2.new(-eFwd.Y, eFwd.X)
                         if dot then
-                            dot.PointA  = dotPos + eFwd * 5
-                            dot.PointB  = dotPos - eFwd * 2.5 + eRight * 2.5
-                            dot.PointC  = dotPos - eFwd * 2.5 - eRight * 2.5
-                            dot.Color   = Color3.fromRGB(65, 220, 130)
+                            dot.PointA  = dotPos + eFwd*5
+                            dot.PointB  = dotPos - eFwd*2.5 + eRight*2.5
+                            dot.PointC  = dotPos - eFwd*2.5 - eRight*2.5
+                            dot.Color   = Color3.fromRGB(65,220,130)
                             dot.Visible = true
                         end
                         idx = idx + 1
@@ -2559,6 +2462,7 @@ local function Radar_step(cam)
             end
         end
     end
+
     if VD.RADAR_Generator then
         for _, gen in ipairs(STREE_Cache.Generators) do
             if objIdx > #Radar.objectDots then break end
@@ -2566,9 +2470,7 @@ local function Radar_step(cam)
                 local dotPos = worldToRadar(gen.part.Position.X, gen.part.Position.Z)
                 if dotPos then
                     local dot = Radar.objectDots[objIdx]
-                    if dot then
-                        dot.Position = dotPos; dot.Radius = 3; dot.Color = Color3.fromRGB(255, 180, 50); dot.Visible = true
-                    end
+                    if dot then dot.Position = dotPos; dot.Radius = 3; dot.Color = Color3.fromRGB(255,180,50); dot.Visible = true end
                     objIdx = objIdx + 1
                 end
             end
@@ -2583,9 +2485,9 @@ local function Radar_step(cam)
                 if dotPos then
                     local sq = Radar.palletSquares[palletIdx]
                     if sq then
-                        sq.Position = dotPos - Vector2.new(2.5, 2.5)
-                        sq.Size     = Vector2.new(5, 5)
-                        sq.Color    = Color3.fromRGB(220, 180, 100)
+                        sq.Position = dotPos - Vector2.new(2.5,2.5)
+                        sq.Size     = Vector2.new(5,5)
+                        sq.Color    = Color3.fromRGB(220,180,100)
                         sq.Visible  = true
                     end
                     palletIdx = palletIdx + 1
@@ -2594,8 +2496,8 @@ local function Radar_step(cam)
         end
     end
 
-    for i = idx, #Radar.dots do if Radar.dots[i] then Radar.dots[i].Visible = false end end
-    for i = objIdx, #Radar.objectDots do if Radar.objectDots[i] then Radar.objectDots[i].Visible = false end end
+    for i = idx,       #Radar.dots          do if Radar.dots[i]          then Radar.dots[i].Visible          = false end end
+    for i = objIdx,    #Radar.objectDots    do if Radar.objectDots[i]    then Radar.objectDots[i].Visible    = false end end
     for i = palletIdx, #Radar.palletSquares do if Radar.palletSquares[i] then Radar.palletSquares[i].Visible = false end end
 
     Radar.center.PointA = center + Vector2.new(0, -8)
@@ -2622,7 +2524,7 @@ function Aimbot.GetClosestTarget(cam)
             local tr = player.Character:FindFirstChild("HumanoidRootPart")
             if tr then
                 local dist = (tr.Position - root.Position).Magnitude
-                
+
                 local passVis = true
                 if VD.AIM_VisCheck then
                     local camPos = cam.CFrame.Position
@@ -2634,8 +2536,7 @@ function Aimbot.GetClosestTarget(cam)
                 end
 
                 if passVis and dist < closestDist then
-                    closestDist = dist
-                    closestPlayer = player
+                    closestDist = dist; closestPlayer = player
                 end
             end
         end
@@ -2743,13 +2644,14 @@ end)
 local ActiveQTEGenerator = nil
 local ActiveQTEPoint     = nil
 
-local function HookIncomingSkillCheck()
+-- FIX: HookIncomingSkillCheck didefinisikan sebelum dipakai di toggle
+function HookIncomingSkillCheck()
     pcall(function()
-        local remotes = ReplicatedStorage:WaitForChild("Remotes", 5)
-        if not remotes then return end
+        local remotes    = ReplicatedStorage:WaitForChild("Remotes", 5)
+        if not remotes   then return end
         local genRemotes = remotes:WaitForChild("Generator", 5)
         if not genRemotes then return end
-        local scEvent = genRemotes:WaitForChild("SkillCheckEvent", 5)
+        local scEvent    = genRemotes:WaitForChild("SkillCheckEvent", 5)
 
         if scEvent then
             scEvent.OnClientEvent:Connect(function(gen, point)
@@ -2757,7 +2659,6 @@ local function HookIncomingSkillCheck()
                 ActiveQTEPoint     = point
 
                 if VD.AUTO_SkillCheck and GetRole() == "Survivor" then
-
                     task.delay(0.2, function()
                         local resEvent = genRemotes:FindFirstChild("SkillCheckResultEvent")
                         if resEvent and ActiveQTEGenerator == gen then
@@ -2788,21 +2689,19 @@ function STREE_ForceLeaveGenerator()
     if not root then return end
 
     local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local hum  = char and char:FindFirstChildOfClass("Humanoid")
     if not hum then return end
 
-    local wasAutoSC = VD.AUTO_SkillCheck
+    local wasAutoSC    = VD.AUTO_SkillCheck
     VD.AUTO_SkillCheck = false
 
     task.spawn(function()
-
         pcall(function()
-            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local remotes    = ReplicatedStorage:FindFirstChild("Remotes")
             local genRemotes = remotes and remotes:FindFirstChild("Generator")
             if genRemotes then
                 local repairEvent = genRemotes:FindFirstChild("RepairEvent")
                 if repairEvent then
-
                     if ActiveQTEPoint then
                         repairEvent:FireServer(ActiveQTEPoint, false)
                     end
@@ -2811,7 +2710,6 @@ function STREE_ForceLeaveGenerator()
                         for _, gen in ipairs(STREE_Cache.Generators) do
                             if gen.part and (gen.part.Position - root.Position).Magnitude < 15 then
                                 repairEvent:FireServer(gen.part, false)
-
                                 local parent = gen.part.Parent
                                 if parent then
                                     for _, child in ipairs(parent:GetChildren()) do
@@ -2828,15 +2726,11 @@ function STREE_ForceLeaveGenerator()
         end)
 
         ActiveQTEGenerator = nil
-        ActiveQTEPoint = nil
+        ActiveQTEPoint     = nil
 
-        pcall(function()
-            hum:Move(Vector3.new(0, 0, -1), true)
-        end)
+        pcall(function() hum:Move(Vector3.new(0,0,-1), true) end)
         task.wait(0.2)
-        pcall(function()
-            hum:Move(Vector3.new(0, 0, 0), true)
-        end)
+        pcall(function() hum:Move(Vector3.new(0,0,0), true) end)
 
         pcall(function()
             local pg = LocalPlayer:FindFirstChild("PlayerGui")
@@ -2869,8 +2763,8 @@ if not isMobile then
 end
 
 function SetupSkillCheckNamecallHook()
-    local ok, mt = pcall(function() return getrawmetatable(game) end)
-    if ok and mt and setreadonly then
+    local ok4, mt = pcall(function() return getrawmetatable(game) end)
+    if ok4 and mt and setreadonly then
         pcall(function()
             setreadonly(mt, false)
             local old     = mt.__namecall
@@ -2880,11 +2774,11 @@ function SetupSkillCheckNamecallHook()
                     if method == "FireServer" and tostring(self) == "SkillCheckResultEvent" then
                         local args = { ... }
                         if args[1] ~= "success" then
-                            warn("QTE: [TERTAHAN] Mencegah pengiriman 'fail' ke server, otomatis diubah menjadi 'success'!")
+                            warn("QTE: [TERTAHAN] Mencegah pengiriman 'fail', otomatis diubah menjadi 'success'!")
                             args[1] = "success"
                             args[2] = 1
                             if ActiveQTEGenerator and not args[3] then args[3] = ActiveQTEGenerator end
-                            if ActiveQTEPoint and not args[4] then args[4] = ActiveQTEPoint end
+                            if ActiveQTEPoint     and not args[4] then args[4] = ActiveQTEPoint     end
                         end
                         ActiveQTEGenerator = nil
                         ActiveQTEPoint     = nil
@@ -2910,8 +2804,8 @@ function SetupNoPalletStun()
         local stunDrop = j:FindFirstChild("StunDrop")
         if not (stun and stun:IsA("RemoteEvent")) then return end
 
-        local ok, mt = pcall(function() return getrawmetatable(game) end)
-        if ok and mt and setreadonly then
+        local ok5, mt = pcall(function() return getrawmetatable(game) end)
+        if ok5 and mt and setreadonly then
             pcall(function()
                 setreadonly(mt, false)
                 local old = mt.__namecall
@@ -2930,23 +2824,21 @@ pcall(SetupNoPalletStun)
 
 function SetupAntiFallDamage()
     pcall(function()
-        local r = ReplicatedStorage:FindFirstChild("Remotes")
+        local r         = ReplicatedStorage:FindFirstChild("Remotes")
         if not r then return end
-        local m = r:FindFirstChild("Mechanics")
+        local m         = r:FindFirstChild("Mechanics")
         local fallEvent = m and m:FindFirstChild("Fall")
         if not (fallEvent and fallEvent:IsA("RemoteEvent")) then return end
 
-        local ok, mt = pcall(function() return getrawmetatable(game) end)
-        if ok and mt and setreadonly then
+        local ok6, mt = pcall(function() return getrawmetatable(game) end)
+        if ok6 and mt and setreadonly then
             pcall(function()
                 setreadonly(mt, false)
                 local old = mt.__namecall
                 mt.__namecall = newcclosure(function(self, ...)
                     if not checkcaller() and VD.SURV_NoFall and self == fallEvent then
                         local method = getnamecallmethod()
-                        if method == "FireServer" then
-                            return nil
-                        end
+                        if method == "FireServer" then return nil end
                     end
                     return old(self, ...)
                 end)
@@ -2964,9 +2856,9 @@ function SetupAntiBlind()
         local fl = i and i:FindFirstChild("Flashlight")
         local gb = fl and fl:FindFirstChild("GotBlinded")
         if not (gb and gb:IsA("RemoteEvent")) then return end
-        
-        local ok, mt = pcall(function() return getrawmetatable(game) end)
-        if ok and mt and setreadonly then
+
+        local ok7, mt = pcall(function() return getrawmetatable(game) end)
+        if ok7 and mt and setreadonly then
             pcall(function()
                 setreadonly(mt, false)
                 local old = mt.__namecall
@@ -3004,8 +2896,8 @@ local function UpdateThirdPerson()
     if shouldBeActive then
         if not ThirdPersonWasActive then OriginalCameraType = cam.CameraType end
         cam.CameraType = Enum.CameraType.Custom
-        local char     = LocalPlayer.Character
-        local hum      = char and char:FindFirstChildOfClass("Humanoid")
+        local char = LocalPlayer.Character
+        local hum  = char and char:FindFirstChildOfClass("Humanoid")
         if hum then hum.CameraOffset = Vector3.new(2, 1, 8) end
         ThirdPersonWasActive = true
     elseif ThirdPersonWasActive then
@@ -3014,7 +2906,7 @@ local function UpdateThirdPerson()
         end
         local char = LocalPlayer.Character
         local hum  = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then hum.CameraOffset = Vector3.new(0, 0, 0) end
+        if hum then hum.CameraOffset = Vector3.new(0,0,0) end
         ThirdPersonWasActive = false
     end
 end
@@ -3039,11 +2931,7 @@ local function RemoveFog()
             for _, obj in ipairs(map:GetDescendants()) do
                 if obj.Name:lower():find("fog") or obj:IsA("Atmosphere") or obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") then
                     if not FogCache[obj] then
-                        FogCache[obj] = {
-                            enabled = obj:IsA("PostEffect") and obj.Enabled or true,
-                            parent =
-                                obj.Parent
-                        }
+                        FogCache[obj] = { enabled = obj:IsA("PostEffect") and obj.Enabled or true, parent = obj.Parent }
                     end
                     if obj:IsA("PostEffect") then obj.Enabled = false else obj.Parent = nil end
                 end
@@ -3075,7 +2963,6 @@ local function RestoreFog()
     end)
 end
 
-
 local function UpdateNoFall()
     if not VD.SURV_NoFall then return end
     local char = LocalPlayer.Character
@@ -3095,11 +2982,10 @@ local function UpdateNoSlowdown()
     if hum and hum.WalkSpeed < 16 then hum.WalkSpeed = VD.SPEED_Value or 16 end
 end
 
-
 function SetupAntiStunSlowdown()
     pcall(function()
-        local ok, mt = pcall(function() return getrawmetatable(game) end)
-        if ok and mt and setreadonly then
+        local ok8, mt = pcall(function() return getrawmetatable(game) end)
+        if ok8 and mt and setreadonly then
             pcall(function()
                 setreadonly(mt, false)
                 local oldNI = mt.__newindex
@@ -3148,15 +3034,14 @@ local function UpdateFly()
         end
         local cam     = workspace.CurrentCamera
         local moveDir = Vector3.zero
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector  end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector  end
         if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space)        then moveDir = moveDir + Vector3.new(0,1,0) end
         if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
-            or UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-            moveDir = moveDir - Vector3.new(0, 1, 0)
-        end
+        or UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)    then moveDir = moveDir - Vector3.new(0,1,0) end
+
         if moveDir.Magnitude > 0 then moveDir = moveDir.Unit * (VD.FLY_Speed or 50) end
 
         if VD.FLY_Method == "Velocity" then
@@ -3167,12 +3052,8 @@ local function UpdateFly()
         end
         FlyBodyGyro.CFrame = cam.CFrame
     else
-        if FlyBodyVelocity then
-            FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil
-        end
-        if FlyBodyGyro then
-            FlyBodyGyro:Destroy(); FlyBodyGyro = nil
-        end
+        if FlyBodyVelocity then FlyBodyVelocity:Destroy(); FlyBodyVelocity = nil end
+        if FlyBodyGyro     then FlyBodyGyro:Destroy();     FlyBodyGyro     = nil end
         hum.PlatformStand = false
     end
 end
@@ -3196,15 +3077,15 @@ local function OnRenderStep()
         if DrawingAvailable then
             for _, esp in pairs(DrawingESP.cache) do
                 if esp then
-                    for _, l in ipairs(esp.Box) do if l then SafeRemove(l) end end
+                    for _, l in ipairs(esp.Box)  do if l then SafeRemove(l) end end
                     for _, l in ipairs(esp.Skel) do if l then SafeRemove(l) end end
-                    if esp.Name then SafeRemove(esp.Name) end
-                    if esp.Dist then SafeRemove(esp.Dist) end
-                    if esp.HealthBg then SafeRemove(esp.HealthBg) end
+                    if esp.Name      then SafeRemove(esp.Name)      end
+                    if esp.Dist      then SafeRemove(esp.Dist)      end
+                    if esp.HealthBg  then SafeRemove(esp.HealthBg)  end
                     if esp.HealthBar then SafeRemove(esp.HealthBar) end
                     if esp.Offscreen then SafeRemove(esp.Offscreen) end
-                    if esp.VelLine then SafeRemove(esp.VelLine) end
-                    if esp.VelArrow then SafeRemove(esp.VelArrow) end
+                    if esp.VelLine   then SafeRemove(esp.VelLine)   end
+                    if esp.VelArrow  then SafeRemove(esp.VelArrow)  end
                 end
             end
             DrawingESP.cache = {}
@@ -3260,31 +3141,24 @@ local function OnRenderStep()
             end
 
             local oc = DrawingESP.objectCache
-            renderObj(oc, STREE_Cache.Generators, "GEN", Color3.fromRGB(200, 140, 30), Color3.fromRGB(255, 200, 80), 0.5,
-                Color3.fromRGB(255, 180, 50))
-            renderObj(oc, STREE_Cache.Gates, "GATE", Color3.fromRGB(150, 150, 170), Color3.fromRGB(220, 220, 255), 0.5,
-                Color3.fromRGB(200, 200, 220))
-            renderObj(oc, STREE_Cache.Pallets, "PALLET", Color3.fromRGB(180, 140, 70), Color3.fromRGB(255, 210, 130), 0.5,
-                Color3.fromRGB(220, 180, 100))
-            renderObj(oc, STREE_Cache.Windows, "WINDOW", Color3.fromRGB(60, 140, 200), Color3.fromRGB(120, 200, 255), 0.5,
-                Color3.fromRGB(100, 180, 255))
+            renderObj(oc, STREE_Cache.Generators, "GEN",    Color3.fromRGB(200,140,30),  Color3.fromRGB(255,200,80),  0.5, Color3.fromRGB(255,180,50))
+            renderObj(oc, STREE_Cache.Gates,      "GATE",   Color3.fromRGB(150,150,170), Color3.fromRGB(220,220,255), 0.5, Color3.fromRGB(200,200,220))
+            renderObj(oc, STREE_Cache.Pallets,    "PALLET", Color3.fromRGB(180,140,70),  Color3.fromRGB(255,210,130), 0.5, Color3.fromRGB(220,180,100))
+            renderObj(oc, STREE_Cache.Windows,    "WINDOW", Color3.fromRGB(60,140,200),  Color3.fromRGB(120,200,255), 0.5, Color3.fromRGB(100,180,255))
 
             for _, obj in ipairs(STREE_Cache.Hooks) do
                 local target    = obj.model or obj.part
                 local isClosest = VD.ESP_ClosestHook and obj == STREE_Cache.ClosestHook
                 local label     = isClosest and "HOOK!" or "HOOK"
-                local fillCol   = isClosest and Color3.fromRGB(200, 180, 40) or Color3.fromRGB(180, 60, 60)
-                local outCol    = isClosest and Color3.fromRGB(255, 240, 100) or Color3.fromRGB(255, 100, 100)
-                local espCol    = isClosest and Color3.fromRGB(255, 230, 80) or Color3.fromRGB(255, 100, 100)
+                local fillCol   = isClosest and Color3.fromRGB(200,180,40)  or Color3.fromRGB(180,60,60)
+                local outCol    = isClosest and Color3.fromRGB(255,240,100) or Color3.fromRGB(255,100,100)
+                local espCol    = isClosest and Color3.fromRGB(255,230,80)  or Color3.fromRGB(255,100,100)
                 local trans     = isClosest and 0.4 or 0.5
                 local dist      = Root and (obj.part.Position - Root.Position).Magnitude or 0
                 if VD.ESP_ObjectChams then
                     local cd = { fill = fillCol, outline = outCol, fillTrans = trans }
-                    if not Chams.Objects[target] then
-                        Chams.Create(target, cd, label)
-                    else
-                        Chams.SetColor(target, cd)
-                    end
+                    if not Chams.Objects[target] then Chams.Create(target, cd, label)
+                    else Chams.SetColor(target, cd) end
                     Chams.Update(target, label, dist)
                 else
                     local key = tostring(target)
@@ -3297,25 +3171,23 @@ local function OnRenderStep()
                 end
             end
         else
-
             for _, esp in pairs(DrawingESP.cache) do
                 if esp then
                     pcall(function()
-                        for _, l in ipairs(esp.Box) do if l then SafeRemove(l) end end
+                        for _, l in ipairs(esp.Box)  do if l then SafeRemove(l) end end
                         for _, l in ipairs(esp.Skel) do if l then SafeRemove(l) end end
-                        if esp.Name then SafeRemove(esp.Name) end
-                        if esp.Dist then SafeRemove(esp.Dist) end
-                        if esp.HealthBg then SafeRemove(esp.HealthBg) end
+                        if esp.Name      then SafeRemove(esp.Name)      end
+                        if esp.Dist      then SafeRemove(esp.Dist)      end
+                        if esp.HealthBg  then SafeRemove(esp.HealthBg)  end
                         if esp.HealthBar then SafeRemove(esp.HealthBar) end
                         if esp.Offscreen then SafeRemove(esp.Offscreen) end
-                        if esp.VelLine then SafeRemove(esp.VelLine) end
-                        if esp.VelArrow then SafeRemove(esp.VelArrow) end
+                        if esp.VelLine   then SafeRemove(esp.VelLine)   end
+                        if esp.VelArrow  then SafeRemove(esp.VelArrow)  end
                     end)
                 end
             end
             DrawingESP.cache       = {}
             DrawingESP.objectCache = {}
-
         end
 
         Radar_step(cam)
@@ -3326,7 +3198,7 @@ local function OnRenderStep()
 
     pcall(function()
         if VD.AIM_Enabled then
-            Aimbot.Update(cam, cam.ViewportSize, Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2))
+            Aimbot.Update(cam, cam.ViewportSize, Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2))
         end
     end)
 
@@ -3339,7 +3211,7 @@ local function OnRenderStep()
         if VD.AIM_Enabled and VD.AIM_ShowFOV then
             FOVCircle.Position = screenCenter
             FOVCircle.Radius   = VD.AIM_FOV or 120
-            FOVCircle.Color    = State.AimTarget and Color3.fromRGB(90, 220, 120) or Color3.fromRGB(220, 70, 70)
+            FOVCircle.Color    = State.AimTarget and Color3.fromRGB(90,220,120) or Color3.fromRGB(220,70,70)
             FOVCircle.Visible  = true
         else
             FOVCircle.Visible = false
@@ -3361,17 +3233,17 @@ local function UpdateObjectChams()
                     local cd = { fill = fCol, outline = oCol, fillTrans = fTrans }
                     if not Chams.Objects[target] then Chams.Create(target, cd, " ")
                     else Chams.SetColor(target, cd) end
-                    
+
                     local activeLabel = nil
                     if obj.model and obj.model.Name == "Generator" then
                         local progress = tonumber(obj.model:GetAttribute("RepairProgress")) or 0
                         activeLabel = math.floor(progress) .. "%"
                         if progress >= 100 then
-                            cd.fill = Color3.new(0, 1, 0)
+                            cd.fill = Color3.new(0,1,0)
                             Chams.SetColor(target, cd)
                         end
                     end
-                    
+
                     Chams.Update(target, activeLabel, nil)
                 else
                     if Chams.Objects[target] then Chams.Remove(target) end
@@ -3380,18 +3252,18 @@ local function UpdateObjectChams()
         end
     end
 
-    chamObj(STREE_Cache.Generators, VD.ESP_Obj_Generator, Color3.fromRGB(0, 255, 255), Color3.new(1,1,1), 0.5)
-    chamObj(STREE_Cache.Gates,      VD.ESP_Obj_Gate,      Color3.fromRGB(150,150,170), Color3.fromRGB(220,220,255), 0.5)
-    chamObj(STREE_Cache.Pallets,    VD.ESP_Obj_Pallet,    Color3.fromRGB(180,140,70),  Color3.fromRGB(255,210,130), 0.5)
-    chamObj(STREE_Cache.Windows,    VD.ESP_Obj_Window,    Color3.fromRGB(60,140,200),  Color3.fromRGB(120,200,255), 0.5)
+    chamObj(STREE_Cache.Generators, VD.ESP_Obj_Generator, Color3.fromRGB(0,255,255),   Color3.new(1,1,1),            0.5)
+    chamObj(STREE_Cache.Gates,      VD.ESP_Obj_Gate,      Color3.fromRGB(150,150,170), Color3.fromRGB(220,220,255),  0.5)
+    chamObj(STREE_Cache.Pallets,    VD.ESP_Obj_Pallet,    Color3.fromRGB(180,140,70),  Color3.fromRGB(255,210,130),  0.5)
+    chamObj(STREE_Cache.Windows,    VD.ESP_Obj_Window,    Color3.fromRGB(60,140,200),  Color3.fromRGB(120,200,255),  0.5)
 
     for _, obj in ipairs(STREE_Cache.Hooks) do
-        local target = obj.model or obj.part
+        local target  = obj.model or obj.part
         if VD.ESP_Obj_Hook and target and target.Parent then
-            local isClose  = VD.ESP_ClosestHook and obj == STREE_Cache.ClosestHook
+            local isClose = VD.ESP_ClosestHook and obj == STREE_Cache.ClosestHook
             local cd = {
-                fill     = isClose and Color3.fromRGB(200,180,40)  or Color3.fromRGB(180,60,60),
-                outline  = isClose and Color3.fromRGB(255,240,100) or Color3.fromRGB(255,100,100),
+                fill      = isClose and Color3.fromRGB(200,180,40)  or Color3.fromRGB(180,60,60),
+                outline   = isClose and Color3.fromRGB(255,240,100) or Color3.fromRGB(255,100,100),
                 fillTrans = isClose and 0.4 or 0.5
             }
             if not Chams.Objects[target] then Chams.Create(target, cd, " ")
@@ -3418,18 +3290,18 @@ local function CreateMobileUI()
     sg.DisplayOrder   = 100
     sg.Parent         = pg
 
-    local RS = VD.RADAR_Size or 130
+    local RS     = VD.RADAR_Size or 130
     local radarF = Instance.new("Frame")
-    radarF.Name                    = "Radar"
-    radarF.Size                    = UDim2.new(0, RS, 0, RS)
-    radarF.Position                = UDim2.new(0, 20, 0, 120)
-    radarF.BackgroundColor3        = Color3.fromRGB(15,15,15)
-    radarF.BackgroundTransparency  = 0.3
-    radarF.BorderSizePixel         = 0
-    radarF.Visible                 = false
-    radarF.Parent                  = sg
+    radarF.Name                   = "Radar"
+    radarF.Size                   = UDim2.new(0, RS, 0, RS)
+    radarF.Position               = UDim2.new(0, 20, 0, 120)
+    radarF.BackgroundColor3       = Color3.fromRGB(15,15,15)
+    radarF.BackgroundTransparency = 0.3
+    radarF.BorderSizePixel        = 0
+    radarF.Visible                = false
+    radarF.Parent                 = sg
     local radarCorner = Instance.new("UICorner", radarF)
-    radarCorner.Name = "RCorner"
+    radarCorner.Name         = "RCorner"
     radarCorner.CornerRadius = UDim.new(0, 5)
     local rStroke = Instance.new("UIStroke")
     rStroke.Color = Color3.fromRGB(220,60,60); rStroke.Thickness = 2; rStroke.Parent = radarF
@@ -3461,13 +3333,13 @@ local function CreateMobileUI()
     end
 
     local fovF = Instance.new("Frame")
-    fovF.Name                 = "FOVCircle"
+    fovF.Name                   = "FOVCircle"
     fovF.BackgroundTransparency = 1
-    fovF.AnchorPoint          = Vector2.new(0.5,0.5)
-    fovF.Position             = UDim2.new(0.5,0,0.5,0)
-    fovF.Size                 = UDim2.new(0,240,0,240)
-    fovF.Visible              = false
-    fovF.Parent               = sg
+    fovF.AnchorPoint            = Vector2.new(0.5,0.5)
+    fovF.Position               = UDim2.new(0.5,0,0.5,0)
+    fovF.Size                   = UDim2.new(0,240,0,240)
+    fovF.Visible                = false
+    fovF.Parent                 = sg
     Instance.new("UICorner", fovF).CornerRadius = UDim.new(1,0)
     local fovStk = Instance.new("UIStroke")
     fovStk.Color = Color3.fromRGB(220,70,70); fovStk.Thickness = 1.5; fovStk.Transparency = 0.2
@@ -3481,18 +3353,19 @@ local function CreateMobileUI()
     aimSG.ZIndexBehavior = Enum.ZIndexBehavior.AlwaysOnTop
     aimSG.Parent         = pg
     local btn = Instance.new("TextButton")
-    btn.Name                = "AimHold"
-    btn.Size                = UDim2.new(0,75,0,75)
-    btn.Position            = UDim2.new(1,-95,1,-170)
-    btn.BackgroundColor3    = Color3.fromRGB(200,55,55)
+    btn.Name                   = "AimHold"
+    btn.Size                   = UDim2.new(0,75,0,75)
+    btn.Position               = UDim2.new(1,-95,1,-170)
+    btn.BackgroundColor3       = Color3.fromRGB(200,55,55)
     btn.BackgroundTransparency = 0.2
-    btn.Text                = "ðŸŽ¯\nAIM"
-    btn.TextColor3          = Color3.new(1,1,1)
-    btn.TextSize            = 14
-    btn.Font                = Enum.Font.GothamBold
-    btn.Visible             = false
-    btn.ZIndex              = 20
-    btn.Parent              = aimSG
+    -- FIX: Emoji corrupt diperbaiki
+    btn.Text                   = "\xF0\x9F\x8E\xAF\nAIM"
+    btn.TextColor3             = Color3.new(1,1,1)
+    btn.TextSize               = 14
+    btn.Font                   = Enum.Font.GothamBold
+    btn.Visible                = false
+    btn.ZIndex                 = 20
+    btn.Parent                 = aimSG
     Instance.new("UICorner", btn).CornerRadius = UDim.new(1,0)
     local aStk = Instance.new("UIStroke")
     aStk.Color = Color3.fromRGB(255,100,100); aStk.Thickness = 2; aStk.Parent = btn
@@ -3520,9 +3393,7 @@ local function UpdateMobileRadar(cam)
     MobileGui.RadarFrame.Visible = true
 
     local rc = MobileGui.RadarFrame:FindFirstChild("RCorner")
-    if rc then
-        rc.CornerRadius = VD.RADAR_Circle and UDim.new(1,0) or UDim.new(0,5)
-    end
+    if rc then rc.CornerRadius = VD.RADAR_Circle and UDim.new(1,0) or UDim.new(0,5) end
 
     local myChar = LocalPlayer.Character
     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
@@ -3539,12 +3410,12 @@ local function UpdateMobileRadar(cam)
     local function worldToRadar(px, pz)
         local rx = px - myRoot.Position.X
         local rz = pz - myRoot.Position.Z
-        if math.sqrt(rx*rx+rz*rz) >= 150 then return nil end
+        if math.sqrt(rx*rx + rz*rz) >= 150 then return nil end
         local rotX = rx*cosA - rz*sinA
         local rotZ = rx*sinA + rz*cosA
         local radarX, radarY = rotX*scale, rotZ*scale
         local rDist = math.sqrt(radarX*radarX + radarY*radarY)
-        if rDist > maxD then radarX,radarY = radarX/rDist*maxD, radarY/rDist*maxD end
+        if rDist > maxD then radarX, radarY = radarX/rDist*maxD, radarY/rDist*maxD end
         return Vector2.new(half+radarX, half+radarY)
     end
 
@@ -3596,38 +3467,32 @@ local function UpdateMobileFOV()
 end
 
 function CreateUniversalCrosshair()
-    local function GetSafeGuiParent()
-        if gethui then return gethui() end
-        local ok, core = pcall(function() return game:GetService("CoreGui") end)
-        if ok and core then return core end
-        return LocalPlayer:FindFirstChild("PlayerGui")
-    end
     local pg = GetSafeGuiParent()
     if not pg then return end
     STREE_CrosshairGui = Instance.new("ScreenGui")
-    STREE_CrosshairGui.Name = "STREE_Crosshair"
-    STREE_CrosshairGui.ResetOnSpawn = false
+    STREE_CrosshairGui.Name           = "STREE_Crosshair"
+    STREE_CrosshairGui.ResetOnSpawn   = false
     STREE_CrosshairGui.IgnoreGuiInset = true
     STREE_CrosshairGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-    STREE_CrosshairGui.Parent = pg
+    STREE_CrosshairGui.Parent         = pg
 
     STREE_CrossH = Instance.new("Frame")
-    STREE_CrossH.Size = UDim2.new(0, 16, 0, 2)
-    STREE_CrossH.AnchorPoint = Vector2.new(0.5, 0.5)
-    STREE_CrossH.Position = UDim2.new(0.5, 0, 0.5, 0)
+    STREE_CrossH.Size             = UDim2.new(0, 16, 0, 2)
+    STREE_CrossH.AnchorPoint      = Vector2.new(0.5, 0.5)
+    STREE_CrossH.Position         = UDim2.new(0.5, 0, 0.5, 0)
     STREE_CrossH.BackgroundColor3 = Color3.fromRGB(80, 255, 80)
-    STREE_CrossH.BorderSizePixel = 0
-    STREE_CrossH.Visible = VD.AIM_Crosshair
-    STREE_CrossH.Parent = STREE_CrosshairGui
+    STREE_CrossH.BorderSizePixel  = 0
+    STREE_CrossH.Visible          = VD.AIM_Crosshair
+    STREE_CrossH.Parent           = STREE_CrosshairGui
 
     STREE_CrossV = Instance.new("Frame")
-    STREE_CrossV.Size = UDim2.new(0, 2, 0, 16)
-    STREE_CrossV.AnchorPoint = Vector2.new(0.5, 0.5)
-    STREE_CrossV.Position = UDim2.new(0.5, 0, 0.5, 0)
+    STREE_CrossV.Size             = UDim2.new(0, 2, 0, 16)
+    STREE_CrossV.AnchorPoint      = Vector2.new(0.5, 0.5)
+    STREE_CrossV.Position         = UDim2.new(0.5, 0, 0.5, 0)
     STREE_CrossV.BackgroundColor3 = Color3.fromRGB(80, 255, 80)
-    STREE_CrossV.BorderSizePixel = 0
-    STREE_CrossV.Visible = VD.AIM_Crosshair
-    STREE_CrossV.Parent = STREE_CrosshairGui
+    STREE_CrossV.BorderSizePixel  = 0
+    STREE_CrossV.Visible          = VD.AIM_Crosshair
+    STREE_CrossV.Parent           = STREE_CrosshairGui
 end
 
 task.spawn(function()
