@@ -33,7 +33,7 @@ if StreeHub then
     Window = StreeHub:CreateWindow({
         Title = "StreeHub",
         Icon = "rbxassetid://99948086845842",
-        Author = "Violence Distrik",
+        Author = "Violence District",
         Folder = "StreeHub",
         Size = WindowSize,
         LiveSearchDropdown = true,
@@ -646,7 +646,7 @@ local PlayerTab, ESPTab, MapTab, AimTab, FOVTab
 local SurvivorTab, KillerTab, GeneratorTab, FlingTab, ResetTab, SettingsTab
 
 if Window then
-    PlayersTab = Window:Tab({ Title = "Players", Icon = "person-standing" })
+    PlayersTab = Window:Tab({ Title = "Players", Icon = "user" })
     ESPTab = Window:Tab({ Title = "Visual", Icon = "eye" })
     MapTab  = Window:Tab({ Title = "Map", Icon = "map" })
     AimTab  = Window:Tab({ Title = "Aim", Icon = "crosshair" })
@@ -675,11 +675,9 @@ end
 if Window then
 
 do
-    local movSection = MakeSection(PlayerTab, {
-        Title = "Movement",
-    })
+    PlayerTab:Section({ Title = "Movement" })
 
-    movSection:Toggle({
+    PlayerTab:Toggle({
         Title = "Speed Hack",
         Callback = function(v)
             VD.Speed = v
@@ -689,7 +687,8 @@ do
             end
         end
     })
-    movSection:Slider({
+
+    PlayerTab:Slider({
         Title = "Speed Value",
         Value = { Min = 16, Max = 200, Default = 16 },
         Callback = function(v)
@@ -697,7 +696,8 @@ do
                 v
         end
     })
-    movSection:Toggle({
+
+    PlayerTab:Toggle({
         Title = "Jump Hack",
         Callback = function(v)
             VD.Jump = v
@@ -707,33 +707,41 @@ do
             end
         end
     })
-    movSection:Slider({
+
+    PlayerTab:Slider({
         Title = "Jump Power",
         Value = { Min = 50, Max = 300, Default = 50 },
         Callback = function(v)
-            VD.JumpValue =
-                v
+            VD.JumpValue = v
         end
     })
-    movSection:Toggle({ Title = "Infinite Jump", Callback = function(v) VD.InfiniteJump = v end })
-    movSection:Toggle({ Title = "Noclip", Callback = function(v) VD.Noclip = v end })
 
-    local tpSection = MakeSection(PlayerTab, {
-        Title = "Teleport",
+    PlayerTab:Toggle({ 
+        Title = "Infinite Jump", 
+        Callback = function(v) 
+            VD.InfiniteJump = v 
+        end 
     })
 
-    tpSection:Button({ Title = "TP to Gen", Callback = function() pcall(function() STREE_TeleportToGenerator(1) end) end })
-    tpSection:Button({ Title = "TP to Gate", Callback = function() pcall(STREE_TeleportToGate) end })
-    tpSection:Button({ Title = "TP to Hook", Callback = function() pcall(STREE_TeleportToHook) end })
+    PlayerTab:Toggle({ 
+        Title = "Noclip", 
+        Callback = function(v) 
+            VD.Noclip = v 
+        end 
+    })
+
+    PlayerTab:Section({ Title = "Teleport" })
+
+    PlayerTab:Button({ Title = "TP to Gen", Callback = function() pcall(function() STREE_TeleportToGenerator(1) end) end })
+    PlayerTab:Button({ Title = "TP to Gate", Callback = function() pcall(STREE_TeleportToGate) end })
+    PlayerTab:Button({ Title = "TP to Hook", Callback = function() pcall(STREE_TeleportToHook) end })
 end
 
 do
-    local basicEsp = MakeSection(ESPTab, {
-        Title = "Basic ESP",
-    })
+    ESPTab:Section({ Title = "Basic Esp" })
 
-    basicEsp:Toggle({
-        Title = "Enable ESP (Highlight + Name)",
+    ESPTab:Toggle({
+        Title = "Enable ESP",
         Callback = function(v)
             VD.ESP = v
             if v then
@@ -745,8 +753,8 @@ do
             end
         end
     })
-    basicEsp:Toggle({ Title = "Show Distance", Callback = function(v) VD.ShowDistance = v end })
-    basicEsp:Slider({
+    ESPTab:Toggle({ Title = "Show Distance", Callback = function(v) VD.ShowDistance = v end })
+    ESPTab:Slider({
         Title = "Max ESP Distance",
         Value = { Min = 500, Max = 5000, Default = 2000 },
         Callback = function(v)
@@ -755,34 +763,29 @@ do
         end
     })
 
-    local advEsp = MakeSection(ESPTab, {
-        Title = "Advanced ESP",
-    })
+    ESPTab:Section({ Title = "Advanced Esp" })
 
-    advEsp:Toggle({ Title = "Master Turn On Object Chams", Callback = function(v) VD.ESP_ObjectChams = v end })
-    advEsp:Toggle({ Title = "- Chams: Generator (with %)", Callback = function(v) VD.ESP_Obj_Generator = v end })
-    advEsp:Toggle({ Title = "- Chams: Gate", Callback = function(v) VD.ESP_Obj_Gate = v end })
-    advEsp:Toggle({ Title = "- Chams: Hook", Callback = function(v) VD.ESP_Obj_Hook = v end })
-    advEsp:Toggle({ Title = "- Chams: Pallet", Callback = function(v) VD.ESP_Obj_Pallet = v end })
-    advEsp:Toggle({ Title = "- Chams: Window", Callback = function(v) VD.ESP_Obj_Window = v end })
-    
-    local otherEsp = MakeSection(ESPTab, {
-        Title = "Other Markers",
-    })
-    otherEsp:Toggle({ Title = "Player Highlight (Chams)", Callback = function(v) VD.ESP_PlayerChams = v end })
-    otherEsp:Toggle({ Title = "ESP Skeleton", Callback = function(v) VD.ESP_Skeleton = v end })
-    otherEsp:Toggle({ Title = "ESP Velocity Arrows", Callback = function(v) VD.ESP_Velocity = v end })
-    otherEsp:Toggle({ Title = "ESP Offscreen Arrows", Callback = function(v) VD.ESP_Offscreen = v end })
-    otherEsp:Toggle({ Title = "Closest Hook Highlight", Callback = function(v) VD.ESP_ClosestHook = v end })
+    ESPTab:Toggle({ Title = "Master Turn On Object Chams", Callback = function(v) VD.ESP_ObjectChams = v end })
+    ESPTab:Toggle({ Title = "Generator (with %)", Callback = function(v) VD.ESP_Obj_Generator = v end })
+    ESPTab:Toggle({ Title = "Gate", Callback = function(v) VD.ESP_Obj_Gate = v end })
+    ESPTab:Toggle({ Title = "Hook", Callback = function(v) VD.ESP_Obj_Hook = v end })
+    ESPTab:Toggle({ Title = "Pallet", Callback = function(v) VD.ESP_Obj_Pallet = v end })
+    ESPTab:Toggle({ Title = "Window", Callback = function(v) VD.ESP_Obj_Window = v end })
+
+    ESPTab:Section({ Title = "Other Markers" })
+
+    ESPTab:Toggle({ Title = "Player Highlight (Chams)", Callback = function(v) VD.ESP_PlayerChams = v end })
+    ESPTab:Toggle({ Title = "ESP Skeleton", Callback = function(v) VD.ESP_Skeleton = v end })
+    ESPTab:Toggle({ Title = "ESP Velocity Arrows", Callback = function(v) VD.ESP_Velocity = v end })
+    ESPTab:Toggle({ Title = "ESP Offscreen Arrows", Callback = function(v) VD.ESP_Offscreen = v end })
+    ESPTab:Toggle({ Title = "Closest Hook Highlight", Callback = function(v) VD.ESP_ClosestHook = v end })
 end
 
 do
-    local radarSection = MakeSection(MapTab, {
-        Title = "Radar",
-    })
+    MapTab:Section({ Title = "Radar" })
 
-    radarSection:Toggle({ Title = "Radar Enable", Callback = function(v) VD.RADAR_Enabled = v end })
-    radarSection:Slider({
+    MapTab:Toggle({ Title = "Radar Enable", Callback = function(v) VD.RADAR_Enabled = v end })
+    MapTab:Slider({
         Title = "Radar Size",
         Value = { Min = 80, Max = 300, Default = 120 },
         Callback = function(v)
@@ -790,34 +793,30 @@ do
                 v
         end
     })
-    radarSection:Toggle({ Title = "Radar Circle Mode", Callback = function(v) VD.RADAR_Circle = v end })
+    MapTab:Toggle({ Title = "Radar Circle Mode", Callback = function(v) VD.RADAR_Circle = v end })
 
-    local radarFilter = MakeSection(MapTab, {
-        Title = "Radar Filters",
-    })
+    MapTab:Section({ Title = "Radar" })
 
-    radarFilter:Toggle({ Title = "Radar show Killer", Callback = function(v) VD.RADAR_Killer = v end })
-    radarFilter:Toggle({ Title = "Radar show Survivor", Callback = function(v) VD.RADAR_Survivor = v end })
-    radarFilter:Toggle({ Title = "Radar show Generator", Callback = function(v) VD.RADAR_Generator = v end })
-    radarFilter:Toggle({ Title = "Radar show Pallet", Callback = function(v) VD.RADAR_Pallet = v end })
+    MapTab:Toggle({ Title = "Radar show Killer", Callback = function(v) VD.RADAR_Killer = v end })
+    MapTab:Toggle({ Title = "Radar show Survivor", Callback = function(v) VD.RADAR_Survivor = v end })
+    MapTab:Toggle({ Title = "Radar show Generator", Callback = function(v) VD.RADAR_Generator = v end })
+    MapTab:Toggle({ Title = "Radar show Pallet", Callback = function(v) VD.RADAR_Pallet = v end })
 end
 
 do
-    local aimbotSection = MakeSection(AimTab, {
-        Title = "Aimbot",
-    })
+    AimTab:Section({ Title = "Aimbot" })
 
-    aimbotSection:Toggle({ Title = "Enable Aimbot", Callback = function(v) VD.AIM_Enabled = v end })
-    aimbotSection:Toggle({ Title = "Show Crosshair", Callback = function(v)
+    AimTab:Toggle({ Title = "Enable Aimbot", Callback = function(v) VD.AIM_Enabled = v end })
+    AimTab:Toggle({ Title = "Show Crosshair", Callback = function(v)
         VD.AIM_Crosshair = v
         if STREE_CrossH and STREE_CrossV then
             STREE_CrossH.Visible = v
             STREE_CrossV.Visible = v
         end
     end })
-    aimbotSection:Toggle({ Title = "Use RMB to aim", Callback = function(v) VD.AIM_UseRMB = v end })
-    aimbotSection:Toggle({ Title = "Show Aim FOV (circle)", Callback = function(v) VD.AIM_ShowFOV = v end })
-    aimbotSection:Slider({
+    AimTab:Toggle({ Title = "Use RMB to aim", Callback = function(v) VD.AIM_UseRMB = v end })
+    AimTab:Toggle({ Title = "Show Aim FOV (circle)", Callback = function(v) VD.AIM_ShowFOV = v end })
+    AimTab:Slider({
         Title = "FOV Size (aim radius on screen)",
         Value = { Min = 20, Max = 400, Default = 120 },
         Callback = function(
@@ -825,7 +824,7 @@ do
             VD.AIM_FOV = v
         end
     })
-    aimbotSection:Slider({
+    AimTab:Slider({
         Title = "Smoothness",
         Value = { Min = 0.1, Max = 1, Default = 0.3, Step = 0.05 },
         Callback = function(v)
@@ -833,22 +832,21 @@ do
         end
     })
 
-    aimbotSection:Toggle({ Title = "Visibility Check", Callback = function(v) VD.AIM_VisCheck = v end })
-    aimbotSection:Toggle({ Title = "Prediction", Callback = function(v) VD.AIM_Predict = v end })
+    AimTab:Toggle({ Title = "Visibility Check", Callback = function(v) VD.AIM_VisCheck = v end })
+    AimTab:Toggle({ Title = "Prediction", Callback = function(v) VD.AIM_Predict = v end })
 
-    local spearSection = MakeSection(AimTab, {
-        Title = "Spear Aimbot",
-    })
 
-    spearSection:Toggle({ Title = "Spear Aimbot", Callback = function(v) VD.SPEAR_Aimbot = v end })
-    spearSection:Toggle({ Title = "Show Crosshair", Callback = function(v)
+    AimTab:Section({ Title = "Spear Aimbot" })
+
+    AimTab:Toggle({ Title = "Spear Aimbot", Callback = function(v) VD.SPEAR_Aimbot = v end })
+    AimTab:Toggle({ Title = "Show Crosshair", Callback = function(v)
         VD.AIM_Crosshair = v
         if STREE_CrossH and STREE_CrossV then
             STREE_CrossH.Visible = v
             STREE_CrossV.Visible = v
         end
     end })
-    spearSection:Slider({
+    AimTab:Slider({
         Title = "Spear Gravity",
         Value = { Min = 10, Max = 200, Default = 50 },
         Callback = function(v)
@@ -856,7 +854,7 @@ do
                 v
         end
     })
-    spearSection:Slider({
+    AimTab:Slider({
         Title = "Spear Speed",
         Value = { Min = 50, Max = 300, Default = 100 },
         Callback = function(v)
@@ -867,12 +865,10 @@ do
 end
 
 do
-    local camSection = MakeSection(FOVTab, {
-        Title = "Camera",
-    })
+    FOVTab:Section({ Title = "Camera" })
 
-    camSection:Toggle({ Title = "Enable Camera FOV override", Callback = function(v) VD.CAM_FOVEnabled = v end })
-    camSection:Slider({
+    FOVTab:Toggle({ Title = "Enable Camera FOV override", Callback = function(v) VD.CAM_FOVEnabled = v end })
+    FOVTab:Slider({
         Title = "Camera FOV",
         Value = { Min = 30, Max = 140, Default = 90 },
         Callback = function(v)
@@ -880,66 +876,60 @@ do
                 v
         end
     })
-    camSection:Toggle({ Title = "Third Person (Killer only)", Callback = function(v) VD.CAM_ThirdPerson = v end })
-    camSection:Toggle({ Title = "Shift Lock (auto face camera)", Callback = function(v) VD.CAM_ShiftLock = v end })
+    FOVTab:Toggle({ Title = "Third Person (Killer only)", Callback = function(v) VD.CAM_ThirdPerson = v end })
+    FOVTab:Toggle({ Title = "Shift Lock (auto face camera)", Callback = function(v) VD.CAM_ShiftLock = v end })
 
-    local visualSection = MakeSection(FOVTab, {
-        Title = "Visual",
-    })
+    FOVTab:Section({ Title = "Visual" })
 
-    visualSection:Toggle({ Title = "No Fog (remove fog/post effects)", Callback = function(v) VD.NO_Fog = v end })
-    visualSection:Toggle({ Title = "Fullbright (lighting preset)", Callback = function(v) VD.Fullbright = v end })
+    FOVTab:Toggle({ Title = "No Fog (remove fog/post effects)", Callback = function(v) VD.NO_Fog = v end })
+    FOVTab:Toggle({ Title = "Fullbright (lighting preset)", Callback = function(v) VD.Fullbright = v end })
 end
 
 do
-    local combatSurv = MakeSection(SurvivorTab, {
-        Title = "Combat",
+    SurvivorTab:Section({ Title = "Combat" })
+
+    SurvivorTab:Toggle({ Title = "Auto Parry", Callback = function(v) VD.AUTO_Parry = v end })
+
+    SurvivorTab:Slider({
+        Title = "Parry Range (studs)",
+        Value = { Min = 5, Max = 30, Default = 15 },
+        Callback = function(v)
+            VD.AUTO_ParryRange = v
+        end
     })
 
-    combatSurv:Toggle({ Title = "Auto Parry", Callback = function(v) VD.AUTO_Parry = v end })
+    SurvivorTab:Slider({
+        Title = "Face Killer Sensitivity (deg)",
+        Value = { Min = 0, Max = 180, Default = 30 },
+        Callback = function(v)
+            VD.AUTO_ParrySensitivity = v
+        end
+    })
 
-    combatSurv:Slider({
-    Title = "Parry Range (studs)",
-    Value = { Min = 5, Max = 30, Default = 15 },
-    Callback = function(v)
-        VD.AUTO_ParryRange = v
-    end
-})
-
-    combatSurv:Slider({
-    Title = "Face Killer Sensitivity (deg)",
-    Value = { Min = 0, Max = 180, Default = 30 },
-    Callback = function(v)
-        VD.AUTO_ParrySensitivity = v
-    end
-})
-
-    combatSurv:Slider({
-    Title = "Auto Parry Delay (s)",
-    Value = { Min = 0.1, Max = 2, Default = 0.5, Step = 0.05 },
-    Callback = function(v)
-        VD.AUTO_ParryDelay = v
-    end
-})
-    combatSurv:Toggle({ Title = "Auto Wiggle", Callback = function(v) VD.SURV_AutoWiggle = v end })
-    combatSurv:Toggle({
+    SurvivorTab:Slider({
+        Title = "Auto Parry Delay (s)",
+        Value = { Min = 0.1, Max = 2, Default = 0.5, Step = 0.05 },
+        Callback = function(v)
+            VD.AUTO_ParryDelay = v
+        end
+    })
+    SurvivorTab:Toggle({ Title = "Auto Wiggle", Callback = function(v) VD.SURV_AutoWiggle = v end })
+    SurvivorTab:Toggle({
         Title = "Auto SkillCheck (QTE)",
         Callback = function(v)
             VD.AUTO_SkillCheck = v; if v then pcall(SetupSkillCheckMonitor) end
         end
     })
-    combatSurv:Button({
+    SurvivorTab:Button({
         Title = "[!] Cancel/Leave Generator [X]",
         Callback = function() pcall(STREE_ForceLeaveGenerator) end
     })
-    combatSurv:Toggle({ Title = "No Fall Damage", Callback = function(v) VD.SURV_NoFall = v end })
+    SurvivorTab:Toggle({ Title = "No Fall Damage", Callback = function(v) VD.SURV_NoFall = v end })
 
-    local escapeSurv = MakeSection(SurvivorTab, {
-        Title = "Escape",
-    })
+    SurvivorTab:Section({ Title = "Escape" })
 
-    escapeSurv:Toggle({ Title = "Flee Killer (Auto TeleAway)", Callback = function(v) VD.AUTO_TeleAway = v end })
-    escapeSurv:Slider({
+    SurvivorTab:Toggle({ Title = "Flee Killer (Auto TeleAway)", Callback = function(v) VD.AUTO_TeleAway = v end })
+    SurvivorTab:Slider({
         Title = "Flee Distance",
         Value = { Min = 20, Max = 120, Default = 40 },
         Callback = function(v)
@@ -947,16 +937,14 @@ do
                 v
         end
     })
-    escapeSurv:Toggle({ Title = "Beat Survivor (auto exit)", Callback = function(v) VD.BEAT_Survivor = v end })
+    SurvivorTab:Toggle({ Title = "Beat Survivor (auto exit)", Callback = function(v) VD.BEAT_Survivor = v end })
 end
 
 do
-    local combatKiller = MakeSection(KillerTab, {
-        Title = "Combat",
-    })
+    KillerTab:Section({ Title = "Combat" })
 
-    combatKiller:Toggle({ Title = "Auto Attack", Callback = function(v) VD.AUTO_Attack = v end })
-    combatKiller:Slider({
+    KillerTab:Toggle({ Title = "Auto Attack", Callback = function(v) VD.AUTO_Attack = v end })
+    KillerTab:Slider({
         Title = "Attack Range",
         Value = { Min = 5, Max = 20, Default = 12 },
         Callback = function(v)
@@ -964,8 +952,8 @@ do
                 v
         end
     })
-    combatKiller:Toggle({ Title = "Hitbox Expand", Callback = function(v) VD.HITBOX_Enabled = v end })
-    combatKiller:Slider({
+    KillerTab:Toggle({ Title = "Hitbox Expand", Callback = function(v) VD.HITBOX_Enabled = v end })
+    KillerTab:Slider({
         Title = "Hitbox Size",
         Value = { Min = 5, Max = 40, Default = 15 },
         Callback = function(v)
@@ -973,59 +961,49 @@ do
                 v
         end
     })
-    combatKiller:Toggle({ Title = "Double Tap", Callback = function(v) VD.KILLER_DoubleTap = v end })
-    combatKiller:Toggle({ Title = "Infinite Lunge", Callback = function(v) VD.KILLER_InfiniteLunge = v end })
+    KillerTab:Toggle({ Title = "Double Tap", Callback = function(v) VD.KILLER_DoubleTap = v end })
+    KillerTab:Toggle({ Title = "Infinite Lunge", Callback = function(v) VD.KILLER_InfiniteLunge = v end })
 
-    local mapKiller = MakeSection(KillerTab, {
-        Title = "Map Control",
-    })
+    KillerTab:Section({ Title = "Map Control" })
 
-    mapKiller:Toggle({ Title = "Destroy Pallets", Callback = function(v) VD.KILLER_DestroyPallets = v end })
-    mapKiller:Toggle({ Title = "Full Gen Break", Callback = function(v) VD.KILLER_FullGenBreak = v end })
+    KillerTab:Toggle({ Title = "Destroy Pallets", Callback = function(v) VD.KILLER_DestroyPallets = v end })
+    KillerTab:Toggle({ Title = "Full Gen Break", Callback = function(v) VD.KILLER_FullGenBreak = v end })
 
-    local utilKiller = MakeSection(KillerTab, {
-        Title = "Utilities",
-    })
+    KillerTab:Section({ Title = "Utilities" })
 
-    utilKiller:Toggle({ Title = "Auto Hook", Callback = function(v) VD.KILLER_AutoHook = v end })
-    utilKiller:Toggle({
+    KillerTab:Toggle({ Title = "Auto Hook", Callback = function(v) VD.KILLER_AutoHook = v end })
+    KillerTab:Toggle({
         Title = "Anti Blind (Flashlight)",
         Callback = function(v)
             VD.KILLER_AntiBlind = v; pcall(SetupAntiBlind)
         end
     })
-    utilKiller:Toggle({
+    KillerTab:Toggle({
         Title = "No Pallet Stun (metamethod)",
         Callback = function(v)
             VD.KILLER_NoPalletStun = v; pcall(SetupNoPalletStun)
         end
     })
-    utilKiller:Toggle({ Title = "No Slowdown", Callback = function(v) VD.KILLER_NoSlowdown = v end })
-    utilKiller:Toggle({ Title = "Beat Killer (auto kill)", Callback = function(v) VD.BEAT_Killer = v end })
+    KillerTab:Toggle({ Title = "No Slowdown", Callback = function(v) VD.KILLER_NoSlowdown = v end })
+    KillerTab:Toggle({ Title = "Beat Killer (auto kill)", Callback = function(v) VD.BEAT_Killer = v end })
 end
 
 do
-    local genVisual = MakeSection(GeneratorTab, {
-        Title = "Visual",
-    })
+    GeneratorTab:Section({ Title = "Visual" })
 
-    genVisual:Toggle({ Title = "Master Turn On Object Chams", Callback = function(v) VD.ESP_ObjectChams = v end })
-    genVisual:Toggle({ Title = "- Chams: Generator (with %)", Callback = function(v) VD.ESP_Obj_Generator = v end })
+    GeneratorTab:Toggle({ Title = "Master Turn On Object Chams", Callback = function(v) VD.ESP_ObjectChams = v end })
+    GeneratorTab:Toggle({ Title = "- Chams: Generator (with %)", Callback = function(v) VD.ESP_Obj_Generator = v end })
 
-    local genAuto = MakeSection(GeneratorTab, {
-        Title = "Automation",
-    })
+    GeneratorTab:Section({ Title = "Automation" })
 
-    genAuto:Toggle({ Title = "AntiFail Generator", Callback = function(v) VD.GenAntiFail = v end })
+    GeneratorTab:Toggle({ Title = "AntiFail Generator", Callback = function(v) VD.GenAntiFail = v end })
 end
 
 do
-    local flingSection = MakeSection(FlingTab, {
-        Title = "Fling",
-    })
+    FlingTab:Section({ Title = "Fling" })
 
-    flingSection:Toggle({ Title = "Enable Fling", Callback = function(v) VD.FLING_Enabled = v end })
-    flingSection:Slider({
+    FlingTab:Toggle({ Title = "Enable Fling", Callback = function(v) VD.FLING_Enabled = v end })
+    FlingTab:Slider({
         Title = "Fling Strength",
         Value = { Min = 1000, Max = 50000, Default = 10000 },
         Callback = function(
@@ -1034,23 +1012,19 @@ do
         end
     })
 
-    local flingActions = MakeSection(FlingTab, {
-        Title = "Actions",
-    })
+    FlingTab:Section({ Title = "Actions" })
 
-    flingActions:Button({ Title = "Fling Nearest", Callback = function() pcall(function() STREE_FlingNearest() end) end })
-    flingActions:Button({ Title = "Fling All", Callback = function() pcall(STREE_FlingAll) end })
+    FlingTab:Button({ Title = "Fling Nearest", Callback = function() pcall(function() STREE_FlingNearest() end) end })
+    FlingTab:Button({ Title = "Fling All", Callback = function() pcall(STREE_FlingAll) end })
 end
 
 do
-    local cfgSection = MakeSection(SettingsTab, {
-        Title = "Configuration",
-    })
+    FlingTab:Section({ Title = "Configuration" })
 
     local confInput = ""
     local configDropdown
 
-    cfgSection:Input({
+    SettingsTab:Input({
         Title = "Config Name",
         Placeholder = "Type name to save...",
         Callback = function(v)
@@ -1058,7 +1032,7 @@ do
         end
     })
 
-    cfgSection:Button({
+    SettingsTab:Button({
         Title = "Save Config",
         Callback = function() 
             if confInput ~= "" then
@@ -1071,7 +1045,7 @@ do
         end
     })
 
-    configDropdown = cfgSection:Dropdown({
+    configDropdown = SettingsTab:Dropdown({
         Title = "Select Config",
         Multi = false,
         Values = GetConfigList(),
@@ -1082,14 +1056,14 @@ do
         end
     })
 
-    cfgSection:Button({
+    SettingsTab:Button({
         Title = "Load Config",
         Callback = function() 
             pcall(function() STREE_LoadConfig(getgenv().CurrentConfigName) end)
         end
     })
     
-    cfgSection:Button({
+    SettingsTab:Button({
         Title = "Delete Config",
         Callback = function() 
             pcall(function() STREE_DeleteConfig(getgenv().CurrentConfigName) end)
@@ -1100,7 +1074,7 @@ do
         end
     })
     
-    cfgSection:Button({
+    SettingsTab:Button({
         Title = "Refresh Config List",
         Callback = function()
             if configDropdown and configDropdown.Refresh then
@@ -1108,14 +1082,10 @@ do
             end
         end
     })
-end
 
-do
-    local resetSection = MakeSection(SettingsTab, {
-        Title = "Unload",
-    })
+    SettingsTab:Section({ Title = "Unload" })
 
-    resetSection:Button({
+    SettingsTab:Button({
         Title = "Unload Script (cleanup)",
         Callback = function()
             VD.Destroyed    = true
