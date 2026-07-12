@@ -644,24 +644,50 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- FIX: Nama variabel konsisten — semuanya pakai PlayersTab
-local PlayersTab, ESPTab, MapTab, AimTab, FOVTab
+
+local HomeTab, PlayersTab, ESPTab, MapTab, AimTab, FOVTab
 local SurvivorTab, KillerTab, GeneratorTab, FlingTab, SettingsTab
 
 if Window then
-    PlayersTab   = Window:Tab({ Title = "Players",   Icon = "user"      })
-    ESPTab       = Window:Tab({ Title = "Visual",    Icon = "eye"       })
-    MapTab       = Window:Tab({ Title = "Map",       Icon = "map"       })
-    AimTab       = Window:Tab({ Title = "Aim",       Icon = "crosshair" })
-    FOVTab       = Window:Tab({ Title = "FOV",       Icon = "video"     })
-    SurvivorTab  = Window:Tab({ Title = "Survivor",  Icon = "shield"    })
-    KillerTab    = Window:Tab({ Title = "Killer",    Icon = "swords"    })
-    GeneratorTab = Window:Tab({ Title = "Generator", Icon = "zap"       })
-    FlingTab     = Window:Tab({ Title = "Fling",     Icon = "wind"      })
-    SettingsTab  = Window:Tab({ Title = "Settings",  Icon = "settings"  })
+    HomeTab = Window:Tab({ Title = "Home", Icon = "scan-face" })
+    PlayersTab = Window:Tab({ Title = "Players", Icon = "user" })
+    ESPTab = Window:Tab({ Title = "Visual", Icon = "eye" })
+    MapTab = Window:Tab({ Title = "Map", Icon = "map" })
+    AimTab = Window:Tab({ Title = "Aim", Icon = "crosshair" })
+    FOVTab = Window:Tab({ Title = "FOV", Icon = "video" })
+    SurvivorTab = Window:Tab({ Title = "Survivor", Icon = "shield" })
+    KillerTab = Window:Tab({ Title = "Killer", Icon = "swords" })
+    GeneratorTab = Window:Tab({ Title = "Generator", Icon = "zap" })
+    FlingTab = Window:Tab({ Title = "Fling", Icon = "wind" })
+    SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 end
 
 if Window then
+
+do
+    HomeTab:Section({ Title = "Information" })
+
+    HomeTab:Button({
+        Title = "Discord",
+        Desc = "Copy Discord Link",
+        Callback = function()
+            local link = "https://discord.gg/jdmX43t5mY"
+            if setclipboard then
+                setclipboard(link)
+            end
+        end
+    })
+
+    HomeTab:Paragraph({
+        Title = "Join Us",
+        Desc = "Every Update Will Be On Discord"
+    })
+
+    HomeTab:Paragraph({
+        Title = "Support",
+        Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+    })
+end
 
 do
     PlayersTab:Section({ Title = "Movement" })
