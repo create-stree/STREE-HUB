@@ -33,7 +33,7 @@ if StreeHub then
     Window = StreeHub:CreateWindow({
         Title = "StreeHub",
         Icon = "rbxassetid://99948086845842",
-        Author = "Violence District",
+        Author = "Premium - Violence District",
         Folder = "StreeHub",
         Size = WindowSize,
         LiveSearchDropdown = true,
