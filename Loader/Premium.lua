@@ -93,6 +93,10 @@ task.wait(0.3)
 ScreenGui:Destroy()
 
 local gameScripts = {
+    [9167377564] = {
+        name = "100 Days At Sea",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/100-Days-At-Sea/Premium.lua"
+    },
     [7326934954] = {
         name = "99 Night In The Forest",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/99NITF/Premium.lua"
