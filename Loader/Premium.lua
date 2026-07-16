@@ -125,6 +125,10 @@ local gameScripts = {
         name = "Climb and Jump Tower",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
     },
+    [10267363348] = {
+        name = "Drain The Lake",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Drain-the-Lake/Premium.lua"
+    },
     [9363735110] = {
         name = "Escape Tsunami For Brainrot",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/ETFB/Premium.lua"
