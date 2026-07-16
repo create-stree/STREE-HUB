@@ -1,0 +1,885 @@
+local ok, val = pcall(function() return scripts_key end)
+_G.scripts_key = _G.scripts_key or (ok and val) or "FREE_USER"
+
+local key = _G.scripts_key
+local hwid = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
+
+local success, response = pcall(function()
+    return game:HttpGet(
+        "https://streehub-api.vercel.app/api/premium?key=" .. key .. "&hwid=" .. hwid,
+        true
+    )
+end)
+
+if not success or not response or response:find("Invalid") or response:find("error") or response:find("Missing") or response:find("expired") or response:find("banned") then
+    game.Players.LocalPlayer:Kick("[StreeHub] Invalid Key: " .. tostring(response or "Unknown error"))
+    return
+end
+
+loadstring([[
+    function LPH_NO_VIRTUALIZE(f) return f end;
+]])();
+repeat task.wait() until game:IsLoaded() and game:FindFirstChild("CoreGui") and pcall(function() return game.CoreGui end)
+
+local version = LRM_ScriptVersion and "v" .. table.concat(LRM_ScriptVersion:split(""), ".") or "Dev Version"
+local StreeHub = game:HttpGet("https://raw.githubusercontent.com/create-stree/VFmkY17j/refs/heads/main/.lua")
+local StreeHub = loadstring(StreeHub)()
+local IsOnMobile = table.find({Enum.Platform.Android, Enum.Platform.IOS}, game:GetService("UserInputService"):GetPlatform())
+local WindowSize = IsOnMobile and UDim2.fromOffset(528, 334) or UDim2.fromOffset(580, 350)
+
+local Window = StreeHub:CreateWindow({
+    Title = "StreeHub",
+    Icon = "rbxassetid://99948086845842",
+    Author = (premium and "Premium" or "Drain The Lake") .. " - " .. version,
+    Folder = "StreeHub",
+    Size = WindowSize,
+    LiveSearchDropdown = true,
+    FileSaveName = "StreeHub/Config.json"
+})
+
+local Tabs = {
+    Home = Window:Tab({ Title = "Home", Icon = "scan-face" }),
+    Lobby = Window:Tab({ Title = "Lobby", Icon = "house" }),
+    Main = Window:Tab({ Title = "Main", Icon = "landmark" }),
+    Buy = Window:Tab({ Title = "Shop", Icon = "shopping-cart" }),
+    Miscellaneous = Window:Tab({ Title = "Miscellaneous", Icon = "layout-grid" }),
+    Settings = Window:Tab({ Title = "Settings", Icon = "settings" })
+}
+
+
+local isLobby = game.PlaceId == 138381251771774
+local isLake = game.PlaceId == 124786371598438
+
+-- [[ SERVICES ]]
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+-- [[ REMOTES ]]
+local verdantRemotes = replicatedStorage:WaitForChild("VerdantRemotes", 5)
+
+local bucketRemote = verdantRemotes and verdantRemotes:WaitForChild("VDT_Bucket.Used", 5)
+local pourRemote = verdantRemotes and verdantRemotes:WaitForChild("VDT_Bucket.Poured", 5)
+local tokenRemote = verdantRemotes and verdantRemotes:WaitForChild("VDT_Tokens.Take", 5)
+local OpenEvent = verdantRemotes and verdantRemotes:WaitForChild("VDT_Chest.Open", 5)
+local createSetupRemote = verdantRemotes and verdantRemotes:WaitForChild("VDT_Portal.CreateSetup", 5)
+local leavePortalRemote = verdantRemotes and verdantRemotes:WaitForChild("VDT_Portal.LeavePortal", 5)
+local upgradeRemote = verdantRemotes and verdantRemotes:WaitForChild("VDT_SkillTree.Purchase", 5)
+
+-- [[ WORKSPACE ]]
+local scriptedFolder = workspace:FindFirstChild("Scripted")
+local checkpointParts = scriptedFolder and scriptedFolder:FindFirstChild("CheckpointParts")
+
+-- [[ CONFIG ]]
+local config = {
+    autoBucket = false,
+    autoToken = false,
+    autoPour = false,
+    autoTP = false,
+    bucketDelay = 0.1,
+    tokenDelay = 0.1,
+    pourDelay = 0.1,
+    chestTPDelay = 0.5
+}
+
+local shopConfig = {
+    autoQuickDrain = false,
+    autoRicherGems = false,
+    autoSteadyHands = false,
+    autoBiggerBucket = false,
+    autoThickSkin = false,
+    autoDiamond = false,
+    autoTreasure = false,
+    autoCharacter = false,
+}
+
+local difficultyPlaceIds = {
+    Easy = nil,
+    Medium = nil,
+    Hard = nil
+}
+
+local lobbyConfig = {
+    portalIndex = 1,
+    maxPlayers  = 4,
+    difficulty  = "Easy"
+}
+
+-- [[ HOME TAB ]]
+local defaultWalk = 16
+local defaultJump = 50
+
+
+Tabs.Home:Section({ Title = "Information" })
+
+Tabs.Home:Button({
+    Title = "Discord",
+    Desc = "Copy Discord Link",
+    Callback = function()
+        local link = "https://discord.gg/jdmX43t5mY"
+        if setclipboard then
+            setclipboard(link)
+        end
+    end
+})
+
+Tabs.Home:Paragraph({
+    Title = "Join Us",
+    Desc = "Every Update Will Be On Discord"
+})
+
+Tabs.Home:Paragraph({
+    Title = "Support",
+    Desc = "Every time there is a game update or someone reports something, I will fix it as soon as possible."
+})
+
+Tabs.Home:Section({ Title = "Local Player" })
+
+Tabs.Home:Slider({
+    Title = "WalkSpeed",
+    Step  = 1,
+    Value = { Min = 0, Max = 100, Default = defaultWalk },
+    Callback = function(value)
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = value
+        end
+    end
+})
+
+Tabs.Home:Slider({
+    Title = "JumpPower",
+    Step  = 1,
+    Value = { Min = 0, Max = 150, Default = defaultJump },
+    Callback = function(value)
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.JumpPower = value
+        end
+    end
+})
+
+Tabs.Home:Button({
+    Title = "Reset Default",
+    Callback = function()
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid.WalkSpeed = defaultWalk
+            char.Humanoid.JumpPower = defaultJump
+        end
+    end
+})
+
+
+if isLobby then
+    local function getPortals()
+        local portals = {}
+        for _, obj in ipairs(workspace:GetChildren()) do
+            if obj.Name == "Portal" and obj:FindFirstChild("Touch") then
+                table.insert(portals, obj)
+            end
+        end
+        return portals
+    end
+
+    local function getPortalByPlaceId(targetPlaceId)
+        for _, portal in ipairs(getPortals()) do
+            local placeIdVal = portal:FindFirstChild("PlaceID")
+            if placeIdVal and placeIdVal.Value == targetPlaceId then
+                return portal
+            end
+        end
+        return nil
+    end
+
+    local function touchPortal(portal)
+        local char = LocalPlayer.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+        local touchPart = portal:FindFirstChild("Touch")
+        if not touchPart or not touchPart:IsA("BasePart") then return end
+
+        local savedCFrame = char.HumanoidRootPart.CFrame
+        char.HumanoidRootPart.CFrame = touchPart.CFrame + Vector3.new(0, 2, 0)
+        task.wait(0.3)
+        char.HumanoidRootPart.CFrame = savedCFrame
+    end
+
+    Tabs.Lobby:Section({ Title = "Play" })
+
+    Tabs.Lobby:Dropdown({
+        Title   = "Number of Players",
+        Values  = { "1", "2", "3", "4" },
+        Default = "4",
+        Callback = function(value)
+            lobbyConfig.maxPlayers = tonumber(value)
+        end
+    })
+
+    Tabs.Lobby:Dropdown({
+        Title   = "Difficulty",
+        Values  = { "Easy", "Medium", "Hard" },
+        Default = "Easy",
+        Callback = function(value)
+            lobbyConfig.difficulty = value
+            if value == "Easy"   then lobbyConfig.portalIndex = 1
+            elseif value == "Medium" then lobbyConfig.portalIndex = 2
+            elseif value == "Hard"   then lobbyConfig.portalIndex = 3
+            end
+        end
+    })
+
+    Tabs.Lobby:Button({
+        Title = "Create Room",
+        Callback = function()
+            local portals = getPortals()
+            local portal = portals[lobbyConfig.portalIndex]
+            if not portal then return end
+
+            local char = LocalPlayer.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+            local savedCFrame = char.HumanoidRootPart.CFrame
+
+            local touchPart = portal:FindFirstChild("Touch")
+            if touchPart and touchPart:IsA("BasePart") then
+                char.HumanoidRootPart.CFrame = touchPart.CFrame + Vector3.new(0, 2, 0)
+                task.wait(0.3)
+            end
+
+            if createSetupRemote then
+                pcall(function()
+                    createSetupRemote:FireServer({
+                        Difficulty = lobbyConfig.difficulty,
+                        MaxPlayers = lobbyConfig.maxPlayers
+                    })
+                end)
+            end
+
+            task.wait(0.2)
+            char.HumanoidRootPart.CFrame = savedCFrame
+        end
+    })
+
+    Tabs.Lobby:Button({
+        Title = "Leave",
+        Callback = function()
+            if not leavePortalRemote then return end
+            pcall(function()
+                leavePortalRemote:FireServer()
+            end)
+        end
+    })
+end
+
+
+-- [[ HELPERS ]]
+local function getAllPrompts()
+    local prompts = {}
+    if not checkpointParts then return prompts end
+    for _, obj in ipairs(checkpointParts:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") then
+            table.insert(prompts, obj)
+        end
+    end
+    return prompts
+end
+
+local function tpToPrompt(prompt)
+    if not config.autoTP then return end
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local targetPart = prompt.Parent:IsA("Model") and prompt.Parent.PrimaryPart or prompt.Parent
+    if targetPart and targetPart:IsA("BasePart") then
+        char.HumanoidRootPart.CFrame = targetPart.CFrame + Vector3.new(0, 2, 0)
+        task.wait(0.1)
+    end
+end
+
+local function useBucket()
+    if bucketRemote then
+        pcall(function() bucketRemote:FireServer() end)
+    end
+end
+
+local function useToken()
+    if not tokenRemote then return end
+    local prompts = getAllPrompts()
+    if #prompts == 0 then return end
+    for _, prompt in ipairs(prompts) do
+        if not config.autoToken then break end
+        tpToPrompt(prompt)
+        pcall(function() tokenRemote:FireServer(prompt) end)
+        task.wait(0.05)
+    end
+end
+
+local function usePour()
+    if not pourRemote then return end
+    local prompts = getAllPrompts()
+    if #prompts == 0 then return end
+    for _, prompt in ipairs(prompts) do
+        if not config.autoPour then break end
+        tpToPrompt(prompt)
+        pcall(function() pourRemote:FireServer(prompt) end)
+        task.wait(0.05)
+    end
+end
+
+local function collectAllChests()
+    if not OpenEvent then return end
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local spawnCFrame  = char.HumanoidRootPart.CFrame
+    local chestFolder  = scriptedFolder and scriptedFolder:FindFirstChild("Chests")
+    if not chestFolder then return end
+
+    for _, chestModel in pairs(chestFolder:GetChildren()) do
+        local chestPart = chestModel:FindFirstChild("Part")
+        if chestPart and chestPart:IsA("BasePart") then
+            char.HumanoidRootPart.CFrame = chestPart.CFrame
+            task.wait(config.chestTPDelay)
+            pcall(function() OpenEvent:FireServer(chestPart) end)
+            task.wait(config.chestTPDelay)
+        end
+    end
+
+    char.HumanoidRootPart.CFrame = spawnCFrame
+end
+
+
+-- [[ LOOPS ]]
+local function startBucketLoop()
+    while config.autoBucket do
+        useBucket()
+        task.wait(config.bucketDelay)
+    end
+end
+
+local function startTokenLoop()
+    while config.autoToken do
+        useToken()
+        task.wait(config.tokenDelay)
+    end
+end
+
+local function startPourLoop()
+    while config.autoPour do
+        usePour()
+        task.wait(config.pourDelay)
+    end
+end
+
+-- [[ SHOP LOOPS ]]
+local function runUpgradeNodes(nodes, configKey)
+    if not upgradeRemote then return end
+    while shopConfig[configKey] do
+        for _, args in ipairs(nodes) do
+            if not shopConfig[configKey] then break end
+            pcall(function()
+                upgradeRemote:InvokeServer(args[1], args[2], args[3])
+            end)
+            task.wait(0.3)
+        end
+        task.wait(1)
+    end
+end
+
+
+-- [[ MAIN TAB ]]
+if isLake then
+    Tabs.Main:Section({ Title = "Auto Farm" })
+
+    Tabs.Main:Toggle({
+        Title   = "Auto Teleport to Machine",
+        Default = false,
+        Callback = function(state)
+            config.autoTP = state
+        end
+    })
+
+    Tabs.Main:Toggle({
+        Title   = "Auto Use Bucket",
+        Default = false,
+        Callback = function(state)
+            config.autoBucket = state
+            if state then task.spawn(startBucketLoop) end
+        end
+    })
+
+    Tabs.Main:Toggle({
+        Title   = "Auto Collect All Tokens",
+        Default = false,
+        Callback = function(state)
+            config.autoToken = state
+            if state then task.spawn(startTokenLoop) end
+        end
+    })
+
+    Tabs.Main:Toggle({
+        Title   = "Auto Pour Bucket (All)",
+        Default = false,
+        Callback = function(state)
+            config.autoPour = state
+            if state then task.spawn(startPourLoop) end
+        end
+    })
+
+    Tabs.Main:Section({ Title = "Farm Delays" })
+
+    Tabs.Main:Slider({
+        Title = "Bucket Delay",
+        Step  = 0.05,
+        Value = { Min = 0.01, Max = 2, Default = 0.1 },
+        Callback = function(value)
+            config.bucketDelay = value
+        end
+    })
+
+    Tabs.Main:Slider({
+        Title = "Token Delay",
+        Step  = 0.05,
+        Value = { Min = 0.01, Max = 2, Default = 0.1 },
+        Callback = function(value)
+            config.tokenDelay = value
+        end
+    })
+
+    Tabs.Main:Slider({
+        Title = "Pour Delay",
+        Step  = 0.05,
+        Value = { Min = 0.01, Max = 2, Default = 0.1 },
+        Callback = function(value)
+            config.pourDelay = value
+        end
+    })
+
+    Tabs.Main:Section({ Title = "Chest Farm" })
+
+    Tabs.Main:Button({
+        Title = "Collect All Chests",
+        Callback = function()
+            task.spawn(collectAllChests)
+        end
+    })
+
+    Tabs.Main:Slider({
+        Title = "Chest TP Delay",
+        Step  = 0.05,
+        Value = { Min = 0.1, Max = 3, Default = 0.5 },
+        Callback = function(value)
+            config.chestTPDelay = value
+        end
+    })
+
+
+-- [[ SHOP TAB ]]
+    Tabs.Buy:Section({ Title = "Quick Drain Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title   = "Auto Upgrade Quick Drain",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoQuickDrain = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"root", 0,  0},
+                        {"root", -1, 1},
+                        {"root", -2, 1},
+                        {"root", -2, 2},
+                        {"root", -3, 1},
+                        {"root", -3, 2},
+                        {"root", -4, 2},
+                        {"root", -2, 3},
+                        {"root", -3, 3},
+                        {"root", -4, 3},
+                    }, "autoQuickDrain")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Richer Gems Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Richer Gems",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoRicherGems = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"root", 1,  -1},
+                        {"root", 1,  -2},
+                        {"root", 0,  -2},
+                        {"root", 2,  -3},
+                        {"root", 1,  -3},
+                        {"root", -1, -1},
+                        {"root", 0,  -3},
+                        {"root", 2,  -4},
+                        {"root", -1, -2},
+                    }, "autoRicherGems")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Steady Hands & Swift Scoop Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Steady Hands & Swift Scoop",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoSteadyHands = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"buckets", 0,  1},
+                        {"buckets", -1, 1},
+                        {"buckets", -1, 2},
+                        {"buckets", 1,  1},
+                        {"buckets", 0,  2},
+                        {"buckets", 1,  2},
+                        {"buckets", 0,  3},
+                        {"buckets", -1, 3},
+                        {"buckets", 1,  3},
+                    }, "autoSteadyHands")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Bigger Bucket Upgrades" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Bigger Bucket",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoBiggerBucket = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"buckets", 1,  0},
+                        {"buckets", 2,  0},
+                        {"buckets", 2,  -1},
+                        {"buckets", 1,  -1},
+                        {"buckets", 2,  -2},
+                        {"buckets", 3,  -1},
+                        {"buckets", 3,  -2},
+                        {"buckets", 3,  0},
+                        {"buckets", 0,  -1},
+                        {"buckets", 4,  -1},
+                        {"buckets", 3,  -3},
+                        {"buckets", 4,  -2},
+                    }, "autoBiggerBucket")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Thick Skin Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Thick Skin",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoThickSkin = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"survival", 0, -1},
+                        {"survival", 0, -2},
+                        {"survival", 1, -3},
+                    }, "autoThickSkin")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Diamond Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Diamond",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoDiamond = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"diamonds", 0,  -1},
+                        {"diamonds", 0,  -2},
+                        {"diamonds", 1,  -3},
+                        {"diamonds", -1, -2},
+                        {"diamonds", -1, -3},
+                        {"diamonds", 1,  -4},
+                        {"diamonds", 1,  -5},
+                    }, "autoDiamond")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Treasure Hunt Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Treasure Hunt",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoTreasure = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"treasure", 0,  -1},
+                        {"treasure", 1,  -1},
+                        {"treasure", 0,  -2},
+                        {"treasure", -1, -2},
+                        {"treasure", 3, -3},
+                        {"treasure", 2,  -2},
+                    }, "autoTreasure")
+                end)
+            end
+        end
+    })
+
+    Tabs.Buy:Section({ Title = "Character Upgrade" })
+
+    Tabs.Buy:Toggle({
+        Title = "Auto Upgrade Skill Character",
+        Default = false,
+        Callback = function(state)
+            shopConfig.autoCharacter = state
+            if state then
+                task.spawn(function()
+                    runUpgradeNodes({
+                        {"character",  0, -1},
+                        {"character",  1, -1},
+                        {"character",  1,  0},
+                        {"character",  0,  1},
+                        {"character", -1,  1},
+                        {"character", -1,  0},
+                        {"character", -2,  1},
+                        {"character",  2, -2},
+                        {"character",  1, -2},
+                        {"character", -2,  0},
+                        {"character",  2, -1},
+                        {"character",  2,  0},
+                        {"character",  1,  1},
+                        {"character",  1,  2},
+                        {"character",  0,  2},
+                        {"character", -2,  2},
+                        {"character", -3,  2},
+                        {"character", -1,  2},
+                        {"character",  2,  2},
+                        {"character",  1,  3},
+                   }, "autoCharacter")
+                end)
+            end
+        end
+    })
+end
+
+
+-- [[ MISCELLANEOUS TAB ]]
+local infJump = false
+local noclip = false
+local antiAFK = false
+local afkConnection
+local autoReconnect = false
+
+Tabs.Miscellaneous:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        infJump = state
+    end
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infJump then
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+    end
+end)
+
+Tabs.Miscellaneous:Button({
+    Title = "FPS Boost",
+    Callback = function()
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false
+            end
+        end
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    end
+})
+
+Tabs.Miscellaneous:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(state)
+        noclip = state
+    end
+})
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip then
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+Tabs.Miscellaneous:Toggle({
+    Title = "Auto Reconnect",
+    Default = false,
+    Callback = function(state)
+        autoReconnect = state
+
+        if autoReconnect then
+            local ts = game:GetService("TeleportService")
+            local player = game.Players.LocalPlayer
+
+            game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+                if autoReconnect and child.Name == "ErrorPrompt" then
+                    task.wait(2)
+                    ts:Teleport(game.PlaceId, player)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Miscellaneous:Toggle({
+    Title = "Anti AFK",
+    Default = false,
+    Callback = function(state)
+        antiAFK = state
+
+        if antiAFK then
+            local vu = game:GetService("VirtualUser")
+
+            afkConnection = game.Players.LocalPlayer.Idled:Connect(function()
+                vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            end)
+        else
+            if afkConnection then
+                afkConnection:Disconnect()
+                afkConnection = nil
+            end
+        end
+    end
+})
+
+
+-- [[ SETTINGS TAB ]]
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = game.Players.LocalPlayer
+
+local inputObj = ""
+
+Tabs.Settings:Paragraph({
+    Title = "Current Server",
+    Desc = game.JobId
+})
+
+Tabs.Settings:Button({
+    Title = "Rejoin",
+    Callback = function()
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Server Hop",
+    Callback = function()
+        local success, result = pcall(function()
+            return HttpService:JSONDecode(
+                game:HttpGet(
+                    "https://games.roblox.com/v1/games/" ..
+                    game.PlaceId ..
+                    "/servers/Public?sortOrder=Asc&limit=100"
+                )
+            )
+        end)
+
+        if success and result and result.data then
+            for _, server in ipairs(result.data) do
+                if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(
+                        game.PlaceId,
+                        server.id,
+                        LocalPlayer
+                    )
+                    break
+                end
+            end
+        end
+    end
+})
+
+Tabs.Settings:Input({
+    Title = "Target Server ID",
+    Default = "",
+    Placeholder = "Enter JobId...",
+    MultiLine = false,
+    Callback = function(input)
+        inputObj = tostring(input)
+    end
+})
+
+Tabs.Settings:Button({
+    Title = "Teleport To JobId",
+    Callback = function()
+        if inputObj ~= "" then
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(
+                    game.PlaceId,
+                    inputObj,
+                    LocalPlayer
+                )
+            end)
+        end
+    end
+})
+
+
+-- [[ GLOBAL STOP ]]
+_G.stopAll = function()
+    config.autoBucket = false
+    config.autoToken = false
+    config.autoPour = false
+    config.autoTP = false
+    shopConfig.autoQuickDrain = false
+    shopConfig.autoRicherGems = false
+    shopConfig.autoSteadyHands = false
+    shopConfig.autoBiggerBucket = false
+    shopConfig.autoThickSkin = false
+    shopConfig.autoDiamond = false
+    shopConfig.autoTreasure = false
+    shopConfig.autoCharacter = false
+end
+
+
+StreeHub:Notify({
+    Title = "StreeHub",
+    Content = "Script loaded successfully",
+    Icon = "bell-ring",
+    Duration = 4
+})
