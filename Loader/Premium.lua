@@ -121,6 +121,10 @@ local gameScripts = {
         name = "Break A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/BALB/Premium.lua"
     },
+    [10276281921] = {
+        name = "Chameleon",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Chameleon/Premium.lua"
+    },
     [7474367816] = {
         name = "Climb and Jump Tower",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Climb%20and%20Jump%20Tower/Premium.lua"
