@@ -153,6 +153,10 @@ local gameScripts = {
         name = "Grow A Garden",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/GaG/Premium.lua"
     },
+    [10200395747] = {
+        name = "Grow A Garden 2",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/GaG2/Premium.lua"
+    },
     [10004244222] = {
         name = "Kick A Lucky Block",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/KALB/Premium.lua"
