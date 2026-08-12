@@ -105,6 +105,10 @@ local gameScripts = {
         name = "Abyss",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Abyss/Premium.lua"
     },
+    [10148749921] = {
+        name = "Animal Hospital",
+        premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Animal-Hospital/Premium.lua"
+    },
     [111958650] = {
         name = "Arsenal",
         premium = "https://raw.githubusercontent.com/create-stree/STREE-HUB/refs/heads/main/Arsenal/Premium.lua"
