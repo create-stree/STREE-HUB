@@ -976,7 +976,7 @@ end))
 local Window = StreeHub:CreateWindow({
     Title = "StreeHub",
     Icon = "rbxassetid://99948086845842",
-    Author = "Animal Hospital",
+    Author = "Premium - Animal Hospital",
     Folder = "StreeHub",
     Size = WindowSize,
     LiveSearchDropdown = true,
