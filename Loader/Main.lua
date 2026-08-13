@@ -1,4 +1,3 @@
---[[ https://stree-hub.vercel.app ]]
 -- This file was protected using Luraph Obfuscator v15.0 [https://lura.ph/]
 
 local function f() LPH_ATTRIBUTES(VM(ONYX), PRESET(SECURE))
